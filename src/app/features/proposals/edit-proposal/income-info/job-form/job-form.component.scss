@@ -1,0 +1,64 @@
+.job-form-container {
+  max-width: 100%;
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* Flex Row for horizontal grouping */
+.section-row {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 20px;
+  align-items: stretch;
+  width: 100%;
+
+  .section-col {
+    flex: 1;
+    min-width: 300px;
+    display: flex;
+    flex-direction: column;
+  }
+}
+
+:host ::ng-deep {
+  .p-panel {
+    height: 100%;
+
+    .p-panel-content {
+      padding: 1.25rem;
+    }
+  }
+
+  .panel-content {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .form-row {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 1rem;
+    width: 100%;
+
+    &.cols-2 > * {
+      flex: 1 1 calc(50% - 0.5rem);
+      min-width: 240px;
+    }
+
+    &.cols-3 > * {
+      flex: 1 1 calc(33.333% - 0.75rem);
+      min-width: 160px;
+    }
+
+    app-text-field, app-number-field, app-select-field,
+    app-date-field, app-textarea-field, app-checkbox-field {
+      width: 100%;
+      display: block;
+    }
+  }
+}

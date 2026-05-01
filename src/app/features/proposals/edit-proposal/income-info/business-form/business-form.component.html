@@ -1,0 +1,330 @@
+<div class="business-form-container p-4">
+
+  <!-- ROW 1: Firm Identity & Business Space -->
+  <div class="section-row">
+
+    <!-- Firm Identity -->
+    <div class="section-col">
+      <p-panel styleClass="border-round-xl border-none h-full">
+        <ng-template pTemplate="header">
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <div class="bg-indigo-alpha-10" style="width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+              <i class="pi pi-building text-indigo-600" style="font-size: 1.25rem;"></i>
+            </div>
+            <span class="font-bold text-color" style="font-size: 1.1rem;">Firm Identity</span>
+          </div>
+        </ng-template>
+
+        <div class="panel-content">
+          <div class="form-row">
+            <app-text-field label="Firm Name" [field]="firmName" />
+          </div>
+          <div class="form-row">
+            <app-text-field label="Nature of the Business" [field]="natureOfBusiness" />
+          </div>
+          <div class="form-row">
+            <app-text-field label="Name on the License" [field]="licenseOwnerName" />
+          </div>
+          <div class="form-row cols-2">
+            <app-number-field label="How many years has the business been going on?" [field]="yearsInBusiness" />
+            <app-text-field label="PAN Number" [field]="panNumber" />
+          </div>
+          <div class="form-row cols-2">
+            <app-text-field label="Contact No." [field]="contactNo" />
+            <app-text-field label="Email ID" [field]="emailId" />
+          </div>
+        </div>
+      </p-panel>
+    </div>
+
+    <!-- Business Space & Constitution -->
+    <div class="section-col">
+      <p-panel styleClass="border-round-xl border-none h-full surface-card border-left-3 border-primary">
+        <ng-template pTemplate="header">
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <div class="bg-blue-alpha-10" style="width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+              <i class="pi pi-map-marker text-blue-500" style="font-size: 1.25rem;"></i>
+            </div>
+            <span class="font-bold text-color" style="font-size: 1.1rem;">Business Space & Constitution</span>
+          </div>
+        </ng-template>
+
+        <div class="panel-content">
+          <div class="form-row">
+            <app-select-field label="Business Space" [field]="spaceStatus" [options]="spaceOptions" optionValue="value" />
+          </div>
+          @if (spaceStatus() === 'On Lease') {
+            <div class="form-row">
+              <app-text-field label="Place Owner Name" [field]="placeOwnerName" />
+            </div>
+            <div class="form-row cols-2">
+              <app-checkbox-field label="Is there a Rental Agreement?" [field]="hasRentalAgreement" />
+              <app-date-field label="Lease Agreement Expires" [field]="leaseExpiryDate" />
+            </div>
+          }
+          <div class="form-row">
+            <app-select-field label="Constitution of Business" [field]="businessConstitution" [options]="constitutionOptions" optionValue="value" />
+          </div>
+          <div class="form-row">
+            <app-select-field label="Is the business wholly owned or in partnership?" [field]="ownershipType" [options]="ownershipOptions" optionValue="value" />
+          </div>
+        </div>
+      </p-panel>
+    </div>
+
+  </div>
+
+  <!-- ROW 2: Financials & Registrations -->
+  <div class="section-row" style="margin-top: 1.5rem;">
+
+    <!-- Financials -->
+    <div class="section-col">
+      <p-panel styleClass="border-round-xl border-none h-full">
+        <ng-template pTemplate="header">
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <div class="bg-green-alpha-10" style="width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+              <i class="pi pi-chart-line text-green-500" style="font-size: 1.25rem;"></i>
+            </div>
+            <span class="font-bold text-color" style="font-size: 1.1rem;">Financial Performance</span>
+          </div>
+        </ng-template>
+
+        <div class="panel-content">
+          <div class="form-row">
+            <app-number-field label="Turnover From Business (₹)" [field]="turnoverAmount" mode="currency" currency="INR" />
+          </div>
+          <div class="form-row">
+            <app-number-field label="Net Profit / Loss for Previous Year (₹)" [field]="netProfitLoss" mode="currency" currency="INR" />
+          </div>
+          <div class="form-row mt-2">
+            <div class="p-3 border-round-xl bg-primary-reverse-alpha-5 surface-100 flex justify-content-between align-items-center w-full">
+              <span class="font-semibold text-color-secondary">Net Profit / Loss:</span>
+              <span class="text-xl font-bold" [class.text-primary]="netProfitLoss() >= 0" [class.text-red-500]="netProfitLoss() < 0">
+                {{ netProfitLoss() | currency:'INR' }}
+              </span>
+            </div>
+          </div>
+          <div class="form-row">
+            <app-textarea-field label="Business Remark" [field]="businessRemark" [rows]="3" />
+          </div>
+        </div>
+      </p-panel>
+    </div>
+
+    <!-- Statutory Registrations -->
+    <div class="section-col">
+      <p-panel styleClass="border-round-xl border-none h-full">
+        <ng-template pTemplate="header">
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <div class="bg-teal-alpha-10" style="width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+              <i class="pi pi-verified text-teal-600" style="font-size: 1.25rem;"></i>
+            </div>
+            <span class="font-bold text-color" style="font-size: 1.1rem;">Statutory Registrations</span>
+          </div>
+        </ng-template>
+
+        <div class="panel-content">
+          <div class="form-row">
+            <app-checkbox-field label="Has the business license been obtained under all the laws required under it?" [field]="hasRequiredLaws" />
+          </div>
+          <div class="form-row">
+            <app-checkbox-field label="Is MSME Registered?" [field]="isMsmeRegistered" />
+          </div>
+          @if (isMsmeRegistered()) {
+            <div class="form-row">
+              <app-text-field label="MSME Registration Number" [field]="msmeRegistrationNumber" />
+            </div>
+            <div class="form-row">
+              <app-date-field label="MSME Registration Date" [field]="msmeRegistrationDate" />
+            </div>
+          }
+          <div class="form-row">
+            <app-checkbox-field label="Does the Tax Officer have the certificate of the concerned district?" [field]="hasDistCert" />
+          </div>
+          <div class="form-row">
+            <app-checkbox-field label="Is there a GST Registration Certificate?" [field]="isGstRegistered" />
+          </div>
+          @if (isGstRegistered()) {
+            <div class="form-row">
+              <app-text-field label="GST Number" [field]="gstNumber" />
+            </div>
+          }
+          <div class="form-row">
+            <app-checkbox-field label="Is Shop Act Licensed?" [field]="hasShopAct" />
+          </div>
+          @if (hasShopAct()) {
+            <div class="form-row">
+              <app-text-field label="Shop Act Number" [field]="shopActNumber" />
+            </div>
+            <div class="form-row">
+              <app-checkbox-field label="Whether Shop Act License has been renewed for the current year?" [field]="isShopActRenewed" />
+            </div>
+          }
+        </div>
+      </p-panel>
+    </div>
+
+  </div>
+
+  <!-- ROW 3: Branches (full width) -->
+  <div class="section-row" style="margin-top: 1.5rem;">
+    <div class="section-col" style="min-width: 100%;">
+      <p-panel styleClass="border-round-xl border-none h-full">
+        <ng-template pTemplate="header">
+          <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
+            <div style="display: flex; align-items: center; gap: 12px;">
+              <div class="bg-indigo-alpha-10" style="width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+                <i class="pi pi-map-marker text-indigo-600" style="font-size: 1.25rem;"></i>
+              </div>
+              <span class="font-bold text-color" style="font-size: 1.1rem;">Is There Another Branch/Unit?</span>
+            </div>
+            <p-button icon="pi pi-plus" label="Add Branch" styleClass="p-button-text p-button-sm" (click)="addBranch()"></p-button>
+          </div>
+        </ng-template>
+
+        <div class="m-3">
+          <p-table [value]="branches()" styleClass="p-datatable-sm" responsiveLayout="scroll">
+            <ng-template pTemplate="header">
+              <tr>
+                <th class="bg-transparent border-bottom-1 text-600 font-semibold p-2">Branch Name</th>
+                <th class="bg-transparent border-bottom-1 text-600 font-semibold p-2">Unit/Branch Address</th>
+                <th class="bg-transparent border-bottom-1 p-2" style="width: 40px"></th>
+              </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-branch let-i="rowIndex">
+              <tr>
+                <td class="p-2 pt-3"><app-text-field [field]="getRowSignal(branch, 'branch_name')" [hideLabel]="true" placeholder="Branch Name"></app-text-field></td>
+                <td class="p-2 pt-3"><app-text-field [field]="getRowSignal(branch, 'branch_address')" [hideLabel]="true" placeholder="Address"></app-text-field></td>
+                <td class="p-2 pt-3 text-center">
+                  <p-button icon="pi pi-trash" styleClass="p-button-danger p-button-text p-button-rounded" (click)="removeBranch(i)"></p-button>
+                </td>
+              </tr>
+            </ng-template>
+            <ng-template pTemplate="emptymessage">
+              <tr>
+                <td colspan="3" class="text-center p-4 text-500 italic">No branches added.</td>
+              </tr>
+            </ng-template>
+          </p-table>
+        </div>
+      </p-panel>
+    </div>
+  </div>
+
+  <!-- ROW 4: Other Licenses (full width) -->
+  <div class="section-row" style="margin-top: 1.5rem;">
+    <div class="section-col" style="min-width: 100%;">
+      <p-panel styleClass="border-round-xl border-none h-full">
+        <ng-template pTemplate="header">
+          <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
+            <div style="display: flex; align-items: center; gap: 12px;">
+              <div class="bg-orange-alpha-10" style="width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+                <i class="pi pi-id-card text-orange-600" style="font-size: 1.25rem;"></i>
+              </div>
+              <span class="font-bold text-color" style="font-size: 1.1rem;">Have Another License?</span>
+            </div>
+            <p-button icon="pi pi-plus" label="Add License" styleClass="p-button-text p-button-sm" (click)="addLicense()"></p-button>
+          </div>
+        </ng-template>
+
+        <div class="m-3">
+          <p-table [value]="licenses()" styleClass="p-datatable-sm" responsiveLayout="scroll">
+            <ng-template pTemplate="header">
+              <tr>
+                <th class="bg-transparent border-bottom-1 text-600 font-semibold p-2">Other License Name</th>
+                <th class="bg-transparent border-bottom-1 text-600 font-semibold p-2">Other License Numbers</th>
+                <th class="bg-transparent border-bottom-1 p-2" style="width: 40px"></th>
+              </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-license let-i="rowIndex">
+              <tr>
+                <td class="p-2 pt-3"><app-text-field [field]="getRowSignal(license, 'license_name')" [hideLabel]="true" placeholder="License Name"></app-text-field></td>
+                <td class="p-2 pt-3"><app-text-field [field]="getRowSignal(license, 'license_number')" [hideLabel]="true" placeholder="License No."></app-text-field></td>
+                <td class="p-2 pt-3 text-center">
+                  <p-button icon="pi pi-trash" styleClass="p-button-danger p-button-text p-button-rounded" (click)="removeLicense(i)"></p-button>
+                </td>
+              </tr>
+            </ng-template>
+            <ng-template pTemplate="emptymessage">
+              <tr>
+                <td colspan="3" class="text-center p-4 text-500 italic">No additional licenses.</td>
+              </tr>
+            </ng-template>
+          </p-table>
+        </div>
+      </p-panel>
+    </div>
+  </div>
+
+  <!-- ROW 5: Business Address -->
+  <div class="section-row" style="margin-top: 1.5rem;">
+    <div class="section-col" style="min-width: 100%;">
+      <p-panel styleClass="border-round-xl border-none h-full">
+        <ng-template pTemplate="header">
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <div class="bg-purple-alpha-10" style="width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+              <i class="pi pi-home text-purple-500" style="font-size: 1.25rem;"></i>
+            </div>
+            <span class="font-bold text-color" style="font-size: 1.1rem;">Business Address</span>
+          </div>
+        </ng-template>
+
+        <div class="panel-content">
+          <div class="form-row">
+            <app-textarea-field label="Business Address" [field]="businessAddress" [rows]="3" />
+          </div>
+        </div>
+      </p-panel>
+    </div>
+  </div>
+
+  <!-- ROW 6: 3-Year Financial Statement (full width) -->
+  <div class="section-row" style="margin-top: 1.5rem;">
+    <div class="section-col" style="min-width: 100%;">
+      <p-panel styleClass="border-round-xl border-none h-full">
+        <ng-template pTemplate="header">
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <div class="bg-green-alpha-10" style="width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+              <i class="pi pi-chart-bar text-green-600" style="font-size: 1.25rem;"></i>
+            </div>
+            <span class="font-bold text-color" style="font-size: 1.1rem;">3-Year Financial Statement</span>
+          </div>
+        </ng-template>
+
+        <div class="m-3">
+          <p-table [value]="financialRows" styleClass="p-datatable-sm" responsiveLayout="scroll">
+            <ng-template pTemplate="header">
+              <tr>
+                <th class="bg-transparent border-bottom-1 text-600 font-semibold p-3" style="min-width: 180px;">Particulars</th>
+                <th class="bg-transparent border-bottom-1 p-2" style="min-width: 200px;">
+                  <app-select-field label="Year 1" [field]="getYearField(0, 'year_label')" [options]="yearOptions" optionValue="value" placeholder="Choose Year" />
+                </th>
+                <th class="bg-transparent border-bottom-1 p-2" style="min-width: 200px;">
+                  <app-select-field label="Year 2" [field]="getYearField(1, 'year_label')" [options]="yearOptions" optionValue="value" placeholder="Choose Year" />
+                </th>
+                <th class="bg-transparent border-bottom-1 p-2" style="min-width: 200px;">
+                  <app-select-field label="Year 3" [field]="getYearField(2, 'year_label')" [options]="yearOptions" optionValue="value" placeholder="Choose Year" />
+                </th>
+              </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-row>
+              <tr>
+                <td class="p-3 font-semibold text-600 border-bottom-1 surface-border" style="background: var(--surface-50);">{{ row.label }}</td>
+                <td class="p-2 border-bottom-1 surface-border">
+                  <app-number-field [field]="getYearField(0, row.key)" [hideLabel]="true" mode="currency" currency="INR" />
+                </td>
+                <td class="p-2 border-bottom-1 surface-border">
+                  <app-number-field [field]="getYearField(1, row.key)" [hideLabel]="true" mode="currency" currency="INR" />
+                </td>
+                <td class="p-2 border-bottom-1 surface-border">
+                  <app-number-field [field]="getYearField(2, row.key)" [hideLabel]="true" mode="currency" currency="INR" />
+                </td>
+              </tr>
+            </ng-template>
+          </p-table>
+        </div>
+      </p-panel>
+    </div>
+  </div>
+
+</div>

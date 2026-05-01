@@ -1,0 +1,93 @@
+<div class="associate-editor surface-ground flex flex-column h-full">
+  
+  <div class="editor-header bg-white px-4 pt-4 border-bottom-1 border-gray-100">
+    <div class="flex align-items-center justify-content-between mb-3">
+      <div class="flex align-items-center gap-3">
+        <div class="bg-primary-alpha-10 w-3rem h-3rem border-round-xl flex align-items-center justify-content-center">
+          <i [class]="participant().entity_type === 'G' ? 'pi pi-shield text-2xl text-primary' : 'pi pi-users text-2xl text-primary'"></i>
+        </div>
+        <div>
+          <h2 class="m-0 text-xl font-bold">{{ participant().name }}</h2>
+          <span class="text-sm text-500">{{ participant().entity_type === 'G' ? 'Guarantor' : 'Co-borrower' }} Profile</span>
+        </div>
+      </div>
+    </div>
+
+    <app-tabs 
+      [tabs]="tabs()" 
+      [activeKey]="activeTab()" 
+      (activeKeyChange)="onTabChange($event)">
+    </app-tabs>
+  </div>
+
+  <div class="editor-content flex-grow-1 overflow-y-auto p-4 custom-scrollbar">
+    <div class="max-w-7xl mx-auto">
+      @if (activeTab() === 'personal') {
+        <app-personal-info 
+          [entityType]="participant().entity_type" 
+          [participantId]="participant().id"
+          [proposalId]="proposalId()"
+          [externalSaveTrigger]="triggerSave()"
+          (save)="onChildSave($event)">
+        </app-personal-info>
+      }
+
+      @if (activeTab() === 'income') {
+        <app-income-info 
+          [proposalId]="proposalId()" 
+          [entityType]="participant().entity_type" 
+          [participantId]="participant().id"
+          [externalSaveTrigger]="triggerSave()"
+          (changed)="markTabFilled('income')">
+        </app-income-info>
+      }
+
+      @if (activeTab() === 'financial') {
+        <app-financial-info 
+          [proposalId]="proposalId()" 
+          [entityType]="participant().entity_type" 
+          [participantId]="participant().id"
+          [externalSaveTrigger]="triggerSave()"
+          (save)="onChildSave($event)"
+          (changed)="markTabFilled('financial')">
+        </app-financial-info>
+      }
+
+      @if (activeTab() === 'credit') {
+        <app-credit-info 
+          [proposalId]="proposalId()" 
+          [entityType]="participant().entity_type" 
+          [participantId]="participant().id"
+          [externalSaveTrigger]="triggerSave()"
+          (save)="onChildSave($event)"
+          (changed)="markTabFilled('credit')">
+        </app-credit-info>
+      }
+
+      @if (activeTab() === 'property') {
+        <app-property-info 
+          [proposalId]="proposalId()" 
+          [entityType]="participant().entity_type" 
+          [participantId]="participant().id"
+          [externalSaveTrigger]="triggerSave()"
+          (changed)="markTabFilled('property')">
+        </app-property-info>
+      }
+    </div>
+    
+    <!-- Spacer for sticky footer -->
+    <div style="height: 80px;"></div>
+  </div>
+
+  <app-form-actions 
+    [sticky]="true" 
+    [showCancel]="true"
+    cancelLabel="Close"
+    [saveLabel]="saveButtonLabel()"
+    saveIcon="pi pi-check"
+    [loading]="saving()"
+    (save)="onSave()"
+    (cancel)="onClose()">
+  </app-form-actions>
+</div>
+

@@ -1,0 +1,21 @@
+<!-- <div class="associate-container p-4 surface-ground min-h-full">
+  <div class="bg-white border-round-2xl shadow-2 overflow-hidden h-full">
+    <div class="p-4 border-bottom-1 border-gray-100 flex align-items-center justify-content-between bg-white">
+      <div class="flex align-items-center gap-3">
+        <div class="bg-primary-alpha-10 w-3rem h-3rem border-round-xl flex align-items-center justify-content-center">
+          <i [class]="entityType() === 'G' ? 'pi pi-shield text-2xl text-primary' : 'pi pi-users text-2xl text-primary'"></i>
+        </div>
+        <div>
+          <h2 class="m-0 text-xl font-bold">{{ typeLabel }}s</h2>
+          <small class="text-500">Manage {{ typeLabel }} profiles and information</small>
+        </div>
+      </div>
+    </div> -->
+<app-page [title]="typeLabel"
+  [icon]="entityType() === 'G' ? 'pi pi-shield text-2xl text-primary' : 'pi pi-users text-2xl text-primary'">
+  <div class="h-full">
+    <app-table [columns]="mainTableCols" [data]="associates()" [loading]="loading()"
+      (onActionClick)="handleTableAction($event)" (onAdd)="onAdd()" (onRefresh)="loadAssociates()">
+    </app-table>
+  </div>
+</app-page>

@@ -1,0 +1,103 @@
+<div class="account-form-container p-4 flex flex-column gap-5 bg-gray-50 min-h-full">
+  
+  <div class="form-body flex flex-column gap-5">
+    
+    <!-- 1. Institution Details -->
+    <p-panel styleClass="border-round-2xl shadow-1 border-none bg-white">
+      <ng-template pTemplate="header">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <div class="bg-primary-alpha-10" 
+               style="width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+            <i class="pi pi-building text-primary" style="font-size: 1.25rem;"></i>
+          </div>
+          <span class="font-bold text-color" style="font-size: 1.1rem;">External Institution Details</span>
+        </div>
+      </ng-template>
+
+      <div class="panel-content">
+        <div class="form-row">
+            <label class="block text-900 font-medium mb-2">Institution Category</label>
+            <p-selectButton [options]="bankCategoryOptions" [ngModel]="bankCategory()" (ngModelChange)="bankCategory.set($event)" optionLabel="label" optionValue="value" styleClass="w-full" />
+        </div>
+        
+        @if (bankCategory() === 'coop') {
+            <div class="form-row">
+                <app-checkbox-field label="Are you a member of this society?" [field]="isSocietyMember" (onChange)="(null)" />
+            </div>
+        }
+
+        <div class="form-row cols-2 mt-3">
+          <app-text-field label="Bank Name" [field]="bankName" (onChange)="(null)" />
+          <app-text-field label="Branch Name" [field]="branchName" (onChange)="(null)" />
+        </div>
+      </div>
+    </p-panel>
+
+    <!-- 2. Deposit Details -->
+    <p-panel styleClass="border-round-2xl shadow-1 border-none bg-white">
+      <ng-template pTemplate="header">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <div class="bg-indigo-alpha-10" 
+               style="width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+            <i class="pi pi-wallet text-indigo-500" style="font-size: 1.25rem;"></i>
+          </div>
+          <span class="font-bold text-color" style="font-size: 1.1rem;">Account Metadata</span>
+        </div>
+      </ng-template>
+
+      <div class="panel-content">
+        <div class="form-row">
+          <app-select-field label="Account Type" [field]="accountType" [options]="accountTypes" optionValue="value" (onChange)="(null)" />
+        </div>
+        <div class="form-row cols-3">
+          <app-text-field label="Account Number" [field]="accountNo" (onChange)="(null)" />
+          <app-date-field label="Opening Date" [field]="openingDate" (onChange)="(null)" />
+          <app-number-field label="Balance / Amount (₹)" [field]="amount" [useGrouping]="true" (onChange)="(null)" />
+        </div>
+      </div>
+    </p-panel>
+
+    <!-- 3. Security Linkage -->
+    <p-panel styleClass="border-round-2xl shadow-1 border-none bg-white">
+      <ng-template pTemplate="header">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <div class="bg-orange-alpha-10" 
+               style="width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+            <i class="pi pi-shield text-orange-500" style="font-size: 1.25rem;"></i>
+          </div>
+          <span class="font-bold text-color" style="font-size: 1.1rem;">Security & Mortgage</span>
+        </div>
+      </ng-template>
+
+      <div class="panel-content">
+        <div class="form-row">
+            <app-checkbox-field label="Is the property to be mortgaged for this loan?" [field]="isMortgaged" (onChange)="onMortgageChange($event)" />
+        </div>
+        <div class="form-row cols-2" [class.opacity-50]="!isMortgaged()" [style.transition]="'opacity 0.3s'">
+            <app-checkbox-field label="Prime Security" [field]="isPrimeSecurity" [disabled]="!isMortgaged()" (onChange)="onPrimeChange($event)" />
+            <app-checkbox-field label="Collateral Security" [field]="isCollateralSecurity" [disabled]="!isMortgaged()" (onChange)="onCollateralChange($event)" />
+        </div>
+        <div class="form-row cols-2 mt-2">
+            <app-date-field label="Expiration Date" [field]="expirationDate" (onChange)="(null)" />
+        </div>
+        
+        <p-divider />
+        
+        <div class="form-row">
+            <app-checkbox-field label="Is the loan taken on deposit?" [field]="isLoanOnDeposit" (onChange)="(null)" />
+        </div>
+        <div class="form-row">
+            <app-textarea-field label="Loan Details" [field]="loanDetails" (onChange)="(null)" />
+        </div>
+      </div>
+    </p-panel>
+
+  </div>
+
+  <app-form-actions
+    saveLabel="Save External Account"
+    [loading]="loading()"
+    (save)="save()"
+    (cancel)="cancel()">
+  </app-form-actions>
+</div>

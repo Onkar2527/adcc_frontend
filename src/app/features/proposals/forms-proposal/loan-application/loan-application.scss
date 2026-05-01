@@ -1,0 +1,533 @@
+.form-container {
+    width: 100%;
+    margin: auto;
+    background: #fff;
+    padding: 30px;
+    position: relative;
+}
+
+/* HEADER */
+.header {
+    text-align: center;
+}
+
+.header h2 {
+    margin: 0;
+    font-size: 20px;
+}
+
+.branch {
+    position: absolute;
+    right: 155px;
+    top: 60px;
+    padding: 3px 10px;
+}
+
+.branch1 {
+    position: absolute;
+    width: 130px;
+    top: -1px;
+    border: 1px solid #000;
+    padding: 3px 10px;
+    height: 30px;
+}
+
+
+.title {
+    margin-top: 10px;
+    text-decoration: underline;
+}
+
+/* PHOTO */
+.photo-box {
+    position: absolute;
+    right: 30px;
+    top: 120px;
+    width: 120px;
+    height: 140px;
+    border: 1px solid #000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* SECTION */
+.section {
+    margin-top: 30px;
+}
+
+.date {
+    margin-left: 630px;
+    margin-top: -20px;
+}
+
+.form-lines {
+    margin-top: 20px;
+}
+
+/* FORM LINES */
+.form-lines p {
+    margin-top: 10px;
+}
+
+/* TABLE */
+.table {
+    margin-top: 20px;
+}
+
+.table-header,
+.row {
+    display: flex;
+    align-items: center;
+}
+
+.table-header div,
+.row div {
+    padding: 8px;
+    word-break: break-word;
+}
+
+/* FIXED WIDTH FOR EACH COLUMN */
+.table-header div:nth-child(1),
+.row div:nth-child(1) {
+    width: 50px;
+}
+
+.table-header div:nth-child(2),
+.row div:nth-child(2) {
+    width: 250px;
+}
+
+.table-header div:nth-child(3),
+.row div:nth-child(3) {
+    width: 350px;
+}
+
+.table-header div:nth-child(4),
+.row div:nth-child(4) {
+    margin-left: 150px;
+    width: 80px;
+}
+
+.table-header div:nth-child(5),
+.row div:nth-child(5) {
+    margin-left: 40px;
+    width: 150px;
+}
+
+/* DECLARATION */
+.declaration {
+    margin-top: 30px;
+}
+
+.long-text {
+    margin-top: 20px;
+    text-align: justify;
+    line-height: 1.6;
+}
+
+/* SIGN */
+.signature {
+    margin-top: 40px;
+    text-align: right;
+}
+
+.signature p {
+    margin-right: 55px;
+}
+
+.sign-line {
+    margin-top: 10px;
+    border-bottom: 1px solid #000;
+    width: 300px;
+    margin-left: auto;
+}
+
+.guarantee {
+    margin-top: 20px;
+}
+
+.g-line {
+    display: flex;
+    align-items: center;
+    margin: 10px 0;
+    gap: 10px;
+    font-size: 14px;
+}
+
+/* This creates FULL WIDTH lines */
+.fill {
+    flex: 1;
+    border-bottom: 1px solid #000;
+    height: 18px;
+}
+
+
+.page {
+    width: 100%;
+    margin: auto;
+    background: #fff;
+    padding: 30px;
+    font-family: "Noto Sans Devanagari", Arial;
+}
+
+/* CENTER TITLE */
+.center {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.line-row1 {
+    margin-top: 30px;
+}
+
+/* LINE STRUCTURE */
+.line-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: nowrap;
+}
+
+.fill1 {
+    width: 200px;
+    border-bottom: 1px solid #000;
+    height: 18px;
+}
+
+.fill.small {
+    flex: 0.3;
+}
+
+/* TABLE */
+.form-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+
+.form-table th,
+.form-table td {
+    border: 1px solid #000;
+    padding: 8px;
+    text-align: center;
+    height: 30px;
+}
+
+/* SPACING */
+.mt {
+    margin-top: 30px;
+}
+
+
+.sheet {
+    width: 100%;
+    margin: auto;
+    background: #fff;
+    padding: 30px;
+    font-family: "Noto Sans Devanagari", Arial;
+}
+
+.row-line {
+    margin-top: 30px;
+    display: flex;
+}
+
+.line-fill {
+    flex: 1;
+    border-bottom: 1px solid #000;
+    height: 18px;
+}
+
+.grid-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+
+.grid-table th,
+.grid-table td {
+    border: 1px solid #000;
+    padding: 8px;
+    text-align: center;
+    height: 35px;
+}
+
+.section-gap {
+    margin-top: 40px;
+}
+
+.sign-block {
+    margin-top: 80px;
+    width: 300px;
+    margin-left: auto;
+    text-align: center;
+}
+
+.sign-line1 {
+    border-bottom: 1px solid #000;
+    margin-top: 30px;
+}
+
+
+.doc-page {
+    width: 100%;
+    margin: auto;
+    background: #fff;
+    padding: 30px;
+    font-family: "Noto Sans Devanagari", Arial;
+    position: relative;
+}
+
+/* TITLE */
+.title-center {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+/* PHOTO BOX */
+.photo-area {
+    position: absolute;
+    top: 40px;
+    right: 30px;
+    width: 120px;
+    height: 140px;
+    border: 1px solid #000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.main-row {
+    display: flex;
+    align-items: flex-start;
+    margin-top: 15px;
+}
+
+.main-row>span {
+    width: 30px;
+    font-weight: bold;
+}
+
+/* INDENT SUB CONTENT */
+.main-content {
+    flex: 1;
+    margin-top: -10px;
+}
+
+/* ROW */
+.row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 35px;
+}
+
+.line1 {
+    width: 600px;
+    border-bottom: 1px solid #000;
+    height: 18px;
+}
+
+/* LINE */
+.line {
+    flex: 1;
+    border-bottom: 1px solid #000;
+    height: 18px;
+}
+
+.small {
+    flex: 0.3;
+}
+
+/* SECTION */
+.section {
+    margin-top: 20px;
+    margin-left: -10px;
+}
+
+/* TABLE */
+.table-box {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+
+.table-box th,
+.table-box td {
+    border: 1px solid #000;
+    height: 35px;
+    text-align: center;
+}
+
+/* BOTTOM ROW */
+.bottom-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 30px;
+}
+
+
+
+.final-page {
+    width: 100%;
+    margin: auto;
+    padding: 30px;
+    font-family: "Noto Sans Devanagari", Arial;
+}
+
+/* NUMBER + CONTENT ALIGNMENT */
+.num-row {
+    display: flex;
+    align-items: flex-start;
+    margin-top: 15px;
+}
+
+/* LEFT NUMBER COLUMN (FIXED WIDTH) */
+.num {
+    width: 35px;
+    /* controls left spacing EXACT */
+    font-weight: bold;
+}
+
+/* RIGHT CONTENT */
+.content {
+    flex: 1;
+}
+
+/* ROW */
+.row-flex {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+/* SPACE PUSH */
+.spacer {
+    flex: 0.5;
+}
+
+.text {}
+
+/* LINES */
+.line {
+    border-bottom: 1px solid #000;
+    height: 18px;
+    flex: 1;
+}
+
+.mid {
+    flex: 0.5;
+}
+
+/* TABLE */
+.tbl {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+
+.tbl th,
+.tbl td {
+    border: 1px solid #000;
+    height: 35px;
+    text-align: center;
+}
+
+/* SECTION TEXT */
+.section {
+    margin-bottom: 5px;
+}
+
+
+.passage-container {
+    width: 92%;
+    margin: auto;
+    font-family: "Noto Sans Devanagari", Arial;
+}
+
+/* ROW STRUCTURE */
+.p-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+/* LEFT EMPTY SPACE PUSH */
+.p-fill {
+    flex: 1;
+}
+
+/* RIGHT TEXT ALIGN */
+.p-right-text {
+    white-space: nowrap;
+}
+
+/* LINE STYLES */
+.p-line {
+    border-bottom: 1px solid #000;
+    height: 18px;
+    flex: 1;
+}
+
+.p-line.small {
+    flex: 0.4;
+}
+
+.p-line.long {
+    flex: 1.5;
+}
+
+.p-line.tiny {
+    flex: 0.2;
+}
+
+/* SIGNATURE LINE (RIGHT SIDE PERFECT) */
+.sign-line {
+    margin-top: 10px;
+    width: 200px;
+    border-bottom: 1px solid #000;
+}
+
+/* SIGN TEXT BELOW LINE */
+.sign-text {
+    position: absolute;
+    right: 0;
+    margin-top: 40px;
+    margin-right: 80px;
+}
+
+/* SPACE BETWEEN LEFT & RIGHT */
+.p-spacer {
+    flex: 1;
+}
+
+/* PARAGRAPH */
+.p-text {
+    margin-top: 10px;
+    line-height: 1.6;
+    text-align: justify;
+}
+
+.first-line {
+    width: 950px;
+    margin: 10px auto;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* Blank line */
+.line {
+    flex: 1;
+    border-bottom: 1px solid #000;
+    height: 18px;
+}
+
+/* Right aligned text */
+.right-text {
+    white-space: nowrap;
+}

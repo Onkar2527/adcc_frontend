@@ -1,0 +1,232 @@
+<div class="personal-info-container p-4">
+  
+  <!-- Identity Verification Summary (Read Only Audit) -->
+  @if (verificationMetadata()) {
+    <div class="grid mb-4">
+      <div class="col-12">
+        <div class="surface-card p-4 border-round-2xl shadow-1 border-1 border-primary-100 flex flex-column md:flex-row align-items-start gap-4">
+          <!-- Photo Section -->
+          @if (verificationMetadata().aadhaar_data?.profile_image) {
+            <div class="relative">
+              <img [src]="'data:image/jpeg;base64,' + verificationMetadata().aadhaar_data.profile_image" 
+                class="w-8rem h-10rem border-round-xl shadow-2 border-2 border-white object-cover" 
+                alt="Verified Photo" />
+              <div class="absolute -bottom-2 -right-2 bg-green-500 text-white w-2rem h-2rem border-round-circle flex align-items-center justify-content-center border-2 border-white shadow-1">
+                <i class="pi pi-verified font-bold"></i>
+              </div>
+            </div>
+          }
+
+          <!-- Audit Details Section -->
+          <div class="flex-1 flex flex-column gap-3">
+            <div class="flex align-items-center gap-3">
+              <span class="text-sm font-bold text-700 uppercase tracking-widest bg-primary-50 text-primary px-3 py-1 border-round-pill">
+                Statutory Audit Trail
+              </span>
+              <span class="text-xs text-500 font-medium">Verified on {{ data()?.created_at | date:'medium' }}</span>
+            </div>
+
+            <div class="grid mt-2">
+              <div class="col-12 md:col-6 lg:col-4">
+                <span class="block text-xs font-bold text-500 uppercase">Aadhaar Verified Name</span>
+                <span class="block font-bold text-900 mt-1">{{ verificationMetadata().aadhaar_data?.full_name || '-' }}</span>
+                <div class="flex align-items-center gap-2 mt-1">
+                  <span class="text-xs text-600">OCR: {{ verificationMetadata().aadhaar_ocr?.applicantName || '-' }}</span>
+                  <i class="pi pi-circle-fill" style="font-size: 8px;"
+                    [class]="normalize(verificationMetadata().aadhaar_data?.full_name) === normalize(verificationMetadata().aadhaar_ocr?.applicantName) ? 'text-green-500' : 'text-red-500'"></i>
+                </div>
+              </div>
+
+              <div class="col-12 md:col-6 lg:col-4">
+                <span class="block text-xs font-bold text-500 uppercase">PAN Verified Name</span>
+                <span class="block font-bold text-900 mt-1">{{ verificationMetadata().pan_data?.full_name || '-' }}</span>
+                <div class="flex align-items-center gap-2 mt-1">
+                  <span class="text-xs text-600">OCR: {{ verificationMetadata().pan_ocr?.applicantName || '-' }}</span>
+                  <i class="pi pi-circle-fill" style="font-size: 8px;"
+                    [class]="normalize(verificationMetadata().pan_data?.full_name) === normalize(verificationMetadata().pan_ocr?.applicantName) ? 'text-green-500' : 'text-red-500'"></i>
+                </div>
+              </div>
+
+              <div class="col-12 lg:col-4">
+                <span class="block text-xs font-bold text-500 uppercase">Verified Address</span>
+                <span class="text-sm text-700 line-height-3 block mt-1">
+                  {{ verificationMetadata().aadhaar_data?.address?.house }} {{ verificationMetadata().aadhaar_data?.address?.street }}, 
+                  {{ verificationMetadata().aadhaar_data?.address?.loc }}, {{ verificationMetadata().aadhaar_data?.address?.dist }}, 
+                  {{ verificationMetadata().aadhaar_data?.address?.state }} - {{ verificationMetadata().aadhaar_data?.zip }}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- ROW 1: Identity & Membership -->
+  <div class="section-row">
+
+    <!-- 1A: Basic Identity -->
+    <div class="section-col">
+      <p-panel styleClass="border-round-2xl shadow-2 border-none h-full">
+        <ng-template pTemplate="header">
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <div class="bg-primary-alpha-10"
+              style="width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+              <i class="pi pi-user text-primary" style="font-size: 1.25rem;"></i>
+            </div>
+            <span class="font-bold text-color" style="font-size: 1.1rem;">Basic Identity</span>
+          </div>
+        </ng-template>
+
+        <div class="panel-content">
+          <div class="form-row">
+            <app-text-field label="Applicant Name" [field]="applicantName" [required]="true"
+              (onChange)="onFieldChange()" />
+          </div>
+
+          <div class="form-row cols-2">
+            <app-date-field label="Date of Birth" [field]="dob" dateFormat="dd-mm-yy" (onChange)="onFieldChange()" />
+            <app-number-field label="Age" [field]="age" [disabled]="true" />
+          </div>
+
+          <div class="form-row cols-2">
+            <app-select-field label="Gender" [field]="gender" [options]="genderOptions" optionValue="value" (onChange)="onFieldChange()" />
+            <app-select-field label="Marital Status" [field]="maritalStatus" [options]="maritalStatusOptions" optionValue="value"
+              (onChange)="onFieldChange()" />
+          </div>
+
+          <div class="form-row">
+            <app-select-field label="Education" [field]="education" [options]="educationOptions" optionValue="value"
+              (onChange)="onFieldChange()" />
+          </div>
+
+          <div class="form-row cols-2">
+            <app-select-field label="Religion" [field]="religion" [options]="religionOptions" optionValue="value"
+              (onChange)="onFieldChange()" />
+            <app-text-field label="Caste" [field]="cast" (onChange)="onFieldChange()" />
+          </div>
+        </div>
+      </p-panel>
+    </div>
+
+    <!-- 1B: Bank Membership -->
+    <div class="section-col">
+      <p-panel styleClass="border-round-2xl shadow-2 border-none h-full surface-card border-left-3 border-primary">
+        <ng-template pTemplate="header">
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <div class="bg-indigo-alpha-10"
+              style="width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+              <i class="pi pi-building text-indigo-500" style="font-size: 1.25rem;"></i>
+            </div>
+            <span class="font-bold text-color" style="font-size: 1.1rem;">Bank Membership</span>
+          </div>
+        </ng-template>
+
+        <div class="panel-content">
+          <div class="bg-surface-50 p-3 border-round-xl border-1 surface-border mb-2">
+            <app-checkbox-field label="Is the applicant a member of the bank?" [field]="isBankMember"
+              (onChange)="onFieldChange()" />
+          </div>
+
+          @if (isBankMember()) {
+          <div class="form-row">
+            <app-select-field label="Member Type" [field]="memberType" [options]="memberTypeOptions" optionValue="value"
+              (onChange)="onFieldChange()" />
+          </div>
+          <div class="form-row">
+            <app-date-field label="Membership Date" [field]="membershipDate" (onChange)="onFieldChange()" />
+          </div>
+          <div class="form-row">
+            <app-text-field label="Member No." [field]="memberNo" (onChange)="onFieldChange()" />
+          </div>
+          <div class="form-row">
+            <app-number-field label="Amount of Bank Shares (₹)" [field]="bankSharesAmount" [useGrouping]="true"
+              (onChange)="onFieldChange()" />
+          </div>
+          }
+        </div>
+      </p-panel>
+    </div>
+
+  </div>
+
+  <!-- ROW 2: Financials & Family -->
+  <div class="section-row">
+
+    <!-- 2A: Statutory & Family -->
+    <div class="section-col">
+      <p-panel styleClass="border-round-2xl shadow-2 border-none h-full">
+        <ng-template pTemplate="header">
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <div class="bg-orange-alpha-10"
+              style="width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+              <i class="pi pi-wallet text-orange-500" style="font-size: 1.25rem;"></i>
+            </div>
+            <span class="font-bold text-color" style="font-size: 1.1rem;">Statutory & Family</span>
+          </div>
+        </ng-template>
+
+        <div class="panel-content">
+          <div class="form-row cols-2">
+            <app-text-field label="PAN Number" [field]="panNumber" [maxlength]="10" (onChange)="onFieldChange()" />
+            <app-text-field label="Aadhaar Number" [field]="aadhaarNumber" [maxlength]="12"
+              (onChange)="onFieldChange()" />
+          </div>
+
+          <div class="form-row cols-2">
+            <app-number-field label="No. of Family Members" [field]="familyMembersCount" (onChange)="onFieldChange()" />
+            <app-number-field label="Earners Out of Them" [field]="earnersCount" (onChange)="onFieldChange()" />
+          </div>
+
+          <div class="form-row cols-2">
+            <app-number-field label="Net Worth Amount (₹)" [field]="netWorthAmount" [useGrouping]="true"
+              (onChange)="onFieldChange()" />
+            <app-date-field label="Net Worth Date" [field]="netWorthDate" (onChange)="onFieldChange()" />
+          </div>
+
+          <div class="form-row">
+            <app-text-field label="Profession" [field]="profession" (onChange)="onFieldChange()" />
+          </div>
+          <div class="form-row">
+            <app-text-field label="Relation with Director" [field]="relationWithDirector"
+              (onChange)="onFieldChange()" />
+          </div>
+        </div>
+      </p-panel>
+    </div>
+
+    <!-- 2B: Contact & Address -->
+    <div class="section-col">
+      <p-panel styleClass="border-round-2xl shadow-2 border-none h-full">
+        <ng-template pTemplate="header">
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <div class="bg-green-alpha-10"
+              style="width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+              <i class="pi pi-map-marker text-green-500" style="font-size: 1.25rem;"></i>
+            </div>
+            <span class="font-bold text-color" style="font-size: 1.1rem;">Contact & Residence</span>
+          </div>
+        </ng-template>
+
+        <div class="panel-content">
+          <div class="form-row">
+            <app-text-field label="Email ID" [field]="emailId" (onChange)="onFieldChange()" />
+          </div>
+          <div class="form-row cols-2">
+            <app-text-field label="Mobile Number" [field]="mobileNumber" [maxlength]="10"
+              (onChange)="onFieldChange()" />
+            <app-text-field label="Mobile Number 2" [field]="mobileNumber2" [maxlength]="10"
+              (onChange)="onFieldChange()" />
+          </div>
+
+          <div class="form-row" style="flex: 1;">
+            <app-textarea-field label="Full Address" [field]="fullAddress" [rows]="6" [autoResize]="false"
+              (onChange)="onFieldChange()" />
+          </div>
+        </div>
+      </p-panel>
+    </div>
+
+  </div>
+
+</div>

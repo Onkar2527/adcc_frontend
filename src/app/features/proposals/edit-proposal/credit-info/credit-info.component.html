@@ -1,0 +1,220 @@
+<div class="credit-info-container p-4">
+
+  <!-- Question 1 & Table -->
+  <div class="bg-surface-50 p-4 border-round-xl border-1 surface-border shadow-sm">
+    <app-checkbox-field label="Does the applicant have any loan in this bank?" [field]="hasLoanInThisBank"
+      (onChange)="onFieldChange()" />
+  </div>
+
+  @if (hasLoanInThisBank()) {
+  <div class="loan-table-section mt-4 shadow-sm border-round-xl overflow-hidden">
+    <app-table [columns]="loanCols" [data]="thisBankLoans()" [loading]="loadingLoans()"
+      (onActionClick)="handleAction($event, 'this')" [showAddButton]="true" (onAdd)="addLoan()"
+      (onRefresh)="fetchLoans()" [showRefreshButton]="true">
+    </app-table>
+  </div>
+  <div class="mt-3">
+    <app-textarea-field label="Remarks for Loans in this Bank" [field]="loansThisBankRemarks" (onChange)="onFieldChange()" />
+  </div>
+  }
+
+  <div class="bg-surface-50 p-4 border-round-xl border-1 surface-border shadow-sm mt-5">
+    <app-checkbox-field label="Does the applicant have loan from other banks?" [field]="hasLoanInOtherBanks"
+      (onChange)="onFieldChange()" />
+  </div>
+
+  @if (hasLoanInOtherBanks()) {
+  <div class="loan-table-section mt-4 shadow-sm border-round-xl overflow-hidden">
+    <app-table [columns]="otherLoanCols" [data]="otherBanksLoans()" [loading]="loadingOtherLoans()"
+      (onActionClick)="handleAction($event, 'other')" [showAddButton]="true" (onAdd)="addOtherLoan()"
+      (onRefresh)="fetchOtherLoans()" [showRefreshButton]="true">
+    </app-table>
+  </div>
+  <div class="mt-3">
+    <app-textarea-field label="Remarks for Loans in other Banks" [field]="loansOtherBanksRemarks" (onChange)="onFieldChange()" />
+  </div>
+  }
+  <div class="bg-surface-50 p-4 border-round-xl border-1 surface-border shadow-sm mt-5">
+    <app-checkbox-field label="Did the applicant take a loan from this bank previously?"
+      [field]="hasPreviousLoanInThisBank" (onChange)="onFieldChange()" />
+  </div>
+
+  @if (hasPreviousLoanInThisBank()) {
+  <div class="loan-table-section mt-4 shadow-sm border-round-xl overflow-hidden">
+    <app-table [columns]="previousLoanCols" [data]="previousLoansThisBank()" [loading]="loadingPreviousLoans()"
+      (onActionClick)="handleAction($event, 'previous')" [showAddButton]="true" (onAdd)="addPreviousLoan()"
+      (onRefresh)="fetchPreviousLoans()" [showRefreshButton]="true">
+    </app-table>
+  </div>
+  <div class="mt-3">
+    <app-textarea-field label="Remarks for Previous Loans in this Bank" [field]="previousLoansThisBankRemarks" (onChange)="onFieldChange()" />
+  </div>
+  }
+  <div class="bg-surface-50 p-4 border-round-xl border-1 surface-border shadow-sm mt-5">
+    <app-checkbox-field label="Did the applicant take loans from other banks previously?"
+      [field]="hasPreviousLoanInOtherBanks" (onChange)="onFieldChange()" />
+  </div>
+
+  @if (hasPreviousLoanInOtherBanks()) {
+  <div class="loan-table-section mt-4 shadow-sm border-round-xl overflow-hidden">
+    <app-table [columns]="previousOtherLoanCols" [data]="previousOtherLoans()" [loading]="loadingPreviousOtherLoans()"
+      (onActionClick)="handleAction($event, 'previousOther')" [showAddButton]="true" (onAdd)="addPreviousOtherLoan()"
+      (onRefresh)="fetchPreviousOtherLoans()" [showRefreshButton]="true">
+    </app-table>
+  </div>
+  <div class="mt-3">
+    <app-textarea-field label="Remarks for Previous Loans in other Banks" [field]="previousLoansOtherBanksRemarks" (onChange)="onFieldChange()" />
+  </div>
+  }
+
+  <div class="bg-surface-50 p-4 border-round-xl border-1 surface-border shadow-sm mt-5">
+    <app-checkbox-field label="Does the applicant have any loan guarantee with this bank?"
+      [field]="hasGuaranteeInThisBank" (onChange)="onFieldChange()" />
+  </div>
+
+  @if (hasGuaranteeInThisBank()) {
+  <div class="loan-table-section mt-4 shadow-sm border-round-xl overflow-hidden">
+    <app-table [columns]="guaranteeCols" [data]="guaranteesThisBank()" [loading]="loadingGuarantees()"
+      (onActionClick)="handleAction($event, 'guarantee')" [showAddButton]="true" (onAdd)="addGuarantee()"
+      (onRefresh)="fetchGuarantees()" [showRefreshButton]="true">
+    </app-table>
+  </div>
+  <div class="mt-3">
+    <app-textarea-field label="Remarks for Guarantees in this Bank" [field]="guaranteesThisBankRemarks" (onChange)="onFieldChange()" />
+  </div>
+  }
+  <div class="bg-surface-50 p-4 border-round-xl border-1 surface-border shadow-sm mt-5">
+    <app-checkbox-field label="Does the applicant have any loan guarantee with other banks/institutions?"
+      [field]="hasGuaranteeInOtherBanks" (onChange)="onFieldChange()" />
+  </div>
+
+  @if (hasGuaranteeInOtherBanks()) {
+  <div class="loan-table-section mt-4 shadow-sm border-round-xl overflow-hidden">
+    <app-table [columns]="otherGuaranteeCols" [data]="otherBanksGuarantees()" [loading]="loadingOtherGuarantees()"
+      (onActionClick)="handleAction($event, 'otherGuarantee')" [showAddButton]="true" (onAdd)="addOtherGuarantee()"
+      (onRefresh)="fetchOtherGuarantees()" [showRefreshButton]="true">
+    </app-table>
+  </div>
+  <div class="mt-3">
+    <app-textarea-field label="Remarks for Guarantees in other Banks" [field]="guaranteesOtherBanksRemarks" (onChange)="onFieldChange()" />
+  </div>
+  }
+
+
+  <div class="bg-surface-50 p-4 border-round-xl border-1 surface-border shadow-sm mt-5">
+    <app-checkbox-field label="Does the applicant have any account in this bank?" [field]="hasAccountInThisBank"
+      (onChange)="onFieldChange()" />
+  </div>
+
+  @if (hasAccountInThisBank()) {
+  <div class="loan-table-section mt-4 shadow-sm border-round-xl overflow-hidden">
+    <app-table [columns]="accountCols" [data]="accountsThisBank()" [loading]="loadingAccounts()"
+      (onActionClick)="handleAction($event, 'account')" [showAddButton]="true" (onAdd)="addAccount()"
+      (onRefresh)="fetchAccounts()" [showRefreshButton]="true">
+    </app-table>
+  </div>
+  <div class="mt-3">
+    <app-textarea-field label="Remarks for Accounts in this Bank" [field]="accountsThisBankRemarks" (onChange)="onFieldChange()" />
+  </div>
+  }
+  <div class="bg-surface-50 p-4 border-round-xl border-1 surface-border shadow-sm mt-5">
+    <app-checkbox-field label="Does the applicant have any account in other banks?" [field]="hasAccountInOtherBanks"
+      (onChange)="onFieldChange()" />
+  </div>
+
+  @if (hasAccountInOtherBanks()) {
+  <div class="loan-table-section mt-4 shadow-sm border-round-xl overflow-hidden">
+    <app-table [columns]="accountOtherCols" [data]="accountsOtherBanks()" [loading]="loadingAccountsOther()"
+      (onActionClick)="handleAction($event, 'accountOther')" [showAddButton]="true" (onAdd)="addAccountOther()"
+      (onRefresh)="fetchAccountsOther()" [showRefreshButton]="true">
+    </app-table>
+  </div>
+  <div class="mt-3">
+    <app-textarea-field label="Remarks for Accounts in other Banks" [field]="accountsOtherBanksRemarks" (onChange)="onFieldChange()" />
+  </div>
+  }
+
+  <div class="bg-surface-50 p-4 border-round-xl border-1 surface-border shadow-sm mt-5">
+    <app-checkbox-field label="Have you insured any life insurance?" [field]="hasLifeInsurance"
+      (onChange)="onFieldChange()" />
+  </div>
+
+  @if (hasLifeInsurance()) {
+  <div class="loan-table-section mt-4 shadow-sm border-round-xl overflow-hidden">
+    <app-table [columns]="insuranceCols" [data]="lifeInsurances()" [loading]="loadingLifeInsurances()"
+      (onActionClick)="handleAction($event, 'insurance')" [showAddButton]="true" (onAdd)="addLifeInsurance()"
+      (onRefresh)="fetchLifeInsurances()" [showRefreshButton]="true">
+    </app-table>
+  </div>
+  <div class="mt-3">
+    <app-textarea-field label="Remarks for Life Insurances" [field]="lifeInsuranceRemarks" (onChange)="onFieldChange()" />
+  </div>
+  }
+  <div class="bg-surface-50 p-4 border-round-xl border-1 surface-border shadow-sm mt-5">
+    <app-checkbox-field label="Are you going to do a new insurance policy?" [field]="willDoNewInsurance"
+      (onChange)="onFieldChange()" />
+  </div>
+
+  @if (willDoNewInsurance()) {
+  <div class="loan-table-section mt-4 shadow-sm border-round-xl overflow-hidden">
+    <app-table [columns]="newInsuranceCols" [data]="newInsurances()" [loading]="loadingNewInsurances()"
+      (onActionClick)="handleAction($event, 'newInsurance')" [showAddButton]="true" (onAdd)="addNewInsurance()"
+      (onRefresh)="fetchNewInsurances()" [showRefreshButton]="true">
+    </app-table>
+  </div>
+  <div class="mt-3">
+    <app-textarea-field label="Remarks for New Insurance Policies" [field]="newInsuranceRemarks" (onChange)="onFieldChange()" />
+  </div>
+  }
+
+  <div class="bg-surface-50 p-4 border-round-xl border-1 surface-border shadow-sm mt-5">
+    <app-checkbox-field label="Applicant Company or L.L.P. Debt record information from ROC if any"
+      [field]="hasRocDebtRecord" (onChange)="onFieldChange()" />
+  </div>
+
+  @if (hasRocDebtRecord()) {
+  <div class="loan-table-section mt-4 shadow-sm border-round-xl overflow-hidden">
+    <app-table [columns]="rocCols" [data]="rocDebts()" [loading]="loadingRocDebts()"
+      (onActionClick)="handleAction($event, 'rocDebt')" [showAddButton]="true" (onAdd)="addRocDebt()"
+      (onRefresh)="fetchRocDebts()" [showRefreshButton]="true">
+    </app-table>
+  </div>
+  <div class="mt-3">
+    <app-textarea-field label="Remarks for ROC Debt Records" [field]="rocDebtsRemarks" (onChange)="onFieldChange()" />
+  </div>
+  }
+
+  <div class="form-row">
+    <app-checkbox-field label="Is there other collateral available for the loan?" [field]="hasOtherCollateral"
+      (onChange)="onFieldChange()" />
+  </div>
+  @if (hasOtherCollateral()) {
+    <div class="mt-2">
+      <app-textarea-field label="Details of other collateral" [field]="otherCollateralDetails" (onChange)="onFieldChange()" />
+    </div>
+  }
+  <div class="form-row">
+    <app-checkbox-field label="Is there other mortgage share available for the loan?" [field]="hasOtherMortgageShare"
+      (onChange)="onFieldChange()" />
+  </div>
+  @if (hasOtherMortgageShare()) {
+    <div class="mt-2">
+      <app-textarea-field label="Details of other mortgage share" [field]="otherMortgageShareDetails" (onChange)="onFieldChange()" />
+    </div>
+  }
+
+  <div class="form-row">
+    <app-checkbox-field label="Have you taken no-dues certificate?" [field]="hasNoDuesCertificate"
+      (onChange)="onFieldChange()" />
+  </div>
+  @if (hasNoDuesCertificate()) {
+    <div class="mt-2">
+      <app-textarea-field label="Details of no-dues certificate" [field]="noDuesCertificateDetails" (onChange)="onFieldChange()" />
+    </div>
+  }
+  <div class="form-row">
+    <app-checkbox-field label="Have you provide the statement of loan account?" [field]="hasLoanStatement"
+      (onChange)="onFieldChange()" />
+  </div>
+
+</div>

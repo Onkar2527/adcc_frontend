@@ -1,0 +1,91 @@
+<div class="machinery-form-container p-4 flex flex-column gap-5 bg-gray-50 min-h-full">
+  
+    <div class="form-body flex flex-column gap-5">
+        
+        <!-- Section 1: Identification -->
+        <p-panel styleClass="border-round-2xl shadow-1 border-none bg-white">
+            <ng-template pTemplate="header">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <div class="bg-primary-alpha-10" style="width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+                        <i class="pi pi-id-card text-primary" style="font-size: 1.25rem;"></i>
+                    </div>
+                    <span class="font-bold text-color" style="font-size: 1.1rem;">Asset Identification</span>
+                </div>
+            </ng-template>
+
+            <div class="panel-content">
+                <div class="form-row cols-2">
+                    <app-date-field label="Quotation Date" [field]="quotationDate" (onChange)="$any(null)" />
+                    <app-text-field label="Vendor Name" [field]="vendorName" (onChange)="$any(null)" />
+                </div>
+                <div class="form-row mt-3">
+                    <app-textarea-field label="Technical Details" [field]="machineryDetails" [rows]="4" (onChange)="$any(null)" />
+                </div>
+            </div>
+        </p-panel>
+
+        <!-- Section 2: Pricing -->
+        <p-panel styleClass="border-round-2xl shadow-1 border-none bg-white border-left-3 border-primary">
+            <ng-template pTemplate="header">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <div class="bg-green-alpha-10" style="width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+                        <i class="pi pi-wallet text-green-500" style="font-size: 1.25rem;"></i>
+                    </div>
+                    <span class="font-bold text-color" style="font-size: 1.1rem;">Pricing & Taxation</span>
+                </div>
+            </ng-template>
+
+            <div class="panel-content">
+                <div class="form-row cols-3">
+                    <app-number-field label="Quoted Price (₹)" [field]="machineryPrice" [useGrouping]="true" (onChange)="$any(null)" />
+                    <app-number-field label="GST Amount (₹)" [field]="gstAmount" [useGrouping]="true" (onChange)="$any(null)" />
+                    
+                    <div class="flex flex-column gap-2">
+                        <label class="text-sm font-semibold text-color-secondary opacity-0">Total</label>
+                        <div class="p-3 border-round-xl bg-primary-alpha-5 flex justify-content-between align-items-center border-1 surface-border">
+                            <span class="font-semibold text-color-secondary">Total:</span>
+                            <span class="text-xl font-bold text-primary">{{ totalAmount() | currency:'INR' }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </p-panel>
+
+        <!-- Section 3: Used Machinery Valuation -->
+        @if (isOld()) {
+            <p-panel styleClass="border-round-2xl shadow-1 border-none bg-white border-left-3 border-orange-500 fade-in">
+                <ng-template pTemplate="header">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <div class="bg-orange-alpha-10" style="width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+                            <i class="pi pi-search-plus text-orange-500" style="font-size: 1.25rem;"></i>
+                        </div>
+                        <span class="font-bold text-color" style="font-size: 1.1rem;">Used Asset Valuation</span>
+                    </div>
+                </ng-template>
+
+                <div class="panel-content">
+                    <div class="form-row cols-3">
+                        <app-number-field label="Valuation Amount (₹)" [field]="valuationAmount" [useGrouping]="true" (onChange)="$any(null)" />
+                        <app-date-field label="Valuation Date" [field]="valuationDate" (onChange)="$any(null)" />
+                        <app-text-field label="Valuer Name" [field]="valuerName" (onChange)="$any(null)" />
+                    </div>
+
+                    <div class="form-row cols-2 mt-3">
+                        <app-text-field label="Age of Machinery" [field]="ageOfMachinery" (onChange)="$any(null)" />
+                        <app-text-field label="Future Life" [field]="futureLifeOfMachinery" (onChange)="$any(null)" />
+                    </div>
+                </div>
+            </p-panel>
+        }
+
+    </div>
+
+    <app-form-actions 
+        saveLabel="Save Machine Detail"
+        [loading]="saving()" 
+        [saveDisabled]="false"
+        (save)="onSave()" 
+        (cancel)="onCancel()">
+    </app-form-actions>
+
+</div>

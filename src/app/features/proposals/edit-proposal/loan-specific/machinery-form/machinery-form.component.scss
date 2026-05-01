@@ -1,0 +1,40 @@
+.machinery-form-container {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.section-row {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 24px;
+  align-items: stretch;
+  width: 100%;
+
+  .section-col {
+    flex: 1;
+    min-width: 320px;
+    display: flex;
+    flex-direction: column;
+  }
+}
+
+.panel-content {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding-top: 16px;
+}
+
+:host ::ng-deep {
+  .p-panel {
+    .p-panel-content {
+      padding: 1.25rem;
+    }
+  }
+
+  .p-inputnumber-input {
+    width: 100% !important;
+  }
+}

@@ -1,0 +1,30 @@
+<div class="property-container p-4">
+  <!-- ───────────────────────────── LIST VIEW ───────────────────────────── -->
+  <div class="list-view">
+    <app-table
+      [columns]="mainTableCols"
+      [data]="properties()"
+      [actions]="tableActions()"
+      [actionDisplayMode]="'buttons'"
+      [showAddButton]="true"
+      [showRefreshButton]="true"
+      (onAdd)="onAddNew()"
+      (onRefresh)="refreshData()">
+    </app-table>
+
+    <div class="mt-4">
+      <p-panel styleClass="border-round-2xl shadow-2 border-none">
+        <ng-template pTemplate="header">
+          <div class="flex align-items-center gap-2">
+            <div class="bg-bluegray-alpha-10 w-2rem h-2rem border-round flex align-items-center justify-content-center">
+              <i class="pi pi-comment text-bluegray-500"></i>
+            </div>
+            <span class="font-bold">General Remark</span>
+          </div>
+        </ng-template>
+        <app-textarea-field label="Remark" [field]="remark" [rows]="3" [hideLabel]="true"></app-textarea-field>
+      </p-panel>
+    </div>
+  </div>
+</div>
+

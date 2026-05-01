@@ -1,0 +1,36 @@
+<div class="roc-form-container p-4 flex flex-column gap-5 bg-gray-50 min-h-full">
+
+  <div class="form-body flex flex-column gap-5">
+
+    <!-- 1. Charge Details -->
+    <p-panel styleClass="border-round-2xl shadow-1 border-none bg-white">
+      <ng-template pTemplate="header">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <div class="bg-primary-alpha-10"
+            style="width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+            <i class="pi pi-briefcase text-primary" style="font-size: 1.25rem;"></i>
+          </div>
+          <span class="font-bold text-color" style="font-size: 1.1rem;">Charge Registration Details</span>
+        </div>
+      </ng-template>
+
+      <div class="panel-content">
+        <div class="form-row cols-2">
+          <app-text-field label="SRN (Service Request Number)" [field]="srn" (onChange)="(null)" />
+          <app-text-field label="Charge ID" [field]="chargeId" (onChange)="(null)" />
+        </div>
+        <div class="form-row cols-2 mt-2">
+          <app-date-field label="Date of Creation" [field]="creationDate" (onChange)="(null)" />
+          <app-number-field label="Charge Amount (₹)" [field]="chargeAmount" [useGrouping]="true" (onChange)="(null)" />
+        </div>
+        <div class="form-row mt-2">
+          <app-text-field label="Charge Holder" [field]="chargeHolder" (onChange)="(null)" />
+        </div>
+      </div>
+    </p-panel>
+
+  </div>
+
+  <app-form-actions saveLabel="Save Charge Record" [loading]="loading()" (save)="save()" (cancel)="cancel()">
+  </app-form-actions>
+</div>

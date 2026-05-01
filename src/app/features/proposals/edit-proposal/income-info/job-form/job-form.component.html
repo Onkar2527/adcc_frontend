@@ -1,0 +1,307 @@
+<div class="job-form-container p-4">
+
+  <!-- ROW 1: Organization & Service -->
+  <div class="section-row">
+
+    <!-- Organization Profile -->
+    <div class="section-col">
+      <p-panel styleClass="border-round-xl border-none h-full">
+        <ng-template pTemplate="header">
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <div class="bg-primary-alpha-10" style="width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+              <i class="pi pi-building text-primary" style="font-size: 1.25rem;"></i>
+            </div>
+            <span class="font-bold text-color" style="font-size: 1.1rem;">Organization Profile</span>
+          </div>
+        </ng-template>
+
+        <div class="panel-content">
+          <div class="form-row">
+            <app-text-field label="Organization Name" [field]="employerName" />
+          </div>
+          <div class="form-row">
+            <app-textarea-field label="Company Address" [field]="orgAddress" [rows]="2" />
+          </div>
+          <div class="form-row cols-2">
+            <app-select-field label="Job Type" [field]="employerType" [options]="employerTypeOptions" optionValue="value" />
+            <app-text-field label="Contact No. of Organization" [field]="organizationContact" />
+          </div>
+          <div class="form-row cols-2">
+            <app-text-field label="Branch" [field]="branch" />
+            <app-text-field label="Department" [field]="department" />
+          </div>
+          <div class="form-row cols-2">
+            <app-text-field label="Designation" [field]="designation" />
+            <app-text-field label="Badge / Token No." [field]="tokenNumber" />
+          </div>
+          <div class="form-row">
+            <app-text-field label="Branch Contact No." [field]="branchContact" />
+          </div>
+          <div class="form-row">
+            <app-textarea-field label="Branch Address" [field]="branchAddress" [rows]="2" />
+          </div>
+          <div class="form-row">
+            <app-textarea-field label="Job Details" [field]="jobDetails" [rows]="2" />
+          </div>
+        </div>
+      </p-panel>
+    </div>
+
+    <!-- Service Timeline -->
+    <div class="section-col">
+      <p-panel styleClass="border-round-xl border-none h-full surface-card border-left-3 border-primary">
+        <ng-template pTemplate="header">
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <div class="bg-indigo-alpha-10" style="width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+              <i class="pi pi-calendar text-indigo-500" style="font-size: 1.25rem;"></i>
+            </div>
+            <span class="font-bold text-color" style="font-size: 1.1rem;">Service Details</span>
+          </div>
+        </ng-template>
+
+        <div class="panel-content">
+          <div class="form-row cols-2">
+            <app-select-field label="Nature of Job" [field]="natureOfJob" [options]="natureOptions" optionValue="value" />
+            <app-text-field label="Salary Grade" [field]="salaryGrade" />
+          </div>
+          <div class="form-row">
+            <app-date-field label="Date of Service" [field]="joiningDate" />
+          </div>
+          <div class="form-row">
+            <app-date-field label="Date of Permanent" [field]="confirmationDate" />
+          </div>
+          <div class="form-row">
+            <app-date-field label="Retirement Date" [field]="retirementDate" />
+          </div>
+          <div class="form-row">
+            <app-date-field label="Last Salary Month" [field]="lastSalaryMonth" />
+          </div>
+          <div class="form-row">
+            <app-number-field label="How many years have you been employed?" [field]="yearsEmployed" />
+          </div>
+          <div class="form-row">
+            <app-checkbox-field label="Is there salary proof?" [field]="hasSalaryProof" />
+          </div>
+        </div>
+      </p-panel>
+    </div>
+
+  </div>
+
+  <!-- ROW 2: Salary Breakdown -->
+  <div class="section-row mt-4">
+
+    <!-- Earnings -->
+    <div class="section-col">
+      <p-panel styleClass="border-round-xl border-none h-full">
+        <ng-template pTemplate="header">
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <div class="bg-green-alpha-10" style="width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+              <i class="pi pi-wallet text-green-500" style="font-size: 1.25rem;"></i>
+            </div>
+            <span class="font-bold text-color" style="font-size: 1.1rem;">Earnings (Monthly)</span>
+          </div>
+        </ng-template>
+
+        <div class="panel-content">
+          <div class="form-row cols-2">
+            <app-number-field label="Basic Salary (₹)" [field]="basicSalary" mode="currency" currency="INR" />
+            <app-number-field label="Grade Pay (₹)" [field]="gradePay" mode="currency" currency="INR" />
+          </div>
+          <div class="form-row cols-2">
+            <app-number-field label="DA (Dearness Allow.)" [field]="dearnessAllowance" mode="currency" currency="INR" />
+            <app-number-field label="House Rent (HRA)" [field]="hra" mode="currency" currency="INR" />
+          </div>
+          <div class="form-row">
+            <app-number-field label="Other Allowances (₹)" [field]="otherEarnings" mode="currency" currency="INR" />
+          </div>
+          <div class="form-row cols-2">
+            <app-text-field label="Other Income Info" [field]="otherIncomeInfo" />
+            <app-number-field label="Other Amount (₹)" [field]="otherIncomeAmount" mode="currency" currency="INR" />
+          </div>
+          <div class="form-row mt-2">
+            <div class="p-3 border-round-xl bg-primary-reverse-alpha-5 surface-100 flex justify-content-between align-items-center w-full">
+              <span class="font-semibold text-color-secondary">Total Salary (Monthly):</span>
+              <span class="text-xl font-bold text-primary">{{ totalGross() | currency:'INR' }}</span>
+            </div>
+          </div>
+        </div>
+      </p-panel>
+    </div>
+
+    <!-- Deductions -->
+    <div class="section-col">
+      <p-panel styleClass="border-round-xl border-none h-full">
+        <ng-template pTemplate="header">
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <div class="bg-orange-alpha-10" style="width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+              <i class="pi pi-minus-circle text-orange-500" style="font-size: 1.25rem;"></i>
+            </div>
+            <span class="font-bold text-color" style="font-size: 1.1rem;">Deductions (Monthly)</span>
+          </div>
+        </ng-template>
+
+        <div class="panel-content">
+          <div class="form-row cols-2">
+            <app-number-field label="Provident Fund (PF)" [field]="pfDeduction" mode="currency" currency="INR" />
+            <app-number-field label="Insurance" [field]="insuranceAmount" mode="currency" currency="INR" />
+          </div>
+          <div class="form-row cols-2">
+            <app-number-field label="Professional Tax" [field]="itDeduction" mode="currency" currency="INR" />
+            <app-number-field label="Loan Installment" [field]="loanDeduction" mode="currency" currency="INR" />
+          </div>
+          <div class="form-row cols-2">
+            <app-number-field label="Savings Reduction" [field]="savingsReduction" mode="currency" currency="INR" />
+            <app-number-field label="Society Deduction" [field]="societyDeduction" mode="currency" currency="INR" />
+          </div>
+          <div class="form-row cols-2">
+            <app-text-field label="Other Deduction Info" [field]="otherDeductionInfo" />
+            <app-number-field label="Other Amount (₹)" [field]="otherDeductions" mode="currency" currency="INR" />
+          </div>
+          <div class="form-row mt-2">
+            <div class="p-3 border-round-xl surface-100 border-1 surface-border flex justify-content-between align-items-center w-full">
+              <span class="font-semibold text-color-secondary">Total Deduction:</span>
+              <span class="text-xl font-bold text-orange-600">{{ totalDeductions() | currency:'INR' }}</span>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="p-3 border-round-xl bg-primary-reverse-alpha-5 surface-100 flex justify-content-between align-items-center w-full">
+              <span class="font-semibold text-color-secondary">Net Salary:</span>
+              <span class="text-xl font-bold text-primary">{{ netSalary() | currency:'INR' }}</span>
+            </div>
+          </div>
+        </div>
+      </p-panel>
+    </div>
+
+  </div>
+
+  <!-- ROW 3: Salary Payout -->
+  <div class="section-row mt-4">
+
+    <div class="section-col">
+      <p-panel styleClass="border-round-xl border-none h-full">
+        <ng-template pTemplate="header">
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <div class="bg-blue-alpha-10" style="width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+              <i class="pi pi-credit-card text-blue-500" style="font-size: 1.25rem;"></i>
+            </div>
+            <span class="font-bold text-color" style="font-size: 1.1rem;">Salary Payout Details</span>
+          </div>
+        </ng-template>
+
+        <div class="panel-content">
+          <div class="form-row">
+            <app-select-field label="Salary Deposited In" [field]="salaryPayoutMode" [options]="salaryPayoutOptions" optionValue="value" />
+          </div>
+          @if (salaryPayoutMode() === 'Bank') {
+            <div class="form-row">
+              <app-text-field label="Bank Name" [field]="salaryBankName" />
+            </div>
+            <div class="form-row cols-2">
+              <app-text-field label="Branch Name" [field]="salaryBranchName" />
+              <app-text-field label="IFSC Code" [field]="salaryIfscCode" />
+            </div>
+          }
+        </div>
+      </p-panel>
+    </div>
+
+    <!-- Transfer & Provident Fund -->
+    <div class="section-col">
+      <p-panel styleClass="border-round-xl border-none h-full">
+        <ng-template pTemplate="header">
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <div class="bg-purple-alpha-10" style="width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+              <i class="pi pi-arrow-right-arrow-left text-purple-500" style="font-size: 1.25rem;"></i>
+            </div>
+            <span class="font-bold text-color" style="font-size: 1.1rem;">Transfer & Provident Fund</span>
+          </div>
+        </ng-template>
+
+        <div class="panel-content">
+          <div class="form-row">
+            <app-checkbox-field label="Is there a possibility of transfer?" [field]="transferPossibility" />
+          </div>
+          @if (transferPossibility()) {
+            <div class="form-row">
+              <app-text-field label="Where (Replacement)?" [field]="transferPlace" />
+            </div>
+          }
+          <div class="form-row">
+            <app-checkbox-field label="Is there Contributory Provident Fund Scheme or Family Pension Scheme?" [field]="hasPensionScheme" />
+          </div>
+          @if (hasPensionScheme()) {
+            <div class="form-row">
+              <app-number-field label="Total Provident Fund (₹)" [field]="totalProvidentFund" mode="currency" currency="INR" />
+            </div>
+          }
+          <div class="form-row">
+            <app-checkbox-field label="Will the head of the place where you work arrange to deduct your loan installment from your monthly salary and remit it to the bank?" [field]="willDeductInstallment" />
+          </div>
+        </div>
+      </p-panel>
+    </div>
+
+  </div>
+
+  <!-- ROW 4: Borrowing & Credit Society -->
+  <div class="section-row mt-4">
+
+    <div class="section-col">
+      <p-panel styleClass="border-round-xl border-none h-full">
+        <ng-template pTemplate="header">
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <div class="bg-teal-alpha-10" style="width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+              <i class="pi pi-money-bill text-teal-500" style="font-size: 1.25rem;"></i>
+            </div>
+            <span class="font-bold text-color" style="font-size: 1.1rem;">Borrowing Details</span>
+          </div>
+        </ng-template>
+
+        <div class="panel-content">
+          <div class="form-row">
+            <app-checkbox-field label="Is it borrowed?" [field]="isBorrowed" />
+          </div>
+          @if (isBorrowed()) {
+            <div class="form-row">
+              <app-number-field label="How much to pay? (₹)" [field]="borrowedAmountToPay" mode="currency" currency="INR" />
+            </div>
+          }
+        </div>
+      </p-panel>
+    </div>
+
+    <div class="section-col">
+      <p-panel styleClass="border-round-xl border-none h-full">
+        <ng-template pTemplate="header">
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <div class="bg-cyan-alpha-10" style="width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+              <i class="pi pi-users text-cyan-500" style="font-size: 1.25rem;"></i>
+            </div>
+            <span class="font-bold text-color" style="font-size: 1.1rem;">Credit Society</span>
+          </div>
+        </ng-template>
+
+        <div class="panel-content">
+          <div class="form-row">
+            <app-checkbox-field label="Is there a credit society at your work place?" [field]="hasCreditSociety" />
+          </div>
+          @if (hasCreditSociety()) {
+            <div class="form-row">
+              <app-checkbox-field label="Are you a member of this credit society?" [field]="isCreditSocietyMember" />
+            </div>
+            <div class="form-row">
+              <app-textarea-field label="Details of your investment in that organization" [field]="creditSocietyInvestmentDetails" [rows]="2" />
+            </div>
+            <div class="form-row">
+              <app-textarea-field label="Details of your loan from that institution" [field]="creditSocietyLoanDetails" [rows]="2" />
+            </div>
+          }
+        </div>
+      </p-panel>
+    </div>
+
+  </div>
+
+</div>

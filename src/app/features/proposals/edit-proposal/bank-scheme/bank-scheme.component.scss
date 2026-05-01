@@ -1,0 +1,46 @@
+.bank-scheme-container {
+  max-width: 100%;
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.section-row {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 24px;
+  align-items: stretch;
+  width: 100%;
+
+  .section-col {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+  }
+}
+
+.panel-content {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding-top: 12px;
+}
+
+:host ::ng-deep {
+  .p-panel {
+    height: 100%;
+    
+    .p-panel-header {
+      display: flex;
+      align-items: center;
+      padding: 1rem 1.25rem;
+    }
+
+    .p-panel-content {
+      padding: 1.25rem;
+    }
+  }
+}

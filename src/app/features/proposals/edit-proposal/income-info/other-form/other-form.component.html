@@ -1,0 +1,65 @@
+<div class="other-form-container p-4">
+
+  <!-- ROW 1: Income Details & Location -->
+  <div class="section-row">
+
+    <!-- Miscellaneous Income Details -->
+    <div class="section-col">
+      <p-panel styleClass="border-round-xl border-none h-full">
+        <ng-template pTemplate="header">
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <div class="bg-pink-alpha-10" style="width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+              <i class="pi pi-ellipsis-h text-pink-600" style="font-size: 1.25rem;"></i>
+            </div>
+            <span class="font-bold text-color" style="font-size: 1.1rem;">Miscellaneous Income Details</span>
+          </div>
+        </ng-template>
+
+        <div class="panel-content">
+          <div class="form-row cols-2">
+            <app-text-field label="Source Name" [field]="sourceName" />
+            <app-text-field label="Source Type" [field]="sourceType" />
+          </div>
+          <div class="form-row cols-2">
+            <app-number-field label="Years Active" [field]="yearsActive" />
+            <app-number-field label="Annual Income Amount (₹)" [field]="annualIncome" mode="currency" currency="INR" />
+          </div>
+          <div class="form-row mt-2">
+            <div class="p-3 border-round-xl bg-primary-reverse-alpha-5 surface-100 flex justify-content-between align-items-center w-full">
+              <span class="font-semibold text-color-secondary">Annual Income:</span>
+              <span class="text-xl font-bold text-primary">{{ annualIncome() | currency:'INR' }}</span>
+            </div>
+          </div>
+        </div>
+      </p-panel>
+    </div>
+
+    <!-- Location & Reference -->
+    <div class="section-col">
+      <p-panel styleClass="border-round-xl border-none h-full surface-card border-left-3 border-primary">
+        <ng-template pTemplate="header">
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <div class="bg-indigo-alpha-10" style="width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+              <i class="pi pi-map-marker text-indigo-600" style="font-size: 1.25rem;"></i>
+            </div>
+            <span class="font-bold text-color" style="font-size: 1.1rem;">Location & Reference</span>
+          </div>
+        </ng-template>
+
+        <div class="panel-content">
+          <div class="form-row">
+            <app-text-field label="Contact Number" [field]="contactNo" />
+          </div>
+          <div class="form-row">
+            <app-textarea-field label="Full Address" [field]="address" [rows]="2" />
+          </div>
+          <div class="form-row">
+            <app-textarea-field label="Description / Details" [field]="details" [rows]="4" />
+          </div>
+        </div>
+      </p-panel>
+    </div>
+
+  </div>
+
+</div>

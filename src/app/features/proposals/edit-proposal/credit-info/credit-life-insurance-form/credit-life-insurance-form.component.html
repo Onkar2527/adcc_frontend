@@ -1,0 +1,99 @@
+<div class="insurance-form-container p-4 flex flex-column gap-5 bg-gray-50 min-h-full">
+  
+  <div class="form-body flex flex-column gap-5">
+    
+    <!-- 1. Policy Details -->
+    <p-panel styleClass="border-round-2xl shadow-1 border-none bg-white">
+      <ng-template pTemplate="header">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <div class="bg-primary-alpha-10" 
+               style="width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+            <i class="pi pi-file text-primary" style="font-size: 1.25rem;"></i>
+          </div>
+          <span class="font-bold text-color" style="font-size: 1.1rem;">Policy Information</span>
+        </div>
+      </ng-template>
+
+      <div class="panel-content">
+        <div class="form-row">
+          <app-text-field label="Policy Company Name" [field]="companyName" (onChange)="(null)" />
+        </div>
+        <div class="form-row cols-2">
+          <app-text-field label="Policy Number" [field]="policyNumber" (onChange)="(null)" />
+          <app-number-field label="Policy / Sum Assured Amount (₹)" [field]="policyAmount" [useGrouping]="true" (onChange)="(null)" />
+        </div>
+        <div class="form-row cols-2">
+          <app-date-field label="Insurance Date" [field]="insuranceDate" (onChange)="(null)" />
+          <app-date-field label="Due / Maturity Date" [field]="maturityDate" (onChange)="(null)" />
+        </div>
+      </div>
+    </p-panel>
+
+    <!-- 2. Premium Details -->
+    <p-panel styleClass="border-round-2xl shadow-1 border-none bg-white">
+      <ng-template pTemplate="header">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <div class="bg-indigo-alpha-10" 
+               style="width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+            <i class="pi pi-wallet text-indigo-500" style="font-size: 1.25rem;"></i>
+          </div>
+          <span class="font-bold text-color" style="font-size: 1.1rem;">Premium & Payment Details</span>
+        </div>
+      </ng-template>
+
+      <div class="panel-content">
+        <div class="form-row cols-2">
+          <app-number-field label="Installment Amount (₹)" [field]="installmentAmount" (onChange)="(null)" />
+          <app-select-field label="Premium Mode" [field]="premiumMode" [options]="premiumModes" optionValue="value" (onChange)="(null)" />
+        </div>
+        <div class="form-row cols-2 mt-2">
+          <app-number-field label="Yearly Premium Amount (₹)" [field]="premiumAmountYearly" [useGrouping]="true" (onChange)="(null)" />
+          <app-number-field label="Total Amount Paid Till Date (₹)" [field]="amountPaidTillDate" [useGrouping]="true" (onChange)="(null)" />
+        </div>
+      </div>
+    </p-panel>
+
+    <!-- 3. Loan & Assignment -->
+    <p-panel styleClass="border-round-2xl shadow-1 border-none bg-white">
+      <ng-template pTemplate="header">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <div class="bg-orange-alpha-10" 
+               style="width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+            <i class="pi pi-shield text-orange-500" style="font-size: 1.25rem;"></i>
+          </div>
+          <span class="font-bold text-color" style="font-size: 1.1rem;">Lien & Security Assignment</span>
+        </div>
+      </ng-template>
+
+      <div class="panel-content">
+        <div class="form-row">
+            <app-checkbox-field label="Any Loan Taken On This Policy?" [field]="hasLoan" (onChange)="(null)" />
+        </div>
+        
+        @if (hasLoan()) {
+            <div class="form-row mt-2">
+                <app-number-field label="Remaining Loan Amount (₹)" [field]="loanRemainingAmount" [useGrouping]="true" (onChange)="(null)" />
+            </div>
+        }
+
+        <div class="form-row mt-3">
+            <app-checkbox-field label="Will the said policy assign the requested loan?" [field]="willAssignPolicy" (onChange)="(null)" />
+        </div>
+
+        @if (!willAssignPolicy()) {
+            <div class="form-row mt-2">
+                <app-textarea-field label="Reason for Non-Assignment" [field]="nonAssignmentReason" (onChange)="(null)" />
+            </div>
+        }
+      </div>
+    </p-panel>
+
+  </div>
+
+  <app-form-actions
+    saveLabel="Save Policy Details"
+    [loading]="loading()"
+    (save)="save()"
+    (cancel)="cancel()">
+  </app-form-actions>
+</div>

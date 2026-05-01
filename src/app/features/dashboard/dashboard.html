@@ -1,0 +1,42 @@
+<div class="dashboard-header">
+  <div class="header-content">
+    <h1><i class="pi pi-chart-line"></i> Operational Dashboard</h1>
+    <div class="subtitle">Real-time metrics for your current role</div>
+  </div>
+</div>
+
+<div class="dashboard-content">
+  <!-- Metric Cards -->
+  <div class="cards-grid">
+    @for (card of cards; track card.title) {
+    <div class="metric-card">
+      <div class="card-top">
+        <div class="icon-box">
+          <i [class]="card.icon"></i>
+        </div>
+        <div class="trend" [class.up]="card.trendUp" [class.down]="!card.trendUp" *ngIf="card.trend">
+          {{ card.trend }}
+          <i [class]="card.trendUp ? 'pi pi-arrow-up' : 'pi pi-arrow-down'"></i>
+        </div>
+      </div>
+      <div class="card-bottom">
+        <div class="card-value">{{ card.value }}</div>
+        <div class="card-title">{{ card.title }}</div>
+      </div>
+    </div>
+    }
+  </div>
+
+  <!-- Charts Section -->
+  <div class="charts-grid" *ngIf="charts.length > 0">
+    @for (chart of charts; track chart.title) {
+    <div class="chart-container">
+      <div class="chart-header">{{ chart.title }}</div>
+      <div class="chart-body">
+        <p-chart [type]="chart.type" [data]="chart.data" [options]="chart.options || chartOptions">
+        </p-chart>
+      </div>
+    </div>
+    }
+  </div>
+</div>

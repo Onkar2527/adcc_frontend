@@ -1,0 +1,200 @@
+<div class="property-form-container surface-ground">
+  <div class="form-content py-4 px-4">
+    <!-- PANEL 1: Basic Info -->
+    <p-panel styleClass="border-round-2xl shadow-2 border-none mb-4">
+      <ng-template pTemplate="header">
+        <div class="flex align-items-center gap-2">
+          <div class="bg-primary-alpha-10 w-2rem h-2rem border-round flex align-items-center justify-content-center">
+            <i class="pi pi-info-circle text-primary"></i>
+          </div>
+          <span class="font-bold">Basic Information</span>
+        </div>
+      </ng-template>
+      <div class="form-grid">
+        <div class="form-row cols-2">
+          <app-text-field label="Owner Name" [field]="ownerName" [required]="true"></app-text-field>
+          <app-text-field label="Relationship With Borrower" [field]="relationshipWithBorrower"></app-text-field>
+        </div>
+        <div class="form-row cols-2">
+          <app-select-field label="Nature Of Property" [field]="natureOfProperty" [options]="natureOptions" optionValue="value" [required]="true"></app-select-field>
+          <app-select-field label="Type of Property" [field]="propertyType" [options]="propertyTypeOptions()" optionValue="value" [filter]="true"></app-select-field>
+        </div>
+
+        @if (natureOfProperty() === 'Immovable') {
+          <div class="form-row cols-4">
+            <app-number-field label="Total Area" [field]="totalArea" [required]="true"></app-number-field>
+            <app-select-field label="Area Unit" [field]="areaUnitTotal" [options]="areaUnitOptions" optionValue="value" [required]="true"></app-select-field>
+            <app-number-field label="Part" [field]="part"></app-number-field>
+            <app-select-field label="Area Unit (Part)" [field]="areaUnitPart" [options]="areaUnitOptions" optionValue="value"></app-select-field>
+          </div>
+          <div class="form-row cols-3">
+            <app-text-field label="Group / Survey Number" [field]="groupSurveyNumber"></app-text-field>
+            <app-text-field label="Sara" [field]="sara"></app-text-field>
+            <app-number-field label="Monthly Rent" [field]="monthlyRent"></app-number-field>
+          </div>
+          <div class="form-row">
+            <app-number-field label="Construction Area (sq. ft)" [field]="constructionArea"></app-number-field>
+          </div>
+        }
+        <div class="form-row">
+          <app-textarea-field label="Details" [field]="details" [rows]="2"></app-textarea-field>
+        </div>
+      </div>
+    </p-panel>
+
+    <!-- PANEL 2: Location -->
+    @if (natureOfProperty() === 'Immovable') {
+      <p-panel styleClass="border-round-2xl shadow-2 border-none mb-4">
+        <ng-template pTemplate="header">
+          <div class="flex align-items-center gap-2">
+            <div class="bg-orange-alpha-10 w-2rem h-2rem border-round flex align-items-center justify-content-center">
+              <i class="pi pi-map-marker text-orange-500"></i>
+            </div>
+            <span class="font-bold">Location Details</span>
+          </div>
+        </ng-template>
+        <div class="form-grid">
+          <div class="form-row">
+            <app-text-field label="Village" [field]="village" [required]="true"></app-text-field>
+          </div>
+          <div class="form-row cols-2">
+            <app-text-field label="Landmark" [field]="landmark"></app-text-field>
+            <app-number-field label="Pincode" [field]="pincode" [maxlength]="6"></app-number-field>
+          </div>
+          <div class="form-row">
+             <app-textarea-field label="Income Description" [field]="incomeDescription" [rows]="2"></app-textarea-field>
+          </div>
+        </div>
+      </p-panel>
+
+      <!-- PANEL 3: Directions -->
+      <p-panel styleClass="border-round-2xl shadow-2 border-none mb-4">
+        <ng-template pTemplate="header">
+          <div class="flex align-items-center gap-2">
+            <div class="bg-pink-alpha-10 w-2rem h-2rem border-round flex align-items-center justify-content-center">
+              <i class="pi pi-compass text-pink-500"></i>
+            </div>
+            <span class="font-bold">Direction</span>
+          </div>
+        </ng-template>
+        <div class="form-grid">
+          <div class="form-row cols-2">
+            <app-text-field label="East" [field]="directionEast"></app-text-field>
+            <app-text-field label="West" [field]="directionWest"></app-text-field>
+          </div>
+          <div class="form-row cols-2">
+            <app-text-field label="South" [field]="directionSouth"></app-text-field>
+            <app-text-field label="North" [field]="directionNorth"></app-text-field>
+          </div>
+        </div>
+      </p-panel>
+    }
+
+    <!-- PANEL 4: Security -->
+    <p-panel styleClass="border-round-2xl shadow-2 border-none mb-4">
+      <ng-template pTemplate="header">
+        <div class="flex align-items-center gap-2">
+          <div class="bg-green-alpha-10 w-2rem h-2rem border-round flex align-items-center justify-content-center">
+            <i class="pi pi-lock text-green-500"></i>
+          </div>
+          <span class="font-bold">Mortgage & Security</span>
+        </div>
+      </ng-template>
+      <div class="form-grid">
+        <div class="form-row cols-2">
+          <app-select-field label="Security Category" [field]="isMortgagedForThisLoan" [options]="mortgageTypeOptions" optionValue="value"></app-select-field>
+          @if (natureOfProperty() === 'Immovable') {
+            <div class="flex align-items-center h-full pt-4">
+              <app-checkbox-field label="All taxes paid?" [field]="isTaxPaid"></app-checkbox-field>
+            </div>
+          }
+        </div>
+        <div class="form-row">
+          <app-checkbox-field label="Mortgaged for other loans?" [field]="isMortgagedOther"></app-checkbox-field>
+        </div>
+        @if (isMortgagedOther()) {
+          <div class="form-row cols-3 bg-surface-50 p-3 border-round">
+            <app-text-field label="Bank Name" [field]="otherBankName"></app-text-field>
+            <app-number-field label="Total Amount" [field]="otherTotalAmount"></app-number-field>
+            <app-number-field label="Due Amount" [field]="otherLoanDueAmount"></app-number-field>
+          </div>
+        }
+      </div>
+    </p-panel>
+
+    <!-- PANEL 5: Valuation -->
+    <p-panel styleClass="border-round-2xl shadow-2 border-none mb-4">
+      <ng-template pTemplate="header">
+        <div class="flex align-items-center justify-content-between w-full">
+          <div class="flex align-items-center gap-2">
+            <div class="bg-purple-alpha-10 w-2rem h-2rem border-round flex align-items-center justify-content-center">
+              <i class="pi pi-chart-line text-purple-500"></i>
+            </div>
+            <span class="font-bold">Valuation Details</span>
+          </div>
+          <app-checkbox-field label="Completed" [field]="valuationDone"></app-checkbox-field>
+        </div>
+      </ng-template>
+      @if (valuationDone()) {
+        <div class="form-grid">
+          <div class="form-row cols-2">
+            <app-text-field label="Valuator Name" [field]="valuatorName"></app-text-field>
+            <app-date-field label="Valuation Date" [field]="valuationDate"></app-date-field>
+          </div>
+          <div class="form-row cols-3">
+            <app-number-field label="Market Value" [field]="marketValue"></app-number-field>
+            <app-number-field label="Realizable Value" [field]="realizableValue"></app-number-field>
+            <app-number-field label="Distress Value" [field]="distressValue"></app-number-field>
+          </div>
+        </div>
+      }
+    </p-panel>
+
+    <!-- PANEL 6: Visit Report -->
+    <p-panel styleClass="border-round-2xl shadow-2 border-none mb-4">
+      <ng-template pTemplate="header">
+        <div class="flex align-items-center justify-content-between w-full">
+          <div class="flex align-items-center gap-2">
+            <div class="bg-cyan-alpha-10 w-2rem h-2rem border-round flex align-items-center justify-content-center">
+              <i class="pi pi-eye text-cyan-500"></i>
+            </div>
+            <span class="font-bold">Visit Report</span>
+          </div>
+          <app-checkbox-field label="Conducted" [field]="visitReportDone"></app-checkbox-field>
+        </div>
+      </ng-template>
+      @if (visitReportDone()) {
+        <div class="form-grid">
+          <div class="form-row cols-2">
+            <app-text-field label="Visitor Name" [field]="visitorName"></app-text-field>
+            <app-date-field label="Visit Date" [field]="visitDate"></app-date-field>
+          </div>
+          <app-textarea-field label="Visit Details" [field]="visitDetails" [rows]="2"></app-textarea-field>
+        </div>
+      }
+    </p-panel>
+
+    <!-- PANEL 7: Remark -->
+    <p-panel styleClass="border-round-2xl shadow-2 border-none mb-4">
+      <ng-template pTemplate="header">
+        <div class="flex align-items-center gap-2">
+          <div class="bg-bluegray-alpha-10 w-2rem h-2rem border-round flex align-items-center justify-content-center">
+            <i class="pi pi-comment text-bluegray-500"></i>
+          </div>
+          <span class="font-bold">Internal Remarks</span>
+        </div>
+      </ng-template>
+      <app-textarea-field label="Remark" [field]="remark" [rows]="2" [hideLabel]="true"></app-textarea-field>
+    </p-panel>
+
+    <div style="height: 100px;"></div>
+  </div>
+
+  <app-form-actions 
+    [sticky]="true" 
+    [loading]="saving()" 
+    saveLabel="Save Property"
+    (save)="onSave()" 
+    (cancel)="onCancel()">
+  </app-form-actions>
+</div>

@@ -1,0 +1,165 @@
+<div class="edit-proposal-container">
+  
+  <!-- Main Scrollable Content Area -->
+  <div class="drawer-content">
+    <app-tabs [tabs]="tabs()" [activeKey]="activeTab()" (activeKeyChange)="activeTab.set($event)" [scrollable]="true">
+      
+      <!-- ── Personal Info Tab (Sub-component) ── -->
+      <ng-template tabContent="personal">
+        <app-personal-info 
+          [data]="personalInfoData()" 
+          [loading]="saving() && activeTab() === 'personal'"
+          (changed)="onPersonalInfoChange($event)"
+          (save)="onPersonalInfoSave($event)">
+        </app-personal-info>
+      </ng-template>
+
+      <!-- ── Loan Info Tab ── -->
+      <ng-template tabContent="loan">
+        <app-loan-info
+          [data]="loanInfoData()"
+          [loading]="saving() && activeTab() === 'loan'"
+          (changed)="onLoanInfoChange($event)"
+          (save)="onLoanInfoSave($event)">
+        </app-loan-info>
+      </ng-template>
+
+      <!-- ── Income Info Tab ── -->
+      <ng-template tabContent="income">
+        <app-income-info 
+          [proposalId]="proposalId() || ''" 
+          [data]="incomeInfoData()"
+          (refresh)="onIncomeRefresh()">
+        </app-income-info>
+      </ng-template>
+
+      <!-- ── Financial Info Tab ── -->
+      <ng-template tabContent="financial">
+        <app-financial-info
+          [proposalId]="proposalId() || ''"
+          [data]="financialInfoData()"
+          (refresh)="onFinancialRefresh()"
+          (changed)="onFinancialInfoChange($event)">
+        </app-financial-info>
+      </ng-template>
+
+      <!-- ── Credit Info Tab ── -->
+      <ng-template tabContent="credit">
+        <app-credit-info
+          [proposalId]="proposalId() || ''"
+          [data]="creditInfoData()"
+          (changed)="onCreditInfoChange($event)">
+        </app-credit-info>
+      </ng-template>
+
+      <!-- ── Property Info Tab ── -->
+      <ng-template tabContent="property">
+        <app-property-info
+          [proposalId]="proposalId() || ''"
+          [data]="propertyData()"
+          (refresh)="onPropertyRefresh()"
+          (changed)="markTabPending('property')">
+        </app-property-info>
+      </ng-template>
+
+      <ng-template tabContent="vehicle">
+        <div class="p-8 flex flex-column align-items-center justify-content-center text-gray-500 h-full">
+          <i class="pi pi-car text-6xl mb-4"></i>
+          <div class="text-xl font-semibold">Vehicle Loan Details</div>
+          <p class="mt-2">VIN, Make, and Model information.</p>
+        </div>
+      </ng-template>
+
+      <!-- ── Guarantor Tab ── -->
+      <ng-template tabContent="guarantor">
+        <app-associate-list 
+          [proposalId]="proposalId() || ''"
+          [entityType]="'G'"
+          (onRefresh)="refreshParticipantCounts()">
+        </app-associate-list>
+      </ng-template>
+
+      <!-- ── Co-borrower Tab ── -->
+      <ng-template tabContent="coborrower">
+        <app-associate-list 
+          [proposalId]="proposalId() || ''"
+          [entityType]="'C'"
+          (onRefresh)="refreshParticipantCounts()">
+        </app-associate-list>
+      </ng-template>
+
+      <ng-template tabContent="bank_scheme">
+        <app-bank-scheme
+          [data]="bankSchemeData()"
+          [loading]="saving() && activeTab() === 'bank_scheme'"
+          (changed)="onBankSchemeChange($event)"
+          (save)="onBankSchemeSave($event)">
+        </app-bank-scheme>
+      </ng-template>
+
+      <ng-template tabContent="loan_specific">
+        <app-loan-specific
+          [proposalId]="proposalId() || ''"
+          [globalData]="higherPurchaseData()"
+          [items]="machineryInfoData()"
+          (globalChanged)="onHigherPurchaseChange($event)"
+          (refresh)="onMachineryRefresh()">
+        </app-loan-specific>
+      </ng-template>
+
+      <!-- ── Finalize Tab ── -->
+      <ng-template tabContent="finalize">
+        <app-proposal-finalize
+          [tabs]="tabs()"
+          [remarks]="finalizeRemarks()"
+          (remarksChange)="finalizeRemarks.set($event)">
+        </app-proposal-finalize>
+      </ng-template>
+
+    </app-tabs>
+  <!-- ── Tab Mapping Manager Dialog ── -->
+  <p-drawer 
+    header="Manage Proposal Sections" 
+    [(visible)]="showTabManager" 
+    position="right"
+    [style]="{ width: '600px' }"
+    styleClass="tab-manager-dialog"
+  >
+    <app-tab-mapping 
+      *ngIf="showTabManager()" 
+      [proposalId]="proposalId() || ''"
+      (onSaved)="onTabMappingSaved()"
+      (onCancel)="showTabManager.set(false)"
+    ></app-tab-mapping>
+  </p-drawer>
+</div>
+  <!-- ── Fixed Drawer Footer ── -->
+  <footer class="drawer-footer">
+    <p-button 
+      label="Cancel" 
+      icon="pi pi-times" 
+      class="p-button-outlined p-button-secondary" 
+      [disabled]="saving()"
+      (click)="onCancel()">
+    </p-button>
+
+    <p-button 
+      *ngIf="activeTab() !== 'finalize'"
+      [label]="saveButtonLabel()" 
+      icon="pi pi-save" 
+      [loading]="saving()" 
+      [disabled]="tabStatuses()[activeTab()] === 'saved'" 
+      (click)="saveTab(activeTab())">
+    </p-button>
+
+    <p-button 
+      *ngIf="activeTab() === 'finalize'"
+      label="Submit Loan Proposal" 
+      icon="pi pi-send" 
+      [loading]="saving()" 
+      [disabled]="!isAllTabsCompleted()" 
+      (click)="submitProposal()">
+    </p-button>
+  </footer>
+
+</div>

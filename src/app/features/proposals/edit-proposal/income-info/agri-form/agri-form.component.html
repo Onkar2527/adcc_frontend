@@ -1,0 +1,297 @@
+<div class="agri-form-container p-4">
+
+  <!-- 1. Land Holding & Location -->
+  <div class="section-row">
+    <div class="section-col" style="min-width: 100%;">
+      <p-panel styleClass="border-round-xl border-none h-full">
+        <ng-template pTemplate="header">
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <div class="bg-indigo-alpha-10" style="width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+              <i class="pi pi-map text-indigo-600" style="font-size: 1.25rem;"></i>
+            </div>
+            <span class="font-bold text-color" style="font-size: 1.1rem;">Land Holding & Location</span>
+          </div>
+        </ng-template>
+
+        <div class="panel-content">
+          <div class="form-row">
+            <app-text-field label="Land Owner Name" [field]="landOwnerName" />
+          </div>
+          <div class="form-row cols-2">
+            <app-text-field label="Group / Survey Number" [field]="groupNo" />
+            <app-text-field label="Current Crops" [field]="currentCrops" />
+          </div>
+          <div class="form-row">
+            <app-textarea-field label="Full Address" [field]="address" [rows]="2" />
+          </div>
+          <div class="form-row mt-3 pt-3 border-top-1 surface-border">
+            <app-number-field label="Annual income from this farm" [field]="annualIncome" mode="currency" currency="INR" />
+          </div>
+        </div>
+      </p-panel>
+    </div>
+  </div>
+
+  <!-- 2. Land Area Distribution -->
+  <div class="section-row" style="margin-top: 1.5rem;">
+    <div class="section-col" style="min-width: 100%;">
+      <p-panel styleClass="border-round-xl border-none h-full">
+        <ng-template pTemplate="header">
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <div class="bg-blue-alpha-10" style="width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+              <i class="pi pi-th-large text-blue-500" style="font-size: 1.25rem;"></i>
+            </div>
+            <span class="font-bold text-color" style="font-size: 1.1rem;">Area Distribution <span class="text-xs text-500 font-normal ml-2">(Hector / Aar)</span></span>
+          </div>
+        </ng-template>
+
+        <div class="panel-content p-4">
+          <style>
+            .agri-area-table {
+              width: 100%;
+              border-collapse: collapse;
+              font-size: 0.875rem;
+              border: 1px solid #a8a29e; /* prominent border */
+            }
+            .agri-area-table td {
+              border: 1px solid #a8a29e;
+              padding: 0.75rem;
+              vertical-align: middle;
+              color: #4b5563;
+              font-weight: 700;
+              text-transform: uppercase;
+            }
+            .agri-area-table .input-cell {
+              padding: 0.35rem; /* tight padding for inputs */
+              text-align: center;
+            }
+            .agri-area-table ::ng-deep .p-inputnumber {
+              width: 100%;
+            }
+            .agri-area-table ::ng-deep .p-inputtext {
+              width: 100%;
+              border: 1px solid #cbd5e1;
+              border-radius: 4px;
+              padding: 0.5rem;
+              text-align: center;
+              box-shadow: none !important;
+            }
+            .agri-area-table ::ng-deep .p-inputtext:disabled {
+              background-color: #f8fafc;
+              color: #94a3b8;
+            }
+          </style>
+
+          <table class="agri-area-table">
+            <tbody>
+              <!-- Row 1 -->
+              <tr>
+                <td rowspan="2" style="width: 30%;">TOTAL AGRICULTURAL AREA OF THE APPLICANT</td>
+                <td style="width: 20%;">HORTICULTURE</td>
+                <td class="input-cell" style="width: 15%;">
+                  <app-number-field [field]="hortiH" [hideLabel]="true"/>
+                </td>
+                <td style="width: 10%; text-align: center;">HECTOR</td>
+                <td class="input-cell" style="width: 15%;">
+                  <app-number-field [field]="hortiA" [hideLabel]="true"/>
+                </td>
+                <td style="width: 10%; text-align: center;">AAR</td>
+              </tr>
+              <!-- Row 2 -->
+              <tr>
+                <td>ARABLE</td>
+                <td class="input-cell">
+                  <app-number-field [field]="arableH" [hideLabel]="true"/>
+                </td>
+                <td style="text-align: center;">HECTOR</td>
+                <td class="input-cell">
+                  <app-number-field [field]="arableA" [hideLabel]="true"/>
+                </td>
+                <td style="text-align: center;">AAR</td>
+              </tr>
+              <!-- Row 3 -->
+              <tr>
+                <td colspan="2">TOTAL AGRICULTURAL AREA</td>
+                <td class="input-cell">
+                  <p-inputNumber [ngModel]="totalH()" [disabled]="true" styleClass="w-full"></p-inputNumber>
+                </td>
+                <td style="text-align: center;">HECTOR</td>
+                <td class="input-cell">
+                  <p-inputNumber [ngModel]="totalA()" [disabled]="true" styleClass="w-full"></p-inputNumber>
+                </td>
+                <td style="text-align: center;">AAR</td>
+              </tr>
+              <!-- Row 4 -->
+              <tr>
+                <td colspan="2">OUT OF SUGARCANE CROP AREA</td>
+                <td class="input-cell">
+                  <app-number-field [field]="sugarcaneH" [hideLabel]="true"/>
+                </td>
+                <td style="text-align: center;">HECTOR</td>
+                <td class="input-cell">
+                  <app-number-field [field]="sugarcaneA" [hideLabel]="true"/>
+                </td>
+                <td style="text-align: center;">AAR</td>
+              </tr>
+              <!-- Row 5 -->
+              <tr>
+                <td colspan="2">OUT OF OTHER CROP AREA</td>
+                <td class="input-cell">
+                  <p-inputNumber [ngModel]="otherH()" [disabled]="true" styleClass="w-full"></p-inputNumber>
+                </td>
+                <td style="text-align: center;">HECTOR</td>
+                <td class="input-cell">
+                  <p-inputNumber [ngModel]="otherA()" [disabled]="true" styleClass="w-full"></p-inputNumber>
+                </td>
+                <td style="text-align: center;">AAR</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </p-panel>
+    </div>
+  </div>
+
+  <!-- 3. Sugarcane Bills -->
+  <div class="section-row" style="margin-top: 1.5rem;">
+    <div class="section-col" style="min-width: 100%;">
+      <p-panel styleClass="border-round-xl border-none h-full">
+        <ng-template pTemplate="header">
+          <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
+            <div style="display: flex; align-items: center; gap: 12px;">
+              <div class="bg-orange-alpha-10" style="width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+                <i class="pi pi-file-edit text-orange-600" style="font-size: 1.25rem;"></i>
+              </div>
+              <span class="font-bold text-color" style="font-size: 1.1rem;">Sugarcane Billing Records</span>
+            </div>
+            <p-button icon="pi pi-plus" label="Add" styleClass="p-button-text p-button-sm" (click)="addBill()"></p-button>
+          </div>
+        </ng-template>
+
+        <div class="overflow-x-auto">
+          <p-table [value]="sugarcaneBills()" styleClass="p-datatable-sm w-full" [tableStyle]="{'min-width': '700px'}">
+            <ng-template pTemplate="header">
+              <tr>
+                <th class="bg-transparent border-bottom-1 text-600 font-semibold p-2" style="width: 25%">Sugar Factory</th>
+                <th class="bg-transparent border-bottom-1 text-600 font-semibold p-2" style="width: 15%">Season</th>
+                <th class="bg-transparent border-bottom-1 text-600 font-semibold p-2" style="width: 15%">Area</th>
+                <th class="bg-transparent border-bottom-1 text-600 font-semibold p-2" style="width: 15%">Tonnage</th>
+                <th class="bg-transparent border-bottom-1 text-600 font-semibold p-2" style="width: 20%">Bill Amount</th>
+                <th class="bg-transparent border-bottom-1 p-2" style="width: 10%"></th>
+              </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-bill let-i="rowIndex">
+              <tr>
+                <td class="p-2 pt-3"><app-text-field [field]="getRowSignal(bill, 'factory_name')" [hideLabel]="true" placeholder="Factory name"></app-text-field></td>
+                <td class="p-2 pt-3"><app-text-field [field]="getRowSignal(bill, 'dry_season')" [hideLabel]="true" placeholder="2024-25"></app-text-field></td>
+                <td class="p-2 pt-3"><app-number-field [field]="getRowSignal(bill, 'sugarcane_area')" [hideLabel]="true" placeholder="1.50"></app-number-field></td>
+                <td class="p-2 pt-3"><app-number-field [field]="getRowSignal(bill, 'tonnage')" [hideLabel]="true" placeholder="0"></app-number-field></td>
+                <td class="p-2 pt-3"><app-number-field [field]="getRowSignal(bill, 'bill_amount')" [hideLabel]="true" placeholder="0"></app-number-field></td>
+                <td class="p-2 pt-3 text-center">
+                  <p-button icon="pi pi-trash" styleClass="p-button-danger p-button-text p-button-rounded" (click)="removeBill(i)"></p-button>
+                </td>
+              </tr>
+            </ng-template>
+            <ng-template pTemplate="emptymessage">
+              <tr><td colspan="6" class="text-center p-4 text-500 italic">No billing records added.</td></tr>
+            </ng-template>
+            <ng-template pTemplate="footer">
+              @if (sugarcaneBills().length > 0) {
+              <tr>
+                <td colspan="2" class="text-right p-3 font-semibold text-color-secondary">Average amounts:</td>
+                <td class="p-3 font-bold text-primary">{{ averageSugarcaneArea() | number:'1.2-2' }}</td>
+                <td class="p-3 font-bold text-primary">{{ averageSugarcaneTonnage() | number:'1.2-2' }}</td>
+                <td class="p-3 font-bold text-primary">{{ averageSugarcaneBill() | currency:'INR':'symbol':'1.2-2' }}</td>
+                <td></td>
+              </tr>
+              }
+            </ng-template>
+          </p-table>
+        </div>
+      </p-panel>
+    </div>
+  </div>
+
+  <!-- 4. Upcoming Season -->
+  <div class="section-row" style="margin-top: 1.5rem;">
+    <div class="section-col" style="min-width: 100%;">
+      <p-panel styleClass="border-round-xl border-none h-full">
+        <ng-template pTemplate="header">
+          <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
+            <div style="display: flex; align-items: center; gap: 12px;">
+              <div class="bg-teal-alpha-10" style="width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+                <i class="pi pi-calendar-plus text-teal-600" style="font-size: 1.25rem;"></i>
+              </div>
+              <span class="font-bold text-color" style="font-size: 1.1rem;">Upcoming Season Planning</span>
+            </div>
+            <p-button icon="pi pi-plus" label="Add" styleClass="p-button-text p-button-sm" (click)="addNextSeason()"></p-button>
+          </div>
+        </ng-template>
+
+        <div class="overflow-x-auto">
+          <p-table [value]="nextSeason()" styleClass="p-datatable-sm w-full" [tableStyle]="{'min-width': '600px'}">
+            <ng-template pTemplate="header">
+              <tr>
+                <th class="bg-transparent border-bottom-1 text-600 font-semibold p-2" style="width: 40%">Expected Factory</th>
+                <th class="bg-transparent border-bottom-1 text-600 font-semibold p-2" style="width: 25%">Future Season</th>
+                <th class="bg-transparent border-bottom-1 text-600 font-semibold p-2" style="width: 25%">Planned Area</th>
+                <th class="bg-transparent border-bottom-1 p-2" style="width: 10%"></th>
+              </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-item let-i="rowIndex">
+              <tr>
+                <td class="p-2 pt-3"><app-text-field [field]="getRowSignal(item, 'factory_name')" [hideLabel]="true" placeholder="Factory"></app-text-field></td>
+                <td class="p-2 pt-3"><app-text-field [field]="getRowSignal(item, 'dry_season')" [hideLabel]="true" placeholder="2025-26"></app-text-field></td>
+                <td class="p-2 pt-3"><app-text-field [field]="getRowSignal(item, 'sugarcane_area')" [hideLabel]="true" placeholder="1.00 H"></app-text-field></td>
+                <td class="p-2 pt-3 text-center">
+                  <p-button icon="pi pi-trash" styleClass="p-button-danger p-button-text p-button-rounded" (click)="removeNextSeason(i)"></p-button>
+                </td>
+              </tr>
+            </ng-template>
+            <ng-template pTemplate="emptymessage">
+              <tr><td colspan="4" class="text-center p-4 text-500 italic">No planning records added.</td></tr>
+            </ng-template>
+          </p-table>
+        </div>
+      </p-panel>
+    </div>
+  </div>
+
+  <!-- 5. Agriculture Income -->
+  <div class="section-row" style="margin-top: 1.5rem;">
+    <div class="section-col" style="min-width: 100%;">
+      <p-panel styleClass="border-round-xl border-none h-full surface-card border-left-3 border-primary">
+        <ng-template pTemplate="header">
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <div class="bg-green-alpha-10" style="width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+              <i class="pi pi-wallet text-green-500" style="font-size: 1.25rem;"></i>
+            </div>
+            <span class="font-bold text-color" style="font-size: 1.1rem;">Agriculture Income</span>
+          </div>
+        </ng-template>
+
+        <div class="panel-content p-4">
+          <div class="form-row">
+            <p-floatlabel variant="on" styleClass="w-full">
+              <p-inputNumber [ngModel]="incomeSugarcane()" [disabled]="true" mode="currency" currency="INR" styleClass="w-full" class="w-full"></p-inputNumber>
+              <label>Income from Sugarcane (₹)</label>
+            </p-floatlabel>
+          </div>
+          <div class="form-row mt-4 pt-2">
+            <p-floatlabel variant="on" styleClass="w-full">
+              <p-inputNumber [ngModel]="incomeOther()" [disabled]="true" mode="currency" currency="INR" styleClass="w-full" class="w-full"></p-inputNumber>
+              <label>Income from Other Crops (₹)</label>
+            </p-floatlabel>
+          </div>
+          <div class="form-row mt-4 pt-2">
+            <div class="p-4 border-round-xl bg-primary-reverse-alpha-5 surface-100 flex justify-content-between align-items-center w-full">
+              <span class="font-semibold text-color-secondary">Combined Annual Income:</span>
+              <span class="text-2xl font-bold text-primary">{{ totalAgriIncome() | currency:'INR' }}</span>
+            </div>
+          </div>
+        </div>
+      </p-panel>
+    </div>
+  </div>
+
+</div>

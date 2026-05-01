@@ -1,0 +1,872 @@
+<div class="p-4 no-print" style="position: sticky; top: 0; z-index: 100; background: rgba(255,255,255,0.8); backdrop-filter: blur(4px); display: flex; justify-content: flex-end; gap: 10px; border-bottom: 1px solid #eee;">
+  <p-button label="Print / Download PDF" icon="pi pi-print" (click)="print()"></p-button>
+</div>
+
+<div class="loanapp" id="loan-application-print-area">
+    <div class="form-container">
+
+        <!-- HEADER -->
+        <div class="header">
+            <h2>दि संगमनेर मर्चंट्स को-ऑप. बँक लि. संगमनेर</h2>
+            <p>इंदिरा गांधी मार्ग, संगमनेर - ४२२ ६०५, जि. अहमदनगर</p>
+
+            <div class="branch">शाखा :&nbsp;&nbsp; <span class="branch1"></span></div>
+
+            <p class="loan-types">
+                कॅशक्रेडिट / हायपोथिकेशन / वाहन कर्ज / मुदत कर्ज / मशिनरी कर्ज / बांधकाम कर्ज इ. साठी
+            </p>
+
+            <h3 class="title">कर्ज मागणी अर्ज</h3>
+        </div>
+
+        <!-- PHOTO BOX -->
+        <div class="photo-box">फोटो</div>
+
+        <!-- TO SECTION -->
+        <div class="section">
+            <p>मा. चेअरमन साहेब</p>
+            <p>दि संगमनेर मर्चंट्स को-ऑप. बँक लि.,</p>
+            <p>संगमनेर.</p>
+
+            <div class="date">दिनांक :</div>
+        </div>
+
+        <!-- FORM LINES -->
+        <div class="form-lines">
+
+            <p>मी / आम्ही &nbsp;<b>{{loandata?.applicant_name}}</b>आपल्या बँकेचा
+                / बँके सभासद / नाममात्र सभासद असून मला / आम्हाला
+                &nbsp;<b>{{loandata?.reason_of_loan}}</b> &nbsp;या कारणासाठी
+
+                कर्जाची आवश्यकता आहे. या करिता मला / आम्हाला श्री./ सौ./ मेसर्स &nbsp;
+                <b>{{loandata?.firm_name}}</b> &nbsp;
+
+                या नावाने आपल्या बँकेतून रु. &nbsp; <b>{{loandata?.requented_amount}}</b> &nbsp;/- (अक्षरी रुपये
+                &nbsp;<b>{{loandata?.requested_amount_words}}</b> &nbsp; रुपये)
+            </p>
+
+            <p>कर्ज मंजूर करावे, ही विनंती.</p>
+
+            <p>प्रोप्रायटर / भागीदार / कंपनी : श्री./ सौ./ मेसर्स
+                &nbsp; <b>{{loandata?.firm_name}}</b>
+            </p>
+
+        </div>
+
+        <!-- TABLE -->
+        <div class="table">
+            <div class="table-header">
+                <div>क्र.</div>
+                <div>भागीदार / संचालक संपूर्ण नाव</div>
+                <div style="margin-left:70px;">पत्ता</div>
+                <div style="margin-left: 30px;">वय</div>
+                <div style="margin-left: 30px;">सभासद क्रमांक</div>
+            </div>
+
+            <!-- DYNAMIC ROWS -->
+            <div class="row" *ngFor="let c of loandata?.co_borrower_info; let i = index">
+                <div><b>{{ i + 1 }}</b></div>
+                <div><b>{{ c.name }}</b></div>
+                <div><b>{{ c.address }}</b></div>
+                <div><b>{{ c.age }}</b></div>
+                <div><b>{{ c.member_no }}</b></div>
+            </div>
+
+            <!-- EMPTY ROW (if no data) -->
+            <div class="row" *ngIf="!loandata?.co_borrower_info?.length">
+                <div colspan="5" style="text-align:center; width:100%;">
+                    माहिती उपलब्ध नाही
+                </div>
+            </div>
+        </div>
+
+        <!-- DECLARATION -->
+        <div class="declaration">
+            <p class="long-text">
+                खाली नमूद केलेल्या व्यक्ती या कर्जासाठी जामीन राहण्यास तयार आहेत. जामीन दिलेल्या व्यक्ती आपल्या बँकेच्या
+                सभासद / नाममात्र सभासद असून त्यांनी आपल्या बँकेशी कर्ज व्यवहार करीत असता प्रतिज्ञापत्र लिहून दिलेले आहे.
+            </p>
+
+
+            <p class="long-text">
+                आम्ही या अर्जाद्वारे सादर करीत आहोत की, या अर्जात दिलेली माहिती दि संगमनेर मर्चंट्स को-ऑप. बँक लि., शाखा
+                ______________________________ यांचेकडून कर्ज मिळविण्याचे उद्देशाने देण्यात आली आहे व ती माझ्या / आमच्या
+                माहितीनुसार खरी व अचूक आहे आणि कोणतीही महत्त्वाची माहिती लपविलेली नाही. अगर नमूद करण्यात चूक झाली
+                असल्यास
+                बँकेला वेळोवेळी लागणारी ती माहिती मी / आम्ही देऊ, तसेच बँकेला अथवा बँकेच्या प्रतिनिधीस माझ्या / आमच्या
+                व्यवसायाची मालमत्ता व हिशोब पुस्तके तपासण्याचा / पाहण्याचा अधिकार राहील. मी / आम्ही व्यवसायाशी संबंधित
+                असलेले बँकेचे सर्व व्यवहार आपल्या बँकेमार्फत करू व व्यवसायातील येणारी आवक आपल्या बँकेतील खात्यात जमा
+                करू.
+            </p>
+
+            <p class="long-text">
+                मी / आम्ही वरील मागणी केलेल्या कर्जासंबंधी बँकेचे नियम वाचून व समजून घेतले असून बँकेच्या माननीय संचालक
+                मंडळाने त्यात वेळोवेळी केलेले बदल व भारतीय रिझर्व्ह बँकेने जारी केलेले आदेश माझ्यावर / आमच्यावर बंधनकारक
+                राहतील.
+            </p>
+
+            <!-- SIGN -->
+            <div class="signature">
+                <p>आपला विश्वासू</p>
+                <div class="sign-line"></div>
+                <p style="margin-top: 20px;">अर्जदाराची स्वाक्षरी</p>
+                <p style="margin-top: -12px; margin-right: 65px;">(शिक्यानिशी)</p>
+            </div>
+
+        </div>
+
+        <div class="page">
+
+            <h3 class="center">कर्जदाराची सविस्तर माहिती</h3>
+
+            <!-- 1 -->
+            <div class="line-row1">
+                <div class="line-row">
+                    <span>१) संपूर्ण नाव :</span>
+                    <span><b>{{loandata?.applicant_name}}</b></span>
+                </div>
+            </div>
+            <div class="line-row1">
+
+                <div class="line-row">
+                    <span>वय :</span>
+                    <span> <b>{{loandata?.age}}</b></span>
+                    <span style="margin-left: 500px;">जात / पोटजात :</span>
+                    <span><b>{{loandata?.religion}} / {{loandata?.cast_name}}</b></span>
+                </div>
+            </div>
+
+            <div class="line-row1">
+                <div class="line-row">
+                    <span>२) व्यवसायाचा पत्ता :</span>
+
+                    <!-- If it's a string -->
+                    <div *ngIf="loandata?.bussiness_address && !isArray(loandata?.bussiness_address)">
+                        <b>{{ loandata?.bussiness_address }}</b>
+                    </div>
+
+                    <!-- If it's an array -->
+                    <div *ngIf="isArray(loandata?.bussiness_address)">
+                        <div *ngFor="let addr of loandata?.bussiness_address; let i = index">
+                            <b>{{ i + 1 }}) {{ addr }}</b>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+            <div class="line-row1">
+                <div class="line-row">
+                    <span>फोन :</span>
+
+
+                    <span style="margin-left: 200px;">मोबाईल नं. :</span>
+                    <b>{{ loandata?.applicant_mobile_no }}</b>
+
+                    <span style="margin-left: 180px;">ई-मेल :</span>
+                    <b>{{ loandata?.applicant_email_id }}</b>
+                </div>
+            </div>
+
+            <!-- 3 -->
+            <div class="line-row1">
+
+                <div class="line-row">
+                    <span>३) निवासी पत्ता :</span>
+                    <b>{{loandata?.applicant_address}}</b>
+                </div>
+            </div>
+
+            <div class="line-row1">
+                <div class="line-row">
+                    <span>फोन :</span>
+
+                    <span style="margin-left: 200px;">मोबाईल नं. :</span>
+                    <b>{{ loandata?.applicant_mobile_no }}</b>
+
+                    <span style="margin-left: 180px;">ई-मेल :</span>
+                    <b>{{ loandata?.applicant_email_id }}</b>
+                </div>
+            </div>
+
+            <!-- 4 -->
+            <div class="line-row1">
+
+                <div class="line-row">
+                    <span>४) व्यवसायाचे स्वरूप :</span>
+                    <span><b>{{loandata?.nature_of_business}}</b></span>
+                </div>
+            </div>
+
+            <!-- 5 TABLE -->
+            <p class="mt">५) भागीदारी फर्म / प्रा. लि. कंपनी / पब्लिक ट्रस्ट / वैयक्तिक :</p>
+
+            <table class="form-table">
+                <tr>
+                    <th>अ.नं.</th>
+                    <th>संपूर्ण नाव</th>
+                    <th>वय</th>
+                    <th>पत्ता</th>
+                    <th>सभासद क्रमांक</th>
+                    <th>शेअर्स रक्कम</th>
+                    <th>बचत / चालू खाते नं.</th>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+            </table>
+
+            <!-- 6 TABLE -->
+            <p class="mt">६) मागील तीन वर्षाचा आर्थिक आढावा</p>
+
+            <table class="form-table">
+                <tr>
+                    <th>अ.नं.</th>
+                    <th>वर्ष</th>
+                    <th>विक्री</th>
+                    <th>खरेदी</th>
+                    <th>निव्वळ नफा</th>
+                    <th>भांडवल</th>
+                    <th>घसारा</th>
+                </tr>
+
+                <!-- LOOP DATA -->
+                <tr *ngFor="let item of loandata?.finaciational_info; let i = index">
+                    <td>{{ i + 1 }}</td>
+                    <td>{{ item.year_label }}</td>
+                    <td>{{ item.sales }}</td>
+                    <td>{{ item.purchases }}</td>
+                    <td>{{ item.net_profit }}</td>
+                    <td>{{ item.investments }}</td>
+                    <td>{{ item.depreciation }}</td>
+                </tr>
+
+                <!-- EMPTY DATA -->
+                <tr *ngIf="!loandata?.finaciational_info?.length">
+                    <td colspan="7" style="text-align:center;">No Data Available</td>
+                </tr>
+            </table>
+
+            <!-- 7 TABLE -->
+            <p class="mt">७) सध्या चालू असलेल्या कर्जांची तपशील</p>
+
+            <table class="form-table">
+                <tr>
+                    <th>कर्ज प्रकार</th>
+                    <th>मंजूर कर्ज मर्यादा</th>
+                    <th>चालू मर्यादा</th>
+                    <th>बाकी रक्कम</th>
+                    <th>थकबाकी</th>
+                </tr>
+                <tr *ngFor="let loan of loandata?.credit_loans_this_bank">
+                    <td>{{ loan.loan_type }}</td>
+                    <td>{{ loan.sanction_amount }}</td>
+                    <td>{{ loan.amount_paid }}</td>
+                    <td>{{ loan.loan_outstanding_amount }}</td>
+                    <td>{{ loan.loan_overdue_amount }}</td>
+                </tr>
+            </table>
+
+            <!-- 8 TABLE -->
+            <p class="mt">८) अर्जदार अन्य सभासदांना जामीन असल्यास</p>
+
+            <table class="form-table">
+                <tr>
+                    <th>कर्ज प्रकार</th>
+                    <th>मंजूर कर्ज मर्यादा</th>
+                    <th>चालू मर्यादा</th>
+                    <th>बाकी रक्कम</th>
+                    <th>थकबाकी</th>
+                </tr>
+
+                <!-- This Bank -->
+                <tr *ngFor="let loan of loandata?.credit_guarantees_this_bank">
+                    <td>{{ loan.loan_type }}</td>
+                    <td>{{ loan.sanction_amount }}</td>
+                    <td>-</td>
+                    <td>{{ loan.loan_outstanding_amount }}</td>
+                    <td>{{ loan.loan_overdue_amount }}</td>
+                </tr>
+
+                <!-- Other Banks -->
+                <tr *ngFor="let loan of loandata?.credit_guarantees_other_banks">
+                    <td>{{ loan.loan_type }}</td>
+                    <td>{{ loan.sanction_amount }}</td>
+                    <td>-</td>
+                    <td>{{ loan.loan_outstanding_amount }}</td>
+                    <td>{{ loan.loan_overdue_amount }}</td>
+                </tr>
+
+                <!-- No Data -->
+                <tr
+                    *ngIf="!loandata?.credit_guarantees_this_bank?.length && !loandata?.credit_guarantees_other_banks?.length">
+                    <td colspan="5" style="text-align:center;">माहिती उपलब्ध नाही</td>
+                </tr>
+            </table>
+
+        </div>
+
+        <div class="sheet">
+
+            <div class="row-line">
+                <span>९) उद्योग असल्यास नोंदणी क्रमांक :</span>
+                <span><b>{{loandata?.msme_registration_number}}</b></span>
+            </div>
+
+            <div class="row-line">
+                <span>१०) शॉप ऐक्ट लायसन्स / सेल्स टॅक्स क्रमांक :</span>
+                <span><b>{{loandata?.shop_act_number}}</b></span>
+            </div>
+
+            <div class="row-line">
+                <span>११) पॅन कार्ड नंबर :</span>
+                <span><b>{{loandata?.business_pan_number}}</b></span>
+            </div>
+
+            <div class="row-line">
+                <span>१२) अंतिम आयकर आदेश झाल्याचे वर्ष :</span>
+                <span><b>{{loandata?.itr_financial_year}}</b></span>
+            </div>
+
+            <p class="section-gap">१३) अ) स्थावर व जंगम तपशील :</p>
+
+            <table class="grid-table">
+                <tr>
+                    <th>मिळकतीचा प्रकार</th>
+                    <th>जमिनीचा तपशील स.नं. गट नं. गाळी</th>
+                    <th>मिळकतीची किंमत</th>
+                    <th>बोजा / तपशील</th>
+                    <th>मिळकतीतील हिस्सा</th>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+            </table>
+
+            <p class="section-gap">१३) ब) अन्य बँक / सोसायटी मधील कर्ज खात्याचा तपशील :</p>
+
+            <table class="grid-table">
+                <tr>
+                    <th>बँकेचे नाव</th>
+                    <th>बचत / चालू / कर्ज खाते</th>
+                    <th>कर्ज प्रकार व कारण</th>
+                    <th>कर्ज मर्यादा</th>
+                    <th>चालू मर्यादा</th>
+                    <th>बाकी रक्कम</th>
+                    <th>थकबाकी</th>
+                </tr>
+
+                <!-- Dynamic Rows -->
+                <tr *ngFor="let loan of loandata?.credit_loans_other_banks">
+                    <td>{{ loan.bank_name }}</td>
+                    <td>कर्ज खाते</td>
+                    <td>{{ loan.loan_type }}</td>
+                    <td>{{ loan.sanction_amount }}</td>
+                    <td>{{ loan.amount_paid }}</td>
+                    <td>{{ loan.loan_outstanding_amount }}</td>
+                    <td>{{ loan.loan_overdue_amount }}</td>
+                </tr>
+
+                <!-- No Data -->
+                <tr *ngIf="!loandata?.credit_loans_other_banks?.length">
+                    <td colspan="7" style="text-align:center;">
+                        माहिती उपलब्ध नाही
+                    </td>
+                </tr>
+            </table>
+
+            <p class="section-gap">१३) क) अन्य बँक / सोसायटी मधील बचत / चालू खात्याचा तपशील :</p>
+
+            <table class="grid-table">
+                <tr>
+                    <th>बँके / सोसायटीचे नाव</th>
+                    <th>खाते प्रकार</th>
+                    <th>जमा रक्कम</th>
+                </tr>
+
+                <!-- Dynamic Rows -->
+                <tr *ngFor="let acc of loandata?.credit_accounts_other_banks">
+                    <td>{{ acc.bank_name }}</td>
+                    <td>{{ parseAccountType(acc.account_type) }}</td>
+                    <td>{{ acc.amount }}</td>
+                </tr>
+
+                <!-- No Data -->
+                <tr *ngIf="!loandata?.credit_accounts_other_banks?.length">
+                    <td colspan="3" style="text-align:center;">
+                        माहिती उपलब्ध नाही
+                    </td>
+                </tr>
+            </table>
+
+            <div class="sign-block">
+                <p>आपला विश्वासू</p>
+                <div class="sign-line1"></div>
+                <p style="margin-top: 10px;">अर्जदाराची स्वाक्षरी</p>
+                <p style="margin-top: -7px;">(शिक्यानिशी)</p>
+            </div>
+
+        </div>
+
+
+        <div class="doc-page">
+            <div *ngIf="gurantordata && gurantordata.length > 0">
+
+                <!--  LOOP FULL PAGE -->
+                <div *ngFor="let g of gurantordata; let i = index" class="doc-page">
+                    <h3 class="title-center">जामिनदाराने भरून द्यावयाची माहिती</h3>
+
+                    <div class="photo-area">फोटो</div>
+
+                    <!-- GUARANTOR SECTION -->
+
+                    <div *ngIf="gurantordata.length">
+
+                        <div class="main-row" *ngFor="let g of gurantordata; let i = index">
+
+                            <span style="margin-top: 25px;">{{ i + 1 }})</span>
+
+                            <div class="main-content">
+
+                                <!-- 1 -->
+                                <div class="row">
+                                    <span>१. संपूर्ण नाव : श्री. / सौ.</span>
+                                    <span>
+                                        <b>{{ g?.guarantor_name || '-' }}</b>
+                                    </span>
+                                </div>
+
+                                <!-- 2 -->
+                                <div class="row">
+                                    <span>२. संपूर्ण पत्ता :</span>
+                                    <span>
+                                        <b>{{ g?.full_address || '-' }}</b>
+                                    </span>
+                                </div>
+
+                                <!-- 3 -->
+                                <div class="row">
+                                    <span>३. वय :</span>
+                                    <span>
+                                        <b>{{ g?.age || '-' }}</b>
+                                    </span>
+
+                                    <span style="margin-left: 150px;">जन्मदिनांक :</span>
+                                    <span>
+                                        <b>{{ g?.birth_date | date:'dd/MM/yyyy' }}</b>
+                                    </span>
+
+                                    <span style="margin-left: 150px;">जात :</span>
+                                    <span>
+                                        <b>{{ g?.religion || '-' }}</b>
+                                    </span>
+                                </div>
+
+                                <!-- 4 -->
+                                <div class="row">
+                                    <span>४. फोन नं.</span>
+                                    <span>
+                                        <b>{{ g?.phone || '-' }}</b>
+                                    </span>
+
+                                    <span style="margin-left: 100px;">मोबाईल नं.</span>
+                                    <span>
+                                        <b>{{ g?.phone || '-' }}</b>
+                                    </span>
+
+                                    <span style="margin-left: 100px;">ई-मेल :</span>
+                                    <span>
+                                        <b>{{ g?.email_id || '-' }}</b>
+                                    </span>
+                                </div>
+
+                                <!-- 5 -->
+                                <div class="row">
+                                    <span>५. बँकेतील ठेव खाते प्रकार</span>
+                                    <span>
+                                        <b>{{ parseAccountType(g?.account_type) || '-' }}</b>
+                                    </span>
+
+                                    <span style="margin-left: 150px;">खाते क्र.</span>
+                                    <span>
+                                        <b>{{ g?.account_no || '-' }}</b>
+                                    </span>
+                                </div>
+
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- NO DATA -->
+                    <div *ngIf="gurantordata && gurantordata.length === 0">
+                        <p>जामीनदार माहिती उपलब्ध नाही</p>
+                    </div>
+
+                    <!-- MAIN 2 -->
+                    <div class="main-row">
+                        <span style="margin-top: 25px;">२)</span>
+                        <div class="main-content">
+
+                            <div class="row">
+                                <span>१. नोकरीच्या कार्यालयाचे नाव</span>
+                                <span><b>{{ jobInfo?.organization_name || '-' }}</b></span>
+                            </div>
+
+                            <div class="row">
+                                <span>२. सध्याच्या ठिकाणी नोकरीत किती वर्षापासून आहात.</span>
+                                <span><b>{{ jobInfo?.years_employed }}वर्ष</b></span>
+                                <span>कायम / हंगामी</span>
+                            </div>
+
+                            <div class="row">
+                                <span>३. नोकरी विभागात हुद्दा :</span>
+                                <span><b>{{ jobInfo?.job_type || '-' }}</b></span>
+                                <span style="margin-left: 200px;">विभाग :</span>
+                                <span><b>{{jobInfo?.department}}</b></span>
+                            </div>
+
+                            <div class="row">
+                                <span>४. दरमहा मिळणारा पगार व एकूण भत्ते रु.</span>
+                                <span><b>{{ jobInfo?.net_salary | number }}</b></span>
+                            </div>
+
+                            <div class="row">
+                                <span>५. फोन नं.</span>
+                                <span><b>{{jobInfo?.branch_contact}}</b></span>
+                                <span style="margin-left: 200px;">मोबाईल नं.</span>
+                                <span></span>
+                                <span style="margin-left: 200px;">ई-मेल :</span>
+                                <span></span>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <!-- MAIN 3 -->
+                    <div class="main-row">
+                        <span style="margin-top: 25px;">३)</span>
+                        <div class="main-content">
+
+                            <div class="row">
+                                <span>व्यवसायाची माहिती :</span>
+                                <span><b>{{ businessInfo?.firm_name || '-' }}</b></span>
+                            </div>
+
+                            <div class="row">
+                                <span>१. व्यवसायाचे स्वरूप :</span>
+                                <span><b>{{ businessInfo?.nature_of_business || '-' }}</b></span>
+                            </div>
+
+                            <div class="row">
+                                <span>२. संपूर्ण पत्ता :</span>
+                                <span><b>{{ businessInfo?.address || '-' }}</b></span>
+                            </div>
+
+                            <div class="row">
+                                <span>३. व्यवसाय किती वर्षापासून करता :</span>
+                                <span><b>{{ businessInfo?.years_in_business }} वर्ष</b></span>
+                            </div>
+
+                            <div class="row">
+                                <span>४. व्यवसाय स्वतंत्र अगर भागीदारीत :</span>
+                                <span><b>{{ businessInfo?.ownership_type || '-' }}</b></span>
+                            </div>
+
+                            <div class="row">
+                                <span>५. भागीदारी असल्यास आपला हिस्सा रु. :</span>
+                                <span><b>-</b></span>
+                            </div>
+
+                            <div class="row">
+                                <span>६. व्यवसायातील स्वतःचे वार्षिक उत्पन्न रु. :</span>
+                                <span><b>{{ businessInfo?.net_profit_loss | number }}</b></span>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <!-- TABLE SAME -->
+                    <p class="section"><b>४)</b>&nbsp;&nbsp; स्थावर मालमत्ता, मशिनरी, वाहन इत्यादी संबंधित माहिती :</p>
+
+                    <table class="table-box">
+                        <tr>
+                            <th>मालमत्तेचा तपशील</th>
+                            <th>पत्ता</th>
+                            <th>अंदाजे किंमत रु.</th>
+                        </tr>
+
+                        <tr *ngFor="let m of gurantordata?.[0]?.machinery_details">
+                            <td>{{ m.machinery_details || '-' }}</td>
+                            <td>-</td>
+                            <td>{{ m.valuation_amount | number }}</td>
+                        </tr>
+
+                        <tr *ngIf="!gurantordata?.[0]?.machinery_details?.length">
+                            <td colspan="3" style="text-align:center">माहिती उपलब्ध नाही</td>
+                        </tr>
+
+                    </table>
+
+                    <!-- LAST -->
+                    <div class="bottom-row">
+                        <span>मिळकतीतील हिस्सा</span>
+                        <span class="line"></span>
+                        <span>मिळकतीपासून मिळणारे उत्पन्न रु.</span>
+                        <span class="line"></span>
+                    </div>
+
+                </div>
+                <div>
+                    <div class="final-page">
+
+                        <!-- ५  -->
+                        <div class="num-row">
+                            <div class="num" style="margin-top: 20px;">५ )</div>
+                            <div class="content">
+
+                                <div class="row-flex">
+                                    <span class="text">इन्कमटॅक्स भरता काय ?</span>
+                                    <span style="margin-left: 80px;">होय / नाही</span>
+
+                                    <span class="spacer"></span>
+
+                                    <span class="text">पॅन कार्ड नं.</span>
+                                    <span><b>{{ gurantordata[0].pan_number || '-' }}</b></span>
+                                </div>
+
+                                <div class="row-flex">
+                                    <span class="text">गेल्या वर्षी किती भरला ?</span>
+                                    <span class="line mid"></span>
+
+                                    <span class="text">चालू वर्षी किती भरला ?</span>
+                                    <span class="line mid"></span>
+                                </div>
+
+                                <div class="row-flex">
+                                    <span class="text">वॅट भरता काय ?</span>
+                                    <span style="margin-left: 120px;">होय / नाही</span>
+
+                                    <span class="spacer"></span>
+
+                                    <span class="text">व्हॅट नं.</span>
+                                    <span class="line"></span>
+                                </div>
+
+                                <div class="row-flex">
+                                    <span class="text">गेल्या वर्षी किती भरला ?</span>
+                                    <span class="line mid"></span>
+
+                                    <span class="text">चालू वर्षी किती भरला ?</span>
+                                    <span class="line mid"></span>
+                                </div>
+
+                            </div>
+                        </div>
+
+                        <!-- ६ -->
+                        <div class="num-row">
+                            <div class="num" style="margin-top: 25px;">६)</div>
+                            <div class="content">
+                                <p class="section">या बँकेकडून घेतलेल्या कर्जाचा तपशील</p>
+
+                                <table class="tbl">
+                                    <tr>
+                                        <th>क्र.</th>
+                                        <th>शाखेचे नाव</th>
+                                        <th>कर्जाचा प्रकार</th>
+                                        <th>मंजूर कर्ज रक्कम</th>
+                                        <th>तारण दिलेल्या वस्तूचा तपशील</th>
+                                    </tr>
+
+                                    <tr *ngFor="let loan of gurantordata[0].credit_loans_this_bank; let i = index">
+                                        <td>{{ i + 1 }}</td>
+                                        <td>{{ loan.branch || '-' }}</td>
+                                        <td>{{ loan.loan_type || '-' }}</td>
+                                        <td>{{ loan.sanctioned_amount | number }}</td>
+                                        <td>{{ loan.mortgage_details || '-' }}</td>
+                                    </tr>
+
+                                    <tr *ngIf="!gurantordata[0].credit_loans_this_bank?.length">
+                                        <td colspan="5" style="text-align:center">माहिती उपलब्ध नाही</td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- ७ -->
+                        <div class="num-row">
+                            <div class="num" style="margin-top: 25px;">७)</div>
+                            <div class="content">
+                                <p class="section">या बँकेत मी खालील सभासद कर्जदारास जामीनदार आहे.</p>
+
+                                <table class="tbl">
+                                    <tr>
+                                        <th>क्र.</th>
+                                        <th>कर्जदाराचे नाव</th>
+                                        <th>सभासद क्र.</th>
+                                        <th>कर्जाचा प्रकार</th>
+                                        <th>कर्जाची रक्कम</th>
+                                    </tr>
+
+                                    <tr *ngFor="let loan of gurantordata[0].credit_guarantees_this_bank; let i = index">
+                                        <td>{{ i + 1 }}</td>
+                                        <td>{{ loan.borrower_name || '-' }}</td>
+                                        <td>-</td> <!-- not available in API -->
+                                        <td>{{ loan.loan_type || '-' }}</td>
+                                        <td>{{ loan.sanctioned_amount | number }}</td>
+                                    </tr>
+
+                                    <tr *ngIf="!gurantordata[0].credit_guarantees_this_bank?.length">
+                                        <td colspan="5" style="text-align:center">माहिती उपलब्ध नाही</td>
+                                    </tr>
+
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- ८ -->
+                        <div class="num-row">
+                            <div class="num" style="margin-top: 25px;">८)</div>
+                            <div class="content">
+                                <p class="section">इतर बँक / पतसंस्था यांच्याकडून घेतलेल्या कर्जाचा तपशील</p>
+
+                                <table class="tbl">
+                                    <tr>
+                                        <th>क्र.</th>
+                                        <th>बँके / पतसंस्थेचे नाव</th>
+                                        <th>कर्जाचा प्रकार</th>
+                                        <th>मंजूर कर्ज रक्कम</th>
+                                        <th>तारण दिलेल्या वस्तूचा तपशील</th>
+                                    </tr>
+
+                                    <tr *ngFor="let loan of gurantordata?.[0]?.credit_loans_other_banks; let i = index">
+                                        <td>{{ i + 1 }}</td>
+                                        <td>{{ loan.bank || '-' }}</td>
+                                        <td>{{ loan.loan_type || '-' }}</td>
+                                        <td>{{ loan.sanctioned_amount | number }}</td>
+                                        <td>{{ loan.mortgage_details || '-' }}</td>
+                                    </tr>
+
+                                    <tr *ngIf="!gurantordata?.[0]?.credit_loans_other_banks?.length">
+                                        <td colspan="5" style="text-align:center">No Data Available</td>
+                                    </tr>
+
+                                </table>
+                            </div>
+                        </div>
+
+                    </div>
+                    <div *ngFor="let g of gurantordata; let i = index" class="doc-page">
+
+                        <div class="passage-container">
+
+                            <span class="long"></span>
+
+                            <!-- LINE 1 -->
+                            <div class="p-row">
+                                <div class="first-line">
+                                    <span>मी</span>
+                                    <span>
+                                        <b>{{ g?.guarantor_name || '-' }}</b>
+                                    </span>
+                                    <span class="right-text">लिहून देतो / देते की,</span>
+                                </div>
+                            </div>
+
+                            <!-- LINE 2 -->
+                            <div class="p-row">
+                                <span>श्री./सौ./मे.</span>
+                                <span>
+                                    <b>{{ g?.guarantor_name || '-' }}</b>
+                                </span>
+                                <span>हे</span>
+
+                                <span>आपल्या बँकेकडून कर्ज रु.</span>
+
+                                <span>
+                                    <b>{{ g?.requested_amount || '-' }}</b>
+                                </span>
+
+                                <span>(अक्षरी रुपये</span>
+
+                                <span>
+                                    <b>{{ g?.requested_amount_words || '-' }}</b>
+                                </span>
+
+                                <span>) एवढे कर्ज घेत असून </span>
+                            </div>
+
+                            <!-- PARAGRAPH -->
+                            <div class="p-text">
+                                त्यास मी जामीन राहात आहे. ते कर्ज ठरवून दिलेल्या कालावधीत परतफेड करतील.
+                                त्यांनी कर्ज भरणा वेळेवर न केल्यास त्याची भरपाई करण्याची जबाबदारी मी घेत आहे.
+                                त्यांनी कर्ज परतफेड न केल्यास त्यांचे मासिक हप्ते अथवा एकरकमी कर्जफेडीची जबाबदारी
+                                वैयक्तिक व संयुक्तरित्या माझ्यावर राहील व त्याची संपूर्ण वसुली माझ्याकडून केली जाईल
+                                याची मला पूर्ण कल्पना व माहिती आहे. हे मी पूर्ण विचारांती, जबाबदारीने लिहून देत आहे.
+                            </div>
+
+                            <!-- NAME -->
+                            <div class="p-row">
+                                <span>नाव : श्री./ सौ.</span>
+                                <span>
+                                    <b>{{ g?.guarantor_name || '-' }}</b>
+                                </span>
+                            </div>
+
+                            <!-- DATE + SIGN -->
+                            <div class="p-row">
+                                <span>दिनांक</span>
+                                <span class="p-line tiny"></span>
+                                <span>/</span>
+                                <span class="p-line tiny"></span>
+                                <span>/ २०२</span>
+
+                                <span class="p-spacer"></span>
+
+                                <span class="sign-line"></span>
+                                <span class="sign-text">जामीनदाराची स्वाक्षरी</span>
+                            </div>
+
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
