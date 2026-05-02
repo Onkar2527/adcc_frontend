@@ -25,9 +25,13 @@ export class AppMenu implements OnInit {
             label: 'Home',
             items: [{ label: 'Dashboard', icon: 'pi pi-fw pi-home', routerLink: ['/home'] }],
         },
+        // {
+        //     label: 'Proposals',
+        //     items: [{ label: 'Proposals', icon: 'pi pi-fw pi-file', routerLink: ['/proposals'] }],
+        // },
         {
-            label: 'Proposals',
-            items: [{ label: 'Proposals', icon: 'pi pi-fw pi-file', routerLink: ['/proposals'] }],
+            label: 'Employee Management',
+            items: [{ label: 'Employee Master', icon: 'pi pi-fw pi-users', routerLink: ['/employees'] }],
         }
     ];
 

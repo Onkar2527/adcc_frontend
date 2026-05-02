@@ -1,4 +1,4 @@
 {
   "company_uuid4": "from_config",
-  "apiUrl": "https://loanprobankbackend.kredpool.in"
+  "apiUrl": "http://localhost:3000"
 }

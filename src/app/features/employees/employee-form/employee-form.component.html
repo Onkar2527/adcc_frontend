@@ -1,0 +1,73 @@
+<div class="employee-form-container">
+  <form [formGroup]="form" (ngSubmit)="onSubmit()">
+    
+    <!-- Using a simple flex column for the whole form -->
+    <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+      
+      <!-- Each field is a row -->
+      <div class="field-row">
+        <label for="emp_code">Employee Code <span style="color: red;">*</span></label>
+        <input pInputText id="emp_code" formControlName="emp_code" placeholder="Enter code" style="width: 100%;" />
+      </div>
+
+      <div class="field-row">
+        <label for="name">Full Name <span style="color: red;">*</span></label>
+        <input pInputText id="name" formControlName="name" placeholder="Enter full name" style="width: 100%;" />
+      </div>
+
+      <!-- Two columns for Email and Mobile -->
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+        <div class="field-row">
+          <label for="email">Email Address <span style="color: red;">*</span></label>
+          <input pInputText id="email" formControlName="email" type="email" placeholder="email@example.com" style="width: 100%;" />
+        </div>
+        <div class="field-row">
+          <label for="mobile">Mobile Number <span style="color: red;">*</span></label>
+          <input pInputText id="mobile" formControlName="mobile" placeholder="Enter mobile" style="width: 100%;" />
+        </div>
+      </div>
+
+      <div class="field-row">
+        <label for="designation">Designation</label>
+        <input pInputText id="designation" formControlName="designation" placeholder="Enter designation" style="width: 100%;" />
+      </div>
+
+      <!-- Two columns for Gender and User Type -->
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+        <div class="field-row">
+          <label for="gender">Gender <span style="color: red;">*</span></label>
+          <p-select 
+            id="gender" 
+            formControlName="gender" 
+            [options]="genderOptions" 
+            optionLabel="label" 
+            optionValue="value" 
+            placeholder="Select Gender"
+            appendTo="body"
+            style="width: 100%;">
+          </p-select>
+        </div>
+        <div class="field-row">
+          <label for="user_type_id">User Type <span style="color: red;">*</span></label>
+          <p-select 
+            id="user_type_id" 
+            formControlName="user_type_id" 
+            [options]="userTypeOptions" 
+            optionLabel="label" 
+            optionValue="value" 
+            placeholder="Select User Type"
+            appendTo="body"
+            style="width: 100%;">
+          </p-select>
+        </div>
+      </div>
+
+      <!-- Buttons -->
+      <div style="display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 1rem; padding-top: 1.5rem; border-top: 1px solid #eee;">
+        <p-button label="Cancel" severity="secondary" [outlined]="true" (onClick)="cancel.emit()"></p-button>
+        <p-button [label]="employee ? 'Update' : 'Save'" type="submit" [disabled]="form.invalid"></p-button>
+      </div>
+
+    </div>
+  </form>
+</div>

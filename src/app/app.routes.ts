@@ -14,7 +14,8 @@ export const routes: Routes = [
       { path: 'proposals', loadComponent: () => import('./features/proposals/proposals').then(mod => mod.Proposals) },
       { path: 'admin', loadChildren: () => import('./features/admin/admin.routes').then(mod => mod.ADMIN_ROUTES) },
       { path: 'loanapplication', loadComponent: () => import('./features/proposals/forms-proposal/loan-application/loan-application').then(mod => mod.LoanApplicationComponent) },
-      { path: 'branchscrutiny', loadComponent: () => import('./features/proposals/forms-proposal/loan-application/loan-application').then(mod => mod.LoanApplicationComponent) }
+      { path: 'branchscrutiny', loadComponent: () => import('./features/proposals/forms-proposal/loan-application/loan-application').then(mod => mod.LoanApplicationComponent) },
+      { path: 'employees', loadChildren: () => import('./features/employees/employees.routes').then(mod => mod.EMPLOYEE_ROUTES) }
 
     ]
   },
