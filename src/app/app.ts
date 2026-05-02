@@ -13,7 +13,7 @@ import { SearchService } from './core/services/search.service';
   styleUrl: './app.scss'
 })
 export class App implements OnInit {
-  protected readonly title = signal('pos_frontend_local');
+  protected readonly title = signal('audit_frontend_local');
   private config = inject(APP_CONFIG);
 
   // @ViewChild('appSearch') appSearch!: AppSearch; // Removed: Using service instead
