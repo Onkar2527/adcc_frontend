@@ -23,6 +23,7 @@ export interface CreateEmployeeDto {
   password?: string;
   is_active?: number;
   audit_unit_authority?: string;
+  unit_ids?: number[];
 }
 
 export interface UpdateEmployeeDto extends Partial<CreateEmployeeDto> {

@@ -31,7 +31,10 @@ export class AppMenu implements OnInit {
         // },
         {
             label: 'Employee Management',
-            items: [{ label: 'Employee Master', icon: 'pi pi-fw pi-users', routerLink: ['/employees'] }],
+            items: [
+                { label: 'Employee Master', icon: 'pi pi-fw pi-users', routerLink: ['/employees'] },
+                { label: 'Password Policy', icon: 'pi pi-fw pi-lock', routerLink: ['/password-policy'] }
+            ],
         }
     ];
 

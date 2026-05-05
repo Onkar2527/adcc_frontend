@@ -64,4 +64,25 @@
             }
         }
     }
+
+    /* Standard Dialog Styling */
+    .p-dialog {
+        .p-dialog-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        .p-dialog-content {
+            padding: 1.5rem !important;
+        }
+    }
+
+    .password-dialog {
+        .p-password {
+            width: 100%;
+            input {
+                width: 100%;
+            }
+        }
+    }
 }
+

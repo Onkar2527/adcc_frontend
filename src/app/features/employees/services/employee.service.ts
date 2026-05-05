@@ -35,4 +35,12 @@ export class EmployeeService {
   toggleStatus(id: number): Observable<Employee> {
     return this.http.patch<Employee>(`${this.apiUrl}/${id}/status`, {});
   }
+
+  setPassword(id: number, password: string): Observable<any> {
+    return this.http.patch(`${this.apiUrl}/${id}/password`, { password });
+  }
+
+  updateAuthority(id: number, unitIds: number[]): Observable<any> {
+    return this.http.patch(`${this.apiUrl}/${id}/authority`, { unit_ids: unitIds });
+  }
 }

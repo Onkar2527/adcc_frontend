@@ -5,60 +5,51 @@
       <h2 class="text-2xl font-bold text-slate-800">Employee Master</h2>
       <p class="text-slate-500 text-sm">Manage and monitor employee records and permissions.</p>
     </div>
-    <p-button label="Add Employee" icon="pi pi-plus" (onClick)="openNew()" styleClass="p-button-raised p-button-primary"></p-button>
+    <p-button label="Add Employee" icon="pi pi-plus" (onClick)="openNew()"
+      styleClass="p-button-raised p-button-primary"></p-button>
   </div>
 
   <!-- Table Container -->
   <div class="bg-white rounded-xl shadow-md border border-slate-200 overflow-hidden">
-    <p-table 
-      #dt
-      [value]="employees()" 
-      [paginator]="true" 
-      [rows]="10" 
-      responsiveLayout="scroll" 
-      [loading]="loading()"
-      styleClass="p-datatable-sm"
-      [rowHover]="true"
+    <p-table #dt [value]="employees()" [paginator]="true" [rows]="10" responsiveLayout="scroll" [loading]="loading()"
+      styleClass="p-datatable-sm" [rowHover]="true"
       [globalFilterFields]="['emp_code', 'name', 'email', 'mobile', 'designation']">
-      
+
       <!-- Search Header -->
       <ng-template pTemplate="caption">
         <div class="flex flex-col md:flex-row md:justify-between md:items-center gap-3 py-2 px-1">
           <h3 class="text-lg font-bold text-slate-700 m-0">Employees Overview</h3>
-          
+
           <!-- Simple Search Bar -->
           <div class="search-container">
             <i class="pi pi-search search-icon"></i>
-            <input 
-              pInputText 
-              type="text" 
-              (input)="dt.filterGlobal($any($event.target).value, 'contains')" 
-              placeholder="Search employee..." 
-              class="search-input" />
+            <input pInputText type="text" (input)="dt.filterGlobal($any($event.target).value, 'contains')"
+              placeholder="Search employee..." class="search-input" />
           </div>
         </div>
       </ng-template>
 
       <ng-template pTemplate="header">
         <tr>
-          <th pSortableColumn="emp_code" class="bg-slate-50 text-slate-700 font-bold text-xs uppercase tracking-wider">
+          <th pSortableColumn="emp_code" class="bg-slate-50 text-slate-700 font-bold text-xs tracking-wider">
             <div class="flex items-center gap-2">
               Emp Code <p-sortIcon field="emp_code"></p-sortIcon>
             </div>
           </th>
-          <th pSortableColumn="name" class="bg-slate-50 text-slate-700 font-bold text-xs uppercase tracking-wider">
+          <th pSortableColumn="name" class="bg-slate-50 text-slate-700 font-bold text-xs tracking-wider">
             <div class="flex items-center gap-2">
               Name <p-sortIcon field="name"></p-sortIcon>
             </div>
           </th>
-          <th class="bg-slate-50 text-slate-700 font-bold text-xs uppercase tracking-wider">Email / Mobile</th>
-          <th pSortableColumn="designation" class="bg-slate-50 text-slate-700 font-bold text-xs uppercase tracking-wider">
+          <th class="bg-slate-50 text-slate-700 font-bold text-xs tracking-wider">Email</th>
+          <th class="bg-slate-50 text-slate-700 font-bold text-xs tracking-wider">Mobile</th>
+          <th pSortableColumn="user_type_id" class="bg-slate-50 text-slate-700 font-bold text-xs tracking-wider">
             <div class="flex items-center gap-2">
-              Designation <p-sortIcon field="designation"></p-sortIcon>
+              Employee Type <p-sortIcon field="user_type_id"></p-sortIcon>
             </div>
           </th>
-          <th class="bg-slate-50 text-slate-700 font-bold text-xs uppercase tracking-wider">Status</th>
-          <th class="text-center bg-slate-50 text-slate-700 font-bold text-xs uppercase tracking-wider">Actions</th>
+          <th class="bg-slate-50 text-slate-700 font-bold text-xs tracking-wider">Status</th>
+          <th class="text-center bg-slate-50 text-slate-700 font-bold text-xs tracking-wider">Actions</th>
         </tr>
       </ng-template>
 
@@ -66,31 +57,34 @@
         <tr class="hover:bg-slate-50 transition-colors">
           <td class="text-slate-600 font-medium">{{ emp.emp_code }}</td>
           <td>
-            <div class="font-bold text-slate-800">
-              {{ emp.gender === 'Male' ? 'Mr. ' : (emp.gender === 'Female' ? 'Ms. ' : '') }}{{ emp.name }}
+            <div class="flex items-center gap-2">
+              <span class="font-bold text-slate-800 text-sm">
+                {{ emp.gender === 'Male' ? 'Mr. ' : (emp.gender === 'Female' ? 'Ms. ' : '') }}{{ emp.name }}
+              </span>
+              <span class="text-xs text-slate-400 font-medium" *ngIf="emp.designation">| {{ emp.designation }}</span>
             </div>
           </td>
           <td>
-            <div class="flex flex-col text-sm">
-              <span class="text-slate-600 font-medium">{{ emp.email }}</span>
-              <span class="text-slate-400">{{ emp.mobile }}</span>
-            </div>
+            <span class="text-sm text-slate-600 font-medium">{{ emp.email }}</span>
           </td>
           <td>
-            <span class="text-sm text-slate-600">{{ emp.designation || '-' }}</span>
+            <span class="text-sm text-slate-600 font-medium">{{ emp.mobile }}</span>
           </td>
           <td>
-            <p-tag 
-              [severity]="emp.is_active ? 'success' : 'danger'" 
-              [value]="emp.is_active ? 'Active' : 'Inactive'"
+            <span class="text-sm font-semibold text-slate-600 bg-slate-100 px-2 py-1 rounded-md">{{ getUserTypeName(emp.user_type_id) }}</span>
+          </td>
+          <td>
+            <p-tag [severity]="emp.is_active ? 'success' : 'danger'" [value]="emp.is_active ? 'Active' : 'Inactive'"
               styleClass="text-[10px] font-bold uppercase">
             </p-tag>
           </td>
-          <td class="text-center">
+          <td>
             <div class="flex justify-center gap-2">
-              <button pButton icon="pi pi-pencil" class="p-button-rounded p-button-text p-button-sm p-button-info" (click)="editEmployee(emp)" pTooltip="Edit"></button>
-              <button pButton [icon]="emp.is_active ? 'pi pi-ban' : 'pi pi-check-circle'" class="p-button-rounded p-button-text p-button-sm" [severity]="emp.is_active ? 'danger' : 'success'" (click)="toggleStatus(emp)" pTooltip="Toggle Status"></button>
-              <button pButton icon="pi pi-shield" class="p-button-rounded p-button-text p-button-sm p-button-warning" pTooltip="Authority"></button>
+              <button pButton icon="pi pi-pencil" class="p-button-rounded p-button-text p-button-sm p-button-info"
+                (click)="editEmployee(emp)" pTooltip="Edit"></button>
+              <button pButton [icon]="emp.is_active ? 'pi pi-ban' : 'pi pi-check-circle'"
+                class="p-button-rounded p-button-text p-button-sm" [severity]="emp.is_active ? 'danger' : 'success'"
+                (click)="toggleStatus(emp)" pTooltip="Toggle Status"></button>
             </div>
           </td>
         </tr>
@@ -98,7 +92,7 @@
 
       <ng-template pTemplate="emptymessage">
         <tr>
-          <td colspan="6" class="text-center py-8 text-slate-400">No employees found.</td>
+          <td colspan="7" class="text-center py-8 text-slate-400">No employees found.</td>
         </tr>
       </ng-template>
     </p-table>
@@ -110,7 +104,8 @@
   [breakpoints]="{ '960px': '75vw', '640px': '95vw' }" styleClass="premium-dialog">
 
   <div class="pt-4 border-t border-slate-100">
-    <app-employee-form *ngIf="formDialog" [employee]="selectedEmployee" (save)="saveEmployee($event)" (cancel)="hideDialog()">
+    <app-employee-form *ngIf="formDialog" [employee]="selectedEmployee" [isSaving]="isSaving()" (save)="saveEmployee($event)"
+      (cancel)="hideDialog()">
     </app-employee-form>
   </div>
 </p-dialog>

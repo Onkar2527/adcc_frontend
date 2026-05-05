@@ -1,5 +1,6 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
 import { DialogModule } from 'primeng/dialog';
@@ -26,7 +27,8 @@ import { InputTextModule } from 'primeng/inputtext';
     EmployeeFormComponent,
     TagModule,
     TooltipModule,
-    InputTextModule
+    InputTextModule,
+    FormsModule
   ],
   providers: [MessageService, ConfirmationService],
   templateUrl: './employee-list.component.html',
@@ -39,9 +41,25 @@ export class EmployeeListComponent implements OnInit {
 
   employees = signal<Employee[]>([]);
   loading = signal<boolean>(false);
+  isSaving = signal<boolean>(false);
 
   formDialog = false;
   selectedEmployee: Employee | null = null;
+
+  userTypeOptions = [
+    { label: 'Admin', value: 1 },
+    { label: 'Auditor', value: 2 },
+    { label: 'Employee', value: 3 },
+    { label: 'Reviewer', value: 4 },
+    { label: 'Top Level Management', value: 5 }
+  ];
+
+  getUserTypeName(id: number | string | null | undefined): string {
+    if (!id) return '-';
+    const typeId = Number(id);
+    const found = this.userTypeOptions.find(opt => opt.value === typeId);
+    return found ? found.label : '-';
+  }
 
   ngOnInit() {
     this.loadEmployees();
@@ -77,14 +95,19 @@ export class EmployeeListComponent implements OnInit {
   }
 
   saveEmployee(data: CreateEmployeeDto | UpdateEmployeeDto) {
+    this.isSaving.set(true);
     if (this.selectedEmployee) {
       this.employeeService.updateEmployee(this.selectedEmployee.id, data).subscribe({
         next: () => {
           this.messageService.add({ severity: 'success', summary: 'Successful', detail: 'Employee Updated' });
           this.loadEmployees();
           this.hideDialog();
+          this.isSaving.set(false);
         },
-        error: () => this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to update employee' })
+        error: () => {
+          this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to update employee' });
+          this.isSaving.set(false);
+        }
       });
     } else {
       this.employeeService.createEmployee(data as CreateEmployeeDto).subscribe({
@@ -92,8 +115,12 @@ export class EmployeeListComponent implements OnInit {
           this.messageService.add({ severity: 'success', summary: 'Successful', detail: 'Employee Created' });
           this.loadEmployees();
           this.hideDialog();
+          this.isSaving.set(false);
         },
-        error: () => this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to create employee' })
+        error: () => {
+          this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to create employee' });
+          this.isSaving.set(false);
+        }
       });
     }
   }
@@ -114,4 +141,6 @@ export class EmployeeListComponent implements OnInit {
       }
     });
   }
+
+
 }
