@@ -30,10 +30,11 @@ export class AppMenu implements OnInit {
         //     items: [{ label: 'Proposals', icon: 'pi pi-fw pi-file', routerLink: ['/proposals'] }],
         // },
         {
-            label: 'Employee Management',
+            label: 'Masters',
             items: [
-                { label: 'Employee Master', icon: 'pi pi-fw pi-users', routerLink: ['/employees'] },
-                { label: 'Password Policy', icon: 'pi pi-fw pi-lock', routerLink: ['/password-policy'] }
+                { label: 'Employee Master', icon: 'pi pi-fw pi-users', routerLink: ['/admin/employee-master'] },
+                { label: 'Password Policy', icon: 'pi pi-fw pi-lock', routerLink: ['/admin/password-policy-master'] },
+                { label: 'Audit Section Master', icon: 'pi pi-fw pi-list-check', routerLink: ['/admin/audit-section-master'] },
             ],
         }
     ];
@@ -110,6 +111,8 @@ export class AppMenu implements OnInit {
                                 { label: 'Role Master', icon: 'pi pi-fw pi-user-edit', routerLink: ['/admin/role-master'] },
                                 { label: 'Role Permissions', icon: 'pi pi-fw pi-lock', routerLink: ['/admin/role-permissions'] },
                                 { label: 'User Master', icon: 'pi pi-fw pi-users', routerLink: ['/admin/user-master'] },
+                                { label: 'Employee Master', icon: 'pi pi-fw pi-users', routerLink: ['/admin/employee-master'] },
+                                { label: 'Password Policy', icon: 'pi pi-fw pi-lock', routerLink: ['/admin/password-policy-master'] },
                             ],
                         },
                         {

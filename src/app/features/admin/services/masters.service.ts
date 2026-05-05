@@ -62,3 +62,101 @@ export class LoanTypeService {
   update(id: string, data: any) { return this.http.put<any>(`${this.apiUrl}/${id}`, data); }
   remove(id: string) { return this.http.delete<any>(`${this.apiUrl}/${id}`); }
 }
+
+@Injectable({ providedIn: 'root' })
+export class AuditSectionService {
+  private http = inject(HttpClient);
+  private config = inject(APP_CONFIG);
+  private apiUrl = `${this.config.apiUrl}/audit-sections`;
+
+  findAll(): Observable<{ data: any[] } | any[]> {
+    return this.http.get<{ data: any[] } | any[]>(this.apiUrl);
+  }
+  create(data: { name: string }) { return this.http.post<any>(this.apiUrl, data); }
+  update(id: string | number, data: { name: string }) { return this.http.put<any>(`${this.apiUrl}/${id}`, data); }
+  toggleStatus(id: string | number) { return this.http.put<any>(`${this.apiUrl}/${id}/toggle-status`, {}); }
+  remove(id: string | number) { return this.http.delete<any>(`${this.apiUrl}/${id}`); }
+}
+
+export interface Employee {
+  id: number;
+  emp_code: string;
+  user_type_id: number;
+  name: string;
+  email: string;
+  mobile: string;
+  designation?: string;
+  gender: string;
+  is_active: number;
+  audit_unit_authority?: string;
+  created_at?: string;
+}
+
+export interface CreateEmployeeDto {
+  emp_code: string;
+  user_type_id: number;
+  name: string;
+  email: string;
+  mobile: string;
+  designation?: string;
+  gender: string;
+  password?: string;
+  is_active?: number;
+  audit_unit_authority?: string;
+  unit_ids?: number[];
+}
+
+export interface UpdateEmployeeDto extends Partial<CreateEmployeeDto> {
+  id?: number;
+}
+
+@Injectable({ providedIn: 'root' })
+export class EmployeeService {
+  private http = inject(HttpClient);
+  private config = inject(APP_CONFIG);
+  private apiUrl = `${this.config.apiUrl}/employees`;
+
+  getEmployees(): Observable<Employee[]> { return this.http.get<Employee[]>(this.apiUrl); }
+  getEmployee(id: number): Observable<Employee> { return this.http.get<Employee>(`${this.apiUrl}/${id}`); }
+  createEmployee(data: CreateEmployeeDto): Observable<Employee> { return this.http.post<Employee>(this.apiUrl, data); }
+  updateEmployee(id: number, data: UpdateEmployeeDto): Observable<Employee> { return this.http.patch<Employee>(`${this.apiUrl}/${id}`, data); }
+  deleteEmployee(id: number): Observable<any> { return this.http.delete(`${this.apiUrl}/${id}`); }
+  toggleStatus(id: number): Observable<Employee> { return this.http.patch<Employee>(`${this.apiUrl}/${id}/status`, {}); }
+  setPassword(id: number, password: string): Observable<any> { return this.http.patch(`${this.apiUrl}/${id}/password`, { password }); }
+  updateAuthority(id: number, unitIds: number[]): Observable<any> { return this.http.patch(`${this.apiUrl}/${id}/authority`, { unit_ids: unitIds }); }
+}
+
+export interface AuditUnit {
+  id: number;
+  name: string;
+  audit_unit_code: string;
+}
+
+@Injectable({ providedIn: 'root' })
+export class UnitsService {
+  private http = inject(HttpClient);
+  private config = inject(APP_CONFIG);
+  private apiUrl = `${this.config.apiUrl}/units`;
+
+  getUnits(): Observable<AuditUnit[]> { return this.http.get<AuditUnit[]>(this.apiUrl); }
+}
+
+export interface PasswordPolicy {
+  id?: number;
+  min_length: number;
+  num_cnt: number;
+  uppercase_cnt: number;
+  lowercase_cnt: number;
+  symbol_cnt: number;
+  updated_at?: string;
+}
+
+@Injectable({ providedIn: 'root' })
+export class PasswordPolicyService {
+  private http = inject(HttpClient);
+  private config = inject(APP_CONFIG);
+  private apiUrl = `${this.config.apiUrl}/password-policy`;
+
+  getPolicy(): Observable<PasswordPolicy> { return this.http.get<PasswordPolicy>(this.apiUrl); }
+  updatePolicy(data: PasswordPolicy): Observable<PasswordPolicy> { return this.http.post<PasswordPolicy>(this.apiUrl, data); }
+}

@@ -51,6 +51,7 @@ import { TooltipModule } from 'primeng/tooltip';
             [virtualScroll]="virtualScroll()"
             [virtualScrollItemSize]="virtualScrollItemSize()"
             [scrollHeight]="scrollHeight()"
+            appendTo="body"
             styleClass="w-full"
             [class.ng-invalid]="showError()"
             [class.ng-dirty]="touched()">
