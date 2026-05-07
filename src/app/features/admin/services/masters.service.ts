@@ -9,8 +9,8 @@ export class BranchService {
   private config = inject(APP_CONFIG);
   private apiUrl = `${this.config.apiUrl}/branches`;
 
-  findAll(): Observable<{ data: any[] }> { 
-    return this.http.get<{ data: any[] }>(this.apiUrl); 
+  findAll(): Observable<{ data: any[] }> {
+    return this.http.get<{ data: any[] }>(this.apiUrl);
   }
   findOne(id: string) { return this.http.get<any>(`${this.apiUrl}/${id}`); }
   create(data: any) { return this.http.post<any>(this.apiUrl, data); }
@@ -24,8 +24,8 @@ export class RoleService {
   private config = inject(APP_CONFIG);
   private apiUrl = `${this.config.apiUrl}/roles`;
 
-  findAll(): Observable<{ data: any[] }> { 
-    return this.http.get<{ data: any[] }>(this.apiUrl); 
+  findAll(): Observable<{ data: any[] }> {
+    return this.http.get<{ data: any[] }>(this.apiUrl);
   }
   findOne(id: string) { return this.http.get<any>(`${this.apiUrl}/${id}`); }
   create(data: any) { return this.http.post<any>(this.apiUrl, data); }
@@ -39,8 +39,8 @@ export class MasterUserService {
   private config = inject(APP_CONFIG);
   private apiUrl = `${this.config.apiUrl}/users`;
 
-  findAll(): Observable<{ data: any[] }> { 
-    return this.http.get<{ data: any[] }>(this.apiUrl); 
+  findAll(): Observable<{ data: any[] }> {
+    return this.http.get<{ data: any[] }>(this.apiUrl);
   }
   findOne(id: string) { return this.http.get<any>(`${this.apiUrl}/${id}`); }
   create(data: any) { return this.http.post<any>(this.apiUrl, data); }
@@ -54,8 +54,8 @@ export class LoanTypeService {
   private config = inject(APP_CONFIG);
   private apiUrl = `${this.config.apiUrl}/loan-types`;
 
-  findAll(): Observable<{ data: any[] }> { 
-    return this.http.get<{ data: any[] }>(this.apiUrl); 
+  findAll(): Observable<{ data: any[] }> {
+    return this.http.get<{ data: any[] }>(this.apiUrl);
   }
   findOne(id: string) { return this.http.get<any>(`${this.apiUrl}/${id}`); }
   create(data: any) { return this.http.post<any>(this.apiUrl, data); }
@@ -76,6 +76,45 @@ export class AuditSectionService {
   update(id: string | number, data: { name: string }) { return this.http.put<any>(`${this.apiUrl}/${id}`, data); }
   toggleStatus(id: string | number) { return this.http.put<any>(`${this.apiUrl}/${id}/toggle-status`, {}); }
   remove(id: string | number) { return this.http.delete<any>(`${this.apiUrl}/${id}`); }
+}
+
+export interface CreateAuditUnitDto {
+  section_type_id: number;
+  audit_unit_code: string;
+  name: string;
+  branch_head_id: number;
+  branch_subhead_id?: number | null;
+  last_audit_date: string;
+  frequency: number;
+  is_active?: number;
+  admin_id?: number;
+}
+
+export interface UpdateAuditUnitDto extends Partial<CreateAuditUnitDto> {
+  id?: number;
+}
+
+@Injectable({ providedIn: 'root' })
+export class AuditUnitService {
+  private http = inject(HttpClient);
+  private config = inject(APP_CONFIG);
+  private apiUrl = `${this.config.apiUrl}/audit-units`;
+
+  findAll() { return this.http.get<any>(this.apiUrl); }
+  findOne(id: string | number) { return this.http.get<any>(`${this.apiUrl}/${id}`); }
+  create(data: CreateAuditUnitDto) { return this.http.post<any>(this.apiUrl, data); }
+  update(id: string | number, data: UpdateAuditUnitDto) { return this.http.patch<any>(`${this.apiUrl}/${id}`, data); }
+  toggleStatus(id: string | number) { return this.http.patch<any>(`${this.apiUrl}/${id}/status`, {}); }
+  updateFrequency(id: string | number, frequency: number) { return this.http.patch<any>(`${this.apiUrl}/${id}/frequency`, { frequency }); }
+  remove(id: string | number) { return this.http.delete<any>(`${this.apiUrl}/${id}`); }
+  getLookups() { return this.http.get<any>(`${this.apiUrl}/lookups`); }
+  getFrequencyOptions() { return this.http.get<any>(`${this.apiUrl}/frequency-options`); }
+  getByAuditByUnit(auditUnitId: number) { return this.http.get<any>(`${this.apiUrl}/get-target/${auditUnitId}`) }
+  getByAuditAndYear(auditUnitId: number, yearId: number) { return this.http.get(`${this.apiUrl}/audit-unit/${auditUnitId}/year/${yearId}`) }
+  createTarget(data: any) { return this.http.post(`${this.apiUrl}/create-target`, data) }
+  updateTarget(id: number, data: any) { return this.http.patch(`${this.apiUrl}/update-target/${id}`, data) }
+  removeTarget(id: number) { return this.http.delete(`${this.apiUrl}/remove-target/${id}`) }
+  getYears() { return this.http.get(`${this.apiUrl}/years`) };
 }
 
 export interface Employee {
