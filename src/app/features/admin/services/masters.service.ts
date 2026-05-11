@@ -199,3 +199,66 @@ export class PasswordPolicyService {
   getPolicy(): Observable<PasswordPolicy> { return this.http.get<PasswordPolicy>(this.apiUrl); }
   updatePolicy(data: PasswordPolicy): Observable<PasswordPolicy> { return this.http.post<PasswordPolicy>(this.apiUrl, data); }
 }
+
+export interface CreateSchemeDto {
+  scheme_type_id: number;
+  category_id: number;
+  scheme_code: string;
+  name: string;
+  is_active?: number;
+  admin_id?: number;
+}
+
+export interface UpdateSchemeDto extends Partial<CreateSchemeDto> {
+  id?: number;
+}
+
+@Injectable({ providedIn: 'root' })
+export class AuditSchemeMasterService {
+  private http = inject(HttpClient);
+  private config = inject(APP_CONFIG);
+
+  private apiUrl = `${this.config.apiUrl}/audit-schemes`;
+
+  findAll() {
+    return this.http.get<any>(this.apiUrl);
+  }
+
+  findOne(id: string | number) {
+    return this.http.get<any>(`${this.apiUrl}/${id}`);
+  }
+
+  create(data: CreateSchemeDto) {
+    return this.http.post<any>(this.apiUrl, data);
+  }
+
+  update(
+    id: string | number,
+    data: UpdateSchemeDto,
+  ) {
+    return this.http.patch<any>(
+      `${this.apiUrl}/${id}`,
+      data,
+    );
+  }
+
+  toggleStatus(id: string | number) {
+    return this.http.patch<any>(
+      `${this.apiUrl}/${id}/status`,
+      {},
+    );
+  }
+
+  remove(id: string | number) {
+    return this.http.delete<any>(
+      `${this.apiUrl}/${id}`,
+    );
+  }
+
+  getCategories(schemeTypeId: number) {
+    return this.http.get<any>(
+      `${this.apiUrl}/categories/${schemeTypeId}`,
+    );
+  }
+}
+
