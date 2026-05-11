@@ -15,24 +15,30 @@ import { ConfirmDialogModule } from 'primeng/confirmdialog';
     imports: [CommonModule, TableComponent, ToastModule, ConfirmDialogModule],
     providers: [MessageService, ConfirmationService],
     template: `
-    <div class="card">
-      <div class="flex align-items-center justify-content-between mb-4">
-        <h5 class="m-0 text-xl font-semibold">Audit Unit Master</h5>
-      </div>
+  <div class="card">
 
-      <app-table
-        [columns]="columns"
-        [data]="auditUnits()"
-        [loading]="loading()"
-        [actionDisplayMode]="'buttons'"
-        (onAdd)="openForm()"
-        (onActionClick)="onAction($event)"
-        (onRefresh)="loadAuditUnits()"
-      ></app-table>
+    <div class="flex align-items-center justify-content-between mb-4">
+      <h5 class="m-0 text-xl font-semibold">
+        Audit Unit Master
+      </h5>
     </div>
-    <p-toast></p-toast>
-    <p-confirmDialog></p-confirmDialog>
-  `
+
+    <app-table
+      [columns]="columns"
+      [data]="auditUnits()"
+      [loading]="loading()"
+      [globalFilterFields]="globalFilterFields"
+      [actionDisplayMode]="'buttons'"
+      (onAdd)="openForm()"
+      (onActionClick)="onAction($event)"
+      (onRefresh)="loadAuditUnits()"
+    ></app-table>
+
+  </div>
+
+  <p-toast></p-toast>
+  <p-confirmDialog></p-confirmDialog>
+`
 })
 export class AuditUnitMasterComponent implements OnInit {
     private auditUnitService = inject(AuditUnitService);
@@ -43,6 +49,15 @@ export class AuditUnitMasterComponent implements OnInit {
 
     auditUnits = signal<any[]>([]);
     loading = signal(false);
+
+    globalFilterFields = [
+        'audit_unit_code',
+        'name',
+        'section_name',
+        'branch_head_name',
+        'branch_subhead_name',
+        'frequency_name',
+    ];
 
     columns: TableColumn[] = [
         { field: '_edit', header: '', type: 'action', actionIcon: 'pi pi-pencil', actionName: 'edit', width: '50px', align: 'center', tooltip: 'Edit' },

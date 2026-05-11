@@ -5,7 +5,7 @@ import {
     signal,
 } from '@angular/core';
 
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
@@ -16,12 +16,12 @@ import { TableComponent } from '../../../shared/components/table/table.component
 
 import { FormDrawerService } from '../../../core/services/drawer/form-drawer.service';
 
-import { AuditSchemeMasterService } from '../services/masters.service';
+import { AuditQuestionMasterService } from '../services/masters.service';
 
-import { AuditSchemeFormComponent } from './audit-scheme-form.component';
+import { AuditQuestionSetFormComponent } from './audit-question-set-form.component';
 
 @Component({
-    selector: 'app-scheme-master',
+    selector: 'app-question-set-master',
     standalone: true,
     imports: [
         RouterModule,
@@ -34,19 +34,19 @@ import { AuditSchemeFormComponent } from './audit-scheme-form.component';
 
     <div class="flex align-items-center justify-content-between mb-4">
       <h5 class="m-0 text-xl font-semibold">
-        Audit Scheme Master
+        Question Set Master
       </h5>
     </div>
 
     <app-table
       [columns]="columns"
-      [data]="schemes()"
+      [data]="sets()"
       [loading]="loading()"
       [globalFilterFields]="globalFilterFields"
       [actionDisplayMode]="'buttons'"
       (onAdd)="openForm()"
       (onActionClick)="onAction($event)"
-      (onRefresh)="loadSchemes()"
+      (onRefresh)="load()"
     ></app-table>
 
   </div>
@@ -55,20 +55,30 @@ import { AuditSchemeFormComponent } from './audit-scheme-form.component';
   <p-confirmDialog></p-confirmDialog>
 `,
 })
-export class AuditSchemeMasterComponent implements OnInit {
-    private schemeService = inject(AuditSchemeMasterService);
-    private drawer = inject(FormDrawerService);
-    private messageService = inject(MessageService);
-    private confirmationService = inject(ConfirmationService);
+export class AuditQuestionSetMasterComponent implements OnInit {
+    private service = inject(
+        AuditQuestionMasterService,
+    );
 
-    schemes = signal<any[]>([]);
+    private drawer = inject(
+        FormDrawerService,
+    );
+
+    private router = inject(Router);
+
+    private messageService =
+        inject(MessageService);
+
+    private confirmationService =
+        inject(ConfirmationService);
+
+    sets = signal<any[]>([]);
+
     loading = signal(false);
 
     globalFilterFields = [
-        'scheme_type_name',
-        'scheme_code',
         'name',
-        'category_name',
+        'set_type_name',
     ];
 
     columns: TableColumn[] = [
@@ -84,27 +94,15 @@ export class AuditSchemeMasterComponent implements OnInit {
         },
 
         {
-            field: 'scheme_type_name',
-            header: 'Scheme Type',
-            width: '180px',
-        },
-
-        {
-            field: 'scheme_code',
-            header: 'Scheme Code',
+            field: 'set_type_name',
+            header: 'Set Type',
             width: '180px',
         },
 
         {
             field: 'name',
-            header: 'Scheme Name',
-            width: '250px',
-        },
-
-        {
-            field: 'category_name',
-            header: 'Category',
-            width: '250px',
+            header: 'Set Name',
+            width: '320px',
         },
 
         {
@@ -116,12 +114,34 @@ export class AuditSchemeMasterComponent implements OnInit {
         },
 
         {
+            field: '_headers',
+            header: '',
+            type: 'action',
+            actionIcon: 'pi pi-list',
+            actionName: 'headers',
+            width: '60px',
+            align: 'center',
+            tooltip: 'Manage Headers',
+        },
+
+        {
+            field: '_questions',
+            header: '',
+            type: 'action',
+            actionIcon: 'pi pi-book',
+            actionName: 'questions',
+            width: '60px',
+            align: 'center',
+            tooltip: 'Manage Questions',
+        },
+
+        {
             field: '_status',
             header: '',
             type: 'action',
             actionIcon: 'pi pi-sync',
             actionName: 'toggle-status',
-            width: '50px',
+            width: '60px',
             align: 'center',
             tooltip: 'Toggle Status',
         },
@@ -132,7 +152,7 @@ export class AuditSchemeMasterComponent implements OnInit {
             type: 'action',
             actionIcon: 'pi pi-trash',
             actionName: 'delete',
-            width: '50px',
+            width: '60px',
             align: 'center',
             tooltip: 'Delete',
             cssClass: 'text-danger',
@@ -140,15 +160,24 @@ export class AuditSchemeMasterComponent implements OnInit {
     ];
 
     ngOnInit() {
-        this.loadSchemes();
+        this.load();
     }
 
-    loadSchemes() {
+    load() {
         this.loading.set(true);
 
-        this.schemeService.findAll().subscribe({
-            next: (result) => {
-                this.schemes.set(this.parseRows(result));
+        this.service.findAllSets().subscribe({
+            next: (res: any) => {
+                const rows = Array.isArray(res)
+                    ? res
+                    : Array.isArray(res?.data)
+                        ? res.data
+                        : Array.isArray(res?.rows)
+                            ? res.rows
+                            : [];
+
+                this.sets.set(rows);
+
                 this.loading.set(false);
             },
 
@@ -158,43 +187,34 @@ export class AuditSchemeMasterComponent implements OnInit {
                 this.messageService.add({
                     severity: 'error',
                     summary: 'Error',
-                    detail: 'Unable to load schemes',
+                    detail:
+                        'Unable to load question sets',
                 });
             },
         });
     }
 
-    private parseRows(res: any): any[] {
-        if (Array.isArray(res)) return res;
-
-        if (Array.isArray(res?.data)) return res.data;
-
-        if (Array.isArray(res?.rows)) return res.rows;
-
-        return [];
-    }
-
     async openForm(row?: any) {
         const res = await this.drawer.open(
-            AuditSchemeFormComponent,
+            AuditQuestionSetFormComponent,
             {
                 header: row
-                    ? 'Edit Scheme'
-                    : 'Create New Scheme',
+                    ? 'Update Question Set'
+                    : 'Create New Question Set',
 
                 data: row,
 
-                width: 'min(700px, 100vw)',
+                width: 'min(650px, 100vw)',
             },
         );
 
         if (res?.saved) {
-            this.loadSchemes();
+            this.load();
 
             this.messageService.add({
                 severity: 'success',
                 summary: 'Success',
-                detail: `Scheme ${row ? 'updated' : 'created'
+                detail: `Question set ${row ? 'updated' : 'created'
                     } successfully`,
             });
         }
@@ -209,48 +229,64 @@ export class AuditSchemeMasterComponent implements OnInit {
             return;
         }
 
+        if (event.name === 'headers') {
+            this.openHeaders(event.row);
+            return;
+        }
+
+        if (event.name === 'questions') {
+            this.openQuestions(event.row);
+            return;
+        }
+
         if (event.name === 'toggle-status') {
             this.toggleStatus(event.row);
             return;
         }
 
         if (event.name === 'delete') {
-            this.deleteScheme(event.row);
+            this.deleteSet(event.row);
             return;
         }
     }
 
+    private openHeaders(row: any) {
+        this.router.navigate([
+            '/admin/question-header-master',
+            row.id,
+        ]);
+    }
+
+    private openQuestions(row: any) {
+        this.router.navigate([
+            '/admin/question-master',
+            row.id,
+        ]);
+    }
+
     private toggleStatus(row: any) {
-        this.schemeService
-            .toggleStatus(row.id)
+        this.service
+            .toggleSetStatus(row.id)
             .subscribe({
                 next: () => {
-                    this.loadSchemes();
+                    this.load();
 
                     this.messageService.add({
                         severity: 'success',
                         summary: 'Success',
-                        detail: `Scheme ${Number(row.is_active) === 1
+                        detail: `Question set ${Number(row.is_active) === 1
                             ? 'deactivated'
                             : 'activated'
                             } successfully`,
                     });
                 },
-
-                error: () => {
-                    this.messageService.add({
-                        severity: 'error',
-                        summary: 'Error',
-                        detail: 'Unable to update status',
-                    });
-                },
             });
     }
 
-    private deleteScheme(row: any) {
+    private deleteSet(row: any) {
         this.confirmationService.confirm({
             message:
-                'Are you sure you want to delete this scheme?',
+                'Are you sure you want to delete this question set?',
 
             header: 'Confirm Delete',
 
@@ -262,26 +298,18 @@ export class AuditSchemeMasterComponent implements OnInit {
 
             accept: () => {
                 this.confirmationService.close();
-                this.schemeService
-                    .remove(row.id)
+
+                this.service
+                    .removeSet(row.id)
                     .subscribe({
                         next: () => {
-                            this.loadSchemes();
+                            this.load();
 
                             this.messageService.add({
                                 severity: 'success',
                                 summary: 'Deleted',
                                 detail:
-                                    'Scheme deleted successfully',
-                            });
-                        },
-
-                        error: () => {
-                            this.messageService.add({
-                                severity: 'error',
-                                summary: 'Error',
-                                detail:
-                                    'Unable to delete scheme',
+                                    'Question set deleted successfully',
                             });
                         },
                     });

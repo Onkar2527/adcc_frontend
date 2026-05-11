@@ -17,30 +17,39 @@ import { ButtonModule } from 'primeng/button';
     imports: [CommonModule, TableComponent, ToastModule, ConfirmDialogModule, ButtonModule],
     providers: [MessageService, ConfirmationService],
     template: `
-    <div class="card">
-      <div class="flex align-items-center mb-3">
-        <button 
-            pButton 
-            icon="pi pi-arrow-left" 
-            class="p-button-text mr-2"
-            (click)="goBack()">
-        </button>
+  <div class="card">
 
-        <h5 class="mb-0">Target Master - {{ unitName() }}</h5>
-        </div>
+    <div class="flex align-items-center mb-4">
 
-      <app-table
-        [columns]="columns"
-        [data]="targets()"
-        [loading]="loading()"
-        (onAdd)="openForm()"
-        (onActionClick)="onAction($event)"
-      ></app-table>
+      <button
+        pButton
+        icon="pi pi-arrow-left"
+        class="p-button-text mr-2"
+        (click)="goBack()">
+      </button>
+
+      <h5 class="m-0 text-xl font-semibold">
+        Target Master - {{ unitName() }}
+      </h5>
+
     </div>
 
-    <p-toast></p-toast>
-    <p-confirmDialog></p-confirmDialog>
-  `
+    <app-table
+      [columns]="columns"
+      [data]="targets()"
+      [loading]="loading()"
+      [globalFilterFields]="globalFilterFields"
+      [actionDisplayMode]="'buttons'"
+      (onAdd)="openForm()"
+      (onActionClick)="onAction($event)"
+      (onRefresh)="load()"
+    ></app-table>
+
+  </div>
+
+  <p-toast></p-toast>
+  <p-confirmDialog></p-confirmDialog>
+`
 })
 export class AuditTargetMasterComponent implements OnInit {
     private auditUnitService = inject(AuditUnitService);
@@ -54,6 +63,13 @@ export class AuditTargetMasterComponent implements OnInit {
     loading = signal(false);
 
     unitName = signal('');
+
+    globalFilterFields = [
+        'year_name',
+        'deposit_target',
+        'advances_target',
+        'npa_target',
+    ];
 
     auditUnitId!: number;
 

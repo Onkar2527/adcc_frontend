@@ -37,6 +37,7 @@ export class AppMenu implements OnInit {
                 { label: 'Section Master', icon: 'pi pi-fw pi-list-check', routerLink: ['/admin/audit-section-master'] },
                 { label: 'Unit Master', icon: 'pi pi-fw pi-building', routerLink: ['/admin/audit-unit-master'] },
                 { label: 'Scheme Master', icon: 'pi pi-fw pi-sitemap', routerLink: ['/admin/audit-scheme-master'] },
+                { label: 'Question Master', icon: 'pi pi-fw pi-question-circle', routerLink: ['/admin/question-set-master'] },
             ],
         }
     ];

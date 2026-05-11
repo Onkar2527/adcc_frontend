@@ -130,11 +130,11 @@ export class AuditSchemeFormComponent {
 
         if (data) {
             this.schemeTypeId.set(
-                data.scheme_type_id ?? null,
+                Number(data.scheme_type_id) || null,
             );
 
             this.categoryId.set(
-                data.category_id ?? null,
+                Number(data.category_id) || null,
             );
 
             this.schemeCode.set(

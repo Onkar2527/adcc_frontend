@@ -262,3 +262,195 @@ export class AuditSchemeMasterService {
   }
 }
 
+export interface CreateQuestionSetDto {
+  name: string;
+  set_type_id: number;
+  is_active?: number;
+  admin_id?: number;
+}
+
+export interface UpdateQuestionSetDto
+  extends Partial<CreateQuestionSetDto> {
+  id?: number;
+}
+
+export interface CreateQuestionHeaderDto {
+  question_set_id: number;
+  name: string;
+  is_active?: number;
+  admin_id?: number;
+}
+
+export interface UpdateQuestionHeaderDto
+  extends Partial<CreateQuestionHeaderDto> {
+  id?: number;
+}
+
+export interface CreateQuestionDto {
+  set_id: number;
+  header_id: number;
+  question: string;
+  question_type_id: number;
+  option_id: number;
+  applicable_id: number;
+  risk_category_id: number;
+  is_active?: number;
+  admin_id?: number;
+}
+
+export interface UpdateQuestionDto
+  extends Partial<CreateQuestionDto> {
+  id?: number;
+}
+
+@Injectable({ providedIn: 'root' })
+export class AuditQuestionMasterService {
+  private http = inject(HttpClient);
+  private config = inject(APP_CONFIG);
+
+  private apiUrl =
+    `${this.config.apiUrl}/audit-question-master`;
+
+  // Question Set
+  findAllSets() {
+    return this.http.get<any>(
+      `${this.apiUrl}/sets`,
+    );
+  }
+
+  findOneSet(id: string | number) {
+    return this.http.get<any>(
+      `${this.apiUrl}/sets/${id}`,
+    );
+  }
+
+  createSet(data: CreateQuestionSetDto) {
+    return this.http.post<any>(
+      `${this.apiUrl}/sets`,
+      data,
+    );
+  }
+
+  updateSet(
+    id: string | number,
+    data: UpdateQuestionSetDto,
+  ) {
+    return this.http.patch<any>(
+      `${this.apiUrl}/sets/${id}`,
+      data,
+    );
+  }
+
+  toggleSetStatus(id: string | number) {
+    return this.http.patch<any>(
+      `${this.apiUrl}/sets/${id}/status`,
+      {},
+    );
+  }
+
+  removeSet(id: string | number) {
+    return this.http.delete<any>(
+      `${this.apiUrl}/sets/${id}`,
+    );
+  }
+
+  // Question Header 
+
+  findHeadersBySet(setId: string | number) {
+    return this.http.get<any>(
+      `${this.apiUrl}/headers/${setId}`,
+    );
+  }
+
+  findOneHeader(id: string | number) {
+    return this.http.get<any>(
+      `${this.apiUrl}/header/${id}`,
+    );
+  }
+
+  createHeader(data: CreateQuestionHeaderDto) {
+    return this.http.post<any>(
+      `${this.apiUrl}/headers`,
+      data,
+    );
+  }
+
+  updateHeader(
+    id: string | number,
+    data: UpdateQuestionHeaderDto,
+  ) {
+    return this.http.patch<any>(
+      `${this.apiUrl}/headers/${id}`,
+      data,
+    );
+  }
+
+  toggleHeaderStatus(id: string | number) {
+    return this.http.patch<any>(
+      `${this.apiUrl}/headers/${id}/status`,
+      {},
+    );
+  }
+
+  removeHeader(id: string | number) {
+    return this.http.delete<any>(
+      `${this.apiUrl}/headers/${id}`,
+    );
+  }
+
+  // Question Master
+
+  findQuestionsByHeader(
+    headerId: string | number,
+  ) {
+    return this.http.get<any>(
+      `${this.apiUrl}/questions/${headerId}`,
+    );
+  }
+
+  findOneQuestion(id: string | number) {
+    return this.http.get<any>(
+      `${this.apiUrl}/question/${id}`,
+    );
+  }
+
+  createQuestion(data: CreateQuestionDto) {
+    return this.http.post<any>(
+      `${this.apiUrl}/questions`,
+      data,
+    );
+  }
+
+  updateQuestion(
+    id: string | number,
+    data: UpdateQuestionDto,
+  ) {
+    return this.http.patch<any>(
+      `${this.apiUrl}/questions/${id}`,
+      data,
+    );
+  }
+
+  toggleQuestionStatus(
+    id: string | number,
+  ) {
+    return this.http.patch<any>(
+      `${this.apiUrl}/questions/${id}/status`,
+      {},
+    );
+  }
+
+  removeQuestion(id: string | number) {
+    return this.http.delete<any>(
+      `${this.apiUrl}/questions/${id}`,
+    );
+  }
+
+  getQuestionLookups() {
+    return this.http.get<any>(
+      `${this.apiUrl}/lookups`,
+    );
+  }
+
+}
+
