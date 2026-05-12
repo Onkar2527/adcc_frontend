@@ -14,6 +14,7 @@ import { FormDrawerRef } from '../../../core/services/drawer/form-drawer.ref';
 import {
     CheckboxFieldComponent,
     FormActionsComponent,
+    NumberFieldComponent,
     SelectFieldComponent,
     TextFieldComponent,
 } from '../../../shared/components/form';
@@ -32,11 +33,30 @@ import {
         TextFieldComponent,
         SelectFieldComponent,
         CheckboxFieldComponent,
-        FormActionsComponent
+        FormActionsComponent,
+        NumberFieldComponent
     ],
 
     template: `
     <div class="flex flex-column gap-3">
+
+    <div
+  class="grid">
+
+  <div class="col-12">
+
+    <app-select-field
+      label="Header"
+      [field]="selectedHeaderId"
+      [options]="headers()"
+      optionLabel="label"
+      optionValue="value"
+      [required]="true"
+    ></app-select-field>
+
+  </div>
+
+</div>
 
       <div>
         <label class="block mb-2 font-medium">
@@ -99,20 +119,110 @@ import {
 
         </div>
 
+      </div>
+
+      <div class="grid">
+
         <div class="col-12 md:col-6">
 
-          <app-select-field
-            label="Risk Category"
-            [field]="riskCategoryId"
-            [options]="riskParameters()"
+            <app-select-field
+            label="Business Risk Category"
+            [field]="businessRiskCategoryId"
+            [options]="businessRiskCategories()"
             optionLabel="label"
             optionValue="value"
-            [required]="true"
-          ></app-select-field>
+            ></app-select-field>
 
         </div>
 
-      </div>
+        <div class="col-12 md:col-6">
+
+            <app-select-field
+            label="Control Risk Category"
+            [field]="controlRiskCategoryId"
+            [options]="controlRiskCategories()"
+            optionLabel="label"
+            optionValue="value"
+            ></app-select-field>
+
+        </div>
+
+        </div>
+
+        <div class="grid">
+
+        <div class="col-12 md:col-6">
+
+            <app-select-field
+            label="Key Aspect"
+            [field]="keyAspectId"
+            [options]="keyAspects()"
+            optionLabel="label"
+            optionValue="value"
+            ></app-select-field>
+
+        </div>
+
+        <div class="col-12 md:col-6">
+
+            <app-select-field
+            label="Residual Risk"
+            [field]="residualRiskId"
+            [options]="residualRisks()"
+            optionLabel="label"
+            optionValue="value"
+            ></app-select-field>
+
+        </div>
+
+        </div>
+
+        <div class="grid">
+
+        <div class="col-12 md:col-6">
+
+            <app-select-field
+            label="Broader Area of Audit"
+            [field]="auditAreaId"
+            [options]="auditAreas()"
+            optionLabel="label"
+            optionValue="value"
+            ></app-select-field>
+
+        </div>
+
+        <div class="col-12 md:col-6">
+
+            <app-number-field
+            label="Show Instances"
+            [field]="showInstances"
+            ></app-number-field>
+
+        </div>
+
+        </div>
+
+        <div class="grid">
+
+        <div class="col-12 md:col-6">
+
+            <app-checkbox-field
+            label="Auditor Evidence Upload"
+            [field]="auditEvidenceUpload"
+            ></app-checkbox-field>
+
+        </div>
+
+        <div class="col-12 md:col-6">
+
+            <app-checkbox-field
+            label="Compliance Evidence Upload"
+            [field]="complianceEvidenceUpload"
+            ></app-checkbox-field>
+
+        </div>
+
+        </div>
 
       <app-checkbox-field
         label="Is Active"
@@ -145,6 +255,11 @@ export class AuditQuestionFormComponent {
 
     question = signal('');
 
+    headers = signal<any[]>([]);
+
+    selectedHeaderId =
+        signal<number | null>(null);
+
     questionTypeId =
         signal<number | null>(null);
 
@@ -161,6 +276,47 @@ export class AuditQuestionFormComponent {
 
     saving = signal(false);
 
+    businessRiskCategoryId =
+        signal<number | null>(null);
+
+    businessRiskCategories =
+        signal<any[]>([]);
+
+    controlRiskCategoryId =
+        signal<number | null>(null);
+
+    controlRiskCategories =
+        signal<any[]>([]);
+
+    keyAspectId =
+        signal<number | null>(null);
+
+    keyAspects =
+        signal<any[]>([]);
+
+    keyAspectMappings: any = {};
+
+    residualRiskId =
+        signal<number | null>(null);
+
+    auditAreaId =
+        signal<number | null>(null);
+
+    auditAreas =
+        signal<any[]>([]);
+
+    showInstances =
+        signal<number | null>(0);
+
+    auditEvidenceUpload =
+        signal(false);
+
+    complianceEvidenceUpload =
+        signal(false);
+
+    residualRisks =
+        signal<any[]>([]);
+
     questionTypes = signal<any[]>([]);
 
     inputMethods = signal<any[]>([]);
@@ -176,11 +332,48 @@ export class AuditQuestionFormComponent {
             data?.set_id,
         );
 
-        this.headerId = Number(
-            data?.header_id,
+        this.headerId =
+            data?.header_id != null
+                ? Number(data.header_id)
+                : 0;
+
+        this.selectedHeaderId.set(
+            this.headerId || null,
         );
 
         this.loadLookups();
+        this.loadHeaders();
+
+        console.log(this.ref.data);
+
+        effect(() => {
+
+            const value =
+                this.controlRiskCategoryId();
+
+            if (
+                value === null ||
+                value === undefined
+            ) {
+                this.keyAspects.set([]);
+
+                return;
+            }
+
+            const options =
+                this.keyAspectMappings[
+                String(value)
+                ] ?? [];
+
+            this.keyAspects.set(
+                options,
+            );
+
+            console.log(
+                'Dynamic Key Aspects:',
+                options,
+            );
+        });
 
         if (data) {
             this.question.set(
@@ -199,21 +392,109 @@ export class AuditQuestionFormComponent {
             );
 
             this.applicableId.set(
-                Number(
-                    data.applicable_id,
-                ) || null,
+                data.applicable_id != null
+                    ? Number(data.applicable_id)
+                    : null,
             );
 
             this.riskCategoryId.set(
-                Number(
-                    data.risk_category_id,
-                ) || null,
+                data.risk_category_id != null
+                    ? Number(data.risk_category_id)
+                    : null,
             );
 
             this.isActive.set(
                 Number(data.is_active) !== 0,
             );
+
+            this.businessRiskCategoryId.set(
+                data.risk_category_id != null
+                    ? Number(
+                        data.risk_category_id,
+                    )
+                    : null,
+            );
+
+            this.controlRiskCategoryId.set(
+                data.control_risk_id != null
+                    ? Number(
+                        data.control_risk_id,
+                    )
+                    : null,
+            );
+
+            this.residualRiskId.set(
+                data.residual_risk_id != null
+                    ? Number(
+                        data.residual_risk_id,
+                    )
+                    : null,
+            );
+
+
+            this.auditAreaId.set(
+                data.area_of_audit_id != null
+                    ? Number(
+                        data.area_of_audit_id,
+                    )
+                    : null,
+            );
+
+            this.showInstances.set(
+                data.show_instances != null
+                    ? Number(
+                        data.show_instances,
+                    )
+                    : 0,
+            );
+
+            this.auditEvidenceUpload.set(
+                Number(
+                    data.audit_ev_upload,
+                ) === 1,
+            );
+
+            this.complianceEvidenceUpload.set(
+                Number(
+                    data.compliance_ev_upload,
+                ) === 1,
+            );
         }
+    }
+
+    loadHeaders() {
+
+        if (
+            !this.setId ||
+            this.headerId
+        ) {
+            return;
+        }
+
+        this.service
+            .findHeadersBySet(
+                this.setId,
+            )
+            .subscribe({
+                next: (res: any) => {
+
+                    const rows =
+                        Array.isArray(res)
+                            ? res
+                            : res?.data ?? [];
+
+                    this.headers.set(
+                        rows.map(
+                            (x: any) => ({
+                                label: x.name,
+                                value: Number(
+                                    x.id,
+                                ),
+                            }),
+                        ),
+                    );
+                },
+            });
     }
 
     loadLookups() {
@@ -237,16 +518,62 @@ export class AuditQuestionFormComponent {
                     this.riskParameters.set(
                         res?.riskParameters ?? [],
                     );
+
+                    this.businessRiskCategories.set(
+                        res?.businessRiskCategories ?? [],
+                    );
+
+                    this.controlRiskCategories.set(
+                        res?.controlRiskCategories ?? [],
+                    );
+
+                    this.keyAspectMappings =
+                        res?.keyAspectMappings ?? {};
+
+                    const controlRiskId =
+                        this.controlRiskCategoryId();
+
+                    if (controlRiskId) {
+
+                        const options =
+                            this.keyAspectMappings[
+                            String(controlRiskId)
+                            ] ?? [];
+
+                        this.keyAspects.set(
+                            options,
+                        );
+                        const data = this.ref.data;
+
+                        if (data?.key_aspect_id != null) {
+
+                            this.keyAspectId.set(
+                                Number(
+                                    data.key_aspect_id,
+                                ),
+                            );
+                        }
+                    }
+
+                    this.residualRisks.set(
+                        res?.residualRisks ?? [],
+                    );
+
+                    this.auditAreas.set(
+                        res?.auditAreas ?? [],
+                    );
                 },
             });
     }
 
     save() {
-        const payload: CreateQuestionDto =
-        {
+        const payload: CreateQuestionDto = {
+
             set_id: this.setId,
 
-            header_id: this.headerId,
+            header_id: Number(
+                this.selectedHeaderId(),
+            ),
 
             question: this.question()
                 .trim(),
@@ -263,9 +590,40 @@ export class AuditQuestionFormComponent {
                 this.applicableId(),
             ),
 
+            // Business Risk Category
             risk_category_id: Number(
-                this.riskCategoryId(),
+                this.businessRiskCategoryId(),
             ),
+
+            area_of_audit_id: Number(
+                this.auditAreaId(),
+            ),
+
+            control_risk_id: Number(
+                this.controlRiskCategoryId(),
+            ),
+
+            key_aspect_id: Number(
+                this.keyAspectId(),
+            ),
+
+            residual_risk_id: Number(
+                this.residualRiskId(),
+            ),
+
+            show_instances: Number(
+                this.showInstances() ?? 0,
+            ),
+
+            audit_ev_upload:
+                this.auditEvidenceUpload()
+                    ? 1
+                    : 0,
+
+            compliance_ev_upload:
+                this.complianceEvidenceUpload()
+                    ? 1
+                    : 0,
 
             is_active: this.isActive()
                 ? 1

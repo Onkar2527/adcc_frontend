@@ -20,6 +20,8 @@ import { AuditQuestionMasterService } from '../services/masters.service';
 
 import { ButtonModule } from 'primeng/button';
 import { AuditQuestionFormComponent } from './audit-question-form.component';
+import { CommonModule } from '@angular/common';
+import { AuditQuestionRiskMappingComponent } from './audit-question-risk-mapping.component';
 
 @Component({
     selector: 'app-question-master',
@@ -28,7 +30,7 @@ import { AuditQuestionFormComponent } from './audit-question-form.component';
         RouterModule,
         TableComponent,
         ToastModule,
-        ConfirmDialogModule, ButtonModule
+        ConfirmDialogModule, ButtonModule, CommonModule
     ],
     template: `
     <div class="card">
@@ -37,19 +39,34 @@ import { AuditQuestionFormComponent } from './audit-question-form.component';
 
         <button
           pButton
-          type="button"
-          class="p-button-text p-button-sm mr-2"
+          icon="pi pi-arrow-left"
+          class="p-button-text mr-2"
           (click)="goBack()">
-
-          <i class="pi pi-arrow-left mr-2"></i>
-
-          Back
-
         </button>
 
-        <h5 class="m-0 text-xl font-semibold">
-          Question Master - {{ headerName() }}
-        </h5>
+        <div>
+
+  <h5 class="m-0 text-xl font-semibold">
+    Question Master
+  </h5>
+
+  <div class="text-sm text-500 mt-1">
+
+    <span *ngIf="setName()">
+      Set:
+      <strong>{{ setName() }}</strong>
+    </span>
+
+    <span *ngIf="headerName()">
+      &nbsp; | &nbsp;
+
+      Header:
+      <strong>{{ headerName() }}</strong>
+    </span>
+
+  </div>
+
+</div>
 
       </div>
 
@@ -81,6 +98,8 @@ export class AuditQuestionMasterComponent implements OnInit {
         FormDrawerService,
     );
 
+    openedFrom = 'set';
+
     private service = inject(
         AuditQuestionMasterService,
     );
@@ -93,7 +112,9 @@ export class AuditQuestionMasterComponent implements OnInit {
 
     setId = 0;
 
-    headerId = 0;
+    headerId: number | null = null;
+
+    setName = signal('');
 
     headerName = signal('');
 
@@ -136,6 +157,12 @@ export class AuditQuestionMasterComponent implements OnInit {
             field: 'option_name',
             header: 'Input Method',
             width: '220px',
+        },
+
+        {
+            field: 'audit_area_name',
+            header: 'Area of Audit',
+            width: '260px',
         },
 
         {
@@ -194,20 +221,49 @@ export class AuditQuestionMasterComponent implements OnInit {
             ),
         );
 
-        this.headerId = Number(
+        this.openedFrom =
+            this.route.snapshot.queryParamMap.get(
+                'from',
+            ) || 'set';
+
+        const headerIdParam =
             this.route.snapshot.paramMap.get(
                 'headerId',
-            ),
-        );
+            );
+
+        this.headerId = headerIdParam
+            ? Number(headerIdParam)
+            : null;
+
+        this.loadSet();
 
         this.loadHeader();
 
         this.load();
     }
 
-    loadHeader() {
+    loadSet() {
         this.service
-            .findOneHeader(this.headerId)
+            .findOneSet(this.setId)
+            .subscribe({
+                next: (res: any) => {
+                    this.setName.set(
+                        res?.name ?? '',
+                    );
+                },
+            });
+    }
+
+    loadHeader() {
+        if (!this.headerId) {
+            this.headerName.set('');
+            return;
+        }
+
+        this.service
+            .findOneHeader(
+                Number(this.headerId),
+            )
             .subscribe({
                 next: (res: any) => {
                     this.headerName.set(
@@ -220,39 +276,61 @@ export class AuditQuestionMasterComponent implements OnInit {
     load() {
         this.loading.set(true);
 
-        this.service
-            .findQuestionsByHeader(
+        const obs = this.headerId
+            ? this.service.findQuestionsByHeader(
                 this.headerId,
             )
-            .subscribe({
-                next: (res: any) => {
-                    const rows = Array.isArray(res)
-                        ? res
-                        : Array.isArray(res?.data)
-                            ? res.data
-                            : Array.isArray(res?.rows)
-                                ? res.rows
-                                : [];
+            : this.service.findQuestionsBySet(
+                this.setId,
+            );
 
-                    this.questions.set(rows);
+        obs.subscribe({
+            next: (res: any) => {
+                const rows = Array.isArray(res)
+                    ? res
+                    : Array.isArray(res?.data)
+                        ? res.data
+                        : Array.isArray(res?.rows)
+                            ? res.rows
+                            : [];
 
-                    this.loading.set(false);
-                },
+                this.questions.set(rows);
 
-                error: () => {
-                    this.loading.set(false);
+                this.loading.set(false);
+            },
 
-                    this.messageService.add({
-                        severity: 'error',
-                        summary: 'Error',
-                        detail:
-                            'Unable to load questions',
-                    });
-                },
-            });
+            error: () => {
+                this.loading.set(false);
+
+                this.messageService.add({
+                    severity: 'error',
+                    summary: 'Error',
+                    detail:
+                        'Unable to load questions',
+                });
+            },
+        });
     }
 
     async openForm(row?: any) {
+
+        let formData = {
+            set_id: this.setId,
+            header_id: this.headerId,
+        };
+
+        if (row?.id) {
+
+            const fullData =
+                await this.service
+                    .findOneQuestion(row.id)
+                    .toPromise();
+
+            formData = {
+                ...fullData,
+            };
+        }
+
         const res = await this.drawer.open(
             AuditQuestionFormComponent,
             {
@@ -260,23 +338,22 @@ export class AuditQuestionMasterComponent implements OnInit {
                     ? 'Update Question'
                     : 'Create New Question',
 
-                data: {
-                    ...row,
-                    set_id: this.setId,
-                    header_id: this.headerId,
-                },
+                data: formData,
 
                 width: 'min(850px, 100vw)',
             },
         );
 
         if (res?.saved) {
+
             this.load();
 
             this.messageService.add({
                 severity: 'success',
                 summary: 'Success',
-                detail: `Question ${row ? 'updated' : 'created'
+                detail: `Question ${row
+                    ? 'updated'
+                    : 'created'
                     } successfully`,
             });
         }
@@ -318,21 +395,35 @@ export class AuditQuestionMasterComponent implements OnInit {
     }
 
     goBack() {
+        if (
+            this.openedFrom === 'header'
+        ) {
+            this.router.navigate([
+                '/admin/question-header-master',
+                this.setId,
+            ]);
+
+            return;
+        }
+
         this.router.navigate([
-            '/admin/question-header-master',
-            this.setId,
+            '/admin/question-set-master',
         ]);
     }
 
-    private openRiskMapping(
+    private async openRiskMapping(
         row: any,
     ) {
-        this.messageService.add({
-            severity: 'info',
-            summary: 'Coming Soon',
-            detail:
-                'Risk Mapping module will be implemented next',
-        });
+        await this.drawer.open(
+            AuditQuestionRiskMappingComponent,
+            {
+                header: 'Question Risk Mapping',
+
+                data: row,
+
+                width: 'min(1100px, 100vw)',
+            },
+        );
     }
 
     private toggleStatus(row: any) {
@@ -348,8 +439,8 @@ export class AuditQuestionMasterComponent implements OnInit {
                         severity: 'success',
                         summary: 'Success',
                         detail: `Question ${Number(row.is_active) === 1
-                                ? 'deactivated'
-                                : 'activated'
+                            ? 'deactivated'
+                            : 'activated'
                             } successfully`,
                     });
                 },

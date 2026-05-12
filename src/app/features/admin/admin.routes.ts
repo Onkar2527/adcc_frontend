@@ -26,6 +26,13 @@ export const ADMIN_ROUTES: Routes = [
     { path: 'audit-scheme-master', component: AuditSchemeMasterComponent },
     { path: 'question-set-master', component: AuditQuestionSetMasterComponent },
     { path: 'question-header-master/:setId', component: AuditQuestionSetHeaderMasterComponent },
-    { path: 'question-master/:setId', component: AuditQuestionMasterComponent },
-    { path: 'question-master/:setId/:headerId', component: AuditQuestionMasterComponent },
+    {
+        path: 'question-master/:setId/:headerId',
+        component: AuditQuestionMasterComponent
+    },
+
+    {
+        path: 'question-master/:setId',
+        component: AuditQuestionMasterComponent
+    },
 ];

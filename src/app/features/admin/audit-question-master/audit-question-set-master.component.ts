@@ -258,10 +258,17 @@ export class AuditQuestionSetMasterComponent implements OnInit {
     }
 
     private openQuestions(row: any) {
-        this.router.navigate([
-            '/admin/question-master',
-            row.id,
-        ]);
+        this.router.navigate(
+            [
+                '/admin/question-master',
+                row.id,
+            ],
+            {
+                queryParams: {
+                    from: 'set',
+                },
+            },
+        );
     }
 
     private toggleStatus(row: any) {

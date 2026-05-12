@@ -293,6 +293,13 @@ export interface CreateQuestionDto {
   question_type_id: number;
   option_id: number;
   applicable_id: number;
+  area_of_audit_id: number;
+  control_risk_id: number;
+  key_aspect_id: number;
+  residual_risk_id: number;
+  show_instances: number;
+  audit_ev_upload: number;
+  compliance_ev_upload: number;
   risk_category_id: number;
   is_active?: number;
   admin_id?: number;
@@ -301,6 +308,14 @@ export interface CreateQuestionDto {
 export interface UpdateQuestionDto
   extends Partial<CreateQuestionDto> {
   id?: number;
+}
+
+export interface CreateQuestionRiskMappingDto {
+  question_id: number;
+  risk_type: string;
+  business_risk: string;
+  control_risk: string;
+  admin_id?: number;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -449,6 +464,41 @@ export class AuditQuestionMasterService {
   getQuestionLookups() {
     return this.http.get<any>(
       `${this.apiUrl}/lookups`,
+    );
+  }
+
+  findQuestionsBySet(
+    setId: string | number,
+  ) {
+    return this.http.get<any>(
+      `${this.apiUrl}/questions-set/${setId}`,
+    );
+  }
+
+  // Question Risk Mapping
+
+  findRiskMappings(
+    questionId: string | number,
+  ) {
+    return this.http.get<any>(
+      `${this.apiUrl}/question-risk-mapping/${questionId}`,
+    );
+  }
+
+  createRiskMapping(
+    data: CreateQuestionRiskMappingDto,
+  ) {
+    return this.http.post<any>(
+      `${this.apiUrl}/question-risk-mapping`,
+      data,
+    );
+  }
+
+  removeRiskMapping(
+    id: string | number,
+  ) {
+    return this.http.delete<any>(
+      `${this.apiUrl}/question-risk-mapping/${id}`,
     );
   }
 

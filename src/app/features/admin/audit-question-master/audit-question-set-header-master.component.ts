@@ -286,11 +286,18 @@ export class AuditQuestionSetHeaderMasterComponent implements OnInit {
     }
 
     private openQuestions(row: any) {
-        this.router.navigate([
-            '/admin/question-master',
-            this.setId,
-            row.id,
-        ]);
+        this.router.navigate(
+            [
+                '/admin/question-master',
+                this.setId,
+                row.id,
+            ],
+            {
+                queryParams: {
+                    from: 'header',
+                },
+            },
+        );
     }
 
     private toggleStatus(row: any) {
