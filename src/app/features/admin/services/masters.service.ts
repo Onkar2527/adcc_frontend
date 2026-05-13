@@ -200,6 +200,37 @@ export class PasswordPolicyService {
   updatePolicy(data: PasswordPolicy): Observable<PasswordPolicy> { return this.http.post<PasswordPolicy>(this.apiUrl, data); }
 }
 
+export interface MenuMaster {
+  id: number;
+  section_name: string;
+  menu_name: string;
+  is_active: number;
+}
+
+export interface CreateMenuMasterDto {
+  section_type_id: number;
+  name: string;
+  is_active: number;
+}
+
+export interface UpdateMenuMasterDto extends Partial<CreateMenuMasterDto> {
+  id?: number;
+}
+
+@Injectable({ providedIn: 'root' })
+export class MenuMasterService {
+  private http = inject(HttpClient);
+  private config = inject(APP_CONFIG);
+  private apiUrl = `${this.config.apiUrl}/menu-masters`;
+
+  getMenuMasters(): Observable<MenuMaster[]> { return this.http.get<MenuMaster[]>(this.apiUrl); }
+  getMenuMaster(id: number): Observable<MenuMaster> { return this.http.get<MenuMaster>(`${this.apiUrl}/${id}`); }
+  createMenuMaster(data: CreateMenuMasterDto): Observable<MenuMaster> { return this.http.post<MenuMaster>(this.apiUrl, data); }
+  updateMenuMaster(id: number, data: UpdateMenuMasterDto): Observable<MenuMaster> { return this.http.patch<MenuMaster>(`${this.apiUrl}/${id}`, data); }
+  deleteMenuMaster(id: number): Observable<any> { return this.http.delete(`${this.apiUrl}/${id}`); }
+  toggleStatus(id: string | number) { return this.http.put<any>(`${this.apiUrl}/${id}/toggle-status`, {}); }
+}
+
 export interface CreateSchemeDto {
   scheme_type_id: number;
   category_id: number;

@@ -7,6 +7,7 @@ import { AuditSectionMasterComponent } from './audit-section-master/audit-sectio
 import { EmployeeMasterComponent } from './employee-master/employee-master.component';
 import { AuditUnitMasterComponent } from './audit-unit-master/audit-unit-master.component';
 import { PasswordPolicyMasterComponent } from './password-policy-master/password-policy-master.component';
+import { MenuMasterComponent } from './menu-master/menu-master.component';
 import { AuditTargetMasterComponent } from './audit-unit-master/audit-target-master.component';
 import { AuditSchemeMasterComponent } from './audit-scheme-master/audit-scheme-master.component';
 import { AuditQuestionSetMasterComponent } from './audit-question-master/audit-question-set-master.component';
@@ -23,6 +24,7 @@ export const ADMIN_ROUTES: Routes = [
     { path: 'employee-master', component: EmployeeMasterComponent },
     { path: 'audit-unit-master', component: AuditUnitMasterComponent },
     { path: 'password-policy-master', component: PasswordPolicyMasterComponent },
+    { path: 'menu-master', component: MenuMasterComponent }
     { path: 'audit-unit-target-master/:auditUnitId', component: AuditTargetMasterComponent },
     { path: 'audit-scheme-master', component: AuditSchemeMasterComponent },
     { path: 'question-set-master', component: AuditQuestionSetMasterComponent },
