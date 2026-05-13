@@ -39,7 +39,7 @@ interface SearchItem {
             <i class="pi pi-bars"></i>
         </button>
         <a class="layout-topbar-logo" routerLink="/">
-            <img src="assets/images/logos/kredpool_logo.png" class="topbar-logo-img">
+            <!-- <img src="assets/images/logos/kredpool_logo.png" class="topbar-logo-img"> -->
             <span class="bank-name">Kredpool Solution Pvt Ltd</span>
         </a>
     </div>

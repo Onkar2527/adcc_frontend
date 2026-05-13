@@ -11,14 +11,14 @@ import { LayoutService } from '../service/layout.service';
 
 
 @Component({
-  selector: 'app-breadcrumb',
-  standalone: true,
-  imports: [CommonModule, BreadcrumbModule, ButtonModule, TooltipModule],
-  template: `
+    selector: 'app-breadcrumb',
+    standalone: true,
+    imports: [CommonModule, BreadcrumbModule, ButtonModule, TooltipModule],
+    template: `
         <div class="breadcrumb-container" [class.no-transition]="layoutService.isSidebarResizing()">
             <div class="breadcrumb-content">
                 <a (click)="navigateHome()" class="breadcrumb-home-logo">
-                    <img src="assets/images/logos/kredpool_logo.png" alt="Home">
+                    <!-- <img src="assets/images/logos/kredpool_logo.png" alt="Home"> -->
                 </a>
                 <p-breadcrumb [model]="breadcrumbItems"></p-breadcrumb>
                 
@@ -61,7 +61,7 @@ import { LayoutService } from '../service/layout.service';
             </div>
         </div>
     `,
-  styles: [`
+    styles: [`
         .breadcrumb-container {
             position: fixed;
             top: 3.5rem;
@@ -209,90 +209,90 @@ import { LayoutService } from '../service/layout.service';
     `]
 })
 export class AppBreadcrumb implements OnInit, OnDestroy {
-  breadcrumbItems: MenuItem[] = [];
-  homeItem: MenuItem = {
-    icon: 'pi pi-home',
-    command: () => this.router.navigate(['/'])
-  };
-  private routerSubscription?: Subscription;
-
-  constructor(
-    private router: Router,
-    private activatedRoute: ActivatedRoute,
-    public layoutService: LayoutService
-  ) { }
-
-  ngOnInit() {
-    this.updateBreadcrumb();
-    this.routerSubscription = this.router.events
-      .pipe(filter(event => event instanceof NavigationEnd))
-      .subscribe(() => this.updateBreadcrumb());
-  }
-
-  ngOnDestroy() {
-    this.routerSubscription?.unsubscribe();
-  }
-
-  navigateHome() {
-    this.router.navigate(['/']);
-  }
-
-  private updateBreadcrumb() {
-    const breadcrumbs: MenuItem[] = [];
-    let currentRoute = this.activatedRoute.root;
-
-    while (currentRoute.firstChild) {
-      currentRoute = currentRoute.firstChild;
-      const routeSnapshot = currentRoute.snapshot;
-      const routeUrl = routeSnapshot.url.map(segment => segment.path).join('/');
-
-      if (routeUrl) {
-        const label = this.formatLabel(routeUrl);
-        const fullPath = this.getFullPath(currentRoute);
-
-        breadcrumbs.push({
-          label: label,
-          icon: this.getIconForRoute(routeUrl),
-          command: () => this.router.navigate([fullPath])
-        });
-      }
-    }
-
-    this.breadcrumbItems = breadcrumbs;
-  }
-
-  private formatLabel(path: string): string {
-    return path.split('-').map(word =>
-      word.charAt(0).toUpperCase() + word.slice(1)
-    ).join(' ');
-  }
-
-  private getFullPath(route: ActivatedRoute): string {
-    const segments: string[] = [];
-    let current: ActivatedRoute | null = route;
-
-    while (current) {
-      const segment = current.snapshot.url.map(s => s.path).join('/');
-      if (segment) segments.unshift(segment);
-      current = current.parent;
-    }
-
-    return '/' + segments.join('/');
-  }
-
-  private getIconForRoute(path: string): string | undefined {
-    const iconMap: { [key: string]: string } = {
-      'dashboard': 'pi pi-chart-line',
-      'pos': 'pi pi-shopping-cart',
-      'product-master': 'pi pi-box',
-      'sales': 'pi pi-dollar',
-      'purchase': 'pi pi-shopping-bag',
-      'inventory': 'pi pi-database',
-      'reports': 'pi pi-file',
-      'settings': 'pi pi-cog'
+    breadcrumbItems: MenuItem[] = [];
+    homeItem: MenuItem = {
+        icon: 'pi pi-home',
+        command: () => this.router.navigate(['/'])
     };
-    return iconMap[path];
-  }
+    private routerSubscription?: Subscription;
+
+    constructor(
+        private router: Router,
+        private activatedRoute: ActivatedRoute,
+        public layoutService: LayoutService
+    ) { }
+
+    ngOnInit() {
+        this.updateBreadcrumb();
+        this.routerSubscription = this.router.events
+            .pipe(filter(event => event instanceof NavigationEnd))
+            .subscribe(() => this.updateBreadcrumb());
+    }
+
+    ngOnDestroy() {
+        this.routerSubscription?.unsubscribe();
+    }
+
+    navigateHome() {
+        this.router.navigate(['/']);
+    }
+
+    private updateBreadcrumb() {
+        const breadcrumbs: MenuItem[] = [];
+        let currentRoute = this.activatedRoute.root;
+
+        while (currentRoute.firstChild) {
+            currentRoute = currentRoute.firstChild;
+            const routeSnapshot = currentRoute.snapshot;
+            const routeUrl = routeSnapshot.url.map(segment => segment.path).join('/');
+
+            if (routeUrl) {
+                const label = this.formatLabel(routeUrl);
+                const fullPath = this.getFullPath(currentRoute);
+
+                breadcrumbs.push({
+                    label: label,
+                    icon: this.getIconForRoute(routeUrl),
+                    command: () => this.router.navigate([fullPath])
+                });
+            }
+        }
+
+        this.breadcrumbItems = breadcrumbs;
+    }
+
+    private formatLabel(path: string): string {
+        return path.split('-').map(word =>
+            word.charAt(0).toUpperCase() + word.slice(1)
+        ).join(' ');
+    }
+
+    private getFullPath(route: ActivatedRoute): string {
+        const segments: string[] = [];
+        let current: ActivatedRoute | null = route;
+
+        while (current) {
+            const segment = current.snapshot.url.map(s => s.path).join('/');
+            if (segment) segments.unshift(segment);
+            current = current.parent;
+        }
+
+        return '/' + segments.join('/');
+    }
+
+    private getIconForRoute(path: string): string | undefined {
+        const iconMap: { [key: string]: string } = {
+            'dashboard': 'pi pi-chart-line',
+            'pos': 'pi pi-shopping-cart',
+            'product-master': 'pi pi-box',
+            'sales': 'pi pi-dollar',
+            'purchase': 'pi pi-shopping-bag',
+            'inventory': 'pi pi-database',
+            'reports': 'pi pi-file',
+            'settings': 'pi pi-cog'
+        };
+        return iconMap[path];
+    }
 
 
 }

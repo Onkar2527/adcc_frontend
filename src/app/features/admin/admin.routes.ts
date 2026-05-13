@@ -5,8 +5,14 @@ import { UserMasterComponent } from './user-master/user-master.component';
 import { LoanMasterComponent } from './loan-master/loan-master.component';
 import { AuditSectionMasterComponent } from './audit-section-master/audit-section-master.component';
 import { EmployeeMasterComponent } from './employee-master/employee-master.component';
+import { AuditUnitMasterComponent } from './audit-unit-master/audit-unit-master.component';
 import { PasswordPolicyMasterComponent } from './password-policy-master/password-policy-master.component';
 import { MenuMasterComponent } from './menu-master/menu-master.component';
+import { AuditTargetMasterComponent } from './audit-unit-master/audit-target-master.component';
+import { AuditSchemeMasterComponent } from './audit-scheme-master/audit-scheme-master.component';
+import { AuditQuestionSetMasterComponent } from './audit-question-master/audit-question-set-master.component';
+import { AuditQuestionSetHeaderMasterComponent } from './audit-question-master/audit-question-set-header-master.component';
+import { AuditQuestionMasterComponent } from './audit-question-master/audit-question-master.component';
 
 export const ADMIN_ROUTES: Routes = [
     { path: 'branch-master', component: BranchMasterComponent },
@@ -15,6 +21,20 @@ export const ADMIN_ROUTES: Routes = [
     { path: 'loan-type-master', component: LoanMasterComponent },
     { path: 'audit-section-master', component: AuditSectionMasterComponent },
     { path: 'employee-master', component: EmployeeMasterComponent },
+    { path: 'audit-unit-master', component: AuditUnitMasterComponent },
     { path: 'password-policy-master', component: PasswordPolicyMasterComponent },
     { path: 'menu-master', component: MenuMasterComponent }
+    { path: 'audit-unit-target-master/:auditUnitId', component: AuditTargetMasterComponent },
+    { path: 'audit-scheme-master', component: AuditSchemeMasterComponent },
+    { path: 'question-set-master', component: AuditQuestionSetMasterComponent },
+    { path: 'question-header-master/:setId', component: AuditQuestionSetHeaderMasterComponent },
+    {
+        path: 'question-master/:setId/:headerId',
+        component: AuditQuestionMasterComponent
+    },
+
+    {
+        path: 'question-master/:setId',
+        component: AuditQuestionMasterComponent
+    },
 ];

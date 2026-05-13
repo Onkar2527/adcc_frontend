@@ -34,7 +34,10 @@ export class AppMenu implements OnInit {
             items: [
                 { label: 'Employee Master', icon: 'pi pi-fw pi-users', routerLink: ['/admin/employee-master'] },
                 { label: 'Password Policy', icon: 'pi pi-fw pi-lock', routerLink: ['/admin/password-policy-master'] },
-                { label: 'Audit Section Master', icon: 'pi pi-fw pi-list-check', routerLink: ['/admin/audit-section-master'] },
+                { label: 'Section Master', icon: 'pi pi-fw pi-list-check', routerLink: ['/admin/audit-section-master'] },
+                { label: 'Unit Master', icon: 'pi pi-fw pi-building', routerLink: ['/admin/audit-unit-master'] },
+                { label: 'Scheme Master', icon: 'pi pi-fw pi-sitemap', routerLink: ['/admin/audit-scheme-master'] },
+                { label: 'Question Master', icon: 'pi pi-fw pi-question-circle', routerLink: ['/admin/question-set-master'] },
                 { label: 'Menu Master', icon: 'pi pi-fw pi-list', routerLink: ['/admin/menu-master'] }
             ],
         }
