@@ -33,58 +33,68 @@ import { AuditQuestionRiskMappingComponent } from './audit-question-risk-mapping
         ConfirmDialogModule, ButtonModule, CommonModule
     ],
     template: `
-    <div class="card">
+  <div class="card border-round-xl shadow-1">
 
-      <div class="flex align-items-center mb-4">
+  <!-- Header -->
+  <div class="flex align-items-start justify-content-between mb-4">
 
-        <button
-          pButton
-          icon="pi pi-arrow-left"
-          class="p-button-text mr-2"
-          (click)="goBack()">
-        </button>
+    <!-- Left Section -->
+    <div class="flex align-items-center">
 
-        <div>
+      <button
+        pButton
+        icon="pi pi-arrow-left"
+        class="p-button-text p-button-rounded mr-2"
+        (click)="goBack()">
+      </button>
 
-  <h5 class="m-0 text-xl font-semibold">
-    Question Master
-  </h5>
+      <div>
 
-  <div class="text-sm text-500 mt-1">
+        <h5 class="m-0 text-xl font-semibold">
+          Question Master
+        </h5>
 
-    <span *ngIf="setName()">
-      Set:
-      <strong>{{ setName() }}</strong>
-    </span>
+        <div class="text-sm text-500 mt-1 flex flex-wrap gap-2">
 
-    <span *ngIf="headerName()">
-      &nbsp; | &nbsp;
+          <span *ngIf="setName()">
+            Set:
+            <strong>{{ setName() }}</strong>
+          </span>
 
-      Header:
-      <strong>{{ headerName() }}</strong>
-    </span>
+          <span *ngIf="headerName()">
+            |
+            Header:
+            <strong>{{ headerName() }}</strong>
+          </span>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- Table -->
+  <div class="border-1 border-gray-200 border-round-lg overflow-hidden">
+
+    <app-table
+      [columns]="columns"
+      [data]="questions()"
+      [loading]="loading()"
+      [globalFilterFields]="globalFilterFields"
+      [actionDisplayMode]="'buttons'"
+      (onAdd)="openForm()"
+      (onActionClick)="onAction($event)"
+      (onRefresh)="load()"
+    ></app-table>
 
   </div>
 
 </div>
 
-      </div>
-
-      <app-table
-        [columns]="columns"
-        [data]="questions()"
-        [loading]="loading()"
-        [globalFilterFields]="globalFilterFields"
-        [actionDisplayMode]="'buttons'"
-        (onAdd)="openForm()"
-        (onActionClick)="onAction($event)"
-        (onRefresh)="load()"
-      ></app-table>
-
-    </div>
-
-    <p-toast></p-toast>
-    <p-confirmDialog></p-confirmDialog>
+<p-toast></p-toast>
+<p-confirmDialog></p-confirmDialog>
   `,
 })
 export class AuditQuestionMasterComponent implements OnInit {

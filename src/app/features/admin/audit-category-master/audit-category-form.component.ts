@@ -42,59 +42,66 @@ import { ToastModule } from 'primeng/toast';
     ],
 
     template: `
-        <div class="grid">
+        <div class="max-h-[90vh] p-4 overflow-y-auto">
 
-            <div class="col-12">
+  <!-- Main Panel -->
+  <div class="border-1 border-gray-300 border-round-lg shadow-1 bg-white p-4">
 
-                <app-select-field
-                    label="Menu"
-                    [field]="menuId"
-                    [options]="menus()"
-                    optionLabel="label"
-                    optionValue="value"
-                    [required]="true"
-                ></app-select-field>
+    <div class="grid">
 
-            </div>
+      <!-- Menu -->
+      <div class="col-12 md:col-6">
+        <app-select-field
+          label="Menu"
+          [field]="menuId"
+          [options]="menus()"
+          optionLabel="label"
+          optionValue="value"
+          [required]="true"
+        ></app-select-field>
+      </div>
 
-            <div class="col-12">
+      <!-- Category -->
+      <div class="col-12 md:col-6">
+        <app-text-field
+          label="Category"
+          [field]="name"
+          [required]="true"
+        ></app-text-field>
+      </div>
 
-                <app-text-field
-                    label="Category"
-                    [field]="name"
-                    [required]="true"
-                ></app-text-field>
+      <!-- CC Account Category -->
+      <div class="col-12 md:col-6 flex align-items-center pt-3">
+        <app-checkbox-field
+          label="Is CC Account Category"
+          [field]="isCcAccCategory"
+        ></app-checkbox-field>
+      </div>
 
-            </div>
+      <!-- Is Active -->
+      <div class="col-12 md:col-6 flex align-items-center pt-3">
+        <app-checkbox-field
+          label="Is Active"
+          [field]="isActive"
+        ></app-checkbox-field>
+      </div>
 
-            <div class="col-12">
+    </div>
 
-                <app-checkbox-field
-                    label="Is CC Account Category"
-                    [field]="isCcAccCategory"
-                ></app-checkbox-field>
+    <!-- Footer -->
+    <div class="flex justify-content-end gap-2 pt-4 mt-4 border-top-1 border-gray-200">
+      <app-form-actions
+        [loading]="saving()"
+        (save)="save()"
+        (cancel)="cancel()"
+      ></app-form-actions>
+    </div>
 
-            </div>
+  </div>
 
-            <div class="col-12">
+  <p-toast></p-toast>
 
-                <app-checkbox-field
-                    label="Is Active"
-                    [field]="isActive"
-                ></app-checkbox-field>
-
-            </div>
-
-        </div>
-
-        <app-form-actions
-      class="mt-4"
-      [loading]="saving()"
-      (save)="save()"
-      (cancel)="cancel()"
-    ></app-form-actions>
-
-        <p-toast></p-toast>
+</div>
     `,
 })
 export class AuditCategoryFormComponent implements OnInit {
