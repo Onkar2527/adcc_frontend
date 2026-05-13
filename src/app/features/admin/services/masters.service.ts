@@ -501,6 +501,118 @@ export class AuditQuestionMasterService {
       `${this.apiUrl}/question-risk-mapping/${id}`,
     );
   }
-
 }
+export interface CreateCategoryDto {
+
+  menu_id: number;
+
+  name: string;
+
+  question_set_ids?: string;
+
+  is_cc_acc_category?: number;
+
+  is_active?: number;
+
+  admin_id?: number;
+}
+
+export interface UpdateCategoryDto
+  extends Partial<CreateCategoryDto> { }
+
+@Injectable({
+  providedIn: 'root',
+})
+export class AuditCategoryMasterService {
+
+  private http =
+    inject(HttpClient);
+
+  private config =
+    inject(APP_CONFIG);
+
+  private apiUrl =
+    `${this.config.apiUrl}/audit-category-master`;
+
+  findAll() {
+    return this.http.get<any>(
+      this.apiUrl,
+    );
+  }
+
+  findOne(
+    id: string | number,
+  ) {
+    return this.http.get<any>(
+      `${this.apiUrl}/${id}`,
+    );
+  }
+
+  create(
+    data: CreateCategoryDto,
+  ) {
+    return this.http.post<any>(
+      this.apiUrl,
+      data,
+    );
+  }
+
+  update(
+    id: string | number,
+    data: UpdateCategoryDto,
+  ) {
+    return this.http.patch<any>(
+      `${this.apiUrl}/${id}`,
+      data,
+    );
+  }
+
+  toggleStatus(
+    id: string | number,
+  ) {
+    return this.http.patch<any>(
+      `${this.apiUrl}/${id}/status`,
+      {},
+    );
+  }
+
+  remove(
+    id: string | number,
+  ) {
+    return this.http.delete<any>(
+      `${this.apiUrl}/${id}`,
+    );
+  }
+
+  getLookups() {
+    return this.http.get<any>(
+      `${this.apiUrl}/lookups`,
+    );
+  }
+
+  // Question Set Mapping
+
+  getQuestionMapping(
+    id: string | number,
+  ) {
+    return this.http.get<any>(
+      `${this.apiUrl}/question-mapping/${id}`,
+    );
+  }
+
+  updateQuestionMapping(
+
+    id: string | number,
+
+    question_set_ids: string,
+  ) {
+    return this.http.patch<any>(
+      `${this.apiUrl}/question-mapping/${id}`,
+      {
+        question_set_ids,
+      },
+    );
+  }
+}
+
 

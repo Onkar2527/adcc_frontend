@@ -12,6 +12,7 @@ import { AuditSchemeMasterComponent } from './audit-scheme-master/audit-scheme-m
 import { AuditQuestionSetMasterComponent } from './audit-question-master/audit-question-set-master.component';
 import { AuditQuestionSetHeaderMasterComponent } from './audit-question-master/audit-question-set-header-master.component';
 import { AuditQuestionMasterComponent } from './audit-question-master/audit-question-master.component';
+import { AuditCategoryMasterComponent } from './audit-category-master/audit-category-master.component';
 
 export const ADMIN_ROUTES: Routes = [
     { path: 'branch-master', component: BranchMasterComponent },
@@ -26,13 +27,7 @@ export const ADMIN_ROUTES: Routes = [
     { path: 'audit-scheme-master', component: AuditSchemeMasterComponent },
     { path: 'question-set-master', component: AuditQuestionSetMasterComponent },
     { path: 'question-header-master/:setId', component: AuditQuestionSetHeaderMasterComponent },
-    {
-        path: 'question-master/:setId/:headerId',
-        component: AuditQuestionMasterComponent
-    },
-
-    {
-        path: 'question-master/:setId',
-        component: AuditQuestionMasterComponent
-    },
+    { path: 'question-master/:setId/:headerId', component: AuditQuestionMasterComponent },
+    { path: 'question-master/:setId', component: AuditQuestionMasterComponent },
+    { path: 'audit-category-master', component: AuditCategoryMasterComponent },
 ];
