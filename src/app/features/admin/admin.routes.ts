@@ -6,6 +6,7 @@ import { LoanMasterComponent } from './loan-master/loan-master.component';
 import { AuditSectionMasterComponent } from './audit-section-master/audit-section-master.component';
 import { EmployeeMasterComponent } from './employee-master/employee-master.component';
 import { PasswordPolicyMasterComponent } from './password-policy-master/password-policy-master.component';
+import { MenuMasterComponent } from './menu-master/menu-master.component';
 
 export const ADMIN_ROUTES: Routes = [
     { path: 'branch-master', component: BranchMasterComponent },
@@ -15,4 +16,5 @@ export const ADMIN_ROUTES: Routes = [
     { path: 'audit-section-master', component: AuditSectionMasterComponent },
     { path: 'employee-master', component: EmployeeMasterComponent },
     { path: 'password-policy-master', component: PasswordPolicyMasterComponent },
+    { path: 'menu-master', component: MenuMasterComponent }
 ];
