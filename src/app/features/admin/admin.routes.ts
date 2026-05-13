@@ -24,7 +24,7 @@ export const ADMIN_ROUTES: Routes = [
     { path: 'employee-master', component: EmployeeMasterComponent },
     { path: 'audit-unit-master', component: AuditUnitMasterComponent },
     { path: 'password-policy-master', component: PasswordPolicyMasterComponent },
-    { path: 'menu-master', component: MenuMasterComponent }
+    { path: 'menu-master', component: MenuMasterComponent },
     { path: 'audit-unit-target-master/:auditUnitId', component: AuditTargetMasterComponent },
     { path: 'audit-scheme-master', component: AuditSchemeMasterComponent },
     { path: 'question-set-master', component: AuditQuestionSetMasterComponent },
