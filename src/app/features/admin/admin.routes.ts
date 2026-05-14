@@ -14,6 +14,8 @@ import { AuditQuestionSetMasterComponent } from './audit-question-master/audit-q
 import { AuditQuestionSetHeaderMasterComponent } from './audit-question-master/audit-question-set-header-master.component';
 import { AuditQuestionMasterComponent } from './audit-question-master/audit-question-master.component';
 import { AuditCategoryMasterComponent } from './audit-category-master/audit-category-master.component';
+import { AuditAnnexureMasterComponent } from './audit-annexure-master/audit-annexure-master.component';
+import { AuditAnnexureColumnsComponent } from './audit-annexure-master/audit-annexure-columns-master.component';
 
 export const ADMIN_ROUTES: Routes = [
     { path: 'branch-master', component: BranchMasterComponent },
@@ -32,4 +34,6 @@ export const ADMIN_ROUTES: Routes = [
     { path: 'question-master/:setId/:headerId', component: AuditQuestionMasterComponent },
     { path: 'question-master/:setId', component: AuditQuestionMasterComponent },
     { path: 'audit-category-master', component: AuditCategoryMasterComponent },
+    { path: 'audit-annexure-master', component: AuditAnnexureMasterComponent },
+    { path: 'audit-annexure-master/:id/columns', component: AuditAnnexureColumnsComponent },
 ];

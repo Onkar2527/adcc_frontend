@@ -646,4 +646,120 @@ export class AuditCategoryMasterService {
   }
 }
 
+export interface CreateAnnexureDto {
+  name: string;
+  risk_defination_id: number;
+  risk_category_id: number;
+  business_risk: number;
+  control_risk: number;
+  is_active?: number;
+  admin_id?: number;
+}
+
+export interface UpdateAnnexureDto
+  extends Partial<CreateAnnexureDto> {
+  id?: number;
+}
+
+export interface CreateAnnexureColumnDto {
+  annexure_id: number;
+  name: string;
+  column_type_id: number;
+  options?: string[];
+  admin_id?: number;
+}
+
+export interface UpdateAnnexureColumnDto
+  extends Partial<CreateAnnexureColumnDto> {
+  id?: number;
+}
+
+@Injectable({ providedIn: 'root' })
+export class AuditAnnexureMasterService {
+  private http = inject(HttpClient);
+  private config = inject(APP_CONFIG);
+
+  private apiUrl = `${this.config.apiUrl}/audit-annexure-master`;
+
+  // Annexure
+
+  findAll() {
+    return this.http.get<any>(this.apiUrl);
+  }
+
+  findOne(id: string | number) {
+    return this.http.get<any>(
+      `${this.apiUrl}/${id}`,
+    );
+  }
+
+  create(data: CreateAnnexureDto) {
+    return this.http.post<any>(
+      this.apiUrl,
+      data,
+    );
+  }
+
+  update(
+    id: string | number,
+    data: UpdateAnnexureDto,
+  ) {
+    return this.http.put<any>(
+      `${this.apiUrl}/${id}`,
+      data,
+    );
+  }
+
+  toggleStatus(id: string | number) {
+    return this.http.patch<any>(
+      `${this.apiUrl}/${id}/toggle-status`,
+      {},
+    );
+  }
+
+  remove(id: string | number) {
+    return this.http.delete<any>(
+      `${this.apiUrl}/${id}`,
+    );
+  }
+
+  getLookups() {
+    return this.http.get<any>(
+      `${this.apiUrl}/lookups`,
+    );
+  }
+
+  // Annexure Columns
+
+  getColumns(annexureId: string | number) {
+    return this.http.get<any>(
+      `${this.apiUrl}/${annexureId}/columns`,
+    );
+  }
+
+  createColumn(
+    data: CreateAnnexureColumnDto,
+  ) {
+    return this.http.post<any>(
+      `${this.apiUrl}/columns`,
+      data,
+    );
+  }
+
+  updateColumn(
+    id: string | number,
+    data: UpdateAnnexureColumnDto,
+  ) {
+    return this.http.put<any>(
+      `${this.apiUrl}/columns/${id}`,
+      data,
+    );
+  }
+
+  deleteColumn(id: string | number) {
+    return this.http.delete<any>(
+      `${this.apiUrl}/columns/${id}`,
+    );
+  }
+}
 
