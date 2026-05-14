@@ -14,6 +14,8 @@ import { AuditQuestionSetMasterComponent } from './audit-question-master/audit-q
 import { AuditQuestionSetHeaderMasterComponent } from './audit-question-master/audit-question-set-header-master.component';
 import { AuditQuestionMasterComponent } from './audit-question-master/audit-question-master.component';
 import { AuditCategoryMasterComponent } from './audit-category-master/audit-category-master.component';
+import { BorderAreaMasterComponent } from './border-area-master/border-area-master.component';
+import { ManageAssessmentMasterComponent } from './manage-assement-master/manage-assement-master-main.compoent';
 
 export const ADMIN_ROUTES: Routes = [
     { path: 'branch-master', component: BranchMasterComponent },
@@ -32,4 +34,7 @@ export const ADMIN_ROUTES: Routes = [
     { path: 'question-master/:setId/:headerId', component: AuditQuestionMasterComponent },
     { path: 'question-master/:setId', component: AuditQuestionMasterComponent },
     { path: 'audit-category-master', component: AuditCategoryMasterComponent },
+    { path: 'broader-area-master', component: BorderAreaMasterComponent },
+    { path: 'manage-assessment-master', component: ManageAssessmentMasterComponent },
+
 ];

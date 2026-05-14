@@ -647,3 +647,93 @@ export class AuditCategoryMasterService {
 }
 
 
+export interface BorderAreaMaster {
+  id: number;
+  name: string;
+  appetite_percent: string;
+  occurance_percent: string;
+  magnitude: string;
+  frequency: string;
+  average_qualitative_count:string;
+  average_quantitative_count:string
+}
+
+export interface CreateBorderAreaMasterDto {
+  name: string;
+  appetite_percent: string;
+  occurance_percent: string;
+  magnitude: string;
+  frequency: string;
+  average_qualitative_count:string;
+  average_quantitative_count:string
+}
+
+export interface UpdateBorderAreaMasterDto extends Partial<CreateBorderAreaMasterDto> {
+  id?: number;
+}
+
+@Injectable({ providedIn: 'root' })
+export class BorderAreaMasterService {
+  private http = inject(HttpClient);
+  private config = inject(APP_CONFIG);
+  private apiUrl = `${this.config.apiUrl}/border-area-masters`;
+
+  getBorderAreas(): Observable<BorderAreaMaster[]> { return this.http.get<BorderAreaMaster[]>(this.apiUrl); }
+  getBorderArea(id: number): Observable<BorderAreaMaster> { return this.http.get<BorderAreaMaster>(`${this.apiUrl}/${id}`); }
+  createBorderArea(data: CreateBorderAreaMasterDto): Observable<BorderAreaMaster> { return this.http.post<BorderAreaMaster>(this.apiUrl, data); }
+  updateBorderArea(id: number, data: UpdateBorderAreaMasterDto): Observable<BorderAreaMaster> { return this.http.put<BorderAreaMaster>(`${this.apiUrl}/${id}`, data); }
+  deleteBorderArea(id: number): Observable<any> { return this.http.delete(`${this.apiUrl}/${id}`); }
+}
+export interface ManageAssessmentMaster {
+  id: number;
+  audit_unit_id: number;
+  audit_unit_code: number;
+  name: string;
+  assesment_period_from: Date;
+  assesment_period_to: Date;
+  audit_status_id:number;
+  audit_start_date:Date;
+  audit_end_date:Date;
+  audit_due_date:Date;
+  compliance_start_date:Date;
+  compliance_end_date:Date;
+  compliance_due_date:Date;
+  compliance_review_reject_limit: number;
+  is_limit_blocked: number;
+}
+
+
+export interface UpdateManageAssessmentMasterDto extends Partial<ManageAssessmentMaster>  {
+ id?: number;
+}
+
+
+@Injectable({ providedIn: 'root' })
+export class ManageAssessmentMasterService {
+  private http = inject(HttpClient);
+  private config = inject(APP_CONFIG);
+  private apiUrl = `${this.config.apiUrl}/manage-assessment-masters
+`;
+
+getManageAssessmentMaster(
+  assesment_period_from: string,
+  assesment_period_to: string,
+  audit_unit_id: number
+): Observable<ManageAssessmentMaster[]> {
+
+  return this.http.get<ManageAssessmentMaster[]>(
+    `${this.apiUrl}?assesment_period_from=${assesment_period_from}&assesment_period_to=${assesment_period_to}&audit_unit_id=${audit_unit_id}`
+  );
+}
+ updateManageAssessmentMaster(
+  id: number,
+  data: any
+): Observable<any> {
+
+  return this.http.put(
+    `${this.apiUrl}/${id}`,
+    data
+  );
+}
+  
+}
