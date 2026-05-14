@@ -23,6 +23,8 @@ import {
     AuditQuestionMasterService,
     CreateQuestionDto,
 } from '../services/masters.service';
+import { CheckboxModule } from 'primeng/checkbox';
+import { FormsModule } from '@angular/forms';
 
 @Component({
     selector: 'app-question-form',
@@ -30,11 +32,10 @@ import {
 
     imports: [
         CommonModule,
-        TextFieldComponent,
         SelectFieldComponent,
         CheckboxFieldComponent,
         FormActionsComponent,
-        NumberFieldComponent
+        NumberFieldComponent, CheckboxModule, FormsModule
     ],
 
     template: `
@@ -100,6 +101,71 @@ import {
         </div>
 
       </div>
+
+      <div
+        class="grid"
+        *ngIf="optionId() === 4"
+        >
+
+        <div class="col-12">
+
+            <app-select-field
+            label="Annexure"
+            [field]="selectedAnnexureId"
+            [options]="annexures()"
+            optionLabel="label"
+            optionValue="value"
+            [required]="true"
+            ></app-select-field>
+
+        </div>
+
+        </div>
+
+    <div
+  *ngIf="optionId() === 5"
+  class="mt-3"
+>
+
+  <label class="block mb-3 font-medium">
+    Subsets
+  </label>
+
+  <div class="grid">
+
+    <div
+      class="col-12 md:col-6"
+      *ngFor="
+        let subset of subsets()
+      "
+    >
+
+      <div class="flex align-items-center gap-2">
+
+    <p-checkbox
+        [binary]="false"
+        [value]="subset.value"
+        [ngModel]="selectedSubsetIds()"
+        (ngModelChange)="
+        selectedSubsetIds.set($event)
+        "
+        [inputId]="'subset_' + subset.value"
+    ></p-checkbox>
+
+    <label
+        [for]="'subset_' + subset.value"
+        class="cursor-pointer"
+    >
+        {{ subset.label }}
+    </label>
+
+</div>
+
+    </div>
+
+  </div>
+
+</div>
 
       <!-- Applicable To -->
       <div class="grid">
@@ -320,6 +386,16 @@ export class AuditQuestionFormComponent {
 
     riskParameters = signal<any[]>([]);
 
+    annexures = signal<any[]>([]);
+
+    subsets = signal<any[]>([]);
+
+    selectedAnnexureId =
+        signal<number | null>(null);
+
+    selectedSubsetIds =
+        signal<number[]>([]);
+
     constructor() {
         const data = this.ref.data;
 
@@ -384,6 +460,25 @@ export class AuditQuestionFormComponent {
             this.optionId.set(
                 Number(data.option_id) ||
                 null,
+            );
+
+            this.selectedAnnexureId.set(
+                data.annexure_id != null
+                    ? Number(data.annexure_id)
+                    : null,
+            );
+
+            this.selectedSubsetIds.set(
+                data.subset_multi_id
+                    ? String(
+                        data.subset_multi_id,
+                    )
+                        .split(',')
+                        .map((x: string) =>
+                            Number(x.trim()),
+                        )
+                        .filter(Boolean)
+                    : [],
             );
 
             this.applicableId.set(
@@ -459,10 +554,7 @@ export class AuditQuestionFormComponent {
 
     loadHeaders() {
 
-        if (
-            !this.setId ||
-            this.headerId
-        ) {
+        if (!this.setId) {
             return;
         }
 
@@ -508,6 +600,14 @@ export class AuditQuestionFormComponent {
 
                     this.applicableTo.set(
                         res?.applicableTo ?? [],
+                    );
+
+                    this.annexures.set(
+                        res?.annexures ?? [],
+                    );
+
+                    this.subsets.set(
+                        res?.subsets ?? [],
                     );
 
                     this.riskParameters.set(
@@ -569,6 +669,13 @@ export class AuditQuestionFormComponent {
             header_id: Number(
                 this.selectedHeaderId(),
             ),
+
+            annexure_id:
+                Number(this.selectedAnnexureId(),),
+
+            subset_multi_id:
+                this.selectedSubsetIds()
+                    .join(','),
 
             question: this.question()
                 .trim(),

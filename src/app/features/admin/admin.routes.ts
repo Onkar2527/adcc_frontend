@@ -16,6 +16,8 @@ import { AuditQuestionMasterComponent } from './audit-question-master/audit-ques
 import { AuditCategoryMasterComponent } from './audit-category-master/audit-category-master.component';
 import { BorderAreaMasterComponent } from './border-area-master/border-area-master.component';
 import { ManageAssessmentMasterComponent } from './manage-assement-master/manage-assement-master-main.compoent';
+import { AuditAnnexureMasterComponent } from './audit-annexure-master/audit-annexure-master.component';
+import { AuditAnnexureColumnsComponent } from './audit-annexure-master/audit-annexure-columns-master.component';
 
 export const ADMIN_ROUTES: Routes = [
     { path: 'branch-master', component: BranchMasterComponent },
@@ -37,4 +39,6 @@ export const ADMIN_ROUTES: Routes = [
     { path: 'broader-area-master', component: BorderAreaMasterComponent },
     { path: 'manage-assessment-master', component: ManageAssessmentMasterComponent },
 
+    { path: 'audit-annexure-master', component: AuditAnnexureMasterComponent },
+    { path: 'audit-annexure-master/:id/columns', component: AuditAnnexureColumnsComponent },
 ];

@@ -41,7 +41,8 @@ export class AppMenu implements OnInit {
                 { label: 'Category Master', icon: 'pi pi-fw pi-tags', routerLink: ['/admin/audit-category-master'] },
                 { label: 'Broader Area Master', icon: 'pi pi-fw pi-map-marker', routerLink: ['/admin/broader-area-master'] },
                 { label: 'Manage Assessment Master', icon: 'pi pi-fw pi-chart-bar', routerLink: ['/admin/manage-assessment-master'] },
-                { label: 'Menu Master', icon: 'pi pi-fw pi-list', routerLink: ['/admin/menu-master'] }
+                { label: 'Menu Master', icon: 'pi pi-fw pi-list', routerLink: ['/admin/menu-master'] },
+                { label: 'Annexure Master', icon: 'pi pi-fw pi-file-edit', routerLink: ['/admin/audit-annexure-master'] }
             ],
         }
     ];
