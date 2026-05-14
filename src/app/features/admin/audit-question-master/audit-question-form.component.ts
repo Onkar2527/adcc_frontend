@@ -38,26 +38,28 @@ import {
     ],
 
     template: `
+   <div class="max-h-[90vh] p-4 overflow-y-auto">
+
+  <!-- Main Panel -->
+  <div class="border-1 border-gray-300 border-round-lg shadow-1 bg-white p-4">
+
     <div class="flex flex-column gap-3">
 
-    <div
-  class="grid">
+      <!-- Header -->
+      <div class="grid">
+        <div class="col-12">
+          <app-select-field
+            label="Header"
+            [field]="selectedHeaderId"
+            [options]="headers()"
+            optionLabel="label"
+            optionValue="value"
+            [required]="true"
+          ></app-select-field>
+        </div>
+      </div>
 
-  <div class="col-12">
-
-    <app-select-field
-      label="Header"
-      [field]="selectedHeaderId"
-      [options]="headers()"
-      optionLabel="label"
-      optionValue="value"
-      [required]="true"
-    ></app-select-field>
-
-  </div>
-
-</div>
-
+      <!-- Question -->
       <div>
         <label class="block mb-2 font-medium">
           Question
@@ -68,16 +70,14 @@ import {
           rows="5"
           class="w-full"
           [value]="question()"
-          (input)="question.set(
-            $any($event.target).value
-          )">
+          (input)="question.set($any($event.target).value)">
         </textarea>
       </div>
 
+      <!-- Question Type + Input Method -->
       <div class="grid">
 
         <div class="col-12 md:col-6">
-
           <app-select-field
             label="Question Type"
             [field]="questionTypeId"
@@ -86,11 +86,9 @@ import {
             optionValue="value"
             [required]="true"
           ></app-select-field>
-
         </div>
 
         <div class="col-12 md:col-6">
-
           <app-select-field
             label="Input Method"
             [field]="optionId"
@@ -99,15 +97,14 @@ import {
             optionValue="value"
             [required]="true"
           ></app-select-field>
-
         </div>
 
       </div>
 
+      <!-- Applicable To -->
       <div class="grid">
 
         <div class="col-12 md:col-6">
-
           <app-select-field
             label="Applicable To"
             [field]="applicableId"
@@ -116,127 +113,125 @@ import {
             optionValue="value"
             [required]="true"
           ></app-select-field>
-
         </div>
 
       </div>
 
+      <!-- Business + Control Risk -->
       <div class="grid">
 
         <div class="col-12 md:col-6">
-
-            <app-select-field
+          <app-select-field
             label="Business Risk Category"
             [field]="businessRiskCategoryId"
             [options]="businessRiskCategories()"
             optionLabel="label"
             optionValue="value"
-            ></app-select-field>
-
+          ></app-select-field>
         </div>
 
         <div class="col-12 md:col-6">
-
-            <app-select-field
+          <app-select-field
             label="Control Risk Category"
             [field]="controlRiskCategoryId"
             [options]="controlRiskCategories()"
             optionLabel="label"
             optionValue="value"
-            ></app-select-field>
-
+          ></app-select-field>
         </div>
 
-        </div>
+      </div>
 
-        <div class="grid">
+      <!-- Key Aspect + Residual Risk -->
+      <div class="grid">
 
         <div class="col-12 md:col-6">
-
-            <app-select-field
+          <app-select-field
             label="Key Aspect"
             [field]="keyAspectId"
             [options]="keyAspects()"
             optionLabel="label"
             optionValue="value"
-            ></app-select-field>
-
+          ></app-select-field>
         </div>
 
         <div class="col-12 md:col-6">
-
-            <app-select-field
+          <app-select-field
             label="Residual Risk"
             [field]="residualRiskId"
             [options]="residualRisks()"
             optionLabel="label"
             optionValue="value"
-            ></app-select-field>
-
+          ></app-select-field>
         </div>
 
-        </div>
+      </div>
 
-        <div class="grid">
+      <!-- Audit Area + Show Instances -->
+      <div class="grid">
 
         <div class="col-12 md:col-6">
-
-            <app-select-field
+          <app-select-field
             label="Broader Area of Audit"
             [field]="auditAreaId"
             [options]="auditAreas()"
             optionLabel="label"
             optionValue="value"
-            ></app-select-field>
-
+          ></app-select-field>
         </div>
 
         <div class="col-12 md:col-6">
-
-            <app-number-field
+          <app-number-field
             label="Show Instances"
             [field]="showInstances"
-            ></app-number-field>
-
+          ></app-number-field>
         </div>
 
-        </div>
+      </div>
 
-        <div class="grid">
+      <!-- Upload Options -->
+      <div class="grid">
 
-        <div class="col-12 md:col-6">
-
-            <app-checkbox-field
+        <div class="col-12 md:col-6 flex align-items-center pt-3">
+          <app-checkbox-field
             label="Auditor Evidence Upload"
             [field]="auditEvidenceUpload"
-            ></app-checkbox-field>
-
+          ></app-checkbox-field>
         </div>
 
-        <div class="col-12 md:col-6">
-
-            <app-checkbox-field
+        <div class="col-12 md:col-6 flex align-items-center pt-3">
+          <app-checkbox-field
             label="Compliance Evidence Upload"
             [field]="complianceEvidenceUpload"
-            ></app-checkbox-field>
-
+          ></app-checkbox-field>
         </div>
 
-        </div>
+      </div>
 
-      <app-checkbox-field
-        label="Is Active"
-        [field]="isActive"
-      ></app-checkbox-field>
+      <!-- Is Active -->
+      <div class="grid">
+        <div class="col-12 md:col-6 flex align-items-center pt-2">
+          <app-checkbox-field
+            label="Is Active"
+            [field]="isActive"
+          ></app-checkbox-field>
+        </div>
+      </div>
 
     </div>
 
-    <app-form-actions
-      class="mt-4"
-      [loading]="saving()"
-      (save)="save()"
-      (cancel)="cancel()"
-    ></app-form-actions>
+    <!-- Footer -->
+    <div class="flex justify-content-end gap-2 pt-4 mt-4 border-top-1 border-gray-200">
+      <app-form-actions
+        [loading]="saving()"
+        (save)="save()"
+        (cancel)="cancel()"
+      ></app-form-actions>
+    </div>
+
+  </div>
+
+</div>
   `,
 })
 export class AuditQuestionFormComponent {

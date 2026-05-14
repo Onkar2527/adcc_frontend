@@ -23,32 +23,45 @@ import { AuditSectionService, AuditUnitService, CreateAuditUnitDto, EmployeeServ
     FormActionsComponent
   ],
   template: `
-    <div class="flex flex-column p-4">
-      <div class="flex-grow-1 overflow-y-auto">
-        <div class="grid">
-          <div class="col-12 md:col-6">
-            <app-select-field
-              label="Audit Section"
-              [field]="sectionTypeId"
-              [options]="sections()"
-              optionLabel="label"
-              optionValue="value"
-              [required]="true"
-              class="mb-3"
-            ></app-select-field>
-          </div>
-          <div class="col-12 md:col-6">
-            <app-text-field
-              label="Audit Unit Code"
-              [field]="auditUnitCode"
-              placeholder="Enter unit code"
-              [required]="true"
-              class="mb-3"
-            ></app-text-field>
-          </div>
+  <div class="max-h-[90vh] p-4 overflow-y-auto">
+
+  <!-- Main Panel -->
+  <div class="border-1 border-gray-300 border-round-lg shadow-1 bg-white p-4">
+
+    <div class="flex flex-column gap-4">
+
+      <!-- Row 1 -->
+      <div class="grid">
+
+        <!-- Audit Section -->
+        <div class="col-12 md:col-6">
+          <app-select-field
+            label="Audit Section"
+            [field]="sectionTypeId"
+            [options]="sections()"
+            optionLabel="label"
+            optionValue="value"
+            [required]="true"
+          ></app-select-field>
         </div>
 
-        <div class="mb-2">
+        <!-- Audit Unit Code -->
+        <div class="col-12 md:col-6">
+          <app-text-field
+            label="Audit Unit Code"
+            [field]="auditUnitCode"
+            placeholder="Enter unit code"
+            [required]="true"
+          ></app-text-field>
+        </div>
+
+      </div>
+
+      <!-- Row 2 -->
+      <div class="grid">
+
+        <!-- Audit Unit Name -->
+        <div class="col-12">
           <app-text-field
             label="Audit Unit Name"
             [field]="name"
@@ -57,66 +70,90 @@ import { AuditSectionService, AuditUnitService, CreateAuditUnitDto, EmployeeServ
           ></app-text-field>
         </div>
 
-        <div class="grid">
-          <div class="col-12 md:col-6">
-            <app-select-field
-              label="Head of Audit Unit"
-              [field]="branchHeadId"
-              [options]="employees()"
-              optionLabel="label"
-              optionValue="value"
-              [required]="true"
-              class="mb-3"
-            ></app-select-field>
-          </div>
-          <div class="col-12 md:col-6">
-            <app-select-field
-              label="Assistant to Head"
-              [field]="branchSubheadId"
-              [options]="employees()"
-              optionLabel="label"
-              optionValue="value"
-              class="mb-3"
-            ></app-select-field>
-          </div>
-        </div>
-
-        <div class="grid">
-          <div class="col-12 md:col-6">
-            <app-date-field
-              label="Last Audit Date"
-              [field]="lastAuditDate"
-              [required]="true"
-              class="mb-3"
-            ></app-date-field>
-          </div>
-          <div class="col-12 md:col-6">
-            <app-select-field
-              label="Audit Frequency"
-              [field]="frequency"
-              [options]="frequencyOptions"
-              optionLabel="label"
-              optionValue="value"
-              [required]="true"
-              class="mb-3"
-            ></app-select-field>
-          </div>
-        </div>
-
-        <app-checkbox-field
-          label="Is Active"
-          [field]="isActive"
-          class="mb-3"
-        ></app-checkbox-field>
       </div>
 
+      <!-- Row 3 -->
+      <div class="grid">
+
+        <!-- Head of Audit Unit -->
+        <div class="col-12 md:col-6">
+          <app-select-field
+            label="Head of Audit Unit"
+            [field]="branchHeadId"
+            [options]="employees()"
+            optionLabel="label"
+            optionValue="value"
+            [required]="true"
+          ></app-select-field>
+        </div>
+
+        <!-- Assistant to Head -->
+        <div class="col-12 md:col-6">
+          <app-select-field
+            label="Assistant to Head"
+            [field]="branchSubheadId"
+            [options]="employees()"
+            optionLabel="label"
+            optionValue="value"
+          ></app-select-field>
+        </div>
+
+      </div>
+
+      <!-- Row 4 -->
+      <div class="grid">
+
+        <!-- Last Audit Date -->
+        <div class="col-12 md:col-6">
+          <app-date-field
+            label="Last Audit Date"
+            [field]="lastAuditDate"
+            [required]="true"
+          ></app-date-field>
+        </div>
+
+        <!-- Audit Frequency -->
+        <div class="col-12 md:col-6">
+          <app-select-field
+            label="Audit Frequency"
+            [field]="frequency"
+            [options]="frequencyOptions"
+            optionLabel="label"
+            optionValue="value"
+            [required]="true"
+          ></app-select-field>
+        </div>
+
+      </div>
+
+      <!-- Is Active -->
+      <div class="grid">
+
+        <div class="col-12 md:col-6 flex align-items-center pt-2">
+          <app-checkbox-field
+            label="Is Active"
+            [field]="isActive"
+          ></app-checkbox-field>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- Footer -->
+    <div class="flex justify-content-end gap-2 pt-4 mt-4 border-top-1 border-gray-200">
+
       <app-form-actions
-        class="mt-auto pt-4 border-top-1 border-gray-200"
         [loading]="saving()"
         (save)="save()"
         (cancel)="cancel()"
       ></app-form-actions>
+
     </div>
+
+  </div>
+
+</div>
   `
 })
 export class AuditUnitFormComponent {

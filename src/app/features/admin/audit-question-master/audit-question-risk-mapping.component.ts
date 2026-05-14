@@ -56,105 +56,117 @@ import { ButtonModule } from 'primeng/button';
 
 
     template: `
+   <div class="max-h-[90vh] p-4 overflow-y-auto">
+
+  <!-- Main Panel -->
+  <div class="border-1 border-gray-300 border-round-lg shadow-1 bg-white p-4">
+
     <div class="flex flex-column gap-4">
 
       <!-- Question Info -->
+      <div class="surface-100 border-round-lg p-3 border-1 border-gray-200">
 
-      <div
-        class="surface-100 border-round p-3">
-
-        <div class="mb-2">
-
-          <span class="font-semibold">
+        <div class="mb-3">
+          <span class="font-semibold text-700">
             Question:
           </span>
 
-          {{ question() }}
-
+          <div class="mt-1 line-height-3">
+            {{ question() }}
+          </div>
         </div>
 
         <div>
-
-          <span class="font-semibold">
+          <span class="font-semibold text-700">
             Answer Type:
           </span>
 
-          {{ answerType() }}
+          <span class="ml-2">
+            {{ answerType() }}
+          </span>
+        </div>
+
+      </div>
+
+      <!-- Mapping Form -->
+      <div class="border-1 border-gray-200 border-round-lg p-3">
+
+        <div class="grid">
+
+          <!-- Risk Type -->
+          <div class="col-12 md:col-4">
+            <app-text-field
+              label="Risk Type"
+              [field]="riskType"
+              placeholder="Enter risk type"
+              [required]="true"
+            ></app-text-field>
+          </div>
+
+          <!-- Business Risk -->
+          <div class="col-12 md:col-4">
+            <app-select-field
+              label="Business Risk"
+              [field]="businessRisk"
+              [options]="riskOptions"
+              optionLabel="label"
+              optionValue="value"
+              [required]="true"
+            ></app-select-field>
+          </div>
+
+          <!-- Control Risk -->
+          <div class="col-12 md:col-4">
+            <app-select-field
+              label="Control Risk"
+              [field]="controlRisk"
+              [options]="riskOptions"
+              optionLabel="label"
+              optionValue="value"
+              [required]="true"
+            ></app-select-field>
+          </div>
+
+        </div>
+
+        <!-- Add Button -->
+        <div class="flex justify-content-end mt-3">
+
+          <button
+            pButton
+            type="button"
+            label="Add Mapping"
+            icon="pi pi-plus"
+            class="p-button-sm"
+            (click)="addMapping()">
+          </button>
 
         </div>
 
       </div>
 
-      <!-- Add Mapping Form -->
+      <!-- Table Section -->
+      <div class="border-1 border-gray-200 border-round-lg overflow-hidden">
 
-      <div class="grid">
-
-        <div class="col-12 md:col-4">
-
-          <app-text-field
-            label="Risk Type"
-            [field]="riskType"
-            placeholder="Enter risk type"
-            [required]="true"
-          ></app-text-field>
-
-        </div>
-
-        <div class="col-12 md:col-4">
-
-          <app-select-field
-            label="Business Risk"
-            [field]="businessRisk"
-            [options]="riskOptions"
-            optionLabel="label"
-            optionValue="value"
-            [required]="true"
-          ></app-select-field>
-
-        </div>
-
-        <div class="col-12 md:col-4">
-
-          <app-select-field
-            label="Control Risk"
-            [field]="controlRisk"
-            [options]="riskOptions"
-            optionLabel="label"
-            optionValue="value"
-            [required]="true"
-          ></app-select-field>
-
-        </div>
+        <app-table
+          [columns]="columns"
+          [data]="mappings()"
+          [loading]="loading()"
+          [actionDisplayMode]="'buttons'"
+          (onActionClick)="onAction($event)"
+        ></app-table>
 
       </div>
-
-      <div class="flex justify-content-end">
-
-        <button
-          pButton
-          type="button"
-          label="Add Mapping"
-          icon="pi pi-plus"
-          (click)="addMapping()">
-        </button>
-
-      </div>
-
-      <!-- Risk Mapping Table -->
-
-      <app-table
-        [columns]="columns"
-        [data]="mappings()"
-        [loading]="loading()"
-        [actionDisplayMode]="'buttons'"
-        (onActionClick)="onAction($event)"
-      ></app-table>
 
     </div>
 
-    <p-toast></p-toast>
+  </div>
 
-    <p-confirmDialog></p-confirmDialog>
+</div>
+
+<p-toast></p-toast>
+
+<p-confirmDialog></p-confirmDialog>
   `,
 })
 export class AuditQuestionRiskMappingComponent {

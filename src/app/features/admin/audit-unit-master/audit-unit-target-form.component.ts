@@ -23,14 +23,74 @@ import { AuditSectionService, AuditUnitService, CreateAuditUnitDto, EmployeeServ
     FormActionsComponent
   ],
   template: `
-  <div class="flex flex-column gap-2">
-    <app-select-field label="Year" [field]="yearId" [options]="years()"  optionLabel="label" optionValue="value"></app-select-field>
-    <app-text-field label="Deposit Target" [field]="deposit"></app-text-field>
-    <app-text-field label="Advances Target" [field]="advances"></app-text-field>
-    <app-text-field label="NPA Target" [field]="npa"></app-text-field>
+  <div class="max-h-[90vh] p-4 overflow-y-auto">
+
+  <!-- Main Panel -->
+  <div class="border-1 border-gray-300 border-round-lg shadow-1 bg-white p-4">
+
+    <div class="flex flex-column gap-4">
+
+      <!-- Row 1 -->
+      <div class="grid">
+
+        <!-- Year -->
+        <div class="col-12 md:col-6">
+          <app-select-field
+            label="Year"
+            [field]="yearId"
+            [options]="years()"
+            optionLabel="label"
+            optionValue="value"
+          ></app-select-field>
+        </div>
+
+      </div>
+
+      <!-- Row 2 -->
+      <div class="grid">
+
+        <!-- Deposit Target -->
+        <div class="col-12 md:col-4">
+          <app-text-field
+            label="Deposit Target"
+            [field]="deposit"
+          ></app-text-field>
+        </div>
+
+        <!-- Advances Target -->
+        <div class="col-12 md:col-4">
+          <app-text-field
+            label="Advances Target"
+            [field]="advances"
+          ></app-text-field>
+        </div>
+
+        <!-- NPA Target -->
+        <div class="col-12 md:col-4">
+          <app-text-field
+            label="NPA Target"
+            [field]="npa"
+          ></app-text-field>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- Footer -->
+    <div class="flex justify-content-end gap-2 pt-4 mt-4 border-top-1 border-gray-200">
+
+      <app-form-actions
+        (save)="save()"
+        (cancel)="cancel()"
+        [loading]="saving()"
+      ></app-form-actions>
+
+    </div>
+
   </div>
 
-    <app-form-actions (save)="save()" (cancel)="cancel()" [loading]="saving()"></app-form-actions>
+</div>
   `
 })
 export class AuditUnitTargetFormComponent {

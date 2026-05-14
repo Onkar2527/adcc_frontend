@@ -37,38 +37,67 @@ import {
     ],
 
     template: `
-    <div class="flex flex-column gap-3">
+    <div class="max-h-[90vh] p-4 overflow-y-auto">
 
-      <app-text-field
-        label="Set Name"
-        [field]="name"
-        placeholder="Enter set name"
-        [required]="true"
-      ></app-text-field>
+  <!-- Main Panel -->
+  <div class="border-1 border-gray-300 border-round-lg shadow-1 bg-white p-4">
 
-      <app-select-field
-        label="Set Type"
-        [field]="setTypeId"
-        [options]="setTypes"
-        optionLabel="label"
-        optionValue="value"
-        [required]="true"
-        scrollHeight="90px"
-      ></app-select-field>
+    <div class="flex flex-column gap-4">
 
-      <app-checkbox-field
-        label="Is Active"
-        [field]="isActive"
-      ></app-checkbox-field>
+      <!-- Form Fields -->
+      <div class="grid">
+
+        <!-- Set Name -->
+        <div class="col-12 md:col-6">
+          <app-text-field
+            label="Set Name"
+            [field]="name"
+            placeholder="Enter set name"
+            [required]="true"
+          ></app-text-field>
+        </div>
+
+        <!-- Set Type -->
+        <div class="col-12 md:col-6">
+          <app-select-field
+            label="Set Type"
+            [field]="setTypeId"
+            [options]="setTypes"
+            optionLabel="label"
+            optionValue="value"
+            [required]="true"
+            scrollHeight="90px"
+          ></app-select-field>
+        </div>
+
+      </div>
+
+      <!-- Active -->
+      <div class="grid">
+        <div class="col-12 md:col-6 flex align-items-center pt-2">
+          <app-checkbox-field
+            label="Is Active"
+            [field]="isActive"
+          ></app-checkbox-field>
+        </div>
+      </div>
 
     </div>
 
-    <app-form-actions
-      class="mt-4"
-      [loading]="saving()"
-      (save)="save()"
-      (cancel)="cancel()"
-    ></app-form-actions>
+    <!-- Footer -->
+    <div class="flex justify-content-end gap-2 pt-4 mt-4 border-top-1 border-gray-200">
+
+      <app-form-actions
+        [loading]="saving()"
+        (save)="save()"
+        (cancel)="cancel()"
+      ></app-form-actions>
+
+    </div>
+
+  </div>
+
+</div>
   `,
 })
 export class AuditQuestionSetFormComponent {

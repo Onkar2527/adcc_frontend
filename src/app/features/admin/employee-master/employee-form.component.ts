@@ -33,75 +33,110 @@ import {
     FormActionsComponent
   ],
   template: `
-    <div class="flex flex-column h-full p-4">
-      <div class="flex-grow-1 overflow-y-auto">
-        <div class="grid">
-          <div class="col-12 md:col-6">
-            <app-text-field label="Employee Code" [field]="empCode" [required]="true" class="mb-3"></app-text-field>
-          </div>
-          <div class="col-12 md:col-6">
-            <app-text-field label="Full Name" [field]="name" [required]="true" class="mb-3"></app-text-field>
-          </div>
-        </div>
+  <div class="max-h-[90vh] p-4 overflow-y-auto">
 
-        <div class="grid">
-          <div class="col-12 md:col-6">
-            <app-text-field label="Email" [field]="email" [required]="true" class="mb-3"></app-text-field>
-          </div>
-          <div class="col-12 md:col-6">
-            <app-text-field label="Mobile" [field]="mobile" [required]="true" class="mb-3"></app-text-field>
-          </div>
-        </div>
+  <!-- Main Panel -->
+  <div class="border-1 border-gray-300 border-round-lg shadow-1 bg-white p-4">
 
-        <app-text-field label="Designation" [field]="designation" class="mb-3"></app-text-field>
+    <!-- Row 1 -->
+    <div class="grid">
+      <div class="col-12 md:col-6">
+        <app-text-field
+          label="Employee Code"
+          [field]="empCode"
+          [required]="true"
+        ></app-text-field>
+      </div>
 
-        <div class="grid">
-          <div class="col-12 md:col-6">
-            <app-select-field
-              label="Gender"
-              [field]="gender"
-              [options]="genderOptions"
-              optionLabel="label"
-              optionValue="value"
-              [required]="true"
-              [virtualScroll]="false"
-              scrollHeight="90px"
-              class="mb-3"
-            ></app-select-field>
-          </div>
-          <div class="col-12 md:col-6">
-            <app-select-field
-              label="Employee Type"
-              [field]="userTypeId"
-              [options]="userTypeOptions"
-              optionLabel="label"
-              optionValue="value"
-              [required]="true"
-              class="mb-3"
-            ></app-select-field>
-          </div>
-        </div>
+      <div class="col-12 md:col-6">
+        <app-text-field
+          label="Full Name"
+          [field]="name"
+          [required]="true"
+        ></app-text-field>
+      </div>
+    </div>
 
-        <div class="mb-3">
-          <label class="font-medium mb-2 block">
-            Password
-            @if (!isEdit) {
-              <span class="text-red-500">*</span>
-            }
-          </label>
-          <p-password
-            [ngModel]="password()"
-            (ngModelChange)="password.set($event)"
-            [toggleMask]="true"
-            [feedback]="!isEdit"
-            placeholder="Enter password"
-            styleClass="w-full"
-            inputStyleClass="w-full"
-            [style]="{ width: '100%' }"
-          ></p-password>
-        </div>
+    <!-- Row 2 -->
+    <div class="grid">
+      <div class="col-12 md:col-6">
+        <app-text-field
+          label="Email"
+          [field]="email"
+          [required]="true"
+        ></app-text-field>
+      </div>
 
-        @if (showAuditUnits()) {
+      <div class="col-12 md:col-6">
+        <app-text-field
+          label="Mobile"
+          [field]="mobile"
+          [required]="true"
+        ></app-text-field>
+      </div>
+    </div>
+
+    <!-- Row 3 -->
+    <div class="grid">
+      <div class="col-12 md:col-6">
+        <app-text-field
+          label="Designation"
+          [field]="designation"
+        ></app-text-field>
+      </div>
+
+      <div class="col-12 md:col-6">
+        <app-select-field
+          label="Gender"
+          [field]="gender"
+          [options]="genderOptions"
+          optionLabel="label"
+          optionValue="value"
+          [required]="true"
+          [virtualScroll]="false"
+          scrollHeight="90px"
+        ></app-select-field>
+      </div>
+    </div>
+
+    <!-- Row 4 -->
+    <div class="grid">
+      <div class="col-12 md:col-6">
+        <app-select-field
+          label="Employee Type"
+          [field]="userTypeId"
+          [options]="userTypeOptions"
+          optionLabel="label"
+          optionValue="value"
+          [required]="true"
+        ></app-select-field>
+      </div>
+
+      <div class="col-12 md:col-6">
+        <label class="font-medium mb-2 block">
+          Password
+          @if (!isEdit) {
+            <span class="text-red-500">*</span>
+          }
+        </label>
+
+        <p-password
+          [ngModel]="password()"
+          (ngModelChange)="password.set($event)"
+          [toggleMask]="true"
+          [feedback]="!isEdit"
+          placeholder="Enter password"
+          styleClass="w-full"
+          inputStyleClass="w-full"
+          [style]="{ width: '100%' }"
+        ></p-password>
+      </div>
+    </div>
+
+    <!-- Row 5 -->
+    @if (showAuditUnits()) {
+      <div class="grid">
+        <div class="col-12 md:col-6">
           <app-multi-select-field
             label="Authorized Audit Units"
             [field]="unitIds"
@@ -109,21 +144,43 @@ import {
             optionLabel="name"
             optionValue="id"
             display="chip"
-            class="mb-3"
           ></app-multi-select-field>
-        }
+        </div>
 
-        <app-checkbox-field label="Is Active" [field]="isActive"></app-checkbox-field>
+        <div class="col-12 md:col-6 flex align-items-center pt-4">
+          <app-checkbox-field
+            label="Is Active"
+            [field]="isActive"
+          ></app-checkbox-field>
+        </div>
       </div>
+    }
 
+    <!-- Row 6 -->
+    @if (!showAuditUnits()) {
+      <div class="grid">
+        <div class="col-12 md:col-6 flex align-items-center pt-2">
+          <app-checkbox-field
+            label="Is Active"
+            [field]="isActive"
+          ></app-checkbox-field>
+        </div>
+      </div>
+    }
+
+    <!-- Footer Buttons -->
+    <div class="flex justify-content-end gap-2 pt-4 mt-4 border-top-1 border-gray-200">
       <app-form-actions
-        class="mt-auto pt-4 border-top-1 border-gray-200"
         [loading]="saving()"
         [saveDisabled]="!isValid()"
         (save)="save()"
         (cancel)="cancel()"
       ></app-form-actions>
     </div>
+
+  </div>
+
+</div>
   `
 })
 export class EmployeeFormComponent {

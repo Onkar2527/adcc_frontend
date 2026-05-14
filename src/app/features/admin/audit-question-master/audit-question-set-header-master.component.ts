@@ -32,38 +32,63 @@ import { ButtonModule } from 'primeng/button';
         ConfirmDialogModule, ButtonModule
     ],
     template: `
-    <div class="card">
+    <div class="card border-round-xl shadow-1">
 
-      <div class="flex align-items-center mb-4">
+  <!-- Header -->
+  <div class="flex align-items-start justify-content-between mb-4">
 
-        <button
-          pButton
-          icon="pi pi-arrow-left"
-          class="p-button-text mr-2"
-          (click)="goBack()">
-        </button>
+    <!-- Left Section -->
+    <div class="flex align-items-center">
+
+      <button
+        pButton
+        icon="pi pi-arrow-left"
+        class="p-button-text p-button-rounded mr-2"
+        (click)="goBack()">
+      </button>
+
+      <div>
 
         <h5 class="m-0 text-xl font-semibold">
-          Question Header Master - {{ setName() }}
+          Question Header Master
         </h5>
+
+        <div class="text-sm text-500 mt-1">
+
+          <span *ngIf="setName()">
+            Set:
+            <strong>{{ setName() }}</strong>
+          </span>
+
+        </div>
 
       </div>
 
-      <app-table
-        [columns]="columns"
-        [data]="headers()"
-        [loading]="loading()"
-        [globalFilterFields]="globalFilterFields"
-        [actionDisplayMode]="'buttons'"
-        (onAdd)="openForm()"
-        (onActionClick)="onAction($event)"
-        (onRefresh)="load()"
-      ></app-table>
-
     </div>
 
-    <p-toast></p-toast>
-    <p-confirmDialog></p-confirmDialog>
+  </div>
+
+  <!-- Table -->
+  <div class="border-1 border-gray-200 border-round-lg overflow-hidden">
+
+    <app-table
+      [columns]="columns"
+      [data]="headers()"
+      [loading]="loading()"
+      [globalFilterFields]="globalFilterFields"
+      [actionDisplayMode]="'buttons'"
+      (onAdd)="openForm()"
+      (onActionClick)="onAction($event)"
+      (onRefresh)="load()"
+    ></app-table>
+
+  </div>
+
+</div>
+
+<p-toast></p-toast>
+
+<p-confirmDialog></p-confirmDialog>
   `,
 })
 export class AuditQuestionSetHeaderMasterComponent implements OnInit {
