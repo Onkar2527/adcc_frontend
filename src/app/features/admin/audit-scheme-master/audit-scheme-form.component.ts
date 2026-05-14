@@ -37,54 +37,96 @@ import {
     ],
 
     template: `
-    <div class="flex flex-column gap-3 p-1">
+    <div class="max-h-[90vh] p-4 overflow-y-auto">
 
-      <app-select-field
-        label="Scheme Type"
-        [field]="schemeTypeId"
-        [options]="schemeTypes"
-        optionLabel="label"
-        optionValue="value"
-        [required]="true"
-        scrollHeight="90px"
-      ></app-select-field>
+  <!-- Main Panel -->
+  <div class="border-1 border-gray-300 border-round-lg shadow-1 bg-white p-4">
 
-      <app-select-field
-        label="Category"
-        [field]="categoryId"
-        [options]="categories()"
-        optionLabel="label"
-        optionValue="value"
-        [required]="true"
-      ></app-select-field>
+    <div class="flex flex-column gap-4">
 
-      <app-text-field
-        label="Scheme Code"
-        [field]="schemeCode"
-        placeholder="Enter scheme code"
-        [required]="true"
-      ></app-text-field>
+      <!-- Row 1 -->
+      <div class="grid">
 
-      <app-text-field
-        label="Scheme Name"
-        [field]="name"
-        placeholder="Enter scheme name"
-        [required]="true"
-      ></app-text-field>
+        <!-- Scheme Type -->
+        <div class="col-12 md:col-6">
+          <app-select-field
+            label="Scheme Type"
+            [field]="schemeTypeId"
+            [options]="schemeTypes"
+            optionLabel="label"
+            optionValue="value"
+            [required]="true"
+            scrollHeight="90px"
+          ></app-select-field>
+        </div>
 
-      <app-checkbox-field
-        label="Is Active"
-        [field]="isActive"
-      ></app-checkbox-field>
+        <!-- Category -->
+        <div class="col-12 md:col-6">
+          <app-select-field
+            label="Category"
+            [field]="categoryId"
+            [options]="categories()"
+            optionLabel="label"
+            optionValue="value"
+            [required]="true"
+          ></app-select-field>
+        </div>
+
+      </div>
+
+      <!-- Row 2 -->
+      <div class="grid">
+
+        <!-- Scheme Code -->
+        <div class="col-12 md:col-6">
+          <app-text-field
+            label="Scheme Code"
+            [field]="schemeCode"
+            placeholder="Enter scheme code"
+            [required]="true"
+          ></app-text-field>
+        </div>
+
+        <!-- Scheme Name -->
+        <div class="col-12 md:col-6">
+          <app-text-field
+            label="Scheme Name"
+            [field]="name"
+            placeholder="Enter scheme name"
+            [required]="true"
+          ></app-text-field>
+        </div>
+
+      </div>
+
+      <!-- Is Active -->
+      <div class="grid">
+
+        <div class="col-12 md:col-6 flex align-items-center pt-2">
+          <app-checkbox-field
+            label="Is Active"
+            [field]="isActive"
+          ></app-checkbox-field>
+        </div>
+
+      </div>
 
     </div>
 
-    <app-form-actions
-      class="mt-4"
-      [loading]="saving()"
-      (save)="save()"
-      (cancel)="cancel()"
-    ></app-form-actions>
+    <!-- Footer -->
+    <div class="flex justify-content-end gap-2 pt-4 mt-4 border-top-1 border-gray-200">
+
+      <app-form-actions
+        [loading]="saving()"
+        (save)="save()"
+        (cancel)="cancel()"
+      ></app-form-actions>
+
+    </div>
+
+  </div>
+
+</div>
   `,
 })
 export class AuditSchemeFormComponent {

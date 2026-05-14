@@ -17,22 +17,44 @@ import { ButtonModule } from 'primeng/button';
     imports: [CommonModule, TableComponent, ToastModule, ConfirmDialogModule, ButtonModule],
     providers: [MessageService, ConfirmationService],
     template: `
-  <div class="card">
+  <div class="card border-round-xl shadow-1">
 
-    <div class="flex align-items-center mb-4">
+  <!-- Header -->
+  <div class="flex align-items-start justify-content-between mb-4">
+
+    <!-- Left Section -->
+    <div class="flex align-items-center">
 
       <button
         pButton
         icon="pi pi-arrow-left"
-        class="p-button-text mr-2"
+        class="p-button-text p-button-rounded mr-2"
         (click)="goBack()">
       </button>
 
-      <h5 class="m-0 text-xl font-semibold">
-        Target Master - {{ unitName() }}
-      </h5>
+      <div>
+
+        <h5 class="m-0 text-xl font-semibold">
+          Target Master
+        </h5>
+
+        <div class="text-sm text-500 mt-1">
+
+          <span *ngIf="unitName()">
+            Unit:
+            <strong>{{ unitName() }}</strong>
+          </span>
+
+        </div>
+
+      </div>
 
     </div>
+
+  </div>
+
+  <!-- Table -->
+  <div class="border-1 border-gray-200 border-round-lg overflow-hidden">
 
     <app-table
       [columns]="columns"
@@ -47,8 +69,11 @@ import { ButtonModule } from 'primeng/button';
 
   </div>
 
-  <p-toast></p-toast>
-  <p-confirmDialog></p-confirmDialog>
+</div>
+
+<p-toast></p-toast>
+
+<p-confirmDialog></p-confirmDialog>
 `
 })
 export class AuditTargetMasterComponent implements OnInit {
