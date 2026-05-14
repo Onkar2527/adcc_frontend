@@ -320,6 +320,8 @@ export interface UpdateQuestionHeaderDto
 export interface CreateQuestionDto {
   set_id: number;
   header_id: number;
+  annexure_id: number;
+  subset_multi_id: string;
   question: string;
   question_type_id: number;
   option_id: number;
