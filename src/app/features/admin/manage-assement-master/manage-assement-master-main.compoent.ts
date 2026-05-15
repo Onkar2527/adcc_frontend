@@ -203,7 +203,9 @@ export class ManageAssessmentMasterComponent implements OnInit {
                     : res?.data || [];
 
                 this.sectionTypeOptions.set(
-                    rows.map((item: any) => ({
+                    rows
+                    .filter((item: any) => item.section_type_id === '1')
+                    .map((item: any) => ({
                         label: item.audit_unit_code
                             ? `${item.name} - (${item.audit_unit_code})`
                             : item.name,

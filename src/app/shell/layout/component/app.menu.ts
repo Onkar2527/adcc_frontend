@@ -40,6 +40,7 @@ export class AppMenu implements OnInit {
                 { label: 'Question Master', icon: 'pi pi-fw pi-question-circle', routerLink: ['/admin/question-set-master'] },
                 { label: 'Category Master', icon: 'pi pi-fw pi-tags', routerLink: ['/admin/audit-category-master'] },
                 { label: 'Broader Area Master', icon: 'pi pi-fw pi-map-marker', routerLink: ['/admin/broader-area-master'] },
+                { label: 'Periodwise Questions Master', icon: 'pi pi-fw pi-list', routerLink: ['/admin/periodwise-questions-master'] },
                 { label: 'Manage Assessment Master', icon: 'pi pi-fw pi-chart-bar', routerLink: ['/admin/manage-assessment-master'] },
                 { label: 'Menu Master', icon: 'pi pi-fw pi-list', routerLink: ['/admin/menu-master'] },
                 { label: 'Annexure Master', icon: 'pi pi-fw pi-file-edit', routerLink: ['/admin/audit-annexure-master'] }

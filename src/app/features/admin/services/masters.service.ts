@@ -855,3 +855,107 @@ getManageAssessmentMaster(
 }
   
 }
+export interface PeriodwiseQuestionsMaster {
+  id: number;
+
+  year_id: number;
+  section_type_id: number;
+  user_type_id: number;
+  audit_unit_id: number;
+
+  start_month_year: string;
+  end_month_year: string;
+
+  menu_ids: string;
+  cat_ids: string;
+  header_ids: string;
+  question_ids: string;
+
+  advances_scheme_ids: string;
+  deposits_scheme_ids: string;
+
+  admin_id: number;
+
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface CreatePeriodwiseQuestionsMasterDto {
+  year_id: number;
+  section_type_id: number;
+  user_type_id: number;
+  audit_unit_id: number;
+
+  start_month_year: string;
+  end_month_year: string;
+
+  menu_ids?: string;
+  cat_ids?: string;
+  header_ids?: string;
+  question_ids?: string;
+
+  advances_scheme_ids?: string;
+  deposits_scheme_ids?: string;
+
+  admin_id?: number;
+}
+
+export interface UpdatePeriodwiseQuestionsMasterDto
+  extends Partial<CreatePeriodwiseQuestionsMasterDto> {
+  id?: number;
+}
+
+@Injectable({
+  providedIn: 'root'
+})
+export class PeriodwiseQuestionsMasterService {
+
+  private http = inject(HttpClient);
+  private config = inject(APP_CONFIG);
+
+  private apiUrl = `${this.config.apiUrl}/periodwise-questions-masters`;
+
+  getAll(): Observable<PeriodwiseQuestionsMaster[]> {
+    return this.http.get<PeriodwiseQuestionsMaster[]>(this.apiUrl);
+  }
+
+  getById(id: number): Observable<PeriodwiseQuestionsMaster> {
+    return this.http.get<PeriodwiseQuestionsMaster>(
+      `${this.apiUrl}/${id}`
+    );
+  }
+
+  create(
+    data: CreatePeriodwiseQuestionsMasterDto
+  ): Observable<PeriodwiseQuestionsMaster> {
+    return this.http.post<PeriodwiseQuestionsMaster>(
+      this.apiUrl,
+      data
+    );
+  }
+
+  update(
+    id: number,
+    data: UpdatePeriodwiseQuestionsMasterDto
+  ): Observable<PeriodwiseQuestionsMaster> {
+    return this.http.put<PeriodwiseQuestionsMaster>(
+      `${this.apiUrl}/${id}`,
+      data
+    );
+  }
+  updateAdvancesSchemes(
+    id: number,
+    advances_scheme_ids: string
+  ): Observable<PeriodwiseQuestionsMaster> {
+    return this.http.put<PeriodwiseQuestionsMaster>(
+      `${this.apiUrl}/advances-schemes/${id}`,
+      { advances_scheme_ids }
+    );
+  }
+
+
+  delete(id: number): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/${id}`);
+  }
+
+}
