@@ -772,8 +772,8 @@ export interface BorderAreaMaster {
   occurance_percent: string;
   magnitude: string;
   frequency: string;
-  average_qualitative_count:string;
-  average_quantitative_count:string
+  average_qualitative_count: string;
+  average_quantitative_count: string
 }
 
 export interface CreateBorderAreaMasterDto {
@@ -782,8 +782,8 @@ export interface CreateBorderAreaMasterDto {
   occurance_percent: string;
   magnitude: string;
   frequency: string;
-  average_qualitative_count:string;
-  average_quantitative_count:string
+  average_qualitative_count: string;
+  average_quantitative_count: string
 }
 
 export interface UpdateBorderAreaMasterDto extends Partial<CreateBorderAreaMasterDto> {
@@ -809,20 +809,20 @@ export interface ManageAssessmentMaster {
   name: string;
   assesment_period_from: Date;
   assesment_period_to: Date;
-  audit_status_id:number;
-  audit_start_date:Date;
-  audit_end_date:Date;
-  audit_due_date:Date;
-  compliance_start_date:Date;
-  compliance_end_date:Date;
-  compliance_due_date:Date;
+  audit_status_id: number;
+  audit_start_date: Date;
+  audit_end_date: Date;
+  audit_due_date: Date;
+  compliance_start_date: Date;
+  compliance_end_date: Date;
+  compliance_due_date: Date;
   compliance_review_reject_limit: number;
   is_limit_blocked: number;
 }
 
 
-export interface UpdateManageAssessmentMasterDto extends Partial<ManageAssessmentMaster>  {
- id?: number;
+export interface UpdateManageAssessmentMasterDto extends Partial<ManageAssessmentMaster> {
+  id?: number;
 }
 
 
@@ -833,27 +833,27 @@ export class ManageAssessmentMasterService {
   private apiUrl = `${this.config.apiUrl}/manage-assessment-masters
 `;
 
-getManageAssessmentMaster(
-  assesment_period_from: string,
-  assesment_period_to: string,
-  audit_unit_id: number
-): Observable<ManageAssessmentMaster[]> {
+  getManageAssessmentMaster(
+    assesment_period_from: string,
+    assesment_period_to: string,
+    audit_unit_id: number
+  ): Observable<ManageAssessmentMaster[]> {
 
-  return this.http.get<ManageAssessmentMaster[]>(
-    `${this.apiUrl}?assesment_period_from=${assesment_period_from}&assesment_period_to=${assesment_period_to}&audit_unit_id=${audit_unit_id}`
-  );
-}
- updateManageAssessmentMaster(
-  id: number,
-  data: any
-): Observable<any> {
+    return this.http.get<ManageAssessmentMaster[]>(
+      `${this.apiUrl}?assesment_period_from=${assesment_period_from}&assesment_period_to=${assesment_period_to}&audit_unit_id=${audit_unit_id}`
+    );
+  }
+  updateManageAssessmentMaster(
+    id: number,
+    data: any
+  ): Observable<any> {
 
-  return this.http.put(
-    `${this.apiUrl}/${id}`,
-    data
-  );
-}
-  
+    return this.http.put(
+      `${this.apiUrl}/${id}`,
+      data
+    );
+  }
+
 }
 export interface PeriodwiseQuestionsMaster {
   id: number;
@@ -919,6 +919,11 @@ export class PeriodwiseQuestionsMasterService {
     return this.http.get<PeriodwiseQuestionsMaster[]>(this.apiUrl);
   }
 
+  getQuestionData(id: number): Observable<PeriodwiseQuestionsMaster> {
+    return this.http.get<PeriodwiseQuestionsMaster>(
+      `${this.apiUrl}/${id}`
+    );
+  }
   getById(id: number): Observable<PeriodwiseQuestionsMaster> {
     return this.http.get<PeriodwiseQuestionsMaster>(
       `${this.apiUrl}/${id}`
@@ -951,6 +956,57 @@ export class PeriodwiseQuestionsMasterService {
       `${this.apiUrl}/advances-schemes/${id}`,
       { advances_scheme_ids }
     );
+  }
+  updateDepositsSchemes(
+    id: number,
+    deposits_scheme_ids: string
+  ): Observable<PeriodwiseQuestionsMaster> {
+    return this.http.put<PeriodwiseQuestionsMaster>(
+      `${this.apiUrl}/deposit-schemes/${id}`,
+      { deposits_scheme_ids }
+    );
+  }
+  updateMenus(
+    id: number,
+    menu_ids: string
+  ): Observable<PeriodwiseQuestionsMaster> {
+    return this.http.put<PeriodwiseQuestionsMaster>(
+      `${this.apiUrl}/menu/${id}`,
+      { menu_ids }
+    );
+  }
+  updateCategories(
+    id: number,
+    cat_ids: string
+  ): Observable<PeriodwiseQuestionsMaster> {
+    return this.http.put<PeriodwiseQuestionsMaster>(
+      `${this.apiUrl}/category/${id}`,
+      { cat_ids }
+    );
+  }
+  updateQuestionHeaders(
+
+    id: number,
+
+    header_ids: string,
+
+    question_ids: string
+
+  ) {
+
+    return this.http.put(
+
+      `${this.apiUrl}/question-and-headers/${id}`,
+
+      {
+
+        header_ids,
+        question_ids
+
+      }
+
+    );
+
   }
 
 
