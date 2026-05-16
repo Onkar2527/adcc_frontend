@@ -36,125 +36,132 @@ import { FormDrawerRef } from '../../../core/services/drawer';
         ToastModule,
     ],
     template: `
-        <div class="card border-none shadow-none p-0">
-        <div class="mb-3 text-sm text-600">
+       <div class="max-h-[90vh] p-4 overflow-y-auto">
 
-            Category:
+  
+  <div class="border-1 border-gray-300 border-round-lg shadow-1 bg-white p-4">
 
-            <span class="font-semibold">
-                {{ categoryName() }}
-            </span>
+    <!-- Category -->
+    <div class="mb-4 text-sm text-600">
 
-        </div>
+      Category:
 
-        <div class="mb-3">
+      <span class="font-bold fw-30">
+        {{ categoryName() }}
+      </span>
 
-            <div class="relative">
+    </div>
 
-                <i
-                    class="pi pi-search absolute"
-                    style="
-                        left: 0.75rem;
-                        top: 50%;
-                        transform: translateY(-50%);
-                        z-index: 1;
-                    "
-                ></i>
+    <!-- Search -->
+    <div class="mb-4">
 
-                <input
-                    pInputText
-                    type="text"
-                    [(ngModel)]="search"
-                    placeholder="Search Question Sets"
-                    class="w-full pl-5"
-                />
+      <div class="relative">
 
-            </div>
+        <i
+          class="pi pi-search absolute"
+          style="
+            left: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 1;
+          "
+        ></i>
 
-        </div>
+        <input
+          pInputText
+          type="text"
+          [(ngModel)]="search"
+          placeholder="Search Question Sets"
+          class="w-full pl-5"
+        />
 
-        <p-table
-            [value]="filteredQuestionSets()"
-            responsiveLayout="scroll"
-            [scrollable]="true"
-            scrollHeight="420px"
+      </div>
+
+    </div>
+
+    <!-- Table -->
+    <div class="border-1 border-gray-200 border-round-lg overflow-hidden">
+
+      <p-table
+        [value]="filteredQuestionSets()"
+        responsiveLayout="scroll"
+        [scrollable]="true"
+        scrollHeight="420px"
+      >
+
+        <!-- Header -->
+        <ng-template pTemplate="header">
+
+          <tr>
+
+            <th style="width: 80px">
+              Select
+            </th>
+
+            <th>
+              Question Set
+            </th>
+
+          </tr>
+
+        </ng-template>
+
+        <!-- Body -->
+        <ng-template
+          pTemplate="body"
+          let-row
         >
 
-            <ng-template pTemplate="header">
+          <tr>
 
-                <tr>
+            <td>
 
-                    <th style="width: 80px">
-                        Select
-                    </th>
+              <p-checkbox
+                [binary]="true"
+                [ngModel]="isSelected(row.value)"
+                (onChange)="toggleSelection(row.value)"
+              ></p-checkbox>
 
-                    <th>
-                        Question Set
-                    </th>
+            </td>
 
-                </tr>
+            <td>
+              {{ row.label }}
+            </td>
 
-            </ng-template>
+          </tr>
 
-            <ng-template
-                pTemplate="body"
-                let-row
-            >
+        </ng-template>
 
-                <tr>
+      </p-table>
 
-                    <td>
+    </div>
 
-                        <p-checkbox
-                            [binary]="true"
-                            [ngModel]="
-                                isSelected(
-                                    row.value
-                                )
-                            "
-                            (onChange)="
-                                toggleSelection(
-                                    row.value
-                                )
-                            "
-                        ></p-checkbox>
+    <!-- Footer -->
+    <div class="flex justify-content-end gap-2 pt-4 mt-4 border-top-1 border-gray-200">
 
-                    </td>
+      <button
+        pButton
+        type="button"
+        label="Cancel"
+        class="p-button-text"
+        (click)="close()"
+      ></button>
 
-                    <td>
-                        {{ row.label }}
-                    </td>
+      <button
+        pButton
+        type="button"
+        label="Save Mapping"
+        [loading]="saving()"
+        (click)="save()"
+      ></button>
 
-                </tr>
+    </div>
 
-            </ng-template>
+  </div>
 
-        </p-table>
+</div>
 
-        <div
-            class="flex justify-content-end gap-2 mt-4"
-        >
-
-            <button
-                pButton
-                type="button"
-                label="Cancel"
-                class="p-button-text"
-                (click)="close()"
-            ></button>
-
-            <button
-                pButton
-                type="button"
-                label="Save Mapping"
-                [loading]="saving()"
-                (click)="save()"
-            ></button>
-
-        </div>
-        </div>
-
-        <p-toast></p-toast>
+<p-toast></p-toast>
     `,
 })
 export class AuditCategoryQuestionMappingComponent {
