@@ -43,7 +43,55 @@ export class AppMenu implements OnInit {
                 { label: 'Periodwise Questions Master', icon: 'pi pi-fw pi-list', routerLink: ['/admin/periodwise-questions-master'] },
                 { label: 'Manage Assessment Master', icon: 'pi pi-fw pi-chart-bar', routerLink: ['/admin/manage-assessment-master'] },
                 { label: 'Menu Master', icon: 'pi pi-fw pi-list', routerLink: ['/admin/menu-master'] },
-                { label: 'Annexure Master', icon: 'pi pi-fw pi-file-edit', routerLink: ['/admin/audit-annexure-master'] }
+                { label: 'Annexure Master', icon: 'pi pi-fw pi-file-edit', routerLink: ['/admin/audit-annexure-master'] },
+                {
+                    label: 'Risk Master',
+                    icon: 'pi pi-fw pi-shield',
+
+                    items: [
+
+                        {
+                            label: 'Risk Categories',
+                            icon: 'pi pi-fw pi-tags',
+                            routerLink: [
+                                '/admin/risk-categories'
+                            ],
+                        },
+
+                        {
+                            label: 'Risk Controls',
+                            icon: 'pi pi-fw pi-sliders-h',
+                            routerLink: [
+                                '/admin/risk-controls'
+                            ],
+                        },
+
+                        {
+                            label: 'Composite Risk',
+                            icon: 'pi pi-fw pi-share-alt',
+                            routerLink: [
+                                '/admin/risk-composites'
+                            ],
+                        },
+
+                        {
+                            label: 'Risk Matrix',
+                            icon: 'pi pi-fw pi-table',
+                            routerLink: [
+                                '/admin/risk-matrix'
+                            ],
+                        },
+
+                        {
+                            label: 'Branch Rating',
+                            icon: 'pi pi-fw pi-chart-line',
+                            routerLink: [
+                                '/admin/branch-rating'
+                            ],
+                        },
+
+                    ],
+                },
             ],
         }
     ];

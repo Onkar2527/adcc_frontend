@@ -18,7 +18,17 @@ import { BorderAreaMasterComponent } from './border-area-master/border-area-mast
 import { ManageAssessmentMasterComponent } from './manage-assement-master/manage-assement-master-main.compoent';
 import { AuditAnnexureMasterComponent } from './audit-annexure-master/audit-annexure-master.component';
 import { AuditAnnexureColumnsComponent } from './audit-annexure-master/audit-annexure-columns-master.component';
+import { RiskCategoryComponent } from './risk-masters/risk-category/risk-category-master.component';
+import { RiskCategoryWeightComponent } from './risk-masters/risk-category/risk-category-weights.component';
+import { RiskControlComponent } from './risk-masters/risk-control/risk-control-master.component';
+import { RiskControlKeyAspectComponent } from './risk-masters/risk-control/risk-control-key-aspect.component';
+import { RiskCompositeComponent } from './risk-masters/risk-composite/risk-composite-master.component';
+import { RiskMatrixComponent } from './risk-masters/risk-matrix/risk-matrix.component';
+import { RiskMatrixConfigComponent } from './risk-masters/risk-matrix/risk-matrix-config.component';
+import { BranchRatingComponent } from './risk-masters/branch-rating/branch-rating.component';
+import { BranchRatingListComponent } from './risk-masters/branch-rating/branch-rating-list.component.ts';
 import { PeriodwiseQuestionsMasterComponent } from './periodwise-questions-master/periodwise-questions-master';
+
 
 export const ADMIN_ROUTES: Routes = [
     { path: 'branch-master', component: BranchMasterComponent },
@@ -42,4 +52,13 @@ export const ADMIN_ROUTES: Routes = [
     { path: 'periodwise-questions-master', component: PeriodwiseQuestionsMasterComponent },
     { path: 'audit-annexure-master', component: AuditAnnexureMasterComponent },
     { path: 'audit-annexure-master/:id/columns', component: AuditAnnexureColumnsComponent },
+    { path: 'risk-categories', component: RiskCategoryComponent },
+    { path: 'risk-categories/:id/weights', component: RiskCategoryWeightComponent },
+    { path: 'risk-controls', component: RiskControlComponent },
+    { path: 'risk-controls/:id/key-aspects', component: RiskControlKeyAspectComponent },
+    { path: 'risk-composites', component: RiskCompositeComponent },
+    { path: 'risk-matrix', component: RiskMatrixComponent },
+    { path: 'risk-matrix/:id', component: RiskMatrixConfigComponent },
+    { path: 'branch-rating', component: BranchRatingComponent },
+    { path: 'branch-rating/:id', component: BranchRatingListComponent },
 ];
