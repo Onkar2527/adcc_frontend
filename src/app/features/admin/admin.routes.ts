@@ -14,6 +14,8 @@ import { AuditQuestionSetMasterComponent } from './audit-question-master/audit-q
 import { AuditQuestionSetHeaderMasterComponent } from './audit-question-master/audit-question-set-header-master.component';
 import { AuditQuestionMasterComponent } from './audit-question-master/audit-question-master.component';
 import { AuditCategoryMasterComponent } from './audit-category-master/audit-category-master.component';
+import { BorderAreaMasterComponent } from './border-area-master/border-area-master.component';
+import { ManageAssessmentMasterComponent } from './manage-assement-master/manage-assement-master-main.compoent';
 import { AuditAnnexureMasterComponent } from './audit-annexure-master/audit-annexure-master.component';
 import { AuditAnnexureColumnsComponent } from './audit-annexure-master/audit-annexure-columns-master.component';
 import { RiskCategoryComponent } from './risk-masters/risk-category/risk-category-master.component';
@@ -25,6 +27,8 @@ import { RiskMatrixComponent } from './risk-masters/risk-matrix/risk-matrix.comp
 import { RiskMatrixConfigComponent } from './risk-masters/risk-matrix/risk-matrix-config.component';
 import { BranchRatingComponent } from './risk-masters/branch-rating/branch-rating.component';
 import { BranchRatingListComponent } from './risk-masters/branch-rating/branch-rating-list.component.ts';
+import { PeriodwiseQuestionsMasterComponent } from './periodwise-questions-master/periodwise-questions-master';
+
 
 export const ADMIN_ROUTES: Routes = [
     { path: 'branch-master', component: BranchMasterComponent },
@@ -43,6 +47,9 @@ export const ADMIN_ROUTES: Routes = [
     { path: 'question-master/:setId/:headerId', component: AuditQuestionMasterComponent },
     { path: 'question-master/:setId', component: AuditQuestionMasterComponent },
     { path: 'audit-category-master', component: AuditCategoryMasterComponent },
+    { path: 'broader-area-master', component: BorderAreaMasterComponent },
+    { path: 'manage-assessment-master', component: ManageAssessmentMasterComponent },
+    { path: 'periodwise-questions-master', component: PeriodwiseQuestionsMasterComponent },
     { path: 'audit-annexure-master', component: AuditAnnexureMasterComponent },
     { path: 'audit-annexure-master/:id/columns', component: AuditAnnexureColumnsComponent },
     { path: 'risk-categories', component: RiskCategoryComponent },
