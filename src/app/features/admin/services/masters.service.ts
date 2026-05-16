@@ -765,3 +765,478 @@ export class AuditAnnexureMasterService {
   }
 }
 
+
+// Risk Masters - Risk Category 
+
+export interface CreateRiskCategoryDto {
+
+  risk_category: string;
+
+  is_active?: number;
+
+  admin_id?: number;
+}
+
+export interface UpdateRiskCategoryDto
+  extends Partial<CreateRiskCategoryDto> {
+
+  id?: number;
+}
+
+export interface CreateRiskCategoryWeightDto {
+
+  risk_category_id: number;
+
+  year_id: number;
+
+  risk_weight: number;
+
+  risk_appetite_percent: number;
+
+  is_active?: number;
+
+  admin_id?: number;
+}
+
+@Injectable({
+  providedIn: 'root',
+})
+export class RiskCategoryMasterService {
+
+  private http = inject(HttpClient);
+
+  private config = inject(APP_CONFIG);
+
+  private apiUrl =
+    `${this.config.apiUrl}/risk-categories`;
+
+  findAll() {
+    return this.http.get<any>(
+      this.apiUrl,
+    );
+  }
+
+  findOne(id: string | number) {
+    return this.http.get<any>(
+      `${this.apiUrl}/${id}`,
+    );
+  }
+
+  create(data: CreateRiskCategoryDto) {
+    return this.http.post<any>(
+      this.apiUrl,
+      data,
+    );
+  }
+
+  update(
+    id: string | number,
+
+    data: UpdateRiskCategoryDto,
+  ) {
+    return this.http.patch<any>(
+      `${this.apiUrl}/${id}`,
+      data,
+    );
+  }
+
+  toggleStatus(id: string | number) {
+    return this.http.patch<any>(
+      `${this.apiUrl}/${id}/status`,
+      {},
+    );
+  }
+
+  remove(id: string | number) {
+    return this.http.delete<any>(
+      `${this.apiUrl}/${id}`,
+    );
+  }
+
+  // Risk Category Weights
+
+  findAllWeights(
+    riskCategoryId: number,
+  ) {
+    return this.http.get<any>(
+      `${this.apiUrl}/${riskCategoryId}/weights`,
+    );
+  }
+
+  createWeight(
+    data: CreateRiskCategoryWeightDto,
+  ) {
+    return this.http.post<any>(
+      `${this.apiUrl}/weights`,
+      data,
+    );
+  }
+
+  updateWeight(
+    id: string | number,
+
+    data: CreateRiskCategoryWeightDto,
+  ) {
+    return this.http.patch<any>(
+      `${this.apiUrl}/weights/${id}`,
+      data,
+    );
+  }
+
+  removeWeight(id: string | number) {
+    return this.http.delete<any>(
+      `${this.apiUrl}/weights/${id}`,
+    );
+  }
+
+  getYears() {
+    return this.http.get<any>(
+      `${this.apiUrl}/lookups/years`,
+    );
+  }
+
+}
+
+
+// Risk Control
+
+export interface CreateRiskControlDto {
+
+  name: string;
+
+  is_active?: number;
+
+  admin_id?: number;
+}
+
+export interface CreateRiskControlKeyAspectDto {
+
+  risk_control_id: number;
+
+  name: string;
+
+  is_active?: number;
+
+  admin_id?: number;
+}
+
+@Injectable({
+  providedIn: 'root',
+})
+
+export class RiskControlMasterService {
+
+  private http = inject(HttpClient);
+
+  private config = inject(APP_CONFIG);
+
+  private apiUrl =
+    `${this.config.apiUrl}/risk-controls`;
+
+  findAllRiskControls() {
+    return this.http.get<any>(
+      this.apiUrl,
+    );
+  }
+
+  findOneRiskControl(
+    id: string | number,
+  ) {
+    return this.http.get<any>(
+      `${this.apiUrl}/${id}`,
+    );
+  }
+
+  createRiskControl(
+    data: CreateRiskControlDto,
+  ) {
+    return this.http.post<any>(
+      this.apiUrl,
+      data,
+    );
+  }
+
+  updateRiskControl(
+    id: string | number,
+
+    data: CreateRiskControlDto,
+  ) {
+    return this.http.patch<any>(
+      `${this.apiUrl}/${id}`,
+      data,
+    );
+  }
+
+  toggleRiskControlStatus(
+    id: string | number,
+  ) {
+    return this.http.patch<any>(
+      `${this.apiUrl}/${id}/status`,
+      {},
+    );
+  }
+
+  removeRiskControl(
+    id: string | number,
+  ) {
+    return this.http.delete<any>(
+      `${this.apiUrl}/${id}`,
+    );
+  }
+
+  // KEY ASPECT
+
+  findAllKeyAspects(
+    riskControlId: number,
+  ) {
+    return this.http.get<any>(
+      `${this.apiUrl}/${riskControlId}/key-aspects`,
+    );
+  }
+
+  createKeyAspect(
+    data: CreateRiskControlKeyAspectDto,
+  ) {
+    return this.http.post<any>(
+      `${this.apiUrl}/key-aspects`,
+      data,
+    );
+  }
+
+  updateKeyAspect(
+    id: string | number,
+
+    data: CreateRiskControlKeyAspectDto,
+  ) {
+    return this.http.patch<any>(
+      `${this.apiUrl}/key-aspects/${id}`,
+      data,
+    );
+  }
+
+  removeKeyAspect(
+    id: string | number,
+  ) {
+    return this.http.delete<any>(
+      `${this.apiUrl}/key-aspects/${id}`,
+    );
+  }
+
+}
+
+
+// Risk Composite
+
+export interface CreateRiskCompositeDto {
+
+  business_risk: number;
+
+  control_risk: number;
+
+  name: string;
+
+  admin_id?: number;
+}
+
+@Injectable({
+  providedIn: 'root',
+})
+
+export class RiskCompositeMasterService {
+
+  private http = inject(HttpClient);
+
+  private config = inject(APP_CONFIG);
+
+  private apiUrl =
+    `${this.config.apiUrl}/risk-composites`;
+
+  findAllRiskComposites() {
+    return this.http.get<any>(
+      this.apiUrl,
+    );
+  }
+
+  findOneRiskComposite(
+    id: string | number,
+  ) {
+    return this.http.get<any>(
+      `${this.apiUrl}/${id}`,
+    );
+  }
+
+  createRiskComposite(
+    data: CreateRiskCompositeDto,
+  ) {
+    return this.http.post<any>(
+      this.apiUrl,
+      data,
+    );
+  }
+
+  updateRiskComposite(
+    id: string | number,
+
+    data: CreateRiskCompositeDto,
+  ) {
+    return this.http.patch<any>(
+      `${this.apiUrl}/${id}`,
+      data,
+    );
+  }
+
+  removeRiskComposite(
+    id: string | number,
+  ) {
+    return this.http.delete<any>(
+      `${this.apiUrl}/${id}`,
+    );
+  }
+
+}
+
+
+// Risk Matrix
+
+export interface RiskMatrixRow {
+
+  risk_parameter: number;
+
+  business_risk_app: number;
+
+  business_risk_score: number;
+
+  control_risk_app: number;
+
+  control_risk_score: number;
+
+  residual_risk_app: number;
+}
+
+export interface CreateRiskMatrixDto {
+
+  rows: RiskMatrixRow[];
+}
+
+
+@Injectable({
+  providedIn: 'root',
+})
+
+export class RiskMatrixService {
+
+  private http = inject(HttpClient);
+
+  private config = inject(APP_CONFIG);
+
+  private apiUrl =
+    `${this.config.apiUrl}/risk-matrix`;
+
+  findRiskMatrixByYear(
+    yearId: number,
+  ) {
+    return this.http.get<any>(
+      `${this.apiUrl}/${yearId}`,
+    );
+  }
+
+  saveRiskMatrix(
+
+    yearId: number,
+
+    data: CreateRiskMatrixDto,
+  ) {
+    return this.http.post<any>(
+      `${this.apiUrl}/${yearId}`,
+      data,
+    );
+  }
+
+}
+
+
+// Branch Rating 
+
+export interface CreateBranchRatingDto {
+
+  year_id: number;
+
+  audit_unit_id: number;
+
+  audit_type_id: number;
+
+  high_range_from: string;
+
+  high_range_to: string;
+
+  medium_range_from: string;
+
+  medium_range_to: string;
+
+  low_range_from: string;
+
+  low_range_to: string;
+
+  admin_id?: number;
+}
+
+@Injectable({
+  providedIn: 'root',
+})
+
+export class BranchRatingService {
+
+  private http = inject(HttpClient);
+
+  private config = inject(APP_CONFIG);
+
+  private apiUrl =
+    `${this.config.apiUrl}/branch-rating`;
+
+  findBranchRatingsByYear(
+    yearId: number,
+  ) {
+    return this.http.get<any>(
+      `${this.apiUrl}/year/${yearId}`,
+    );
+  }
+
+  findOneBranchRating(
+    id: number,
+  ) {
+    return this.http.get<any>(
+      `${this.apiUrl}/${id}`,
+    );
+  }
+
+  createBranchRating(
+    data: CreateBranchRatingDto,
+  ) {
+    return this.http.post<any>(
+      this.apiUrl,
+      data,
+    );
+  }
+
+  updateBranchRating(
+
+    id: number,
+
+    data: CreateBranchRatingDto,
+  ) {
+    return this.http.patch<any>(
+      `${this.apiUrl}/${id}`,
+      data,
+    );
+  }
+
+  removeBranchRating(
+    id: number,
+  ) {
+    return this.http.delete<any>(
+      `${this.apiUrl}/${id}`,
+    );
+  }
+
+}
+
