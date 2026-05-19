@@ -1393,6 +1393,11 @@ export class PeriodwiseQuestionsMasterService {
     return this.http.get<PeriodwiseQuestionsMaster[]>(this.apiUrl);
   }
 
+  getQuestionData(id: number): Observable<PeriodwiseQuestionsMaster> {
+    return this.http.get<PeriodwiseQuestionsMaster>(
+      `${this.apiUrl}/${id}`
+    );
+  }
   getById(id: number): Observable<PeriodwiseQuestionsMaster> {
     return this.http.get<PeriodwiseQuestionsMaster>(
       `${this.apiUrl}/${id}`
@@ -1425,6 +1430,57 @@ export class PeriodwiseQuestionsMasterService {
       `${this.apiUrl}/advances-schemes/${id}`,
       { advances_scheme_ids }
     );
+  }
+  updateDepositsSchemes(
+    id: number,
+    deposits_scheme_ids: string
+  ): Observable<PeriodwiseQuestionsMaster> {
+    return this.http.put<PeriodwiseQuestionsMaster>(
+      `${this.apiUrl}/deposit-schemes/${id}`,
+      { deposits_scheme_ids }
+    );
+  }
+  updateMenus(
+    id: number,
+    menu_ids: string
+  ): Observable<PeriodwiseQuestionsMaster> {
+    return this.http.put<PeriodwiseQuestionsMaster>(
+      `${this.apiUrl}/menu/${id}`,
+      { menu_ids }
+    );
+  }
+  updateCategories(
+    id: number,
+    cat_ids: string
+  ): Observable<PeriodwiseQuestionsMaster> {
+    return this.http.put<PeriodwiseQuestionsMaster>(
+      `${this.apiUrl}/category/${id}`,
+      { cat_ids }
+    );
+  }
+  updateQuestionHeaders(
+
+    id: number,
+
+    header_ids: string,
+
+    question_ids: string
+
+  ) {
+
+    return this.http.put(
+
+      `${this.apiUrl}/question-and-headers/${id}`,
+
+      {
+
+        header_ids,
+        question_ids
+
+      }
+
+    );
+
   }
 
 

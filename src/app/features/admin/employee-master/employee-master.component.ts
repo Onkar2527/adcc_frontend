@@ -86,7 +86,7 @@ export class EmployeeMasterComponent implements OnInit {
     const res = await this.drawer.open(EmployeeFormComponent, {
       header: employee ? 'Edit Employee' : 'Create New Employee',
       data: employee,
-      width: 'min(620px, 100vw)'
+      width: 'min(820px, 150vw)'
     });
 
     if (res.saved) {
