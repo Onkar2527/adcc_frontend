@@ -5,7 +5,7 @@ import {
   signal,
 } from '@angular/core';
 
-import { CommonModule }
+import { CommonModule, DatePipe }
   from '@angular/common';
 
 
@@ -17,7 +17,7 @@ import { ManageAccountsDataService }
 
 @Component({
   selector:
-    'app-deposit-upload-dumps',
+    'app-advance-upload-dumps',
 
   standalone: true,
 
@@ -25,7 +25,8 @@ import { ManageAccountsDataService }
 
     CommonModule,
 
-    TableModule
+    TableModule,
+
   ],
 
   template: `
@@ -90,7 +91,7 @@ import { ManageAccountsDataService }
 </div>
 `
 })
-export class DepositUploadDumpsComponent
+export class AdvanceUploadDumpsComponent
   implements OnInit {
 
   private service =
@@ -133,7 +134,7 @@ export class DepositUploadDumpsComponent
     this.loading.set(true);
 
     this.service
-      .getUploadDumps()
+      .getUploadDumpsAdvance()
       .subscribe({
 
         next: (res) => {

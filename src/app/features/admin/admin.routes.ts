@@ -29,6 +29,7 @@ import { BranchRatingComponent } from './risk-masters/branch-rating/branch-ratin
 import { BranchRatingListComponent } from './risk-masters/branch-rating/branch-rating-list.component.ts';
 import { PeriodwiseQuestionsMasterComponent } from './periodwise-questions-master/periodwise-questions-master';
 import { DepositAccountsComponent } from './manage-accounts/deposit-accounts/deposit-accounts.component';
+import { AdvanceAccountsComponent } from './manage-accounts/advance-accounts/advance-accounts.component';
 
 
 export const ADMIN_ROUTES: Routes = [
@@ -63,5 +64,5 @@ export const ADMIN_ROUTES: Routes = [
     { path: 'branch-rating', component: BranchRatingComponent },
     { path: 'branch-rating/:id', component: BranchRatingListComponent },
     { path: 'deposit-accounts', component: DepositAccountsComponent },
-    // { path: 'advance-accounts', component: AdvanceAccountsComponent },
+    { path: 'advance-accounts', component: AdvanceAccountsComponent },
 ];

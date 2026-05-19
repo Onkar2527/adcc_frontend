@@ -404,7 +404,7 @@ export class DepositAccountsComponent
 
         this.loadDropdowns();
 
-        this.loadInitial();
+        // this.loadInitial();
     }
 
     loadDropdowns() {
@@ -602,7 +602,7 @@ export class DepositAccountsComponent
                     'Upload Deposit Accounts',
 
                 width:
-                    'min(700px, 100vw)',
+                    'min(850px, 98vw)',
             },
         );
     }
@@ -613,7 +613,7 @@ export class DepositAccountsComponent
             document.createElement('a');
 
         link.href =
-            'assets/csv/deposit-sample.csv';
+            'assets/csv/sample_csv_deposits.csv';
 
         link.download =
             'deposit-sample.csv';
