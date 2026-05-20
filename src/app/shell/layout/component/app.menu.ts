@@ -18,17 +18,17 @@ import { LayoutService } from '../service/layout.service';
     </ul>
   `,
 })
-export class AppMenu  implements OnInit {
+export class AppMenu implements OnInit {
     private layoutService = inject(LayoutService);
     ngOnInit(): void {
-         const user =
-    JSON.parse(localStorage.getItem('user') || '{}');
-      
+        const user =
+            JSON.parse(localStorage.getItem('user') || '{}');
+
         this.model =
-      this.model.filter((menu: any) =>
-        !menu.authority ||
-        menu.authority.includes(user.user_type_id)
-      );
+            this.model.filter((menu: any) =>
+                !menu.authority ||
+                menu.authority.includes(user.user_type_id)
+            );
     }
     model: MenuItem[] = [
         {
@@ -37,14 +37,15 @@ export class AppMenu  implements OnInit {
             items: [{ label: 'Dashboard', icon: 'pi pi-fw pi-home', routerLink: ['/home'] }],
         },
         {
+            label: 'Audit Management',
             authority: ['2'],
-            items: [{ label: 'Internal Audit', icon: 'pi pi-fw--pi-alert', routerLink: ['/auditor/select-audit-unit'] }],
+            items: [{ label: 'Internal Audit', icon: 'pi pi-fw pi-exclamation-triangle', routerLink: ['/auditor/audit-dashboard'] }],
         },
         {
             label: 'Masters',
             authority: ['1'],
             items: [
-                
+
                 { label: 'Employee Master', icon: 'pi pi-fw pi-users', routerLink: ['/admin/employee-master'] },
                 { label: 'Password Policy', icon: 'pi pi-fw pi-lock', routerLink: ['/admin/password-policy-master'] },
                 { label: 'Section Master', icon: 'pi pi-fw pi-list-check', routerLink: ['/admin/audit-section-master'] },
@@ -110,6 +111,7 @@ export class AppMenu  implements OnInit {
 
         {
             label: 'Manage Accounts Data',
+            authority: ['1'],
             items: [
                 {
                     label: 'Manage Deposit Accounts',
@@ -133,7 +135,7 @@ export class AppMenu  implements OnInit {
 
 
 
-   
+
 
     // private updateMenu(role: string) {
     //     // --- Common Menu Items ---

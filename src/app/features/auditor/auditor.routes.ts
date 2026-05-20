@@ -1,6 +1,6 @@
 import { Routes } from '@angular/router';
-import { SelectAuditUnitComponent } from './internal-audit/internal-audit.component';
+import { AuditDashboardComponent } from './audit-dashboard/audit-dashboard.component';
 export const AUDITOR_ROUTES: Routes = [
-    { path: 'select-audit-unit', component: SelectAuditUnitComponent},
- 
+    { path: 'audit-dashboard', component: AuditDashboardComponent },
+
 ];
