@@ -1,0 +1,3 @@
+branch_code,branch_name,scheme_code,scheme_name,account_no,account_holder_name,ucic,customer_type,intrest_rate,principal_amount,account_opening_date,balance,balance_date,maturity_date,maturity_amount,close_date,account_status
+1,BRANCH NAME,555,SCHEME NAME,123456,ACCOUNT HOLDER NAME,78945,,2.5,50000,03-04-2023,5000,31-07-2023,,,,
+,,,,,,,,,,YYYY-MM-DD,,YYYY-MM-DD,YYYY-MM-DD,,YYYY-MM-DD,

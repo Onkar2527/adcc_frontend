@@ -1489,3 +1489,379 @@ export class PeriodwiseQuestionsMasterService {
   }
 
 }
+
+
+// Manage Accounts Data
+
+export interface DepositAccountFilters {
+
+  search?: string;
+
+  search_type?: string;
+
+  branch_id?: number;
+
+  scheme_id?: number;
+
+  period_from?: string;
+
+  period_to?: string;
+
+  page?: number;
+
+  limit?: number;
+}
+
+export interface CreateDepositAccountDto {
+
+  branch_id: number;
+
+  scheme_id: number;
+
+  account_no: string;
+
+  account_holder_name: string;
+
+  ucic: string;
+
+  customer_type: string;
+
+  intrest_rate: string;
+
+  principal_amount: string;
+
+  account_opening_date?: string;
+
+  balance: string;
+
+  balance_date?: string;
+
+  maturity_date?: string;
+
+  maturity_amount: string;
+
+  upload_period_from: string;
+
+  upload_period_to: string;
+
+  close_date?: string;
+
+  account_status: string;
+
+  sampling_filter?: number;
+
+  assesment_period_id: number;
+
+  admin_id?: number;
+}
+
+export interface AdvancesAccountFilters {
+
+  search?: string;
+
+  search_type?: string;
+
+  branch_id?: number;
+
+  scheme_id?: number;
+
+  period_from?: string;
+
+  period_to?: string;
+
+  page?: number;
+
+  limit?: number;
+}
+
+export interface CreateAdvanceAccountDto {
+
+  branch_id: number;
+
+  scheme_id: number;
+
+  account_no: string;
+
+  account_holder_name: string;
+
+  ucic: string;
+
+  customer_type: string;
+
+  intrest_rate: string;
+
+  // principal_amount: string;
+
+  account_opening_date?: string;
+
+  // balance: string;
+
+  balance_date?: string;
+
+  // maturity_date?: string;
+
+  // maturity_amount: string;
+
+  upload_period_from: string;
+
+  upload_period_to: string;
+
+  // close_date?: string;
+
+  renewal_date?: string;
+
+  npa_status?: string;
+
+  sanction_amount?: string;
+
+  outstanding_balance?: string;
+
+  due_date?: string;
+
+  account_status: string;
+
+  sampling_filter?: number;
+
+  assesment_period_id: number;
+
+  admin_id?: number;
+}
+
+@Injectable({
+  providedIn: 'root'
+})
+export class ManageAccountsDataService {
+
+  private http = inject(HttpClient);
+  private config = inject(APP_CONFIG);
+
+  private apiUrl = `${this.config.apiUrl}/deposit-accounts`;
+  private apiUrl1 = `${this.config.apiUrl}/advance-accounts`;
+
+
+
+  findAllDepositAccounts(
+    filters?: DepositAccountFilters,
+  ) {
+
+    return this.http.get<any>(
+      this.apiUrl,
+      {
+        params: filters as any,
+      },
+    );
+  }
+
+  findOneDepositAccount(
+    id: number,
+  ) {
+    return this.http.get<any>(
+      `${this.apiUrl}/${id}`,
+    );
+  }
+
+  createDepositAccount(
+    data: CreateDepositAccountDto,
+  ) {
+    return this.http.post<any>(
+      this.apiUrl,
+      data,
+    );
+  }
+
+  updateDepositAccount(
+
+    id: number,
+
+    data: CreateDepositAccountDto,
+  ) {
+    return this.http.patch<any>(
+      `${this.apiUrl}/${id}`,
+      data,
+    );
+  }
+
+  removeDepositAccount(
+    id: number,
+  ) {
+    return this.http.delete<any>(
+      `${this.apiUrl}/${id}`,
+    );
+  }
+
+  getUploadDumps() {
+
+    return this.http.get<any[]>(
+      `${this.apiUrl}/upload-dumps`,
+    );
+  }
+
+  validateDepositCsv(
+    file: File,
+    payload: any,
+  ) {
+
+    const formData =
+      new FormData();
+
+    formData.append(
+      'file',
+      file,
+    );
+
+    formData.append(
+      'upload_date',
+      payload.upload_date,
+    );
+
+    formData.append(
+      'period_from',
+      payload.period_from,
+    );
+
+    formData.append(
+      'period_to',
+      payload.period_to,
+    );
+
+    return this.http.post<any>(
+
+      `${this.apiUrl}/validate-upload`,
+
+      formData,
+    );
+  }
+
+  addDepositDump(
+    rows: any[],
+  ) {
+
+    return this.http.post<any>(
+
+      `${this.apiUrl}/add-dump`,
+
+      {
+        rows,
+      },
+    );
+  }
+
+
+
+  // Advance Dump
+
+  findAllAdvanceAccounts(
+    filters?: AdvancesAccountFilters,
+  ) {
+
+    return this.http.get<any>(
+      this.apiUrl1,
+      {
+        params: filters as any,
+      },
+    );
+  }
+
+  findOneAdvanceAccount(
+    id: number,
+  ) {
+    return this.http.get<any>(
+      `${this.apiUrl1}/${id}`,
+    );
+  }
+
+  createAdvanceAccount(
+    data: CreateAdvanceAccountDto,
+  ) {
+    return this.http.post<any>(
+      this.apiUrl1,
+      data,
+    );
+  }
+
+  updateAdvanceAccount(
+
+    id: number,
+
+    data: CreateAdvanceAccountDto,
+  ) {
+    return this.http.patch<any>(
+      `${this.apiUrl1}/${id}`,
+      data,
+    );
+  }
+
+  removeAdvanceAccount(
+    id: number,
+  ) {
+    return this.http.delete<any>(
+      `${this.apiUrl1}/${id}`,
+    );
+  }
+
+  getUploadDumpsAdvance() {
+
+    return this.http.get<any[]>(
+      `${this.apiUrl1}/upload-dumps`,
+    );
+  }
+
+  validateAdvanceCsv(
+    file: File,
+    payload: any,
+  ) {
+
+    const formData =
+      new FormData();
+
+    formData.append(
+      'file',
+      file,
+    );
+
+    formData.append(
+      'upload_date',
+      payload.upload_date,
+    );
+
+    formData.append(
+      'period_from',
+      payload.period_from,
+    );
+
+    formData.append(
+      'period_to',
+      payload.period_to,
+    );
+
+    return this.http.post<any>(
+
+      `${this.apiUrl1}/validate-upload`,
+
+      formData,
+    );
+  }
+
+  addAdvanceDump(
+    rows: any[],
+  ) {
+
+    return this.http.post<any>(
+
+      `${this.apiUrl1}/add-dump`,
+
+      {
+        rows,
+      },
+    );
+  }
+
+
+  // Advance Dump
+
+
+
+
+
+
+}

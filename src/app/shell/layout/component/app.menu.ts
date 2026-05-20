@@ -106,6 +106,22 @@ export class AppMenu  implements OnInit {
                     ],
                 },
             ],
+        },
+
+        {
+            label: 'Manage Accounts Data',
+            items: [
+                {
+                    label: 'Manage Deposit Accounts',
+                    icon: 'pi pi-fw pi-wallet',
+                    routerLink: ['/admin/deposit-accounts'],
+                },
+                {
+                    label: 'Manage Advance Accounts',
+                    icon: 'pi pi-fw pi-credit-card',
+                    routerLink: ['/admin/advance-accounts'],
+                },
+            ],
         }
     ];
 
