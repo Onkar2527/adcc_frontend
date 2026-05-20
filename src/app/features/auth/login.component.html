@@ -1,0 +1,134 @@
+<p-toast></p-toast>
+<div class="login-page">
+
+    <!-- Fixed Banner -->
+    <div class="top-banner"></div>
+
+    <!-- Scrollable Content -->
+    <div class="content-section">
+
+        <!-- Brand -->
+        <div class="brand-section">
+
+            <h1>AuditPro</h1>
+
+            <p>
+                RISK BASED INTERNAL AUDIT
+            </p>
+
+        </div>
+
+        <!-- Login -->
+        <div class="login-wrapper">
+
+            <div class="login-card">
+
+                <h2>
+                    Login to Your Account
+                </h2>
+
+                <div class="company-name">
+                    Kredpool Co-Op Bank Ltd., Sangli
+                </div>
+
+                <hr>
+
+                <p class="login-text">
+                    Login to start your session!
+                </p>
+
+                <form
+                    #loginForm="ngForm"
+                    (ngSubmit)="onLogin()">
+
+                    <!-- Username -->
+                    <div class="input-group">
+
+                        <label>
+                            Employee Code
+                        </label>
+
+                        <span class="p-input-icon-left w-full">
+
+                           
+
+                            <input
+                                pInputText
+                                type="text"
+                                [(ngModel)]="username"
+                                name="username"
+                                placeholder="Enter Employee Code"
+                                class="w-full custom-input"
+                                required />
+
+                        </span>
+
+                    </div>
+
+                    <!-- Password -->
+                    <div class="input-group">
+
+                        <label>
+                            Password
+                        </label>
+
+                        <p-password
+                            [(ngModel)]="password"
+                            name="password"
+                            [toggleMask]="true"
+                            [feedback]="false"
+                            placeholder="Enter Password"
+                            styleClass="w-full"
+                            inputStyleClass="w-full custom-input"
+                            required>
+                        </p-password>
+
+                    </div>
+
+                    <!-- Login Button -->
+                    <button
+                        pButton
+                        type="submit"
+                        label="Login"
+                        class="login-btn">
+                    </button>
+
+                    <!-- Roles -->
+                    <div class="user-types">
+
+                        <button
+                            type="button"
+                            class="user-btn"
+                             (click)="setCredentials('auditor')">
+                            
+                            Auditor
+
+                        </button>
+
+                        <button
+                            type="button"
+                            class="user-btn"
+                              (click)="setCredentials('reviewer')">
+                            Reviewer
+
+                        </button>
+
+                        <button
+                            type="button"
+                            class="user-btn">
+
+                            Employee
+
+                        </button>
+
+                    </div>
+
+                </form>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>

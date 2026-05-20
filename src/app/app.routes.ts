@@ -16,13 +16,14 @@ export const routes: Routes = [
       { path: 'loanapplication', loadComponent: () => import('./features/proposals/forms-proposal/loan-application/loan-application').then(mod => mod.LoanApplicationComponent) },
       { path: 'branchscrutiny', loadComponent: () => import('./features/proposals/forms-proposal/loan-application/loan-application').then(mod => mod.LoanApplicationComponent) },
       { path: 'employees', redirectTo: '/admin/employee-master', pathMatch: 'full' },
-      { path: 'password-policy', redirectTo: '/admin/password-policy-master', pathMatch: 'full' }
+      { path: 'password-policy', redirectTo: '/admin/password-policy-master', pathMatch: 'full' },
+      { path: 'auditor', loadChildren: () => import('./features/auditor/auditor.routes').then(mod => mod.AUDITOR_ROUTES) },
 
     ]
   },
-  // { 
-  //   path: 'login', 
-  //   loadComponent: () => import('./features/auth/login.component').then(m => m.LoginComponent) 
-  // },
+  { 
+    path: 'login', 
+    loadComponent: () => import('./features/auth/login.component').then(m => m.LoginComponent) 
+  },
   { path: '**', redirectTo: '/home' },
 ];

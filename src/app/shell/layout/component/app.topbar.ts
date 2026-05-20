@@ -340,6 +340,6 @@ export class AppTopbar implements OnInit, OnDestroy {
     }
 
     logout() {
-        // TODO: Add logout logic
+        this.router.navigate(['/login']);
     }
 }

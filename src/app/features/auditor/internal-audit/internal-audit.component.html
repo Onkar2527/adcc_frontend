@@ -1,0 +1,193 @@
+<div class="page-container">
+
+    <!-- ================================= -->
+    <!-- HEADER -->
+    <!-- ================================= -->
+
+    <div class="header-section">
+
+        <h1>
+            Select Audit Unit
+        </h1>
+
+        <p>
+            Internal Audit Dashboard
+        </p>
+
+    </div>
+
+    <!-- ================================= -->
+    <!-- LOADING -->
+    <!-- ================================= -->
+
+    <div
+        class="loading-section"
+        *ngIf="loading()"
+    >
+
+        <div class="loader"></div>
+
+        <p>
+            Loading Audit Units...
+        </p>
+
+    </div>
+
+    <!-- ================================= -->
+    <!-- EMPTY -->
+    <!-- ================================= -->
+
+    <div
+        class="empty-section"
+        *ngIf="
+            !loading()
+            &&
+            dashboardData().length === 0
+        "
+    >
+
+        No Audit Data Found
+
+    </div>
+
+    <!-- ================================= -->
+    <!-- GRID -->
+    <!-- ================================= -->
+
+    <div
+        class="audit-grid"
+        *ngIf="
+            !loading()
+            &&
+            dashboardData().length > 0
+        "
+    >
+
+        <div
+            class="audit-card"
+            *ngFor="
+                let item of dashboardData()
+            "
+            (click)="openAudit(item)"
+        >
+
+            <!-- CARD HEADER -->
+
+            <div class="card-header">
+
+                <h2>
+
+                    {{ item.name }}
+
+                </h2>
+
+                <span
+                    class="audit-code"
+                >
+
+                    CODE :
+                    {{ item.audit_unit_code }}
+
+                </span>
+
+            </div>
+
+            <!-- COUNTS -->
+
+            <div class="audit-details">
+
+                <div class="detail-row">
+
+                    <span>
+                        Total Audit
+                    </span>
+
+                    <strong>
+                        {{ item.total_audit }}
+                    </strong>
+
+                </div>
+
+                <div class="detail-row">
+
+                    <span>
+                        Audit Pending
+                    </span>
+
+                    <strong>
+                        {{ item.audit_pending }}
+                    </strong>
+
+                </div>
+
+                <div class="detail-row">
+
+                    <span>
+                        Review Pending
+                    </span>
+
+                    <strong>
+                        {{ item.review_pending }}
+                    </strong>
+
+                </div>
+
+                <div class="detail-row">
+
+                    <span>
+                        Compliance Pending
+                    </span>
+
+                    <strong>
+                        {{ item.compliance_pending }}
+                    </strong>
+
+                </div>
+
+                <div class="detail-row">
+
+                    <span>
+                        Audit Completed
+                    </span>
+
+                    <strong>
+                        {{ item.audit_completed }}
+                    </strong>
+
+                </div>
+
+            </div>
+
+            <!-- STATUS -->
+
+            <div class="status-section">
+
+                <div class="status-title">
+
+                    Last Audit Status
+
+                </div>
+
+                <div
+
+                    class="status-badge"
+
+                    [ngClass]="
+                        getStatusClass(
+                            item.last_audit_status
+                        )
+                    "
+
+                >
+
+                    {{ item.last_audit_status }}
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>

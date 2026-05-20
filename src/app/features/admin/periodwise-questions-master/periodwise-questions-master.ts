@@ -211,6 +211,5 @@ private getPeriodwiseQuestionsMasterRows(res: any): any[] {
    
 
   }
-
   
 }
