@@ -29,4 +29,59 @@ export class AuditDashboardService {
       payload,
     );
   }
+
+  getInternalAuditMenu(
+    assessmentId: number,
+    employeeId: number,
+  ) {
+
+    return this.http.get<any>(
+
+      `${this.config.apiUrl}/internal-audit/${assessmentId}/menu`,
+
+      {
+        params: {
+          employee_id:
+            employeeId,
+        },
+      },
+    );
+  }
+
+  getAuditUnitDashboard(
+    auditUnitId: number,
+    employeeId: number,
+  ) {
+
+    return this.http.get<any>(
+
+      `${this.config.apiUrl}/internal-audit/unit/${auditUnitId}`,
+
+      {
+        params: {
+          employee_id:
+            employeeId,
+        },
+      },
+    );
+  }
+
+  getStartAssessmentPreview(
+    auditUnitId: number,
+    yearId: number,
+    employeeId: number,
+  ) {
+
+    return this.http.get<any>(
+
+      `${this.config.apiUrl}/internal-audit/unit/${auditUnitId}/start/${yearId}`,
+
+      {
+        params: {
+          employee_id:
+            employeeId,
+        },
+      },
+    );
+  }
 }

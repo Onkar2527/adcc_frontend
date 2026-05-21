@@ -264,7 +264,10 @@ export class AuditDashboardComponent
             JSON.parse(userData);
 
         return Number(
-            user.id || 0,
+            user.id
+            || user.employee_id
+            || user.emp_id
+            || 0,
         );
     }
 
@@ -443,7 +446,9 @@ export class AuditDashboardComponent
                 this.employee_id(),
 
             audit_unit_id:
-                item.audit_unit_id,
+                Number(
+                    item.audit_unit_id,
+                ),
         };
 
         this.service
@@ -455,21 +460,37 @@ export class AuditDashboardComponent
                     if (
                         res.action ===
                         'continue'
+                        ||
+                        res.action ===
+                        'unit_dashboard'
                     ) {
 
                         this.router.navigate([
 
-                            '/auditor/internal-audit',
+                            '/auditor/internal-audit/unit',
 
-                            res.assessment_id,
+                            res.audit_unit_id
+                            ||
+                            item.audit_unit_id,
 
                         ]);
 
                         return;
                     }
 
-                    console.log(
-                        'CREATE NEW ASSESSMENT FLOW',
+                    alert(
+                        res.message
+                        ||
+                        'Start assessment flow will be implemented next.',
+                    );
+                },
+
+                error: (err) => {
+
+                    alert(
+                        err?.error?.message
+                        ||
+                        'Unable to open this audit assessment.',
                     );
                 },
             });
