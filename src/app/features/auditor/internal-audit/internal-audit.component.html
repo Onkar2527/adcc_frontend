@@ -12,14 +12,8 @@
             </p>
         </div>
 
-        <button
-            pButton
-            type="button"
-            icon="pi pi-arrow-left"
-            label="Dashboard"
-            severity="secondary"
-            (click)="backToDashboard()"
-        ></button>
+        <button pButton type="button" icon="pi pi-arrow-left" label="Dashboard" severity="secondary"
+            (click)="backToDashboard()"></button>
 
     </div>
 
@@ -33,10 +27,7 @@
         </div>
     </div>
 
-    <div
-        *ngIf="!loading() && error()"
-        class="surface-card border-round-xl shadow-1 p-4"
-    >
+    <div *ngIf="!loading() && error()" class="surface-card border-round-xl shadow-1 p-4">
         <div class="flex align-items-center gap-3 text-red-600">
             <i class="pi pi-exclamation-triangle text-2xl"></i>
             <span class="font-medium">{{ error() }}</span>
@@ -60,10 +51,7 @@
                             </div>
                         </div>
 
-                        <p-tag
-                            [value]="audit.latest_status"
-                            [severity]="getStatusSeverity(audit)"
-                        ></p-tag>
+                        <p-tag [value]="audit.latest_status" [severity]="getStatusSeverity(audit)"></p-tag>
                     </div>
 
                     <div class="detail-row">
@@ -96,10 +84,7 @@
                         </strong>
                     </div>
 
-                    <div
-                        *ngIf="audit.block_reason"
-                        class="mt-4 p-3 border-round-lg bg-red-50 text-red-700 font-medium"
-                    >
+                    <div *ngIf="audit.block_reason" class="mt-4 p-3 border-round-lg bg-red-50 text-red-700 font-medium">
                         {{ audit.block_reason }}
                     </div>
                 </p-card>
@@ -156,56 +141,284 @@
                     Audit Sections
                 </h3>
 
-                <p-tag
-                    [value]="audit.can_continue ? 'Active' : 'Locked'"
-                    [severity]="audit.can_continue ? 'success' : 'danger'"
-                ></p-tag>
+                <p-tag [value]="audit.can_continue ? 'Active' : 'Locked'"
+                    [severity]="audit.can_continue ? 'success' : 'danger'"></p-tag>
             </div>
 
             <div *ngIf="menus().length === 0" class="text-600">
                 No audit menu is available for this assessment.
             </div>
 
-            <div class="menu-list" *ngIf="menus().length > 0">
-                <section
-                    class="menu-block"
-                    *ngFor="let menu of menus()"
-                >
-                    <div class="menu-title">
+          <p-accordion
+    *ngIf="menus().length > 0"
+    [multiple]="true"
+    [value]="[]"
+>
+
+    <p-accordion-panel
+        *ngFor="let menu of menus(); let menuIndex = index"
+        [value]="menuIndex"
+    >
+
+        <!-- MENU HEADER -->
+        <ng-template pTemplate="header">
+
+            <div class="flex align-items-center justify-content-between w-full">
+
+                <div class="flex align-items-center gap-2">
+
+                    <i class="pi pi-folder text-primary"></i>
+
+                    <span class="font-semibold">
                         {{ menu.name }}
-                    </div>
+                    </span>
 
-                    <div class="category-grid">
-                        <button
-                            type="button"
-                            class="category-tile"
-                            *ngFor="let category of menu.categories"
-                            [disabled]="!audit.can_continue"
-                            (click)="openCategory(category)"
-                        >
-                            <span class="category-name">
-                                {{ category.name }}
-                            </span>
+                </div>
 
-                            <span class="category-meta">
-                                {{ category.answered_count }}
-                                /
-                                {{ category.question_count }}
-                                answered
-                            </span>
+                <div class="flex align-items-center gap-2">
+
+                    <p-progressBar
+                        [value]="getMenuProgress(menu)"
+                        [showValue]="false"
+                        styleClass="w-8rem h-1rem"
+                    ></p-progressBar>
+
+                    <span class="text-sm font-semibold">
+
+                        {{ getMenuAnswered(menu) }}
+                        /
+                        {{ getMenuQuestions(menu) }}
+
+                    </span>
+
+                </div>
+
+            </div>
+
+        </ng-template>
+
+        <!-- CATEGORY -->
+        <div
+            *ngFor="let category of menu.categories"
+            class="mb-4"
+        >
+
+            <p-panel
+                [toggleable]="true"
+                [collapsed]="true"
+                styleClass="mb-3"
+            >
+
+                <!-- CATEGORY HEADER -->
+                <ng-template pTemplate="header">
+
+                    <div class="flex align-items-center justify-content-between w-full">
+
+                        <div class="font-semibold text-primary">
+
+                            {{ category.name }}
+
+                        </div>
+
+                        <div class="flex align-items-center gap-2">
 
                             <p-progressBar
-                                [value]="
-                                    category.question_count
-                                        ? (category.answered_count / category.question_count) * 100
-                                        : 0
-                                "
+                                [value]="getCategoryProgress(category)"
                                 [showValue]="false"
+                                styleClass="w-8rem h-1rem"
                             ></p-progressBar>
-                        </button>
+
+                            <div class="text-sm text-600">
+
+                                {{ getCategoryAnswered(category) }}
+                                /
+                                {{ getCategoryQuestions(category) }}
+
+                            </div>
+
+                        </div>
+
                     </div>
-                </section>
-            </div>
+
+                </ng-template>
+
+                <!-- QUESTION SET -->
+                <div
+                    *ngFor="let set of category.question_sets"
+                    class="mb-4"
+                >
+
+                    <div
+                        class="text-xl font-bold mb-3 text-primary"
+                    >
+                        {{ set.name }}
+                    </div>
+
+                    <!-- HEADER -->
+                    <div
+                        *ngFor="let header of set.headers"
+                        class="mb-4"
+                    >
+
+                        <div
+                            class="surface-100 border-round p-3 mb-3 flex justify-content-between align-items-center"
+                        >
+
+                            <div class="font-semibold">
+
+                                {{ header.name }}
+
+                            </div>
+
+                            <div class="flex align-items-center gap-2">
+
+                                <p-progressBar
+                                    [value]="getHeaderProgress(header)"
+                                    [showValue]="false"
+                                    styleClass="w-8rem h-1rem"
+                                ></p-progressBar>
+
+                                <span class="text-sm">
+
+                                    {{ getHeaderAnswered(header) }}
+                                    /
+                                    {{ header.questions?.length || 0 }}
+
+                                </span>
+
+                            </div>
+
+                        </div>
+
+                        <!-- QUESTIONS -->
+                        <div
+                            *ngFor="let question of header.questions; let qIndex = index"
+                            class="mb-4"
+                        >
+
+                            <p-card>
+
+                                <!-- QUESTION HEADER -->
+                                <div class="flex justify-content-between align-items-start mb-4">
+
+                                    <div
+                                        class="font-semibold line-height-3"
+                                    >
+
+                                        {{ qIndex + 1 }}.
+                                        {{ question.question }}
+
+                                    </div>
+
+                                    <!-- STATUS -->
+                                    <p-tag
+                                        *ngIf="question.answer"
+                                        value="Answered"
+                                        severity="success"
+                                    ></p-tag>
+
+                                    <p-tag
+                                        *ngIf="!question.answer"
+                                        value="Pending"
+                                        severity="danger"
+                                    ></p-tag>
+
+                                </div>
+
+                                <!-- OPTIONS -->
+                                <div
+                                    *ngIf="question.parameters?.length"
+                                    class="grid"
+                                >
+
+                                    <div
+                                        class="col-12 md:col-4"
+                                        *ngFor="let option of question.parameters"
+                                    >
+
+                                        <div
+                                            class="flex align-items-center"
+                                        >
+
+                                            <p-radioButton
+                                                [name]="'q_' + question.question_id"
+                                                [value]="option.rt"
+                                                [(ngModel)]="question.answer"
+                                            ></p-radioButton>
+
+                                            <label class="ml-2">
+
+                                                {{ option.rt }}
+
+                                            </label>
+
+                                        </div>
+
+                                    </div>
+
+                                </div>
+
+                                <!-- TEXTBOX -->
+                                <div
+                                    *ngIf="!question.parameters?.length"
+                                >
+
+                                    <textarea
+                                        pInputTextarea
+                                        rows="3"
+                                        class="w-full"
+                                        [(ngModel)]="question.answer"
+                                    ></textarea>
+
+                                </div>
+
+                                <!-- REMARK -->
+                                <div class="mt-4">
+
+                                    <label
+                                        class="font-medium block mb-2"
+                                    >
+                                        Remark
+                                    </label>
+
+                                    <textarea
+                                        pInputTextarea
+                                        rows="2"
+                                        class="w-full"
+                                        [(ngModel)]="question.remark"
+                                    ></textarea>
+
+                                </div>
+
+                                <!-- FILE -->
+                                <div class="mt-4">
+
+                                    <p-fileUpload
+                                        mode="basic"
+                                        chooseLabel="Upload"
+                                        chooseIcon="pi pi-upload"
+                                        [auto]="false"
+                                        [customUpload]="true"
+                                        (onSelect)="onFileSelect($event, question)"
+                                    ></p-fileUpload>
+
+                                </div>
+
+                            </p-card>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </p-panel>
+
+        </div>
+
+    </p-accordion-panel>
+
+</p-accordion>
         </div>
 
     </ng-container>
@@ -280,10 +493,7 @@
                 </h3>
             </div>
 
-            <div
-                class="year-block"
-                *ngFor="let year of visibleYears()"
-            >
+            <div class="year-block" *ngFor="let year of visibleYears()">
                 <div class="flex flex-column md:flex-row md:align-items-center md:justify-content-between gap-3 mb-3">
                     <h4 class="text-primary font-bold m-0">
                         Financial Year:
@@ -292,14 +502,8 @@
                         </span>
                     </h4>
 
-                    <button
-                        *ngIf="year.can_start"
-                        pButton
-                        type="button"
-                        icon="pi pi-play"
-                        label="Start Assessment"
-                        (click)="startAssessment(year)"
-                    ></button>
+                    <button *ngIf="year.can_start" pButton type="button" icon="pi pi-play" label="Start Assessment"
+                        (click)="startAssessment(year)"></button>
                 </div>
 
                 <div class="assessment-table">
@@ -311,19 +515,13 @@
                         <div>Action</div>
                     </div>
 
-                    <div
-                        *ngIf="!year.assessments?.length"
-                        class="assessment-row empty-row"
-                    >
+                    <div *ngIf="!year.assessments?.length" class="assessment-row empty-row">
                         <div class="text-600">
                             No assessment found
                         </div>
                     </div>
 
-                    <div
-                        class="assessment-row"
-                        *ngFor="let assessment of year.assessments; let i = index"
-                    >
+                    <div class="assessment-row" *ngFor="let assessment of year.assessments; let i = index">
                         <div>{{ i + 1 }}</div>
 
                         <div>
@@ -337,18 +535,14 @@
                                 Frequency - {{ assessment.frequency }} Months
                             </div>
 
-                            <div
-                                *ngIf="assessment.audit_due_date && [1, 3].includes(assessment.audit_status_id)"
-                                class="text-red-600 text-sm font-medium mt-1"
-                            >
+                            <div *ngIf="assessment.audit_due_date && [1, 3].includes(assessment.audit_status_id)"
+                                class="text-red-600 text-sm font-medium mt-1">
                                 Audit Due Date:
                                 {{ assessment.audit_due_date | date: 'mediumDate' }}
                             </div>
 
-                            <div
-                                *ngIf="assessment.compliance_due_date && [4, 6].includes(assessment.audit_status_id)"
-                                class="text-red-600 text-sm font-medium mt-1"
-                            >
+                            <div *ngIf="assessment.compliance_due_date && [4, 6].includes(assessment.audit_status_id)"
+                                class="text-red-600 text-sm font-medium mt-1">
                                 Compliance Due Date:
                                 {{ assessment.compliance_due_date | date: 'mediumDate' }}
                             </div>
@@ -357,10 +551,7 @@
                         <div>
                             <div>{{ assessment.audit_status_label }}</div>
 
-                            <div
-                                *ngIf="assessment.reviewer_status_label"
-                                class="text-red-600 text-sm font-medium mt-1"
-                            >
+                            <div *ngIf="assessment.reviewer_status_label" class="text-red-600 text-sm font-medium mt-1">
                                 Reviewer Status:
                                 {{ assessment.reviewer_status_label }}
                             </div>
@@ -371,20 +562,12 @@
                         </div>
 
                         <div>
-                            <button
-                                *ngIf="assessment.can_continue"
-                                pButton
-                                type="button"
-                                [label]="assessment.action_label"
-                                icon="pi pi-arrow-right"
-                                (click)="openAssessment(assessment)"
-                            ></button>
+                            <button *ngIf="assessment.can_continue" pButton type="button"
+                                [label]="assessment.action_label" icon="pi pi-arrow-right"
+                                (click)="openAssessment(assessment)"></button>
 
-                            <p-tag
-                                *ngIf="!assessment.can_continue"
-                                [value]="assessment.action_label || '-'"
-                                [severity]="getActionSeverity(assessment)"
-                            ></p-tag>
+                            <p-tag *ngIf="!assessment.can_continue" [value]="assessment.action_label || '-'"
+                                [severity]="getActionSeverity(assessment)"></p-tag>
                         </div>
                     </div>
                 </div>
@@ -407,10 +590,8 @@
                     </p>
                 </div>
 
-                <p-tag
-                    [value]="preview.can_start ? 'Ready' : 'Blocked'"
-                    [severity]="preview.can_start ? 'success' : 'danger'"
-                ></p-tag>
+                <p-tag [value]="preview.can_start ? 'Ready' : 'Blocked'"
+                    [severity]="preview.can_start ? 'success' : 'danger'"></p-tag>
             </div>
 
             <div class="grid">
@@ -469,21 +650,13 @@
                 </div>
             </div>
 
-            <div
-                *ngIf="preview.error"
-                class="mt-4 p-3 border-round-lg bg-yellow-50 text-yellow-900 font-medium"
-            >
+            <div *ngIf="preview.error" class="mt-4 p-3 border-round-lg bg-yellow-50 text-yellow-900 font-medium">
                 {{ preview.error }}
             </div>
 
             <div class="flex justify-content-end mt-4">
-                <button
-                    pButton
-                    type="button"
-                    icon="pi pi-play"
-                    label="Start Audit"
-                    [disabled]="!preview.can_start"
-                ></button>
+                <button pButton type="button" icon="pi pi-play" label="Start Audit"
+                    [disabled]="!preview.can_start"></button>
             </div>
         </div>
 
