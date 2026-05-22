@@ -48,6 +48,44 @@ export class AuditDashboardService {
     );
   }
 
+  getInternalAuditCategory(
+    assessmentId: number,
+    categoryId: number,
+    employeeId: number,
+  ) {
+
+    return this.http.get<any>(
+
+      `${this.config.apiUrl}/internal-audit/${assessmentId}/category/${categoryId}`,
+
+      {
+        params: {
+          employee_id:
+            employeeId,
+        },
+      },
+    );
+  }
+
+  saveInternalAuditCategoryAnswers(
+    assessmentId: number,
+    categoryId: number,
+    employeeId: number,
+    answers: any[],
+  ) {
+
+    return this.http.post<any>(
+
+      `${this.config.apiUrl}/internal-audit/${assessmentId}/category/${categoryId}/answers`,
+
+      {
+        employee_id:
+          employeeId,
+        answers,
+      },
+    );
+  }
+
   getAuditUnitDashboard(
     auditUnitId: number,
     employeeId: number,
@@ -81,6 +119,23 @@ export class AuditDashboardService {
           employee_id:
             employeeId,
         },
+      },
+    );
+  }
+
+  startAssessment(
+    auditUnitId: number,
+    yearId: number,
+    employeeId: number,
+  ) {
+
+    return this.http.post<any>(
+
+      `${this.config.apiUrl}/internal-audit/unit/${auditUnitId}/start/${yearId}`,
+
+      {
+        employee_id:
+          employeeId,
       },
     );
   }

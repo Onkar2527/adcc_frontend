@@ -1,0 +1,207 @@
+<div class="internal-audit min-h-screen bg-gray-100 p-4 md:p-5">
+
+    <div class="flex flex-column md:flex-row md:align-items-center md:justify-content-between gap-3 mb-4">
+
+        <div>
+            <h2 class="text-2xl font-bold text-900 m-0">
+                Internal Audit
+            </h2>
+
+            <p class="text-600 mt-2 mb-0">
+                Category assessment
+            </p>
+        </div>
+
+        <button
+            pButton
+            type="button"
+            icon="pi pi-arrow-left"
+            label="Dashboard"
+            severity="secondary"
+            (click)="backToDashboard()"
+        ></button>
+
+    </div>
+
+    <div *ngIf="loading()" class="grid">
+        <div class="col-12 lg:col-4">
+            <p-skeleton height="10rem"></p-skeleton>
+        </div>
+
+        <div class="col-12 lg:col-8">
+            <p-skeleton height="18rem"></p-skeleton>
+        </div>
+    </div>
+
+    <div
+        *ngIf="!loading() && error()"
+        class="surface-card border-round-xl shadow-1 p-4"
+    >
+        <div class="flex align-items-center gap-3 text-red-600">
+            <i class="pi pi-exclamation-triangle text-2xl"></i>
+            <span class="font-medium">{{ error() }}</span>
+        </div>
+    </div>
+
+    <ng-container *ngIf="!loading() && !error() && categoryDetail() as detail">
+
+        <div class="surface-card border-round-xl shadow-1 p-4 mb-4">
+            <div class="flex flex-column md:flex-row md:align-items-start md:justify-content-between gap-3">
+                <div>
+                    <div class="text-sm text-600 mb-2">
+                        {{ detail.category?.menu_name }}
+                    </div>
+
+                    <h3 class="text-xl font-bold text-900 m-0">
+                        {{ detail.category?.name }}
+                    </h3>
+
+                    <p class="text-600 mt-2 mb-0">
+                        {{ detail.overview?.audit_unit_name }}
+                        -
+                        F.Y. {{ financialYearLabel(detail.overview) }}
+                    </p>
+                </div>
+
+                <button
+                    pButton
+                    type="button"
+                    icon="pi pi-arrow-left"
+                    label="Back"
+                    severity="secondary"
+                    (click)="backToWorkspace()"
+                ></button>
+            </div>
+        </div>
+
+        <div
+            *ngIf="!detail.sets?.length"
+            class="surface-card border-round-xl shadow-1 p-4 text-600"
+        >
+            No question is configured for this audit category.
+        </div>
+
+        <div
+            *ngIf="saveMessage()"
+            class="surface-card border-round-xl shadow-1 p-3 mb-4 font-medium"
+            [class.text-green-700]="!hasAnswerErrors()"
+            [class.text-red-700]="hasAnswerErrors()"
+        >
+            {{ saveMessage() }}
+        </div>
+
+        <div
+            class="question-set"
+            *ngFor="let set of detail.sets"
+        >
+            <div class="question-set-title">
+                {{ set.name }}
+            </div>
+
+            <section
+                class="question-header"
+                *ngFor="let header of set.headers"
+            >
+                <div class="flex flex-column md:flex-row md:align-items-center md:justify-content-between gap-3 mb-3">
+                    <div class="question-header-title m-0">
+                        {{ header.name }}
+                    </div>
+
+                    <button
+                        pButton
+                        type="button"
+                        icon="pi pi-save"
+                        label="Save Answers"
+                        [loading]="savingHeader() === header.id"
+                        (click)="saveHeader(header)"
+                    ></button>
+                </div>
+
+                <div
+                    class="question-card"
+                    *ngFor="let question of header.questions; let i = index"
+                >
+                    <div class="question-main">
+                        <div class="question-number">
+                            {{ i + 1 }}
+                        </div>
+
+                        <div>
+                            <div class="font-medium text-900">
+                                {{ question.question }}
+                            </div>
+
+                            <div class="question-meta">
+                                <span>{{ question.option_name }}</span>
+                                <span *ngIf="question.risk_category_name">
+                                    Risk: {{ question.risk_category_name }}
+                                </span>
+                                <span *ngIf="question.weightage">
+                                    Weightage: {{ question.weightage }}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="answer-form">
+                        <label class="answer-label">
+                            Answer
+                        </label>
+
+                        <textarea
+                            *ngIf="isTextAnswer(question); else optionAnswer"
+                            class="answer-control"
+                            rows="3"
+                            [(ngModel)]="question.answer_value"
+                        ></textarea>
+
+                        <ng-template #optionAnswer>
+                            <select
+                                class="answer-control"
+                                [(ngModel)]="question.answer_value"
+                            >
+                                <option value="">
+                                    Please select
+                                </option>
+
+                                <option
+                                    *ngFor="let option of answerOptions(question)"
+                                    [value]="option.value"
+                                >
+                                    {{ option.label }}
+                                </option>
+                            </select>
+                        </ng-template>
+
+                        <label class="answer-label mt-3">
+                            Audit Comment
+                        </label>
+
+                        <textarea
+                            class="answer-control"
+                            rows="2"
+                            [(ngModel)]="question.audit_comment"
+                        ></textarea>
+
+                        <label class="compliance-check mt-3">
+                            <input
+                                type="checkbox"
+                                [(ngModel)]="question.is_compliance"
+                            />
+                            <span>Compliance required</span>
+                        </label>
+
+                        <div
+                            *ngIf="questionError(question)"
+                            class="text-red-600 text-sm font-medium mt-2"
+                        >
+                            {{ questionError(question) }}
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+    </ng-container>
+
+</div>

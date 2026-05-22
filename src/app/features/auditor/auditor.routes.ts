@@ -1,10 +1,15 @@
 import { Routes } from '@angular/router';
 import { AuditDashboardComponent } from './audit-dashboard/audit-dashboard.component';
-import { InternalAuditComponent } from './internal-audit/internal-audit.component';
+import { AssessmentWorkspaceComponent } from './internal-audit/assessment-workspace/assessment-workspace.component';
+import { AuditUnitDashboardComponent } from './internal-audit/audit-unit-dashboard/audit-unit-dashboard.component';
+import { CategoryAssessmentComponent } from './internal-audit/category-assessment/category-assessment.component';
+import { StartAssessmentComponent } from './internal-audit/start-assessment/start-assessment.component';
+
 export const AUDITOR_ROUTES: Routes = [
     { path: 'audit-dashboard', component: AuditDashboardComponent },
-    { path: 'internal-audit/unit/:auditUnitId/start/:yearId', component: InternalAuditComponent },
-    { path: 'internal-audit/unit/:auditUnitId', component: InternalAuditComponent },
-    { path: 'internal-audit/:assessmentId', component: InternalAuditComponent },
+    { path: 'internal-audit/unit/:auditUnitId/start/:yearId', component: StartAssessmentComponent },
+    { path: 'internal-audit/unit/:auditUnitId', component: AuditUnitDashboardComponent },
+    { path: 'internal-audit/:assessmentId/category/:categoryId', component: CategoryAssessmentComponent },
+    { path: 'internal-audit/:assessmentId', component: AssessmentWorkspaceComponent },
 
 ];
