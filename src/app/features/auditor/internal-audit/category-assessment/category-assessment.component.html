@@ -6,6 +6,7 @@
     >
 
         <div>
+
             <h2 class="text-2xl font-bold text-900 m-0">
                 Internal Audit
             </h2>
@@ -13,6 +14,7 @@
             <p class="text-600 mt-2 mb-0">
                 Category assessment
             </p>
+
         </div>
 
         <button
@@ -26,7 +28,11 @@
 
     </div>
 
-    <div *ngIf="loading()" class="grid">
+    <div
+        *ngIf="loading()"
+        class="grid"
+    >
+
         <div class="col-12 lg:col-4">
             <p-skeleton height="10rem"></p-skeleton>
         </div>
@@ -34,23 +40,40 @@
         <div class="col-12 lg:col-8">
             <p-skeleton height="18rem"></p-skeleton>
         </div>
+
     </div>
 
     <div
         *ngIf="!loading() && error()"
         class="surface-card border-round-xl shadow-1 p-4"
     >
+
         <div class="flex align-items-center gap-3 text-red-600">
+
             <i class="pi pi-exclamation-triangle text-2xl"></i>
-            <span class="font-medium">{{ error() }}</span>
+
+            <span class="font-medium">
+                {{ error() }}
+            </span>
+
         </div>
+
     </div>
 
-    <ng-container *ngIf="!loading() && !error() && categoryDetail() as detail">
+    <ng-container
+        *ngIf="!loading() && !error() && categoryDetail() as detail"
+    >
 
-        <div class="surface-card border-round-xl shadow-1 p-4 mb-4">
-            <div class="flex flex-column md:flex-row md:align-items-start md:justify-content-between gap-3">
+        <div
+            class="surface-card border-round-xl shadow-1 p-4 mb-4"
+        >
+
+            <div
+                class="flex flex-column md:flex-row md:align-items-start md:justify-content-between gap-3"
+            >
+
                 <div>
+
                     <div class="text-sm text-600 mb-2">
                         {{ detail.category?.menu_name }}
                     </div>
@@ -62,8 +85,10 @@
                     <p class="text-600 mt-2 mb-0">
                         {{ detail.overview?.audit_unit_name }}
                         -
-                        F.Y. {{ financialYearLabel(detail.overview) }}
+                        F.Y.
+                        {{ financialYearLabel(detail.overview) }}
                     </p>
+
                 </div>
 
                 <button
@@ -74,7 +99,9 @@
                     severity="secondary"
                     (click)="backToWorkspace()"
                 ></button>
+
             </div>
+
         </div>
 
         <div
@@ -90,13 +117,16 @@
             [class.text-green-700]="!hasAnswerErrors()"
             [class.text-red-700]="hasAnswerErrors()"
         >
+
             {{ saveMessage() }}
+
         </div>
 
         <div
             class="question-set"
             *ngFor="let set of detail.sets"
         >
+
             <div class="question-set-title">
                 {{ set.name }}
             </div>
@@ -105,7 +135,11 @@
                 class="question-header"
                 *ngFor="let header of set.headers"
             >
-                <div class="flex flex-column md:flex-row md:align-items-center md:justify-content-between gap-3 mb-3">
+
+                <div
+                    class="flex flex-column md:flex-row md:align-items-center md:justify-content-between gap-3 mb-3"
+                >
+
                     <div class="question-header-title m-0">
                         {{ header.name }}
                     </div>
@@ -118,35 +152,55 @@
                         [loading]="savingHeader() === header.id"
                         (click)="saveHeader(header)"
                     ></button>
+
                 </div>
 
                 <ng-container
                     *ngFor="let question of header.questions; let i = index"
                 >
+
                     <div class="question-card">
+
                         <div class="question-main">
+
                             <div class="question-number">
                                 {{ i + 1 }}
                             </div>
 
                             <div>
+
                                 <div class="font-medium text-900">
                                     {{ question.question }}
                                 </div>
 
                                 <div class="question-meta">
-                                    <span>{{ question.option_name }}</span>
-                                    <span *ngIf="question.risk_category_name">
-                                        Risk: {{ question.risk_category_name }}
+
+                                    <span>
+                                        {{ question.option_name }}
                                     </span>
-                                    <span *ngIf="question.weightage">
-                                        Weightage: {{ question.weightage }}
+
+                                    <span
+                                        *ngIf="question.risk_category_name"
+                                    >
+                                        Risk:
+                                        {{ question.risk_category_name }}
                                     </span>
+
+                                    <span
+                                        *ngIf="question.weightage"
+                                    >
+                                        Weightage:
+                                        {{ question.weightage }}
+                                    </span>
+
                                 </div>
+
                             </div>
+
                         </div>
 
                         <div class="answer-form">
+
                             <label class="answer-label">
                                 Answer
                             </label>
@@ -159,21 +213,25 @@
                             ></textarea>
 
                             <ng-template #optionAnswer>
+
                                 <select
                                     class="answer-control"
                                     [(ngModel)]="question.answer_value"
                                 >
+
                                     <option value="">
                                         Please select
                                     </option>
 
                                     <option
-                                        *ngFor="let option of answerOptions(question)"
+                                        *ngFor="let option of question.options"
                                         [value]="option.value"
                                     >
                                         {{ option.label }}
                                     </option>
+
                                 </select>
+
                             </ng-template>
 
                             <label class="answer-label mt-3">
@@ -187,17 +245,23 @@
                             ></textarea>
 
                             <label class="compliance-check mt-3">
+
                                 <input
                                     type="checkbox"
                                     [(ngModel)]="question.is_compliance"
                                 />
-                                <span>Compliance required</span>
+
+                                <span>
+                                    Compliance required
+                                </span>
+
                             </label>
 
                             <div
-                                *ngIf="isAnnexureSelected(question)"
+                                *ngIf="question.isAnnexureSelected"
                                 class="annexure-preview"
                             >
+
                                 <div class="font-medium text-900 mb-2">
                                     {{ question.annexure?.name || 'Annexure' }}
                                 </div>
@@ -206,33 +270,43 @@
                                     *ngIf="question.annexure?.columns?.length; else noAnnexureColumns"
                                     class="annexure-column-list"
                                 >
+
                                     <span
                                         *ngFor="let column of question.annexure.columns"
                                     >
                                         {{ column.name }}
                                     </span>
+
                                 </div>
 
                                 <ng-template #noAnnexureColumns>
+
                                     <div class="text-600 text-sm">
                                         No annexure columns configured.
                                     </div>
+
                                 </ng-template>
+
                             </div>
 
                             <div
-                                *ngIf="questionError(question)"
+                                *ngIf="answerErrors()[question.id]"
                                 class="text-red-600 text-sm font-medium mt-2"
                             >
-                                {{ questionError(question) }}
+
+                                {{ answerErrors()[question.id] }}
+
                             </div>
+
                         </div>
+
                     </div>
 
                     <div
-                        *ngFor="let subsetSet of selectedSubsetSets(question)"
+                        *ngFor="let subsetSet of question.selectedSubsetSets"
                         class="subset-panel"
                     >
+
                         <div class="question-set-title">
                             {{ subsetSet.name }}
                         </div>
@@ -241,7 +315,11 @@
                             class="question-header"
                             *ngFor="let subsetHeader of subsetSet.headers"
                         >
-                            <div class="flex flex-column md:flex-row md:align-items-center md:justify-content-between gap-3 mb-3">
+
+                            <div
+                                class="flex flex-column md:flex-row md:align-items-center md:justify-content-between gap-3 mb-3"
+                            >
+
                                 <div class="question-header-title m-0">
                                     {{ subsetHeader.name }}
                                 </div>
@@ -254,32 +332,47 @@
                                     [loading]="savingHeader() === subsetHeader.id"
                                     (click)="saveHeader(subsetHeader)"
                                 ></button>
+
                             </div>
 
                             <div
                                 class="question-card"
                                 *ngFor="let subsetQuestion of subsetHeader.questions; let si = index"
                             >
+
                                 <div class="question-main">
+
                                     <div class="question-number">
                                         {{ si + 1 }}
                                     </div>
 
                                     <div>
+
                                         <div class="font-medium text-900">
                                             {{ subsetQuestion.question }}
                                         </div>
 
                                         <div class="question-meta">
-                                            <span>{{ subsetQuestion.option_name }}</span>
-                                            <span *ngIf="subsetQuestion.risk_category_name">
-                                                Risk: {{ subsetQuestion.risk_category_name }}
+
+                                            <span>
+                                                {{ subsetQuestion.option_name }}
                                             </span>
+
+                                            <span
+                                                *ngIf="subsetQuestion.risk_category_name"
+                                            >
+                                                Risk:
+                                                {{ subsetQuestion.risk_category_name }}
+                                            </span>
+
                                         </div>
+
                                     </div>
+
                                 </div>
 
                                 <div class="answer-form">
+
                                     <label class="answer-label">
                                         Answer
                                     </label>
@@ -292,21 +385,25 @@
                                     ></textarea>
 
                                     <ng-template #subsetOptionAnswer>
+
                                         <select
                                             class="answer-control"
                                             [(ngModel)]="subsetQuestion.answer_value"
                                         >
+
                                             <option value="">
                                                 Please select
                                             </option>
 
                                             <option
-                                                *ngFor="let option of answerOptions(subsetQuestion)"
+                                                *ngFor="let option of subsetQuestion.options"
                                                 [value]="option.value"
                                             >
                                                 {{ option.label }}
                                             </option>
+
                                         </select>
+
                                     </ng-template>
 
                                     <label class="answer-label mt-3">
@@ -320,17 +417,23 @@
                                     ></textarea>
 
                                     <label class="compliance-check mt-3">
+
                                         <input
                                             type="checkbox"
                                             [(ngModel)]="subsetQuestion.is_compliance"
                                         />
-                                        <span>Compliance required</span>
+
+                                        <span>
+                                            Compliance required
+                                        </span>
+
                                     </label>
 
                                     <div
-                                        *ngIf="isAnnexureSelected(subsetQuestion)"
+                                        *ngIf="subsetQuestion.isAnnexureSelected"
                                         class="annexure-preview"
                                     >
+
                                         <div class="font-medium text-900 mb-2">
                                             {{ subsetQuestion.annexure?.name || 'Annexure' }}
                                         </div>
@@ -339,32 +442,46 @@
                                             *ngIf="subsetQuestion.annexure?.columns?.length; else noSubsetAnnexureColumns"
                                             class="annexure-column-list"
                                         >
+
                                             <span
                                                 *ngFor="let column of subsetQuestion.annexure.columns"
                                             >
                                                 {{ column.name }}
                                             </span>
+
                                         </div>
 
                                         <ng-template #noSubsetAnnexureColumns>
+
                                             <div class="text-600 text-sm">
                                                 No annexure columns configured.
                                             </div>
+
                                         </ng-template>
+
                                     </div>
 
                                     <div
-                                        *ngIf="questionError(subsetQuestion)"
+                                        *ngIf="answerErrors()[subsetQuestion.id]"
                                         class="text-red-600 text-sm font-medium mt-2"
                                     >
-                                        {{ questionError(subsetQuestion) }}
+
+                                        {{ answerErrors()[subsetQuestion.id] }}
+
                                     </div>
+
                                 </div>
+
                             </div>
+
                         </section>
+
                     </div>
+
                 </ng-container>
+
             </section>
+
         </div>
 
     </ng-container>

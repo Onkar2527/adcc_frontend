@@ -46,17 +46,56 @@ export class AppMenu implements OnInit {
             authority: ['1'],
             items: [
 
-                { label: 'Employee Master', icon: 'pi pi-fw pi-users', routerLink: ['/admin/employee-master'] },
-                { label: 'Password Policy', icon: 'pi pi-fw pi-lock', routerLink: ['/admin/password-policy-master'] },
+                {
+                    label: 'Employee Master', icon: 'pi pi-fw pi-users',
+                     items: [
+                        {
+                        label: 'Manage Employee',
+                        icon: 'pi pi-fw pi-users',
+                        routerLink: [
+                            '/admin/employee-master'
+                        ]
+                    },
+                    {
+                        label: 'Password Policy',
+                        icon: 'pi pi-fw pi-lock',
+                        routerLink: [
+                            '/admin/password-policy-master'
+                        ]
+                    }
+                ]
+                },
                 { label: 'Section Master', icon: 'pi pi-fw pi-list-check', routerLink: ['/admin/audit-section-master'] },
                 { label: 'Unit Master', icon: 'pi pi-fw pi-building', routerLink: ['/admin/audit-unit-master'] },
                 { label: 'Scheme Master', icon: 'pi pi-fw pi-sitemap', routerLink: ['/admin/audit-scheme-master'] },
-                { label: 'Question Master', icon: 'pi pi-fw pi-question-circle', routerLink: ['/admin/question-set-master'] },
-                { label: 'Category Master', icon: 'pi pi-fw pi-tags', routerLink: ['/admin/audit-category-master'] },
+                { label: 'Question Master', icon: 'pi pi-fw pi-question-circle', 
+                    items: [
+                        {
+                            label: 'Manage Question ',
+                            icon: 'pi pi-fw pi-question-circle',
+                            routerLink: [
+                                '/admin/question-set-master'
+                            ]
+                        },
+                        {
+                            label: 'Menu Master',
+                            icon: 'pi pi-fw pi-list',
+                            routerLink: [
+                                '/admin/menu-master'
+                            ]
+                        },
+                        {
+                            label: 'Category Master',
+                            icon: 'pi pi-fw pi-tags',
+                            routerLink: [
+                                '/admin/audit-category-master'
+                            ]
+                        }
+                    ]
+                },
                 { label: 'Broader Area Master', icon: 'pi pi-fw pi-map-marker', routerLink: ['/admin/broader-area-master'] },
                 { label: 'Periodwise Questions Master', icon: 'pi pi-fw pi-list', routerLink: ['/admin/periodwise-questions-master'] },
                 { label: 'Manage Assessment Master', icon: 'pi pi-fw pi-chart-bar', routerLink: ['/admin/manage-assessment-master'] },
-                { label: 'Menu Master', icon: 'pi pi-fw pi-list', routerLink: ['/admin/menu-master'] },
                 { label: 'Annexure Master', icon: 'pi pi-fw pi-file-edit', routerLink: ['/admin/audit-annexure-master'] },
                 {
                     label: 'Risk Master',
