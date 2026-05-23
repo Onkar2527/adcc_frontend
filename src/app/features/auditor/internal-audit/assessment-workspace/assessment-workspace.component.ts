@@ -18,7 +18,9 @@ import { CardModule } from 'primeng/card';
 import { ProgressBarModule } from 'primeng/progressbar';
 import { SkeletonModule } from 'primeng/skeleton';
 import { TagModule } from 'primeng/tag';
+import { FormDrawerService } from '../../../../core/services/drawer/form-drawer.service';
 import { AuditDashboardService } from '../../services/auditor-main.service';
+import { CategoryAssessmentComponent } from '../category-assessment/category-assessment.component';
 
 @Component({
     selector: 'app-assessment-workspace',
@@ -44,6 +46,9 @@ export class AssessmentWorkspaceComponent implements OnInit {
 
     private service =
         inject(AuditDashboardService);
+
+    private drawer =
+        inject(FormDrawerService);
 
     loading =
         signal(false);
@@ -172,7 +177,7 @@ export class AssessmentWorkspaceComponent implements OnInit {
         ]);
     }
 
-    openCategory(
+    async openCategory(
         category: any,
     ) {
         const assessment =
@@ -186,12 +191,29 @@ export class AssessmentWorkspaceComponent implements OnInit {
             return;
         }
 
-        this.router.navigate([
-            '/auditor/internal-audit',
+        await this.drawer.open(
+            CategoryAssessmentComponent,
+            {
+                header:
+                    category.name || 'Category Assessment',
+                icon:
+                    'pi pi-list-check',
+                width:
+                    '100vw',
+                dismissible:
+                    false,
+                data: {
+                    assessmentId:
+                        assessment.id,
+                    categoryId:
+                        category.id,
+                },
+            },
+        );
+
+        this.loadMenu(
             assessment.id,
-            'category',
-            category.id,
-        ]);
+        );
     }
 
     financialYearLabel(

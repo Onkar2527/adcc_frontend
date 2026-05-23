@@ -309,8 +309,43 @@
     font-weight: 600;
 }
 
+.subset-panel {
+    margin: .75rem 0 .75rem 2.75rem;
+    padding: 1rem;
+    border: 1px dashed var(--primary-color);
+    border-radius: .75rem;
+    background: var(--primary-50);
+}
+
+.annexure-preview {
+    margin-top: 1rem;
+    padding: .75rem;
+    border: 1px solid var(--surface-200);
+    border-radius: .5rem;
+    background: var(--surface-0);
+}
+
+.annexure-column-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .5rem;
+}
+
+.annexure-column-list span {
+    padding: .25rem .5rem;
+    border-radius: .35rem;
+    background: var(--surface-100);
+    color: var(--text-color-secondary);
+    font-size: .8rem;
+    font-weight: 600;
+}
+
 @media (max-width: 768px) {
     .question-card {
         grid-template-columns: 1fr;
+    }
+
+    .subset-panel {
+        margin-left: 0;
     }
 }

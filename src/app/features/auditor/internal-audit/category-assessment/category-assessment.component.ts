@@ -4,6 +4,7 @@ import {
 import {
     Component,
     OnInit,
+    Optional,
     inject,
     signal,
 } from '@angular/core';
@@ -14,6 +15,7 @@ import {
 } from '@angular/router';
 import { ButtonModule } from 'primeng/button';
 import { SkeletonModule } from 'primeng/skeleton';
+import { FormDrawerRef } from '../../../../core/services/drawer/form-drawer.ref';
 import { AuditDashboardService } from '../../services/auditor-main.service';
 
 @Component({
@@ -38,6 +40,12 @@ export class CategoryAssessmentComponent implements OnInit {
     private service =
         inject(AuditDashboardService);
 
+    constructor(
+        @Optional()
+        private drawerRef?: FormDrawerRef<any, any>,
+    ) {
+    }
+
     loading =
         signal(false);
 
@@ -56,9 +64,28 @@ export class CategoryAssessmentComponent implements OnInit {
     savingHeader =
         signal<number | null>(null);
 
+    drawerMode =
+        signal(false);
+
+    savedAny =
+        signal(false);
+
     ngOnInit() {
+        const drawerData =
+            this.drawerRef?.data || {};
+
+        this.drawerMode.set(
+            Boolean(
+                drawerData.assessmentId
+                &&
+                drawerData.categoryId,
+            ),
+        );
+
         const assessmentId =
             Number(
+                drawerData.assessmentId
+                ||
                 this.route.snapshot.paramMap.get(
                     'assessmentId',
                 ),
@@ -66,6 +93,8 @@ export class CategoryAssessmentComponent implements OnInit {
 
         const categoryId =
             Number(
+                drawerData.categoryId
+                ||
                 this.route.snapshot.paramMap.get(
                     'categoryId',
                 ),
@@ -123,9 +152,20 @@ export class CategoryAssessmentComponent implements OnInit {
         detail: any,
     ) {
 
+        this.prepareSets(
+            detail?.sets || [],
+        );
+
+        return detail;
+    }
+
+    prepareSets(
+        sets: any[],
+    ) {
+
         for (
             const set
-            of detail?.sets || []
+            of sets
         ) {
 
             for (
@@ -148,11 +188,12 @@ export class CategoryAssessmentComponent implements OnInit {
                                 question.answer?.is_compliance || 0,
                             ),
                         );
+                    this.prepareSets(
+                        question.subset_sets || [],
+                    );
                 }
             }
         }
-
-        return detail;
     }
 
     saveHeader(
@@ -224,6 +265,7 @@ export class CategoryAssessmentComponent implements OnInit {
                     this.saveMessage.set(
                         res.message || 'Answers saved successfully',
                     );
+                    this.savedAny.set(true);
                     this.loadCategory(
                         Number(
                             detail.overview.id,
@@ -254,11 +296,8 @@ export class CategoryAssessmentComponent implements OnInit {
                 ? question.parameters
                 : [];
 
-        if (
-            parameters.length
-        ) {
-
-            return parameters.map(
+        const options =
+            parameters.map(
                 (item: any) => ({
                     value:
                         item.rt,
@@ -266,7 +305,6 @@ export class CategoryAssessmentComponent implements OnInit {
                         item.rt,
                 }),
             );
-        }
 
         if (
             Number(question?.option_id) === 4
@@ -274,14 +312,50 @@ export class CategoryAssessmentComponent implements OnInit {
             question?.annexure_id
         ) {
 
-            return [
-                {
+            options.push({
+                value:
+                    String(question.annexure_id),
+                label:
+                    'As per annexure',
+            });
+        }
+
+        if (
+            Number(question?.option_id) === 5
+            &&
+            question?.subset_sets?.length
+        ) {
+
+            for (
+                const set
+                of question.subset_sets
+            ) {
+
+                if (
+                    options.some(
+                        (option: any) =>
+                            String(option.value)
+                            ===
+                            String(set.id),
+                    )
+                ) {
+                    continue;
+                }
+
+                options.push({
                     value:
-                        String(question.annexure_id),
+                        String(set.id),
                     label:
-                        'Annexure',
-                },
-            ];
+                        set.name,
+                });
+            }
+        }
+
+        if (
+            options.length
+        ) {
+
+            return options;
         }
 
         if (
@@ -318,6 +392,41 @@ export class CategoryAssessmentComponent implements OnInit {
         ) === 3;
     }
 
+    selectedSubsetSets(
+        question: any,
+    ) {
+
+        if (
+            Number(question?.option_id) !== 5
+        ) {
+            return [];
+        }
+
+        const selected =
+            String(
+                question.answer_value || '',
+            );
+
+        return (question.subset_sets || [])
+            .filter(
+                (set: any) =>
+                    String(set.id) === selected,
+            );
+    }
+
+    isAnnexureSelected(
+        question: any,
+    ) {
+
+        return Number(question?.option_id) === 4
+            &&
+            question?.annexure_id
+            &&
+            String(question.answer_value || '')
+            ===
+            String(question.annexure_id);
+    }
+
     questionError(
         question: any,
     ) {
@@ -348,12 +457,26 @@ export class CategoryAssessmentComponent implements OnInit {
     }
 
     backToDashboard() {
+        if (
+            this.drawerMode()
+        ) {
+            this.closeDrawer();
+            return;
+        }
+
         this.router.navigate([
             '/auditor/audit-dashboard',
         ]);
     }
 
     backToWorkspace() {
+        if (
+            this.drawerMode()
+        ) {
+            this.closeDrawer();
+            return;
+        }
+
         const assessmentId =
             this.categoryDetail()?.overview?.id;
 
@@ -388,5 +511,12 @@ export class CategoryAssessmentComponent implements OnInit {
         return startYear
             ? `${startYear} - ${startYear + 1}`
             : '-';
+    }
+
+    closeDrawer() {
+        this.drawerRef?.close({
+            saved:
+                this.savedAny(),
+        });
     }
 }
