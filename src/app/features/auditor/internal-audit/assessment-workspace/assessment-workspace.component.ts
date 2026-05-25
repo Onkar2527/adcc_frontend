@@ -122,6 +122,21 @@ export class AssessmentWorkspaceComponent implements OnInit {
             assessmentId,
         );
     }
+    openExecutiveSummary() {
+
+    const assessmentId =
+        Number(
+            this.route.snapshot.paramMap.get(
+                'assessmentId',
+            ),
+        );
+
+    this.router.navigate([
+        '/auditor/internal-audit/executive-summary',
+        assessmentId,
+    ]);
+
+}
 
     loadMenu(
         assessmentId: number,
