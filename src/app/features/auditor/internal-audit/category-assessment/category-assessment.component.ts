@@ -109,6 +109,9 @@ export class CategoryAssessmentComponent
     uploadingAnnexureQuestion =
         signal<number | null>(null);
 
+    uploadingEvidenceKey =
+        signal('');
+
     drawerMode =
         signal(false);
 
@@ -170,11 +173,16 @@ export class CategoryAssessmentComponent
     loadCategory(
         assessmentId: number,
         categoryId: number,
+        showLoader = true,
     ) {
 
-        this.loading.set(true);
+        if (
+            showLoader
+        ) {
+            this.loading.set(true);
 
-        this.error.set('');
+            this.error.set('');
+        }
 
         this.service
             .getInternalAuditCategory(
@@ -195,17 +203,30 @@ export class CategoryAssessmentComponent
                         prepared,
                     );
 
-                    this.loading.set(false);
+                    if (
+                        showLoader
+                    ) {
+                        this.loading.set(false);
+                    }
                 },
 
                 error: (err) => {
 
-                    this.error.set(
-                        err?.error?.message
-                        || 'Unable to load category questions.',
-                    );
+                    if (
+                        showLoader
+                    ) {
+                        this.error.set(
+                            err?.error?.message
+                            || 'Unable to load category questions.',
+                        );
 
-                    this.loading.set(false);
+                        this.loading.set(false);
+                    } else {
+                        this.saveMessage.set(
+                            err?.error?.message
+                            || 'Saved, but unable to refresh category questions.',
+                        );
+                    }
                 },
             });
     }
@@ -531,6 +552,7 @@ export class CategoryAssessmentComponent
                     this.loadCategory(
                         Number(detail.overview.id),
                         Number(detail.category.id),
+                        false,
                     );
                 },
 
@@ -726,10 +748,57 @@ export class CategoryAssessmentComponent
                         res.message || 'Annexure row saved successfully',
                     );
                     this.savedAny.set(true);
-                    this.loadCategory(
-                        Number(detail.overview.id),
-                        Number(detail.category.id),
-                    );
+
+                    if (
+                        res?.row?.id
+                    ) {
+                        question.answer = {
+                            ...(question.answer || {}),
+                            id:
+                                Number(
+                                    res?.answer_id
+                                    || question.answer?.id
+                                    || 0,
+                                ),
+                            answer_given:
+                                question.answer_value,
+                        };
+
+                        const rowIndex =
+                            (question.annexure_rows || [])
+                                .findIndex(
+                                    (row: any) =>
+                                        Number(row.id)
+                                        === Number(res.row.id),
+                                );
+
+                        if (
+                            rowIndex >= 0
+                        ) {
+                            question.annexure_rows[rowIndex] = {
+                                ...question.annexure_rows[rowIndex],
+                                ...res.row,
+                            };
+                        } else {
+                            question.annexure_rows = [
+                                ...(question.annexure_rows || []),
+                                res.row,
+                            ];
+                        }
+
+                        question.answer.annexure_rows =
+                            question.annexure_rows;
+
+                        this.clearAnnexureDraft(
+                            question,
+                        );
+                    } else {
+                        this.loadCategory(
+                            Number(detail.overview.id),
+                            Number(detail.category.id),
+                            false,
+                        );
+                    }
                 },
                 error: (err) => {
                     this.saveMessage.set(
@@ -793,14 +862,42 @@ export class CategoryAssessmentComponent
             )
             .subscribe({
                 next: (res: any) => {
+                    if (
+                        !res?.success
+                    ) {
+                        this.saveMessage.set(
+                            res?.message || 'Unable to delete annexure row.',
+                        );
+                        return;
+                    }
+
                     this.saveMessage.set(
                         res?.message || 'Annexure row deleted successfully',
                     );
                     this.savedAny.set(true);
-                    this.loadCategory(
-                        Number(detail.overview.id),
-                        Number(detail.category.id),
-                    );
+                    question.annexure_rows =
+                        (question.annexure_rows || [])
+                            .filter(
+                                (currentRow: any) =>
+                                    Number(currentRow.id)
+                                    !== Number(row.id),
+                            );
+
+                    if (
+                        question.answer
+                    ) {
+                        question.answer.annexure_rows =
+                            question.annexure_rows;
+                    }
+
+                    if (
+                        Number(question.annexure_draft?.id || 0)
+                        === Number(row.id)
+                    ) {
+                        this.clearAnnexureDraft(
+                            question,
+                        );
+                    }
                 },
                 error: (err) => {
                     this.saveMessage.set(
@@ -959,6 +1056,7 @@ export class CategoryAssessmentComponent
                     this.loadCategory(
                         Number(detail.overview.id),
                         Number(detail.category.id),
+                        false,
                     );
                 },
                 error: (err) => {
@@ -966,6 +1064,241 @@ export class CategoryAssessmentComponent
                     this.saveMessage.set(
                         err?.error?.message
                         || 'Unable to upload annexure CSV.',
+                    );
+                },
+            });
+    }
+
+    isEvidenceRequired(
+        question: any,
+    ) {
+
+        return Number(
+            question?.audit_ev_upload || 0,
+        ) === 1;
+    }
+
+    evidenceKey(
+        question: any,
+        row?: any,
+    ) {
+
+        return `${Number(question?.id || 0)}:${Number(row?.id || 0)}`;
+    }
+
+    uploadEvidence(
+        question: any,
+        event: Event,
+        row?: any,
+    ) {
+
+        const input =
+            event.target as HTMLInputElement;
+
+        const file =
+            input.files?.[0];
+
+        input.value = '';
+
+        const detail =
+            this.categoryDetail();
+
+        if (
+            !file
+            ||
+            !detail?.overview?.id
+            ||
+            !detail?.category?.id
+            ||
+            !question?.id
+        ) {
+            return;
+        }
+
+        if (
+            !question.answer?.id
+        ) {
+            this.saveMessage.set(
+                'Save the answer before uploading evidence.',
+            );
+            return;
+        }
+
+        const allowedTypes = [
+            'image/jpeg',
+            'image/jpg',
+            'image/png',
+            'application/pdf',
+        ];
+
+        if (
+            !allowedTypes.includes(file.type)
+        ) {
+            this.saveMessage.set(
+                'Only JPG, JPEG, PNG and PDF evidence files are allowed.',
+            );
+            return;
+        }
+
+        if (
+            file.size > 5 * 1024 * 1024
+        ) {
+            this.saveMessage.set(
+                'Evidence file size must be less than or equal to 5 MB.',
+            );
+            return;
+        }
+
+        this.uploadingEvidenceKey.set(
+            this.evidenceKey(
+                question,
+                row,
+            ),
+        );
+        this.saveMessage.set('');
+
+        this.service
+            .uploadInternalAuditEvidence(
+                Number(detail.overview.id),
+                Number(detail.category.id),
+                Number(question.id),
+                Number(row?.id || 0),
+                this.employeeId,
+                file,
+            )
+            .subscribe({
+                next: (res: any) => {
+                    this.uploadingEvidenceKey.set('');
+
+                    if (
+                        !res?.success
+                    ) {
+                        this.saveMessage.set(
+                            res?.message || 'Unable to upload evidence.',
+                        );
+                        return;
+                    }
+
+                    this.saveMessage.set(
+                        res.message || 'Evidence uploaded successfully.',
+                    );
+                    this.savedAny.set(true);
+                    this.loadCategory(
+                        Number(detail.overview.id),
+                        Number(detail.category.id),
+                        false,
+                    );
+                },
+                error: (err) => {
+                    this.uploadingEvidenceKey.set('');
+                    this.saveMessage.set(
+                        err?.error?.message
+                        || 'Unable to upload evidence.',
+                    );
+                },
+            });
+    }
+
+    viewEvidence(
+        evidence: any,
+    ) {
+
+        const detail =
+            this.categoryDetail();
+
+        if (
+            !detail?.overview?.id
+            ||
+            !detail?.category?.id
+            ||
+            !evidence?.id
+        ) {
+            return;
+        }
+
+        this.service
+            .viewInternalAuditEvidence(
+                Number(detail.overview.id),
+                Number(detail.category.id),
+                Number(evidence.id),
+                this.employeeId,
+            )
+            .subscribe({
+                next: (blob: Blob) => {
+                    const url =
+                        URL.createObjectURL(blob);
+
+                    window.open(
+                        url,
+                        '_blank',
+                    );
+
+                    setTimeout(
+                        () =>
+                            URL.revokeObjectURL(url),
+                        60000,
+                    );
+                },
+                error: (err) => {
+                    this.saveMessage.set(
+                        err?.error?.message
+                        || 'Unable to open evidence.',
+                    );
+                },
+            });
+    }
+
+    deleteEvidence(
+        evidence: any,
+    ) {
+
+        const detail =
+            this.categoryDetail();
+
+        if (
+            !detail?.overview?.id
+            ||
+            !detail?.category?.id
+            ||
+            !evidence?.id
+        ) {
+            return;
+        }
+
+        this.saveMessage.set('');
+
+        this.service
+            .deleteInternalAuditEvidence(
+                Number(detail.overview.id),
+                Number(detail.category.id),
+                Number(evidence.id),
+                this.employeeId,
+            )
+            .subscribe({
+                next: (res: any) => {
+                    if (
+                        !res?.success
+                    ) {
+                        this.saveMessage.set(
+                            res?.message || 'Unable to remove evidence.',
+                        );
+                        return;
+                    }
+
+                    this.saveMessage.set(
+                        res.message || 'Evidence removed successfully.',
+                    );
+                    this.savedAny.set(true);
+                    this.loadCategory(
+                        Number(detail.overview.id),
+                        Number(detail.category.id),
+                        false,
+                    );
+                },
+                error: (err) => {
+                    this.saveMessage.set(
+                        err?.error?.message
+                        || 'Unable to remove evidence.',
                     );
                 },
             });

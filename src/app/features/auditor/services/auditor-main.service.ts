@@ -174,6 +174,80 @@ export class AuditDashboardService {
     );
   }
 
+  uploadInternalAuditEvidence(
+    assessmentId: number,
+    categoryId: number,
+    questionId: number,
+    annexureRowId: number,
+    employeeId: number,
+    file: File,
+  ) {
+
+    const formData =
+      new FormData();
+
+    formData.append(
+      'employee_id',
+      String(employeeId),
+    );
+    formData.append(
+      'file',
+      file,
+    );
+
+    const targetPath =
+      annexureRowId
+        ? `/annexure/${annexureRowId}/evidence/upload`
+        : '/evidence/upload';
+
+    return this.http.post<any>(
+
+      `${this.config.apiUrl}/internal-audit/${assessmentId}/category/${categoryId}/question/${questionId}${targetPath}`,
+
+      formData,
+    );
+  }
+
+  viewInternalAuditEvidence(
+    assessmentId: number,
+    categoryId: number,
+    evidenceId: number,
+    employeeId: number,
+  ) {
+
+    return this.http.get(
+
+      `${this.config.apiUrl}/internal-audit/${assessmentId}/category/${categoryId}/evidence/${evidenceId}/view`,
+
+      {
+        params: {
+          employee_id:
+            employeeId,
+        },
+        responseType:
+          'blob',
+      },
+    );
+  }
+
+  deleteInternalAuditEvidence(
+    assessmentId: number,
+    categoryId: number,
+    evidenceId: number,
+    employeeId: number,
+  ) {
+
+    return this.http.post<any>(
+
+      `${this.config.apiUrl}/internal-audit/${assessmentId}/category/${categoryId}/evidence/${evidenceId}/delete`,
+
+      {
+        employee_id:
+          employeeId,
+      },
+    );
+  }
+
   getAuditUnitDashboard(
     auditUnitId: number,
     employeeId: number,

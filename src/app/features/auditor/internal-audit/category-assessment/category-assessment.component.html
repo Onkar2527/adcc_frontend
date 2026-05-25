@@ -258,6 +258,86 @@
                             </label>
 
                             <div
+                                *ngIf="!buildIsAnnexureSelected(question) || question.answer?.evidence"
+                                class="evidence-panel"
+                            >
+
+                                <div class="evidence-title">
+                                    <span>Audit Evidence</span>
+                                    <span
+                                        *ngIf="isEvidenceRequired(question)"
+                                        class="evidence-required"
+                                    >
+                                        Required
+                                    </span>
+                                </div>
+
+                                <ng-container
+                                    *ngIf="question.answer?.evidence as evidence; else questionEvidenceUpload"
+                                >
+                                    <div class="evidence-file">
+                                        <span>
+                                            {{ evidence.description || evidence.file_name }}
+                                        </span>
+
+                                        <button
+                                            pButton
+                                            type="button"
+                                            icon="pi pi-eye"
+                                            severity="secondary"
+                                            title="View evidence"
+                                            (click)="viewEvidence(evidence)"
+                                        ></button>
+
+                                        <button
+                                            pButton
+                                            type="button"
+                                            icon="pi pi-trash"
+                                            severity="danger"
+                                            title="Remove evidence"
+                                            (click)="deleteEvidence(evidence)"
+                                        ></button>
+                                    </div>
+                                </ng-container>
+
+                                <ng-template #questionEvidenceUpload>
+                                    <input
+                                        #questionEvidenceInput
+                                        type="file"
+                                        accept=".jpg,.jpeg,.png,.pdf,image/jpeg,image/png,application/pdf"
+                                        style="display: none"
+                                        (change)="uploadEvidence(question, $event)"
+                                    />
+
+                                    <button
+                                        pButton
+                                        type="button"
+                                        icon="pi pi-upload"
+                                        label="Upload Evidence"
+                                        severity="secondary"
+                                        [disabled]="!question.answer?.id"
+                                        [loading]="uploadingEvidenceKey() === evidenceKey(question)"
+                                        (click)="questionEvidenceInput.click()"
+                                    ></button>
+
+                                    <div
+                                        *ngIf="!question.answer?.id"
+                                        class="evidence-hint"
+                                    >
+                                        Save the answer first to upload evidence.
+                                    </div>
+                                </ng-template>
+
+                            </div>
+
+                            <div
+                                *ngIf="buildIsAnnexureSelected(question) && !question.answer?.evidence"
+                                class="evidence-panel evidence-hint"
+                            >
+                                Upload evidence from the annexure row after adding the row.
+                            </div>
+
+                            <div
                                 *ngIf="buildIsAnnexureSelected(question)"
                                 class="annexure-preview"
                             >
@@ -464,6 +544,7 @@
                                             <span>Business Risk</span>
                                             <span>Control Risk</span>
                                             <span>Risk Type</span>
+                                            <span>Evidence</span>
                                             <span>Action</span>
                                         </div>
 
@@ -479,6 +560,48 @@
                                             <span>{{ riskLabel(row.business_risk, 'business_risks') }}</span>
                                             <span>{{ riskLabel(row.control_risk, 'control_risks') }}</span>
                                             <span>{{ riskCategoryLabel(row.risk_cat_id) }}</span>
+
+                                            <span class="evidence-cell">
+                                                <ng-container *ngIf="row.evidence as evidence; else rowEvidenceUpload">
+                                                    <button
+                                                        pButton
+                                                        type="button"
+                                                        icon="pi pi-eye"
+                                                        severity="secondary"
+                                                        title="View evidence"
+                                                        (click)="viewEvidence(evidence)"
+                                                    ></button>
+
+                                                    <button
+                                                        pButton
+                                                        type="button"
+                                                        icon="pi pi-trash"
+                                                        severity="danger"
+                                                        title="Remove evidence"
+                                                        (click)="deleteEvidence(evidence)"
+                                                    ></button>
+                                                </ng-container>
+
+                                                <ng-template #rowEvidenceUpload>
+                                                    <input
+                                                        #rowEvidenceInput
+                                                        type="file"
+                                                        accept=".jpg,.jpeg,.png,.pdf,image/jpeg,image/png,application/pdf"
+                                                        style="display: none"
+                                                        (change)="uploadEvidence(question, $event, row)"
+                                                    />
+
+                                                    <button
+                                                        pButton
+                                                        type="button"
+                                                        icon="pi pi-upload"
+                                                        severity="secondary"
+                                                        title="Upload evidence"
+                                                        [loading]="uploadingEvidenceKey() === evidenceKey(question, row)"
+                                                        (click)="rowEvidenceInput.click()"
+                                                    ></button>
+                                                </ng-template>
+                                            </span>
 
                                             <span class="flex gap-2">
                                                 <button
@@ -642,6 +765,86 @@
                                         </span>
 
                                     </label>
+
+                                    <div
+                                        *ngIf="!buildIsAnnexureSelected(subsetQuestion) || subsetQuestion.answer?.evidence"
+                                        class="evidence-panel"
+                                    >
+
+                                        <div class="evidence-title">
+                                            <span>Audit Evidence</span>
+                                            <span
+                                                *ngIf="isEvidenceRequired(subsetQuestion)"
+                                                class="evidence-required"
+                                            >
+                                                Required
+                                            </span>
+                                        </div>
+
+                                        <ng-container
+                                            *ngIf="subsetQuestion.answer?.evidence as evidence; else subsetEvidenceUpload"
+                                        >
+                                            <div class="evidence-file">
+                                                <span>
+                                                    {{ evidence.description || evidence.file_name }}
+                                                </span>
+
+                                                <button
+                                                    pButton
+                                                    type="button"
+                                                    icon="pi pi-eye"
+                                                    severity="secondary"
+                                                    title="View evidence"
+                                                    (click)="viewEvidence(evidence)"
+                                                ></button>
+
+                                                <button
+                                                    pButton
+                                                    type="button"
+                                                    icon="pi pi-trash"
+                                                    severity="danger"
+                                                    title="Remove evidence"
+                                                    (click)="deleteEvidence(evidence)"
+                                                ></button>
+                                            </div>
+                                        </ng-container>
+
+                                        <ng-template #subsetEvidenceUpload>
+                                            <input
+                                                #subsetEvidenceInput
+                                                type="file"
+                                                accept=".jpg,.jpeg,.png,.pdf,image/jpeg,image/png,application/pdf"
+                                                style="display: none"
+                                                (change)="uploadEvidence(subsetQuestion, $event)"
+                                            />
+
+                                            <button
+                                                pButton
+                                                type="button"
+                                                icon="pi pi-upload"
+                                                label="Upload Evidence"
+                                                severity="secondary"
+                                                [disabled]="!subsetQuestion.answer?.id"
+                                                [loading]="uploadingEvidenceKey() === evidenceKey(subsetQuestion)"
+                                                (click)="subsetEvidenceInput.click()"
+                                            ></button>
+
+                                            <div
+                                                *ngIf="!subsetQuestion.answer?.id"
+                                                class="evidence-hint"
+                                            >
+                                                Save the answer first to upload evidence.
+                                            </div>
+                                        </ng-template>
+
+                                    </div>
+
+                                    <div
+                                        *ngIf="buildIsAnnexureSelected(subsetQuestion) && !subsetQuestion.answer?.evidence"
+                                        class="evidence-panel evidence-hint"
+                                    >
+                                        Upload evidence from the annexure row after adding the row.
+                                    </div>
 
                                     <div
                                         *ngIf="buildIsAnnexureSelected(subsetQuestion)"
@@ -850,6 +1053,7 @@
                                                     <span>Business Risk</span>
                                                     <span>Control Risk</span>
                                                     <span>Risk Type</span>
+                                                    <span>Evidence</span>
                                                     <span>Action</span>
                                                 </div>
 
@@ -865,6 +1069,48 @@
                                                     <span>{{ riskLabel(row.business_risk, 'business_risks') }}</span>
                                                     <span>{{ riskLabel(row.control_risk, 'control_risks') }}</span>
                                                     <span>{{ riskCategoryLabel(row.risk_cat_id) }}</span>
+
+                                                    <span class="evidence-cell">
+                                                        <ng-container *ngIf="row.evidence as evidence; else subsetRowEvidenceUpload">
+                                                            <button
+                                                                pButton
+                                                                type="button"
+                                                                icon="pi pi-eye"
+                                                                severity="secondary"
+                                                                title="View evidence"
+                                                                (click)="viewEvidence(evidence)"
+                                                            ></button>
+
+                                                            <button
+                                                                pButton
+                                                                type="button"
+                                                                icon="pi pi-trash"
+                                                                severity="danger"
+                                                                title="Remove evidence"
+                                                                (click)="deleteEvidence(evidence)"
+                                                            ></button>
+                                                        </ng-container>
+
+                                                        <ng-template #subsetRowEvidenceUpload>
+                                                            <input
+                                                                #subsetRowEvidenceInput
+                                                                type="file"
+                                                                accept=".jpg,.jpeg,.png,.pdf,image/jpeg,image/png,application/pdf"
+                                                                style="display: none"
+                                                                (change)="uploadEvidence(subsetQuestion, $event, row)"
+                                                            />
+
+                                                            <button
+                                                                pButton
+                                                                type="button"
+                                                                icon="pi pi-upload"
+                                                                severity="secondary"
+                                                                title="Upload evidence"
+                                                                [loading]="uploadingEvidenceKey() === evidenceKey(subsetQuestion, row)"
+                                                                (click)="subsetRowEvidenceInput.click()"
+                                                            ></button>
+                                                        </ng-template>
+                                                    </span>
 
                                                     <span class="flex gap-2">
                                                         <button
