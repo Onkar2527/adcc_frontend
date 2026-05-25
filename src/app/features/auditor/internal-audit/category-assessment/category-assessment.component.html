@@ -218,6 +218,220 @@
                                         No annexure columns configured.
                                     </div>
                                 </ng-template>
+
+                                <div
+                                    *ngIf="question.annexure?.columns?.length"
+                                    class="annexure-editor"
+                                >
+                                    <div class="annexure-grid">
+                                        <div
+                                            class="annexure-field"
+                                            *ngFor="let column of question.annexure.columns; let ci = index"
+                                        >
+                                            <label class="answer-label">
+                                                {{ column.name }}
+                                            </label>
+
+                                            <textarea
+                                                *ngIf="column.column_type_id == 2; else annexureInput"
+                                                class="answer-control"
+                                                rows="2"
+                                                [(ngModel)]="question.annexure_draft.values[ci]"
+                                            ></textarea>
+
+                                            <ng-template #annexureInput>
+                                                <select
+                                                    *ngIf="column.column_type_id == 3; else annexureText"
+                                                    class="answer-control"
+                                                    [(ngModel)]="question.annexure_draft.values[ci]"
+                                                >
+                                                    <option value="">
+                                                        Please select
+                                                    </option>
+
+                                                    <option
+                                                        *ngFor="let option of annexureColumnOptions(column)"
+                                                        [value]="option.option_label"
+                                                    >
+                                                        {{ option.option_label }}
+                                                    </option>
+                                                </select>
+
+                                                <ng-template #annexureText>
+                                                    <input
+                                                        type="text"
+                                                        class="answer-control"
+                                                        [(ngModel)]="question.annexure_draft.values[ci]"
+                                                    />
+                                                </ng-template>
+                                            </ng-template>
+                                        </div>
+
+                                        <div class="annexure-field">
+                                            <label class="answer-label">
+                                                Business Risk
+                                            </label>
+
+                                            <select
+                                                class="answer-control"
+                                                [(ngModel)]="question.annexure_draft.business_risk"
+                                                [disabled]="!isCustomAnnexureRisk(question)"
+                                            >
+                                                <option value="">
+                                                    Please select
+                                                </option>
+
+                                                <option
+                                                    *ngFor="let risk of annexureRiskOptions().business_risks"
+                                                    [value]="risk.id"
+                                                >
+                                                    {{ risk.label }}
+                                                </option>
+                                            </select>
+                                        </div>
+
+                                        <div class="annexure-field">
+                                            <label class="answer-label">
+                                                Control Risk
+                                            </label>
+
+                                            <select
+                                                class="answer-control"
+                                                [(ngModel)]="question.annexure_draft.control_risk"
+                                                [disabled]="!isCustomAnnexureRisk(question)"
+                                            >
+                                                <option value="">
+                                                    Please select
+                                                </option>
+
+                                                <option
+                                                    *ngFor="let risk of annexureRiskOptions().control_risks"
+                                                    [value]="risk.id"
+                                                >
+                                                    {{ risk.label }}
+                                                </option>
+                                            </select>
+                                        </div>
+
+                                        <div class="annexure-field">
+                                            <label class="answer-label">
+                                                Risk Type
+                                            </label>
+
+                                            <select
+                                                class="answer-control"
+                                                [(ngModel)]="question.annexure_draft.risk_cat_id"
+                                                [disabled]="!isCustomAnnexureRisk(question)"
+                                            >
+                                                <option value="">
+                                                    Please select
+                                                </option>
+
+                                                <option
+                                                    *ngFor="let risk of annexureRiskOptions().risk_categories"
+                                                    [value]="risk.id"
+                                                >
+                                                    {{ risk.risk_category }}
+                                                </option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="flex flex-wrap justify-content-end gap-2 mt-3">
+                                        <input
+                                            #annexCsvInput
+                                            type="file"
+                                            accept=".csv,text/csv"
+                                            style="display: none"
+                                            (change)="uploadAnnexureCsv(question, $event)"
+                                        />
+
+                                        <button
+                                            pButton
+                                            type="button"
+                                            icon="pi pi-download"
+                                            label="Sample CSV"
+                                            severity="secondary"
+                                            (click)="downloadAnnexureSample(question)"
+                                        ></button>
+
+                                        <button
+                                            pButton
+                                            type="button"
+                                            icon="pi pi-upload"
+                                            label="Upload CSV"
+                                            severity="secondary"
+                                            [loading]="uploadingAnnexureQuestion() === question.id"
+                                            (click)="annexCsvInput.click()"
+                                        ></button>
+
+                                        <button
+                                            pButton
+                                            type="button"
+                                            icon="pi pi-times"
+                                            label="Clear"
+                                            severity="secondary"
+                                            (click)="clearAnnexureDraft(question)"
+                                        ></button>
+
+                                        <button
+                                            pButton
+                                            type="button"
+                                            icon="pi pi-save"
+                                            [label]="question.annexure_draft.id ? 'Update Row' : 'Add Row'"
+                                            (click)="saveAnnexureRow(question)"
+                                        ></button>
+                                    </div>
+
+                                    <div
+                                        *ngIf="question.annexure_rows?.length"
+                                        class="annexure-table"
+                                    >
+                                        <div class="annexure-table-row annexure-table-head">
+                                            <span
+                                                *ngFor="let column of question.annexure.columns"
+                                            >
+                                                {{ column.name }}
+                                            </span>
+                                            <span>Business Risk</span>
+                                            <span>Control Risk</span>
+                                            <span>Risk Type</span>
+                                            <span>Action</span>
+                                        </div>
+
+                                        <div
+                                            class="annexure-table-row"
+                                            *ngFor="let row of question.annexure_rows"
+                                        >
+                                            <span
+                                                *ngFor="let column of question.annexure.columns; let ci = index"
+                                            >
+                                                {{ row.values?.[ci] || '-' }}
+                                            </span>
+                                            <span>{{ riskLabel(row.business_risk, 'business_risks') }}</span>
+                                            <span>{{ riskLabel(row.control_risk, 'control_risks') }}</span>
+                                            <span>{{ riskCategoryLabel(row.risk_cat_id) }}</span>
+
+                                            <span class="flex gap-2">
+                                                <button
+                                                    pButton
+                                                    type="button"
+                                                    icon="pi pi-pencil"
+                                                    severity="secondary"
+                                                    (click)="editAnnexureRow(question, row)"
+                                                ></button>
+
+                                                <button
+                                                    pButton
+                                                    type="button"
+                                                    icon="pi pi-trash"
+                                                    severity="danger"
+                                                    (click)="deleteAnnexureRow(question, row)"
+                                                ></button>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
 
                             <div
@@ -351,6 +565,220 @@
                                                 No annexure columns configured.
                                             </div>
                                         </ng-template>
+
+                                        <div
+                                            *ngIf="subsetQuestion.annexure?.columns?.length"
+                                            class="annexure-editor"
+                                        >
+                                            <div class="annexure-grid">
+                                                <div
+                                                    class="annexure-field"
+                                                    *ngFor="let column of subsetQuestion.annexure.columns; let ci = index"
+                                                >
+                                                    <label class="answer-label">
+                                                        {{ column.name }}
+                                                    </label>
+
+                                                    <textarea
+                                                        *ngIf="column.column_type_id == 2; else subsetAnnexureInput"
+                                                        class="answer-control"
+                                                        rows="2"
+                                                        [(ngModel)]="subsetQuestion.annexure_draft.values[ci]"
+                                                    ></textarea>
+
+                                                    <ng-template #subsetAnnexureInput>
+                                                        <select
+                                                            *ngIf="column.column_type_id == 3; else subsetAnnexureText"
+                                                            class="answer-control"
+                                                            [(ngModel)]="subsetQuestion.annexure_draft.values[ci]"
+                                                        >
+                                                            <option value="">
+                                                                Please select
+                                                            </option>
+
+                                                            <option
+                                                                *ngFor="let option of annexureColumnOptions(column)"
+                                                                [value]="option.option_label"
+                                                            >
+                                                                {{ option.option_label }}
+                                                            </option>
+                                                        </select>
+
+                                                        <ng-template #subsetAnnexureText>
+                                                            <input
+                                                                type="text"
+                                                                class="answer-control"
+                                                                [(ngModel)]="subsetQuestion.annexure_draft.values[ci]"
+                                                            />
+                                                        </ng-template>
+                                                    </ng-template>
+                                                </div>
+
+                                                <div class="annexure-field">
+                                                    <label class="answer-label">
+                                                        Business Risk
+                                                    </label>
+
+                                                    <select
+                                                        class="answer-control"
+                                                        [(ngModel)]="subsetQuestion.annexure_draft.business_risk"
+                                                        [disabled]="!isCustomAnnexureRisk(subsetQuestion)"
+                                                    >
+                                                        <option value="">
+                                                            Please select
+                                                        </option>
+
+                                                        <option
+                                                            *ngFor="let risk of annexureRiskOptions().business_risks"
+                                                            [value]="risk.id"
+                                                        >
+                                                            {{ risk.label }}
+                                                        </option>
+                                                    </select>
+                                                </div>
+
+                                                <div class="annexure-field">
+                                                    <label class="answer-label">
+                                                        Control Risk
+                                                    </label>
+
+                                                    <select
+                                                        class="answer-control"
+                                                        [(ngModel)]="subsetQuestion.annexure_draft.control_risk"
+                                                        [disabled]="!isCustomAnnexureRisk(subsetQuestion)"
+                                                    >
+                                                        <option value="">
+                                                            Please select
+                                                        </option>
+
+                                                        <option
+                                                            *ngFor="let risk of annexureRiskOptions().control_risks"
+                                                            [value]="risk.id"
+                                                        >
+                                                            {{ risk.label }}
+                                                        </option>
+                                                    </select>
+                                                </div>
+
+                                                <div class="annexure-field">
+                                                    <label class="answer-label">
+                                                        Risk Type
+                                                    </label>
+
+                                                    <select
+                                                        class="answer-control"
+                                                        [(ngModel)]="subsetQuestion.annexure_draft.risk_cat_id"
+                                                        [disabled]="!isCustomAnnexureRisk(subsetQuestion)"
+                                                    >
+                                                        <option value="">
+                                                            Please select
+                                                        </option>
+
+                                                        <option
+                                                            *ngFor="let risk of annexureRiskOptions().risk_categories"
+                                                            [value]="risk.id"
+                                                        >
+                                                            {{ risk.risk_category }}
+                                                        </option>
+                                                    </select>
+                                                </div>
+                                            </div>
+
+                                            <div class="flex flex-wrap justify-content-end gap-2 mt-3">
+                                                <input
+                                                    #subsetAnnexCsvInput
+                                                    type="file"
+                                                    accept=".csv,text/csv"
+                                                    style="display: none"
+                                                    (change)="uploadAnnexureCsv(subsetQuestion, $event)"
+                                                />
+
+                                                <button
+                                                    pButton
+                                                    type="button"
+                                                    icon="pi pi-download"
+                                                    label="Sample CSV"
+                                                    severity="secondary"
+                                                    (click)="downloadAnnexureSample(subsetQuestion)"
+                                                ></button>
+
+                                                <button
+                                                    pButton
+                                                    type="button"
+                                                    icon="pi pi-upload"
+                                                    label="Upload CSV"
+                                                    severity="secondary"
+                                                    [loading]="uploadingAnnexureQuestion() === subsetQuestion.id"
+                                                    (click)="subsetAnnexCsvInput.click()"
+                                                ></button>
+
+                                                <button
+                                                    pButton
+                                                    type="button"
+                                                    icon="pi pi-times"
+                                                    label="Clear"
+                                                    severity="secondary"
+                                                    (click)="clearAnnexureDraft(subsetQuestion)"
+                                                ></button>
+
+                                                <button
+                                                    pButton
+                                                    type="button"
+                                                    icon="pi pi-save"
+                                                    [label]="subsetQuestion.annexure_draft.id ? 'Update Row' : 'Add Row'"
+                                                    (click)="saveAnnexureRow(subsetQuestion)"
+                                                ></button>
+                                            </div>
+
+                                            <div
+                                                *ngIf="subsetQuestion.annexure_rows?.length"
+                                                class="annexure-table"
+                                            >
+                                                <div class="annexure-table-row annexure-table-head">
+                                                    <span
+                                                        *ngFor="let column of subsetQuestion.annexure.columns"
+                                                    >
+                                                        {{ column.name }}
+                                                    </span>
+                                                    <span>Business Risk</span>
+                                                    <span>Control Risk</span>
+                                                    <span>Risk Type</span>
+                                                    <span>Action</span>
+                                                </div>
+
+                                                <div
+                                                    class="annexure-table-row"
+                                                    *ngFor="let row of subsetQuestion.annexure_rows"
+                                                >
+                                                    <span
+                                                        *ngFor="let column of subsetQuestion.annexure.columns; let ci = index"
+                                                    >
+                                                        {{ row.values?.[ci] || '-' }}
+                                                    </span>
+                                                    <span>{{ riskLabel(row.business_risk, 'business_risks') }}</span>
+                                                    <span>{{ riskLabel(row.control_risk, 'control_risks') }}</span>
+                                                    <span>{{ riskCategoryLabel(row.risk_cat_id) }}</span>
+
+                                                    <span class="flex gap-2">
+                                                        <button
+                                                            pButton
+                                                            type="button"
+                                                            icon="pi pi-pencil"
+                                                            severity="secondary"
+                                                            (click)="editAnnexureRow(subsetQuestion, row)"
+                                                        ></button>
+
+                                                        <button
+                                                            pButton
+                                                            type="button"
+                                                            icon="pi pi-trash"
+                                                            severity="danger"
+                                                            (click)="deleteAnnexureRow(subsetQuestion, row)"
+                                                        ></button>
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
 
                                     <div

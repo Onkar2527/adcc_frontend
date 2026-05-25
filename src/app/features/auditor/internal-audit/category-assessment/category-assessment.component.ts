@@ -64,6 +64,9 @@ export class CategoryAssessmentComponent implements OnInit {
     savingHeader =
         signal<number | null>(null);
 
+    uploadingAnnexureQuestion =
+        signal<number | null>(null);
+
     drawerMode =
         signal(false);
 
@@ -154,6 +157,7 @@ export class CategoryAssessmentComponent implements OnInit {
 
         this.prepareSets(
             detail?.sets || [],
+            detail?.annexure_risk_options || {},
         );
 
         return detail;
@@ -161,6 +165,7 @@ export class CategoryAssessmentComponent implements OnInit {
 
     prepareSets(
         sets: any[],
+        riskOptions: any,
     ) {
 
         for (
@@ -188,8 +193,17 @@ export class CategoryAssessmentComponent implements OnInit {
                                 question.answer?.is_compliance || 0,
                             ),
                         );
+                    question.annexure_rows =
+                        question.answer?.annexure_rows || [];
+                    question.annexure_draft =
+                        this.createAnnexureDraft(
+                            question,
+                            undefined,
+                            riskOptions,
+                        );
                     this.prepareSets(
                         question.subset_sets || [],
+                        riskOptions,
                     );
                 }
             }
@@ -437,6 +451,413 @@ export class CategoryAssessmentComponent implements OnInit {
         return Object.keys(
             this.answerErrors(),
         ).length > 0;
+    }
+
+    createAnnexureDraft(
+        question: any,
+        row?: any,
+        riskOptions: any =
+            this.annexureRiskOptions(),
+    ) {
+
+        const columns =
+            question?.annexure?.columns || [];
+
+        const defaults =
+            this.defaultAnnexureRisk(
+                question,
+                riskOptions,
+            );
+
+        return {
+            id:
+                row?.id || 0,
+            values:
+                columns.map(
+                    (
+                        _column: any,
+                        index: number,
+                    ) =>
+                        row?.values?.[index] || '',
+                ),
+            business_risk:
+                row?.business_risk || defaults.business_risk,
+            control_risk:
+                row?.control_risk || defaults.control_risk,
+            risk_cat_id:
+                row?.risk_cat_id || defaults.risk_cat_id,
+        };
+    }
+
+    annexureRiskOptions() {
+        return this.categoryDetail()
+            ?.annexure_risk_options || {};
+    }
+
+    isCustomAnnexureRisk(
+        question: any,
+    ) {
+        return Number(
+            question?.annexure?.risk_defination_id || 0,
+        ) === 1;
+    }
+
+    defaultAnnexureRisk(
+        question: any,
+        riskOptions: any =
+            this.annexureRiskOptions(),
+    ) {
+
+        const riskCategory =
+            (riskOptions?.risk_categories || [])
+                .find(
+                    (item: any) =>
+                        Number(item.id) === 1,
+                )
+            ||
+            (riskOptions?.risk_categories || [])[0];
+
+        if (
+            !this.isCustomAnnexureRisk(question)
+        ) {
+            return {
+                business_risk:
+                    1,
+                control_risk:
+                    1,
+                risk_cat_id:
+                    Number(riskCategory?.id || 0),
+            };
+        }
+
+        return {
+            business_risk:
+                '',
+            control_risk:
+                '',
+            risk_cat_id:
+                '',
+        };
+    }
+
+    riskLabel(
+        riskId: any,
+        type: 'business_risks' | 'control_risks',
+    ) {
+        return (
+            this.annexureRiskOptions()?.[type] || []
+        ).find(
+            (risk: any) =>
+                Number(risk.id) === Number(riskId),
+        )?.label || '-';
+    }
+
+    riskCategoryLabel(
+        riskCategoryId: any,
+    ) {
+        return (
+            this.annexureRiskOptions()?.risk_categories || []
+        ).find(
+            (risk: any) =>
+                Number(risk.id) === Number(riskCategoryId),
+        )?.risk_category || '-';
+    }
+
+    annexureColumnOptions(
+        column: any,
+    ) {
+        return Array.isArray(column?.options)
+            ? column.options
+            : [];
+    }
+
+    saveAnnexureRow(
+        question: any,
+    ) {
+
+        const detail =
+            this.categoryDetail();
+
+        if (
+            !detail?.overview?.id
+            ||
+            !detail?.category?.id
+            ||
+            !question?.id
+            ||
+            !question?.annexure_draft
+        ) {
+            return;
+        }
+
+        this.saveMessage.set('');
+
+        this.service
+            .saveInternalAuditAnnexureRow(
+                Number(detail.overview.id),
+                Number(detail.category.id),
+                Number(question.id),
+                this.employeeId(),
+                question.annexure_draft,
+            )
+            .subscribe({
+                next: (res: any) => {
+                    if (
+                        !res?.success
+                    ) {
+                        this.saveMessage.set(
+                            res?.message || 'Unable to save annexure row.',
+                        );
+                        return;
+                    }
+
+                    this.saveMessage.set(
+                        res.message || 'Annexure row saved successfully',
+                    );
+                    this.savedAny.set(true);
+                    this.loadCategory(
+                        Number(detail.overview.id),
+                        Number(detail.category.id),
+                    );
+                },
+                error: (err) => {
+                    this.saveMessage.set(
+                        err?.error?.message
+                        || 'Unable to save annexure row.',
+                    );
+                },
+            });
+    }
+
+    editAnnexureRow(
+        question: any,
+        row: any,
+    ) {
+        question.annexure_draft =
+            this.createAnnexureDraft(
+                question,
+                row,
+                this.annexureRiskOptions(),
+            );
+    }
+
+    clearAnnexureDraft(
+        question: any,
+    ) {
+        question.annexure_draft =
+            this.createAnnexureDraft(
+                question,
+                undefined,
+                this.annexureRiskOptions(),
+            );
+    }
+
+    deleteAnnexureRow(
+        question: any,
+        row: any,
+    ) {
+
+        const detail =
+            this.categoryDetail();
+
+        if (
+            !detail?.overview?.id
+            ||
+            !detail?.category?.id
+            ||
+            !question?.id
+            ||
+            !row?.id
+        ) {
+            return;
+        }
+
+        this.service
+            .deleteInternalAuditAnnexureRow(
+                Number(detail.overview.id),
+                Number(detail.category.id),
+                Number(question.id),
+                Number(row.id),
+                this.employeeId(),
+            )
+            .subscribe({
+                next: (res: any) => {
+                    this.saveMessage.set(
+                        res?.message || 'Annexure row deleted successfully',
+                    );
+                    this.savedAny.set(true);
+                    this.loadCategory(
+                        Number(detail.overview.id),
+                        Number(detail.category.id),
+                    );
+                },
+                error: (err) => {
+                    this.saveMessage.set(
+                        err?.error?.message
+                        || 'Unable to delete annexure row.',
+                    );
+                },
+            });
+    }
+
+    downloadAnnexureSample(
+        question: any,
+    ) {
+
+        const detail =
+            this.categoryDetail();
+
+        if (
+            !detail?.overview?.id
+            ||
+            !detail?.category?.id
+            ||
+            !question?.id
+        ) {
+            return;
+        }
+
+        this.saveMessage.set('');
+
+        this.service
+            .getInternalAuditAnnexureSample(
+                Number(detail.overview.id),
+                Number(detail.category.id),
+                Number(question.id),
+                this.employeeId(),
+            )
+            .subscribe({
+                next: (res: any) => {
+                    if (
+                        !res?.success
+                        ||
+                        !res?.csv
+                    ) {
+                        this.saveMessage.set(
+                            res?.message || 'Unable to download annexure sample.',
+                        );
+                        return;
+                    }
+
+                    const blob =
+                        new Blob(
+                            [res.csv],
+                            {
+                                type:
+                                    'text/csv;charset=utf-8;',
+                            },
+                        );
+
+                    const url =
+                        URL.createObjectURL(blob);
+
+                    const link =
+                        document.createElement('a');
+
+                    link.href =
+                        url;
+                    link.download =
+                        res.filename || 'sample-annexure.csv';
+                    link.click();
+
+                    URL.revokeObjectURL(url);
+                },
+                error: (err) => {
+                    this.saveMessage.set(
+                        err?.error?.message
+                        || 'Unable to download annexure sample.',
+                    );
+                },
+            });
+    }
+
+    uploadAnnexureCsv(
+        question: any,
+        event: Event,
+    ) {
+
+        const input =
+            event.target as HTMLInputElement;
+
+        const file =
+            input.files?.[0];
+
+        input.value = '';
+
+        const detail =
+            this.categoryDetail();
+
+        if (
+            !file
+            ||
+            !detail?.overview?.id
+            ||
+            !detail?.category?.id
+            ||
+            !question?.id
+        ) {
+            return;
+        }
+
+        if (
+            !file.name.toLowerCase().endsWith('.csv')
+        ) {
+            this.saveMessage.set(
+                'Only CSV files are allowed.',
+            );
+            return;
+        }
+
+        this.uploadingAnnexureQuestion.set(
+            Number(question.id),
+        );
+        this.saveMessage.set('');
+
+        this.service
+            .uploadInternalAuditAnnexureCsv(
+                Number(detail.overview.id),
+                Number(detail.category.id),
+                Number(question.id),
+                this.employeeId(),
+                file,
+            )
+            .subscribe({
+                next: (res: any) => {
+                    this.uploadingAnnexureQuestion.set(null);
+
+                    if (
+                        !res?.success
+                    ) {
+                        const firstError =
+                            Array.isArray(res?.errors)
+                            &&
+                            res.errors.length
+                                ? ` Row ${res.errors[0].row}: ${res.errors[0].errors?.join(', ')}`
+                                : '';
+
+                        this.saveMessage.set(
+                            `${res?.message || 'Unable to upload annexure CSV.'}${firstError}`,
+                        );
+                        return;
+                    }
+
+                    this.saveMessage.set(
+                        res.message || 'Annexure CSV uploaded successfully.',
+                    );
+                    this.savedAny.set(true);
+                    this.loadCategory(
+                        Number(detail.overview.id),
+                        Number(detail.category.id),
+                    );
+                },
+                error: (err) => {
+                    this.uploadingAnnexureQuestion.set(null);
+                    this.saveMessage.set(
+                        err?.error?.message
+                        || 'Unable to upload annexure CSV.',
+                    );
+                },
+            });
     }
 
     employeeId(): number {

@@ -86,6 +86,94 @@ export class AuditDashboardService {
     );
   }
 
+  saveInternalAuditAnnexureRow(
+    assessmentId: number,
+    categoryId: number,
+    questionId: number,
+    employeeId: number,
+    payload: any,
+  ) {
+
+    return this.http.post<any>(
+
+      `${this.config.apiUrl}/internal-audit/${assessmentId}/category/${categoryId}/question/${questionId}/annexure`,
+
+      {
+        ...payload,
+        employee_id:
+          employeeId,
+      },
+    );
+  }
+
+  deleteInternalAuditAnnexureRow(
+    assessmentId: number,
+    categoryId: number,
+    questionId: number,
+    annexureRowId: number,
+    employeeId: number,
+  ) {
+
+    return this.http.post<any>(
+
+      `${this.config.apiUrl}/internal-audit/${assessmentId}/category/${categoryId}/question/${questionId}/annexure/${annexureRowId}/delete`,
+
+      {
+        employee_id:
+          employeeId,
+      },
+    );
+  }
+
+  getInternalAuditAnnexureSample(
+    assessmentId: number,
+    categoryId: number,
+    questionId: number,
+    employeeId: number,
+  ) {
+
+    return this.http.get<any>(
+
+      `${this.config.apiUrl}/internal-audit/${assessmentId}/category/${categoryId}/question/${questionId}/annexure/sample`,
+
+      {
+        params: {
+          employee_id:
+            employeeId,
+        },
+      },
+    );
+  }
+
+  uploadInternalAuditAnnexureCsv(
+    assessmentId: number,
+    categoryId: number,
+    questionId: number,
+    employeeId: number,
+    file: File,
+  ) {
+
+    const formData =
+      new FormData();
+
+    formData.append(
+      'employee_id',
+      String(employeeId),
+    );
+
+    formData.append(
+      'file',
+      file,
+    );
+
+    return this.http.post<any>(
+
+      `${this.config.apiUrl}/internal-audit/${assessmentId}/category/${categoryId}/question/${questionId}/annexure/upload`,
+
+      formData,
+    );
+  }
+
   getAuditUnitDashboard(
     auditUnitId: number,
     employeeId: number,

@@ -340,6 +340,49 @@
     font-weight: 600;
 }
 
+.annexure-editor {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--surface-200);
+}
+
+.annexure-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+    gap: .75rem;
+}
+
+.annexure-field {
+    min-width: 0;
+}
+
+.annexure-table {
+    margin-top: 1rem;
+    border: 1px solid var(--surface-200);
+    border-radius: .5rem;
+    overflow: auto;
+}
+
+.annexure-table-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
+    gap: .75rem;
+    align-items: center;
+    min-width: 65rem;
+    padding: .75rem;
+    border-top: 1px solid var(--surface-200);
+}
+
+.annexure-table-row:first-child {
+    border-top: 0;
+}
+
+.annexure-table-head {
+    background: var(--surface-100);
+    color: var(--text-color);
+    font-weight: 700;
+}
+
 @media (max-width: 768px) {
     .question-card {
         grid-template-columns: 1fr;
