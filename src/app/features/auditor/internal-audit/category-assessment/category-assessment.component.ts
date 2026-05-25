@@ -32,6 +32,10 @@ import {
 } from '../../../../core/services/drawer/form-drawer.ref';
 
 import {
+    NotificationService,
+} from '../../../../core/services/notification/notification.service';
+
+import {
     AuditDashboardService,
 } from '../../services/auditor-main.service';
 
@@ -65,6 +69,9 @@ export class CategoryAssessmentComponent
 
     private service =
         inject(AuditDashboardService);
+
+    private notification =
+        inject(NotificationService);
 
     constructor(
         @Optional()
@@ -100,9 +107,6 @@ export class CategoryAssessmentComponent
     answerErrors =
         signal<Record<string, string>>({});
 
-    saveMessage =
-        signal('');
-
     savingHeader =
         signal<number | null>(null);
 
@@ -115,10 +119,16 @@ export class CategoryAssessmentComponent
     drawerMode =
         signal(false);
 
+    pendingOnly =
+        signal(false);
+
     savedAny =
         signal(false);
 
     employeeId = 0;
+
+    private pendingQuestionIds =
+        new Set<number>();
 
     ngOnInit() {
 
@@ -131,6 +141,20 @@ export class CategoryAssessmentComponent
                 &&
                 drawerData.categoryId,
             ),
+        );
+
+        this.pendingQuestionIds =
+            new Set<number>(
+                (drawerData.pendingQuestionIds || [])
+                    .map(
+                        (questionId: any) =>
+                            Number(questionId),
+                    )
+                    .filter(Boolean),
+            );
+
+        this.pendingOnly.set(
+            this.pendingQuestionIds.size > 0,
         );
 
         const assessmentId =
@@ -222,7 +246,7 @@ export class CategoryAssessmentComponent
 
                         this.loading.set(false);
                     } else {
-                        this.saveMessage.set(
+                        this.notification.error(
                             err?.error?.message
                             || 'Saved, but unable to refresh category questions.',
                         );
@@ -235,12 +259,75 @@ export class CategoryAssessmentComponent
         detail: any,
     ) {
 
+        if (
+            this.pendingOnly()
+        ) {
+            detail.sets =
+                this.filterPendingSets(
+                    detail?.sets || [],
+                );
+        }
+
         this.prepareSets(
             detail?.sets || [],
             detail?.annexure_risk_options || {},
         );
 
         return detail;
+    }
+
+    filterPendingSets(
+        sets: any[],
+    ): any[] {
+
+        return (sets || [])
+            .map(
+                (set: any) => ({
+                    ...set,
+                    headers:
+                        (set.headers || [])
+                            .map(
+                                (header: any) => ({
+                                    ...header,
+                                    questions:
+                                        (header.questions || [])
+                                            .map(
+                                                (question: any) => {
+                                                    const pendingSubsetSets =
+                                                        this.filterPendingSets(
+                                                            question.subset_sets || [],
+                                                        );
+
+                                                    if (
+                                                        !this.pendingQuestionIds.has(
+                                                            Number(question.id),
+                                                        )
+                                                        &&
+                                                        !pendingSubsetSets.length
+                                                    ) {
+                                                        return null;
+                                                    }
+
+                                                    return {
+                                                        ...question,
+                                                        pending_subset_sets:
+                                                            pendingSubsetSets,
+                                                    };
+                                                },
+                                            )
+                                            .filter(Boolean),
+                                }),
+                            )
+                            .filter(
+                                (header: any) =>
+                                    header.questions.length,
+                            ),
+                }),
+            )
+            .filter(
+                (set: any) =>
+                    set.headers.length,
+            );
     }
 
     prepareSets(
@@ -275,6 +362,12 @@ export class CategoryAssessmentComponent
                                 question.answer?.is_compliance || 0,
                             ),
                         );
+                    question.audit_compulsary_ev_upload =
+                        Boolean(
+                            Number(
+                                question.answer?.audit_compulsary_ev_upload || 0,
+                            ),
+                        );
                     question.annexure_rows =
                         question.answer?.annexure_rows || [];
                     question.annexure_draft =
@@ -303,6 +396,17 @@ export class CategoryAssessmentComponent
                         question.subset_sets || [],
                         riskOptions,
                     );
+
+                    if (
+                        this.pendingOnly()
+                        &&
+                        question.pending_subset_sets?.length
+                    ) {
+                        this.prepareSets(
+                            question.pending_subset_sets,
+                            riskOptions,
+                        );
+                    }
                 }
             }
         }
@@ -437,7 +541,12 @@ export class CategoryAssessmentComponent
                 question.answer_value || '',
             );
 
-        return (question.subset_sets || [])
+        const subsetSets =
+            this.pendingOnly()
+                ? question.pending_subset_sets || []
+                : question.subset_sets || [];
+
+        return subsetSets
             .filter(
                 (set: any) =>
                     String(set.id)
@@ -457,6 +566,130 @@ export class CategoryAssessmentComponent
             String(question.answer_value || '')
             ===
             String(question.annexure_id);
+    }
+
+    selectDefaultAnswers(
+        header: any,
+    ) {
+
+        for (
+            const question
+            of header?.questions || []
+        ) {
+
+            const defaultAnswer =
+                this.defaultAnswerValue(
+                    question,
+                );
+
+            if (
+                defaultAnswer !== null
+            ) {
+                question.answer_value =
+                    defaultAnswer;
+            }
+        }
+    }
+
+    canApplyDefaults() {
+
+        return Number(
+            this.categoryDetail()?.overview?.audit_status_id || 0,
+        ) === 1;
+    }
+
+    defaultAnswerValue(
+        question: any,
+    ): string | null {
+
+        if (
+            this.isTextAnswer(
+                question,
+            )
+        ) {
+            return null;
+        }
+
+        const parameters =
+            Array.isArray(
+                question?.parameters,
+            )
+                ? question.parameters
+                : [];
+
+        if (
+            !parameters.length
+        ) {
+            const firstOption =
+                question?.options?.[0]?.value;
+
+            return firstOption === undefined
+                ? null
+                : String(firstOption);
+        }
+
+        let defaultIndex = 0;
+        let previousRiskTotal = 0;
+        let hasOnlyNeutralRisk = true;
+        const riskTotals: number[] = [];
+
+        for (
+            let index = 0;
+            index < parameters.length;
+            index++
+        ) {
+            const option =
+                parameters[index];
+
+            const totalRisk =
+                Number(option?.br || 0)
+                +
+                Number(option?.cr || 0);
+
+            riskTotals.push(
+                totalRisk,
+            );
+
+            if (
+                ![0, 4.4, 8].includes(
+                    totalRisk,
+                )
+            ) {
+                hasOnlyNeutralRisk =
+                    false;
+            }
+
+            if (
+                previousRiskTotal < totalRisk
+            ) {
+                defaultIndex =
+                    index;
+            }
+
+            previousRiskTotal =
+                totalRisk;
+        }
+
+        if (
+            hasOnlyNeutralRisk
+            &&
+            riskTotals.length
+            &&
+            riskTotals.every(
+                (risk) =>
+                    risk === riskTotals[0],
+            )
+        ) {
+            defaultIndex =
+                parameters.length - 1;
+        }
+
+        const answer =
+            parameters[defaultIndex]?.rt;
+
+        return answer === undefined
+            ? null
+            : String(answer);
     }
 
     saveHeader(
@@ -494,6 +727,9 @@ export class CategoryAssessmentComponent
 
                     is_compliance:
                         question.is_compliance === true,
+
+                    audit_compulsary_ev_upload:
+                        question.audit_compulsary_ev_upload === true,
                 }),
             );
 
@@ -503,10 +739,6 @@ export class CategoryAssessmentComponent
 
         this.answerErrors.set(
             {},
-        );
-
-        this.saveMessage.set(
-            '',
         );
 
         this.service
@@ -532,7 +764,7 @@ export class CategoryAssessmentComponent
                             res?.errors || {},
                         );
 
-                        this.saveMessage.set(
+                        this.notification.error(
                             res?.message
                             || 'Please correct highlighted answers.',
                         );
@@ -540,7 +772,7 @@ export class CategoryAssessmentComponent
                         return;
                     }
 
-                    this.saveMessage.set(
+                    this.notification.success(
                         res.message
                         || 'Answers saved successfully',
                     );
@@ -562,7 +794,7 @@ export class CategoryAssessmentComponent
                         null,
                     );
 
-                    this.saveMessage.set(
+                    this.notification.error(
                         err?.error?.message
                         || 'Unable to save answers.',
                     );
@@ -577,13 +809,6 @@ export class CategoryAssessmentComponent
         return Number(
             question?.option_id,
         ) === 3;
-    }
-
-    hasAnswerErrors() {
-
-        return Object.keys(
-            this.answerErrors(),
-        ).length > 0;
     }
 
     createAnnexureDraft(
@@ -723,8 +948,6 @@ export class CategoryAssessmentComponent
             return;
         }
 
-        this.saveMessage.set('');
-
         this.service
             .saveInternalAuditAnnexureRow(
                 Number(detail.overview.id),
@@ -738,13 +961,13 @@ export class CategoryAssessmentComponent
                     if (
                         !res?.success
                     ) {
-                        this.saveMessage.set(
+                        this.notification.error(
                             res?.message || 'Unable to save annexure row.',
                         );
                         return;
                     }
 
-                    this.saveMessage.set(
+                    this.notification.success(
                         res.message || 'Annexure row saved successfully',
                     );
                     this.savedAny.set(true);
@@ -801,7 +1024,7 @@ export class CategoryAssessmentComponent
                     }
                 },
                 error: (err) => {
-                    this.saveMessage.set(
+                    this.notification.error(
                         err?.error?.message
                         || 'Unable to save annexure row.',
                     );
@@ -865,13 +1088,13 @@ export class CategoryAssessmentComponent
                     if (
                         !res?.success
                     ) {
-                        this.saveMessage.set(
+                        this.notification.error(
                             res?.message || 'Unable to delete annexure row.',
                         );
                         return;
                     }
 
-                    this.saveMessage.set(
+                    this.notification.success(
                         res?.message || 'Annexure row deleted successfully',
                     );
                     this.savedAny.set(true);
@@ -900,7 +1123,7 @@ export class CategoryAssessmentComponent
                     }
                 },
                 error: (err) => {
-                    this.saveMessage.set(
+                    this.notification.error(
                         err?.error?.message
                         || 'Unable to delete annexure row.',
                     );
@@ -925,8 +1148,6 @@ export class CategoryAssessmentComponent
             return;
         }
 
-        this.saveMessage.set('');
-
         this.service
             .getInternalAuditAnnexureSample(
                 Number(detail.overview.id),
@@ -941,7 +1162,7 @@ export class CategoryAssessmentComponent
                         ||
                         !res?.csv
                     ) {
-                        this.saveMessage.set(
+                        this.notification.error(
                             res?.message || 'Unable to download annexure sample.',
                         );
                         return;
@@ -969,9 +1190,12 @@ export class CategoryAssessmentComponent
                     link.click();
 
                     URL.revokeObjectURL(url);
+                    this.notification.success(
+                        'Annexure sample downloaded successfully.',
+                    );
                 },
                 error: (err) => {
-                    this.saveMessage.set(
+                    this.notification.error(
                         err?.error?.message
                         || 'Unable to download annexure sample.',
                     );
@@ -1010,7 +1234,7 @@ export class CategoryAssessmentComponent
         if (
             !file.name.toLowerCase().endsWith('.csv')
         ) {
-            this.saveMessage.set(
+            this.notification.error(
                 'Only CSV files are allowed.',
             );
             return;
@@ -1019,8 +1243,6 @@ export class CategoryAssessmentComponent
         this.uploadingAnnexureQuestion.set(
             Number(question.id),
         );
-        this.saveMessage.set('');
-
         this.service
             .uploadInternalAuditAnnexureCsv(
                 Number(detail.overview.id),
@@ -1043,13 +1265,13 @@ export class CategoryAssessmentComponent
                                 ? ` Row ${res.errors[0].row}: ${res.errors[0].errors?.join(', ')}`
                                 : '';
 
-                        this.saveMessage.set(
+                        this.notification.error(
                             `${res?.message || 'Unable to upload annexure CSV.'}${firstError}`,
                         );
                         return;
                     }
 
-                    this.saveMessage.set(
+                    this.notification.success(
                         res.message || 'Annexure CSV uploaded successfully.',
                     );
                     this.savedAny.set(true);
@@ -1061,7 +1283,7 @@ export class CategoryAssessmentComponent
                 },
                 error: (err) => {
                     this.uploadingAnnexureQuestion.set(null);
-                    this.saveMessage.set(
+                    this.notification.error(
                         err?.error?.message
                         || 'Unable to upload annexure CSV.',
                     );
@@ -1073,9 +1295,7 @@ export class CategoryAssessmentComponent
         question: any,
     ) {
 
-        return Number(
-            question?.audit_ev_upload || 0,
-        ) === 1;
+        return question?.audit_compulsary_ev_upload === true;
     }
 
     evidenceKey(
@@ -1118,7 +1338,7 @@ export class CategoryAssessmentComponent
         if (
             !question.answer?.id
         ) {
-            this.saveMessage.set(
+            this.notification.error(
                 'Save the answer before uploading evidence.',
             );
             return;
@@ -1134,7 +1354,7 @@ export class CategoryAssessmentComponent
         if (
             !allowedTypes.includes(file.type)
         ) {
-            this.saveMessage.set(
+            this.notification.error(
                 'Only JPG, JPEG, PNG and PDF evidence files are allowed.',
             );
             return;
@@ -1143,7 +1363,7 @@ export class CategoryAssessmentComponent
         if (
             file.size > 5 * 1024 * 1024
         ) {
-            this.saveMessage.set(
+            this.notification.error(
                 'Evidence file size must be less than or equal to 5 MB.',
             );
             return;
@@ -1155,8 +1375,6 @@ export class CategoryAssessmentComponent
                 row,
             ),
         );
-        this.saveMessage.set('');
-
         this.service
             .uploadInternalAuditEvidence(
                 Number(detail.overview.id),
@@ -1173,13 +1391,13 @@ export class CategoryAssessmentComponent
                     if (
                         !res?.success
                     ) {
-                        this.saveMessage.set(
+                        this.notification.error(
                             res?.message || 'Unable to upload evidence.',
                         );
                         return;
                     }
 
-                    this.saveMessage.set(
+                    this.notification.success(
                         res.message || 'Evidence uploaded successfully.',
                     );
                     this.savedAny.set(true);
@@ -1191,7 +1409,7 @@ export class CategoryAssessmentComponent
                 },
                 error: (err) => {
                     this.uploadingEvidenceKey.set('');
-                    this.saveMessage.set(
+                    this.notification.error(
                         err?.error?.message
                         || 'Unable to upload evidence.',
                     );
@@ -1240,7 +1458,7 @@ export class CategoryAssessmentComponent
                     );
                 },
                 error: (err) => {
-                    this.saveMessage.set(
+                    this.notification.error(
                         err?.error?.message
                         || 'Unable to open evidence.',
                     );
@@ -1265,8 +1483,6 @@ export class CategoryAssessmentComponent
             return;
         }
 
-        this.saveMessage.set('');
-
         this.service
             .deleteInternalAuditEvidence(
                 Number(detail.overview.id),
@@ -1279,13 +1495,13 @@ export class CategoryAssessmentComponent
                     if (
                         !res?.success
                     ) {
-                        this.saveMessage.set(
+                        this.notification.error(
                             res?.message || 'Unable to remove evidence.',
                         );
                         return;
                     }
 
-                    this.saveMessage.set(
+                    this.notification.success(
                         res.message || 'Evidence removed successfully.',
                     );
                     this.savedAny.set(true);
@@ -1296,7 +1512,7 @@ export class CategoryAssessmentComponent
                     );
                 },
                 error: (err) => {
-                    this.saveMessage.set(
+                    this.notification.error(
                         err?.error?.message
                         || 'Unable to remove evidence.',
                     );

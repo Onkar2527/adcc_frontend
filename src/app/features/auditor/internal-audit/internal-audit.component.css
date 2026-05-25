@@ -106,6 +106,97 @@
     font-size: .875rem;
 }
 
+.submission-message {
+    padding: .75rem;
+    border-radius: .5rem;
+    background: var(--surface-100);
+    color: var(--text-color-secondary);
+    font-weight: 600;
+}
+
+.submission-ready {
+    background: var(--green-50);
+    color: var(--green-700);
+}
+
+.submission-pending {
+    background: var(--red-50);
+    color: var(--red-700);
+}
+
+.pending-list {
+    display: flex;
+    flex-direction: column;
+    border: 1px solid var(--surface-200);
+    border-radius: .5rem;
+    overflow: hidden;
+}
+
+.pending-item {
+    display: grid;
+    grid-template-columns: minmax(10rem, .8fr) minmax(14rem, 1.5fr) minmax(14rem, 1fr);
+    gap: 1rem;
+    align-items: center;
+    width: 100%;
+    padding: .75rem;
+    border: 0;
+    border-top: 1px solid var(--surface-200);
+    background: var(--surface-0);
+    color: inherit;
+    text-align: left;
+    cursor: pointer;
+}
+
+.pending-item:first-child {
+    border-top: 0;
+}
+
+.pending-item:hover {
+    background: var(--surface-50);
+}
+
+.pending-category {
+    font-weight: 700;
+}
+
+.pending-question {
+    color: var(--text-color-secondary);
+}
+
+.pending-reason {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: .5rem;
+    color: var(--red-700);
+    font-weight: 600;
+}
+
+.compliance-list {
+    border-color: var(--green-200);
+}
+
+.compliance-item {
+    cursor: default;
+}
+
+.compliance-item:hover {
+    background: var(--surface-0);
+}
+
+.compliance-answer {
+    display: flex;
+    flex-direction: column;
+    gap: .25rem;
+    color: var(--green-700);
+    font-weight: 600;
+}
+
+.compliance-answer small {
+    color: var(--text-color-secondary);
+    font-weight: 400;
+}
+
 .year-block {
     padding-top: 1.25rem;
     margin-top: 1.25rem;
@@ -157,6 +248,11 @@
 
     .assessment-head {
         display: none;
+    }
+
+    .pending-item {
+        grid-template-columns: 1fr;
+        gap: .4rem;
     }
 }
 

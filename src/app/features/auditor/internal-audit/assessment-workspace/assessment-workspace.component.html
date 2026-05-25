@@ -150,6 +150,121 @@
 
         </div>
 
+        <div
+            *ngIf="audit.can_continue"
+            class="surface-card border-round-xl shadow-1 p-4 mb-4"
+        >
+            <div class="flex flex-column md:flex-row md:align-items-center md:justify-content-between gap-3">
+                <div>
+                    <h3 class="text-xl font-bold text-900 m-0">
+                        Submit Audit
+                    </h3>
+
+                    <div
+                        *ngIf="!checkingSubmission() && submissionPreview() as preview"
+                        class="text-600 mt-2"
+                    >
+                        Pending points:
+                        <strong>{{ preview.pending_count }}</strong>
+                        &nbsp;|&nbsp;
+                        Compliance points:
+                        <strong>{{ preview.compliance_count }}</strong>
+                    </div>
+                </div>
+
+                <div class="flex flex-wrap gap-2">
+                    <button
+                        pButton
+                        type="button"
+                        icon="pi pi-check-circle"
+                        label="Check Completion"
+                        severity="secondary"
+                        [loading]="checkingSubmission()"
+                        [disabled]="submitting()"
+                        (click)="checkSubmission()"
+                    ></button>
+
+                    <button
+                        pButton
+                        type="button"
+                        icon="pi pi-send"
+                        label="Submit for Review"
+                        [loading]="submitting()"
+                        [disabled]="!submissionPreview()?.can_submit || checkingSubmission()"
+                        (click)="submitForReview()"
+                    ></button>
+                </div>
+            </div>
+
+            <div
+                *ngIf="submissionMessage()"
+                class="submission-message mt-3"
+                [class.submission-ready]="!checkingSubmission() && submissionPreview()?.can_submit"
+                [class.submission-pending]="!checkingSubmission() && submissionPreview() && !submissionPreview()?.can_submit"
+            >
+                {{ submissionMessage() }}
+            </div>
+
+            <div
+                *ngIf="!checkingSubmission() && submissionPreview()?.issues?.length"
+                class="pending-list mt-3"
+            >
+                <button
+                    type="button"
+                    class="pending-item"
+                    *ngFor="let issue of submissionPreview().issues"
+                    (click)="openPendingCategory(issue)"
+                >
+                    <span class="pending-category">
+                        {{ issue.category_name }}
+                    </span>
+
+                    <span class="pending-question">
+                        {{ issue.question }}
+                    </span>
+
+                    <span class="pending-reason">
+                        {{ issue.message }}
+                        <i class="pi pi-arrow-right"></i>
+                    </span>
+                </button>
+            </div>
+
+            <div
+                *ngIf="!checkingSubmission() && submissionPreview()?.compliance_points?.length"
+                class="mt-4"
+            >
+                <div class="font-bold text-900 mb-2">
+                    Compliance Points
+                </div>
+
+                <div class="pending-list compliance-list">
+                    <div
+                        class="pending-item compliance-item"
+                        *ngFor="let point of submissionPreview().compliance_points"
+                    >
+                        <span class="pending-category">
+                            {{ point.category_name }}
+                        </span>
+
+                        <span class="pending-question">
+                            {{ point.question }}
+                        </span>
+
+                        <span class="compliance-answer">
+                            <span>
+                                {{ point.answer_given || '-' }}
+                            </span>
+
+                            <small *ngIf="point.audit_comment">
+                                {{ point.audit_comment }}
+                            </small>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div class="surface-card border-round-xl shadow-1 p-4">
             <div class="flex align-items-center justify-content-between gap-3 mb-4">
                 <h3 class="text-xl font-bold text-900 m-0">

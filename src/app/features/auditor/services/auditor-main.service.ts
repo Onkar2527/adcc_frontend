@@ -67,6 +67,40 @@ export class AuditDashboardService {
     );
   }
 
+  getInternalAuditSubmissionPreview(
+    assessmentId: number,
+    employeeId: number,
+  ) {
+
+    return this.http.get<any>(
+
+      `${this.config.apiUrl}/internal-audit/${assessmentId}/submission-preview`,
+
+      {
+        params: {
+          employee_id:
+            employeeId,
+        },
+      },
+    );
+  }
+
+  submitInternalAudit(
+    assessmentId: number,
+    employeeId: number,
+  ) {
+
+    return this.http.post<any>(
+
+      `${this.config.apiUrl}/internal-audit/${assessmentId}/submit`,
+
+      {
+        employee_id:
+          employeeId,
+      },
+    );
+  }
+
   saveInternalAuditCategoryAnswers(
     assessmentId: number,
     categoryId: number,
