@@ -15,9 +15,11 @@ import {
   CreateEmployeeDto,
   Employee,
   EmployeeService,
+  PasswordPolicyService,
   UnitsService,
   UpdateEmployeeDto
 } from '../services/masters.service';
+import { MessageService } from 'primeng/api';
 
 @Component({
   selector: 'app-employee-form',
@@ -120,16 +122,24 @@ import {
           }
         </label>
 
+
         <p-password
-          [ngModel]="password()"
-          (ngModelChange)="password.set($event)"
-          [toggleMask]="true"
-          [feedback]="!isEdit"
-          placeholder="Enter password"
-          styleClass="w-full"
-          inputStyleClass="w-full"
-          [style]="{ width: '100%' }"
-        ></p-password>
+                  [ngModel]="password()"
+                (ngModelChange)="onPasswordChange($event)"
+                  [toggleMask]="true"
+                  [feedback]="!isEdit"
+                  placeholder="Enter password"
+                  styleClass="w-full"
+                  inputStyleClass="w-full"
+                  [style]="{ width: '100%' }"
+                ></p-password>
+
+        <small
+          *ngIf="passwordError()"
+          class="text-red-500 block mt-2"
+        >
+          {{ passwordError() }}
+        </small>
       </div>
     </div>
 
@@ -187,7 +197,8 @@ export class EmployeeFormComponent {
   private ref = inject(FormDrawerRef);
   private employeeService = inject(EmployeeService);
   private unitsService = inject(UnitsService);
-
+  private messageService = inject(MessageService);
+  private policyService = inject(PasswordPolicyService);
   empCode = signal('');
   name = signal('');
   email = signal('');
@@ -201,7 +212,12 @@ export class EmployeeFormComponent {
   units = signal<AuditUnit[]>([]);
   saving = signal(false);
   isEdit = false;
-
+  minLength = signal<number | null>(8);
+  numCnt = signal<number | null>(1);
+  uppercaseCnt = signal<number | null>(1);
+  lowercaseCnt = signal<number | null>(1);
+  symbolCnt = signal<number | null>(1);
+  passwordError = signal('');
   genderOptions = [
     { label: 'Male', value: 'Male' },
     { label: 'Female', value: 'Female' }
@@ -221,18 +237,27 @@ export class EmployeeFormComponent {
   });
 
   isValid = computed(() => {
+
     return !!this.empCode().trim()
       && !!this.name().trim()
       && !!this.email().trim()
       && !!this.mobile().trim()
       && !!this.gender()
       && !!this.userTypeId()
-      && (this.isEdit || !!this.password().trim());
+      && (
+        this.isEdit
+        || !!this.password().trim()
+      );
   });
+  onPasswordChange(value: string) {
 
+    this.password.set(value);
+
+    this.validatePassword();
+  }
   constructor() {
     this.loadUnits();
-
+    this.loadPolicy();
     const data = this.ref.data as Employee | null;
     if (data) {
       this.isEdit = true;
@@ -249,38 +274,210 @@ export class EmployeeFormComponent {
   }
 
   save() {
-    if (!this.isValid()) return;
+
+    if (!this.isValid()) {
+      return;
+    }
+
+    if (!this.validatePassword()) {
+      return;
+    }
 
     this.saving.set(true);
-    const payload: CreateEmployeeDto | UpdateEmployeeDto = {
-      emp_code: this.empCode().trim(),
-      name: this.name().trim(),
-      email: this.email().trim(),
-      mobile: this.mobile().trim(),
-      designation: this.designation().trim(),
-      gender: this.gender() || '',
-      user_type_id: this.userTypeId() || 0,
-      is_active: this.isActive() ? 1 : 0,
-      unit_ids: this.showAuditUnits() ? this.unitIds() : []
+
+    const payload:
+      CreateEmployeeDto
+      |
+      UpdateEmployeeDto = {
+
+      emp_code:
+        this.empCode().trim(),
+
+      name:
+        this.name().trim(),
+
+      email:
+        this.email().trim(),
+
+      mobile:
+        this.mobile().trim(),
+
+      designation:
+        this.designation().trim(),
+
+      gender:
+        this.gender() || '',
+
+      user_type_id:
+        this.userTypeId() || 0,
+
+      is_active:
+        this.isActive() ? 1 : 0,
+
+      unit_ids:
+        this.showAuditUnits()
+          ? this.unitIds()
+          : []
     };
 
     if (this.password().trim()) {
-      payload.password = this.password().trim();
+
+      payload.password =
+        this.password().trim();
     }
 
-    const obs = this.isEdit
-      ? this.employeeService.updateEmployee(this.ref.data.id, payload)
-      : this.employeeService.createEmployee(payload as CreateEmployeeDto);
+    const obs =
+      this.isEdit
+
+        ? this.employeeService.updateEmployee(
+          this.ref.data.id,
+          payload,
+        )
+
+        : this.employeeService.createEmployee(
+          payload as CreateEmployeeDto,
+        );
 
     obs.subscribe({
+
       next: (res) => {
+
         this.saving.set(false);
+
         this.ref.close(res);
       },
-      error: () => this.saving.set(false)
+
+      error: () =>
+        this.saving.set(false)
     });
   }
 
+  loadPolicy() {
+
+    this.policyService.getPolicy().subscribe({
+      next: (policy) => {
+        if (policy) {
+          this.minLength.set(Number(policy.min_length));
+          this.numCnt.set(Number(policy.num_cnt));
+          this.uppercaseCnt.set(Number(policy.uppercase_cnt));
+          this.lowercaseCnt.set(Number(policy.lowercase_cnt));
+          this.symbolCnt.set(Number(policy.symbol_cnt));
+        }
+
+      },
+      error: () => {
+        this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to load password policy' });
+      }
+    });
+  }
+  validatePassword(): boolean {
+
+    const password =
+      this.password();
+
+    // EDIT MODE + EMPTY PASSWORD
+    if (
+      this.isEdit &&
+      !password.trim()
+    ) {
+
+      this.passwordError.set('');
+      return true;
+    }
+
+    const minLength =
+      this.minLength() || 0;
+
+    const numCnt =
+      this.numCnt() || 0;
+
+    const uppercaseCnt =
+      this.uppercaseCnt() || 0;
+
+    const lowercaseCnt =
+      this.lowercaseCnt() || 0;
+
+    const symbolCnt =
+      this.symbolCnt() || 0;
+
+    // MIN LENGTH
+    if (
+      password.length < minLength
+    ) {
+
+      this.passwordError.set(
+        `Password must be at least ${minLength} characters long`,
+      );
+
+      return false;
+    }
+
+    // UPPERCASE
+    const uppercaseMatches =
+      password.match(/[A-Z]/g) || [];
+
+    if (
+      uppercaseMatches.length < uppercaseCnt
+    ) {
+
+      this.passwordError.set(
+        `Password must contain at least ${uppercaseCnt} uppercase letter(s)`,
+      );
+
+      return false;
+    }
+
+    // LOWERCASE
+    const lowercaseMatches =
+      password.match(/[a-z]/g) || [];
+
+    if (
+      lowercaseMatches.length < lowercaseCnt
+    ) {
+
+      this.passwordError.set(
+        `Password must contain at least ${lowercaseCnt} lowercase letter(s)`,
+      );
+
+      return false;
+    }
+
+    // NUMBER
+    const numberMatches =
+      password.match(/[0-9]/g) || [];
+
+    if (
+      numberMatches.length < numCnt
+    ) {
+
+      this.passwordError.set(
+        `Password must contain at least ${numCnt} number(s)`,
+      );
+
+      return false;
+    }
+
+    // SYMBOL
+    const symbolMatches =
+      password.match(
+        /[!@#$%^&*(),.?":{}|<>_\-+=/\\[\];'`~]/g,
+      ) || [];
+
+    if (
+      symbolMatches.length < symbolCnt
+    ) {
+
+      this.passwordError.set(
+        `Password must contain at least ${symbolCnt} special character(s)`,
+      );
+
+      return false;
+    }
+
+    this.passwordError.set('');
+
+    return true;
+  }
   cancel() {
     this.ref.close();
   }
@@ -298,4 +495,6 @@ export class EmployeeFormComponent {
       .map((id) => Number(id.trim()))
       .filter((id) => !Number.isNaN(id));
   }
+
+
 }
