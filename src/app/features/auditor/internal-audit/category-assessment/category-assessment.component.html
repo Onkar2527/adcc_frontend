@@ -258,7 +258,7 @@
                             </label>
 
                             <div
-                                *ngIf="question.isAnnexureSelected"
+                                *ngIf="buildIsAnnexureSelected(question)"
                                 class="annexure-preview"
                             >
 
@@ -517,7 +517,7 @@
                     </div>
 
                     <div
-                        *ngFor="let subsetSet of question.selectedSubsetSets"
+                        *ngFor="let subsetSet of buildSelectedSubsetSets(question)"
                         class="subset-panel"
                     >
 
@@ -644,7 +644,7 @@
                                     </label>
 
                                     <div
-                                        *ngIf="subsetQuestion.isAnnexureSelected"
+                                        *ngIf="buildIsAnnexureSelected(subsetQuestion)"
                                         class="annexure-preview"
                                     >
 
