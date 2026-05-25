@@ -82,6 +82,13 @@
                         {{ detail.category?.name }}
                     </h3>
 
+                    <p
+                        *ngIf="pendingOnly()"
+                        class="text-orange-700 font-medium mt-2 mb-0"
+                    >
+                        Pending questions
+                    </p>
+
                     <p class="text-600 mt-2 mb-0">
                         {{ detail.overview?.audit_unit_name }}
                         -
@@ -112,17 +119,6 @@
         </div>
 
         <div
-            *ngIf="saveMessage()"
-            class="surface-card border-round-xl shadow-1 p-3 mb-4 font-medium"
-            [class.text-green-700]="!hasAnswerErrors()"
-            [class.text-red-700]="hasAnswerErrors()"
-        >
-
-            {{ saveMessage() }}
-
-        </div>
-
-        <div
             class="question-set"
             *ngFor="let set of detail.sets"
         >
@@ -144,14 +140,18 @@
                         {{ header.name }}
                     </div>
 
-                    <button
-                        pButton
-                        type="button"
-                        icon="pi pi-save"
-                        label="Save Answers"
-                        [loading]="savingHeader() === header.id"
-                        (click)="saveHeader(header)"
-                    ></button>
+                    @if (canApplyDefaults()) {
+                        <div class="flex gap-2 flex-wrap">
+                            <button
+                                pButton
+                                type="button"
+                                icon="pi pi-check-square"
+                                label="Default"
+                                severity="secondary"
+                                (click)="selectDefaultAnswers(header)"
+                            ></button>
+                        </div>
+                    }
 
                 </div>
 
@@ -253,6 +253,19 @@
 
                                 <span>
                                     Compliance required
+                                </span>
+
+                            </label>
+
+                            <label class="compliance-check mt-3">
+
+                                <input
+                                    type="checkbox"
+                                    [(ngModel)]="question.audit_compulsary_ev_upload"
+                                />
+
+                                <span>
+                                    Evidence to be uploaded
                                 </span>
 
                             </label>
@@ -544,7 +557,15 @@
                                             <span>Business Risk</span>
                                             <span>Control Risk</span>
                                             <span>Risk Type</span>
-                                            <span>Evidence</span>
+                                            <span>
+                                                Evidence
+                                                <small
+                                                    *ngIf="isEvidenceRequired(question)"
+                                                    class="evidence-required"
+                                                >
+                                                    Required
+                                                </small>
+                                            </span>
                                             <span>Action</span>
                                         </div>
 
@@ -661,14 +682,18 @@
                                     {{ subsetHeader.name }}
                                 </div>
 
-                                <button
-                                    pButton
-                                    type="button"
-                                    icon="pi pi-save"
-                                    label="Save Answers"
-                                    [loading]="savingHeader() === subsetHeader.id"
-                                    (click)="saveHeader(subsetHeader)"
-                                ></button>
+                                @if (canApplyDefaults()) {
+                                    <div class="flex gap-2 flex-wrap">
+                                        <button
+                                            pButton
+                                            type="button"
+                                            icon="pi pi-check-square"
+                                            label="Default"
+                                            severity="secondary"
+                                            (click)="selectDefaultAnswers(subsetHeader)"
+                                        ></button>
+                                    </div>
+                                }
 
                             </div>
 
@@ -762,6 +787,19 @@
 
                                         <span>
                                             Compliance required
+                                        </span>
+
+                                    </label>
+
+                                    <label class="compliance-check mt-3">
+
+                                        <input
+                                            type="checkbox"
+                                            [(ngModel)]="subsetQuestion.audit_compulsary_ev_upload"
+                                        />
+
+                                        <span>
+                                            Evidence to be uploaded
                                         </span>
 
                                     </label>
@@ -1053,7 +1091,15 @@
                                                     <span>Business Risk</span>
                                                     <span>Control Risk</span>
                                                     <span>Risk Type</span>
-                                                    <span>Evidence</span>
+                                                    <span>
+                                                        Evidence
+                                                        <small
+                                                            *ngIf="isEvidenceRequired(subsetQuestion)"
+                                                            class="evidence-required"
+                                                        >
+                                                            Required
+                                                        </small>
+                                                    </span>
                                                     <span>Action</span>
                                                 </div>
 
@@ -1148,11 +1194,33 @@
 
                             </div>
 
+                            <div class="flex justify-content-end mt-3">
+                                <button
+                                    pButton
+                                    type="button"
+                                    icon="pi pi-save"
+                                    label="Save Answers"
+                                    [loading]="savingHeader() === subsetHeader.id"
+                                    (click)="saveHeader(subsetHeader)"
+                                ></button>
+                            </div>
+
                         </section>
 
                     </div>
 
                 </ng-container>
+
+                <div class="flex justify-content-end mt-3">
+                    <button
+                        pButton
+                        type="button"
+                        icon="pi pi-save"
+                        label="Save Answers"
+                        [loading]="savingHeader() === header.id"
+                        (click)="saveHeader(header)"
+                    ></button>
+                </div>
 
             </section>
 

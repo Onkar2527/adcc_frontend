@@ -97,6 +97,110 @@ getBranchFinancialPosition(
     );
   }
 
+  getInternalAuditSubmissionPreview(
+    assessmentId: number,
+    employeeId: number,
+  ) {
+
+    return this.http.get<any>(
+
+      `${this.config.apiUrl}/internal-audit/${assessmentId}/submission-preview`,
+
+      {
+        params: {
+          employee_id:
+            employeeId,
+        },
+      },
+    );
+  }
+
+  submitInternalAudit(
+    assessmentId: number,
+    employeeId: number,
+  ) {
+
+    return this.http.post<any>(
+
+      `${this.config.apiUrl}/internal-audit/${assessmentId}/submit`,
+
+      {
+        employee_id:
+          employeeId,
+      },
+    );
+  }
+
+  getInternalAuditRemarks(
+    assessmentId: number,
+    employeeId: number,
+  ) {
+
+    return this.http.get<any>(
+
+      `${this.config.apiUrl}/internal-audit/${assessmentId}/remarks`,
+
+      {
+        params: {
+          employee_id:
+            employeeId,
+        },
+      },
+    );
+  }
+
+  saveInternalAuditRemark(
+    assessmentId: number,
+    employeeId: number,
+    payload: any,
+  ) {
+
+    return this.http.post<any>(
+
+      `${this.config.apiUrl}/internal-audit/${assessmentId}/remarks`,
+
+      {
+        ...payload,
+        employee_id:
+          employeeId,
+      },
+    );
+  }
+
+  markInternalAuditRemarkRead(
+    assessmentId: number,
+    remarkId: number,
+    employeeId: number,
+  ) {
+
+    return this.http.post<any>(
+
+      `${this.config.apiUrl}/internal-audit/${assessmentId}/remarks/${remarkId}/read`,
+
+      {
+        employee_id:
+          employeeId,
+      },
+    );
+  }
+
+  deleteInternalAuditRemark(
+    assessmentId: number,
+    remarkId: number,
+    employeeId: number,
+  ) {
+
+    return this.http.post<any>(
+
+      `${this.config.apiUrl}/internal-audit/${assessmentId}/remarks/${remarkId}/delete`,
+
+      {
+        employee_id:
+          employeeId,
+      },
+    );
+  }
+
   saveInternalAuditCategoryAnswers(
     assessmentId: number,
     categoryId: number,
