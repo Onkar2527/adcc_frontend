@@ -708,7 +708,7 @@ export class CategoryAssessmentComponent
                 Number(detail.overview.id),
                 Number(detail.category.id),
                 Number(question.id),
-                this.employeeId(),
+                this.employeeId,
                 question.annexure_draft,
             )
             .subscribe({
@@ -789,7 +789,7 @@ export class CategoryAssessmentComponent
                 Number(detail.category.id),
                 Number(question.id),
                 Number(row.id),
-                this.employeeId(),
+                this.employeeId,
             )
             .subscribe({
                 next: (res: any) => {
@@ -835,7 +835,7 @@ export class CategoryAssessmentComponent
                 Number(detail.overview.id),
                 Number(detail.category.id),
                 Number(question.id),
-                this.employeeId(),
+                this.employeeId,
             )
             .subscribe({
                 next: (res: any) => {
@@ -929,7 +929,7 @@ export class CategoryAssessmentComponent
                 Number(detail.overview.id),
                 Number(detail.category.id),
                 Number(question.id),
-                this.employeeId(),
+                this.employeeId,
                 file,
             )
             .subscribe({
