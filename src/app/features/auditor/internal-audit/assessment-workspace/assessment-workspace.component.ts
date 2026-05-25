@@ -9,6 +9,7 @@ import {
     inject,
     signal,
 } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import {
     ActivatedRoute,
     Router,
@@ -20,6 +21,7 @@ import { SkeletonModule } from 'primeng/skeleton';
 import { TagModule } from 'primeng/tag';
 import { ConfirmationService } from 'primeng/api';
 import { FormDrawerService } from '../../../../core/services/drawer/form-drawer.service';
+import { NotificationService } from '../../../../core/services/notification/notification.service';
 import { AuditDashboardService } from '../../services/auditor-main.service';
 import { CategoryAssessmentComponent } from '../category-assessment/category-assessment.component';
 
@@ -29,6 +31,7 @@ import { CategoryAssessmentComponent } from '../category-assessment/category-ass
     imports: [
         CommonModule,
         DatePipe,
+        FormsModule,
         ButtonModule,
         CardModule,
         ProgressBarModule,
@@ -54,6 +57,9 @@ export class AssessmentWorkspaceComponent implements OnInit {
     private confirmationService =
         inject(ConfirmationService);
 
+    private notification =
+        inject(NotificationService);
+
     loading =
         signal(false);
 
@@ -77,6 +83,27 @@ export class AssessmentWorkspaceComponent implements OnInit {
 
     submissionMessage =
         signal('');
+
+    remarks =
+        signal<any>(null);
+
+    remarksLoading =
+        signal(false);
+
+    savingRemark =
+        signal(false);
+
+    remarkTab =
+        signal<'add' | 'current' | 'other'>('current');
+
+    expandedRemarks =
+        signal<Record<number, boolean>>({});
+
+    remarkNotiType: number | null = null;
+
+    remarkSubject = '';
+
+    remarkMessage = '';
 
     private submissionCheckRequest = 0;
 
@@ -177,6 +204,20 @@ export class AssessmentWorkspaceComponent implements OnInit {
                     this.loading.set(false);
 
                     if (
+                        this.canUseRemarks(
+                            res?.overview,
+                        )
+                    ) {
+                        this.loadRemarks(
+                            assessmentId,
+                        );
+                    } else {
+                        this.remarks.set(
+                            null,
+                        );
+                    }
+
+                    if (
                         refreshSubmission
                         &&
                         res?.overview?.can_continue
@@ -199,6 +240,247 @@ export class AssessmentWorkspaceComponent implements OnInit {
                     this.loading.set(false);
                     this.checkingSubmission.set(
                         false,
+                    );
+                },
+            });
+    }
+
+    canUseRemarks(
+        audit: any = this.overview(),
+    ) {
+        return [1, 3].includes(
+            Number(
+                audit?.audit_status_id,
+            ),
+        );
+    }
+
+    loadRemarks(
+        assessmentId: number,
+    ) {
+        this.remarksLoading.set(
+            true,
+        );
+
+        this.service
+            .getInternalAuditRemarks(
+                assessmentId,
+                this.employeeId(),
+            )
+            .subscribe({
+                next: (res: any) => {
+                    this.remarks.set(
+                        res,
+                    );
+                    this.remarksLoading.set(
+                        false,
+                    );
+                },
+                error: (err) => {
+                    this.remarksLoading.set(
+                        false,
+                    );
+                    this.notification.error(
+                        err?.error?.message
+                        || 'Unable to load assessment remarks.',
+                    );
+                },
+            });
+    }
+
+    saveRemark() {
+        const assessmentId =
+            Number(
+                this.overview()?.id || 0,
+            );
+
+        if (
+            !assessmentId
+            ||
+            this.savingRemark()
+        ) {
+            return;
+        }
+
+        if (
+            !this.remarkNotiType
+            ||
+            !this.remarkSubject.trim()
+            ||
+            !this.remarkMessage.trim()
+        ) {
+            this.notification.error(
+                'Select a recipient and enter subject and message.',
+            );
+            return;
+        }
+
+        this.savingRemark.set(
+            true,
+        );
+
+        this.service
+            .saveInternalAuditRemark(
+                assessmentId,
+                this.employeeId(),
+                {
+                    noti_type:
+                        this.remarkNotiType,
+                    subject:
+                        this.remarkSubject.trim(),
+                    message:
+                        this.remarkMessage.trim(),
+                },
+            )
+            .subscribe({
+                next: (res: any) => {
+                    this.savingRemark.set(
+                        false,
+                    );
+                    this.remarkNotiType =
+                        null;
+                    this.remarkSubject =
+                        '';
+                    this.remarkMessage =
+                        '';
+                    this.remarkTab.set(
+                        'current',
+                    );
+                    this.notification.success(
+                        res?.message
+                        || 'Assessment remark saved successfully.',
+                    );
+                    this.loadRemarks(
+                        assessmentId,
+                    );
+                },
+                error: (err) => {
+                    this.savingRemark.set(
+                        false,
+                    );
+                    this.notification.error(
+                        err?.error?.message
+                        || 'Unable to save assessment remark.',
+                    );
+                },
+            });
+    }
+
+    toggleRemark(
+        remark: any,
+        incoming = false,
+    ) {
+        const expanded = {
+            ...this.expandedRemarks(),
+        };
+        const remarkId =
+            Number(remark?.id || 0);
+
+        expanded[remarkId] =
+            !expanded[remarkId];
+        this.expandedRemarks.set(
+            expanded,
+        );
+
+        if (
+            !expanded[remarkId]
+            ||
+            !incoming
+            ||
+            !remark?.is_unread
+        ) {
+            return;
+        }
+
+        this.service
+            .markInternalAuditRemarkRead(
+                Number(this.overview()?.id),
+                remarkId,
+                this.employeeId(),
+            )
+            .subscribe({
+                next: () => {
+                    this.loadRemarks(
+                        Number(
+                            this.overview()?.id,
+                        ),
+                    );
+                },
+                error: (err) => {
+                    this.notification.error(
+                        err?.error?.message
+                        || 'Unable to mark remark as read.',
+                    );
+                },
+            });
+    }
+
+    isRemarkExpanded(
+        remarkId: number,
+    ) {
+        return Boolean(
+            this.expandedRemarks()[
+            Number(remarkId)
+            ],
+        );
+    }
+
+    removeRemark(
+        remark: any,
+    ) {
+        if (
+            !remark?.can_delete
+        ) {
+            return;
+        }
+
+        this.confirmationService.confirm({
+            header:
+                'Remove Remark',
+            message:
+                'Remove this unread assessment remark?',
+            icon:
+                'pi pi-trash',
+            acceptLabel:
+                'Remove',
+            rejectLabel:
+                'Cancel',
+            accept:
+                () =>
+                    this.performRemoveRemark(
+                        Number(remark.id),
+                    ),
+        });
+    }
+
+    private performRemoveRemark(
+        remarkId: number,
+    ) {
+        const assessmentId =
+            Number(
+                this.overview()?.id || 0,
+            );
+
+        this.service
+            .deleteInternalAuditRemark(
+                assessmentId,
+                remarkId,
+                this.employeeId(),
+            )
+            .subscribe({
+                next: (res: any) => {
+                    this.notification.success(
+                        res?.message
+                        || 'Assessment remark removed successfully.',
+                    );
+                    this.loadRemarks(
+                        assessmentId,
+                    );
+                },
+                error: (err) => {
+                    this.notification.error(
+                        err?.error?.message
+                        || 'Unable to remove assessment remark.',
                     );
                 },
             });
