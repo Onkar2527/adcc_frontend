@@ -117,6 +117,107 @@ export class ExecutiveSummaryComponent
 
     }
     financialPositionData: any[] = [];
+    freshAccountsData: any[] = [];
+
+    private prepareFinancialPositionRows(
+        rows: any[],
+    ) {
+        const groups = [
+            'Deposits',
+            'Advances',
+            'NPA',
+        ];
+        const result: any[] = [];
+
+        groups.forEach(
+            (
+                group: string,
+                index: number,
+            ) => {
+                const items =
+                    rows.filter(
+                        (row: any) =>
+                            row.group === group,
+                    );
+
+                result.push({
+                    isHeader:
+                        true,
+                    prefix:
+                        String.fromCharCode(65 + index),
+                    scheme_type:
+                        group.toUpperCase(),
+                    total_accounts:
+                        '-',
+                    march_position:
+                        items.reduce(
+                            (
+                                total: number,
+                                row: any,
+                            ) =>
+                                total + Number(row.march_position || 0),
+                            0,
+                        ),
+                    total_amount:
+                        items.reduce(
+                            (
+                                total: number,
+                                row: any,
+                            ) =>
+                                total + Number(row.amount || 0),
+                            0,
+                        ),
+                });
+
+                items.forEach(
+                    (
+                        row: any,
+                        itemIndex: number,
+                    ) => {
+                        result.push({
+                            ...row,
+                            isHeader:
+                                false,
+                            isNpa:
+                                false,
+                            index:
+                                itemIndex + 1,
+                            scheme_name:
+                                row.name,
+                            total_accounts:
+                                '-',
+                            total_amount:
+                                row.amount,
+                        });
+                    },
+                );
+            },
+        );
+
+        return result;
+    }
+
+    financialGroupTotal(
+        group: string,
+        field: 'march_position' | 'total_amount',
+    ) {
+        return this.financialPositionData
+            .filter(
+                (row: any) =>
+                    !row.isHeader
+                    &&
+                    String(row.group || '').toUpperCase()
+                    === String(group || '').toUpperCase(),
+            )
+            .reduce(
+                (
+                    total: number,
+                    row: any,
+                ) =>
+                    total + Number(row[field] || 0),
+                0,
+            );
+    }
 
     getBranchFinancialPosition() {
 
@@ -390,6 +491,12 @@ export class ExecutiveSummaryComponent
         this.service
             .getExecutiveSummary(
                 this.assessmentId,
+                Number(
+                    this.user?.id
+                    || this.user?.employee_id
+                    || this.user?.emp_id
+                    || 0,
+                ),
             )
             .subscribe({
 
@@ -399,14 +506,15 @@ export class ExecutiveSummaryComponent
 
                     this.summary =
                         res || null;
-                    if (this.summary?.branch_code) {
-
-                        this.getBranchFinancialPosition();
-
-                    }
 
                     this.summary_detail =
                         res.summary_detail || [];
+                    this.financialPositionData =
+                        this.prepareFinancialPositionRows(
+                            res.branch_positions || [],
+                        );
+                    this.freshAccountsData =
+                        res.fresh_accounts || [];
 
                     this.loading.set(
                         false,
@@ -440,7 +548,14 @@ export class ExecutiveSummaryComponent
                 this.summary?.year_id,
 
             admin_id:
-                this.user?.id,
+                this.user?.id
+                || this.user?.employee_id
+                || this.user?.emp_id,
+
+            employee_id:
+                this.user?.id
+                || this.user?.employee_id
+                || this.user?.emp_id,
 
             audit_report_submitted_date:
                 this.summary_detail.find(
@@ -463,6 +578,31 @@ export class ExecutiveSummaryComponent
                         '13. Approximate Number of manual Challans per day',
                 )?.value,
 
+            branch_positions:
+                this.financialPositionData
+                    .filter(
+                        (row: any) =>
+                            !row.isHeader,
+                    )
+                    .map(
+                        (row: any) => ({
+                            type_id:
+                                row.type_id,
+                            amount:
+                                row.total_amount,
+                        }),
+                    ),
+
+            fresh_accounts:
+                this.freshAccountsData.map(
+                    (row: any) => ({
+                        type_id:
+                            row.type_id,
+                        accounts:
+                            row.accounts,
+                    }),
+                ),
+
         };
 
         this.loading.set(true);
@@ -480,6 +620,7 @@ export class ExecutiveSummaryComponent
                         summary: 'Success',
                         detail: 'Executive summary saved successfully'
                     });
+                    this.getExecutiveSummary();
 
                 },
 
@@ -492,7 +633,9 @@ export class ExecutiveSummaryComponent
                     this.messageService.add({
                         severity: 'error',
                         summary: 'Error',
-                        detail: 'Failed to save executive summary'
+                        detail:
+                            err?.error?.message
+                            || 'Failed to save executive summary'
                     });
 
                 },

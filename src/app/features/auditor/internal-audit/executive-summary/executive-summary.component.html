@@ -260,13 +260,6 @@
         </p-card>
 
     </div>
-    <div class="col-12 flex justify-content-center mt-4">
-
-        <button pButton type="button" label="Save" icon="pi pi-save" [loading]="loading()" [disabled]="loading()"
-            (click)="saveExecutiveSummary()"></button>
-
-    </div>
-
     <div class="col-12">
 
         <p-card styleClass="shadow-1 border-round-xl">
@@ -331,7 +324,7 @@
                         <td class="text-right">
 
                             {{
-                            row.march_position
+                            financialGroupTotal(row.scheme_type, 'march_position')
                             | number:'1.2-2'
                             }}
 
@@ -340,7 +333,7 @@
                         <td class="text-right">
 
                             {{
-                            row.total_amount / 100000
+                            financialGroupTotal(row.scheme_type, 'total_amount')
                             | number:'1.2-2'
                             }}
                             <div class="
@@ -357,9 +350,9 @@
 
                             {{
                             (
-                            row.total_amount -
-                            row.march_position
-                            ) / 100000
+                            financialGroupTotal(row.scheme_type, 'total_amount') -
+                            financialGroupTotal(row.scheme_type, 'march_position')
+                            )
                             | number:'1.2-2'
                             }}
                             <div class="
@@ -422,7 +415,7 @@
                                     ">
                                 {{
                                 (
-                                row.total_amount / 100000
+                                row.total_amount
                                 )
                                 | number:'1.2-2'
                                 }}
@@ -437,7 +430,7 @@
                             (
                             row.total_amount -
                             row.march_position
-                            ) / 100000
+                            )
                             | number:'1.2-2'
                             }}
 
@@ -523,5 +516,62 @@
 
         </p-card>
 
+    </div>
+
+    <div class="col-12">
+
+        <p-card styleClass="shadow-1 border-round-xl">
+
+            <div class="text-2xl font-bold mb-4 text-center">
+                Number of New (Fresh) Accounts
+            </div>
+
+            <p-table
+                [value]="freshAccountsData"
+                responsiveLayout="scroll"
+                styleClass="p-datatable-sm p-datatable-gridlines"
+            >
+                <ng-template pTemplate="header">
+                    <tr>
+                        <th>Category</th>
+                        <th>Particulars</th>
+                        <th class="text-right">
+                            Number of Accounts
+                        </th>
+                    </tr>
+                </ng-template>
+
+                <ng-template pTemplate="body" let-row>
+                    <tr>
+                        <td>{{ row.group }}</td>
+                        <td>{{ row.name }}</td>
+                        <td class="text-right">
+                            <input
+                                pInputText
+                                type="number"
+                                min="0"
+                                step="1"
+                                [(ngModel)]="row.accounts"
+                                class="w-full text-right"
+                            />
+                        </td>
+                    </tr>
+                </ng-template>
+            </p-table>
+
+        </p-card>
+
+    </div>
+
+    <div class="col-12 flex justify-content-end mt-2">
+        <button
+            pButton
+            type="button"
+            label="Save Executive Summary"
+            icon="pi pi-save"
+            [loading]="loading()"
+            [disabled]="loading()"
+            (click)="saveExecutiveSummary()"
+        ></button>
     </div>
 </div>

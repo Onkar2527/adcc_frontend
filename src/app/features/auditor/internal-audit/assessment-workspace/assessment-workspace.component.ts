@@ -677,6 +677,13 @@ export class AssessmentWorkspaceComponent implements OnInit {
     ) {
 
         if (
+            issue?.type === 'executive_summary'
+        ) {
+            this.openExecutiveSummary();
+            return;
+        }
+
+        if (
             this.checkingSubmission()
         ) {
             return;

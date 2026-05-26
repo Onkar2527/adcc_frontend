@@ -131,7 +131,27 @@ export class CategoryAssessmentComponent
     completingAccount =
         signal(false);
 
+    samplingOpen =
+        signal(false);
+
+    samplingLoading =
+        signal(false);
+
+    samplingSaving =
+        signal(false);
+
+    samplingData =
+        signal<any>(null);
+
     accountSearch = '';
+
+    samplingFilterType = 0;
+
+    samplingPrimaryValue = '';
+
+    samplingSecondaryValue = '';
+
+    samplingSelection: number[] = [];
 
     employeeId = 0;
 
@@ -1353,6 +1373,229 @@ export class CategoryAssessmentComponent
                         .includes(search),
             )
             : accounts;
+    }
+
+    canManageSampling(
+        detail: any = this.categoryDetail(),
+    ) {
+        return (
+            this.isAccountCategory(detail)
+            &&
+            Number(detail?.overview?.audit_status_id || 0) === 1
+        );
+    }
+
+    toggleSampling() {
+        if (
+            this.samplingOpen()
+        ) {
+            this.samplingOpen.set(false);
+            return;
+        }
+
+        this.samplingOpen.set(true);
+        this.loadSampling();
+    }
+
+    loadSampling() {
+        const detail =
+            this.categoryDetail();
+
+        if (
+            !detail?.overview?.id
+            ||
+            !detail?.category?.id
+            ||
+            !this.canManageSampling(detail)
+        ) {
+            return;
+        }
+
+        this.samplingLoading.set(true);
+        this.samplingSelection = [];
+
+        this.service
+            .getInternalAuditAccountSampling(
+                Number(detail.overview.id),
+                Number(detail.category.id),
+                this.employeeId,
+                Number(this.samplingFilterType || 0),
+                this.samplingPrimaryValue.trim(),
+                this.samplingSecondaryValue.trim(),
+            )
+            .subscribe({
+                next: (res: any) => {
+                    this.samplingData.set(
+                        res,
+                    );
+                    this.samplingLoading.set(false);
+                },
+                error: (err) => {
+                    this.samplingLoading.set(false);
+                    this.notification.error(
+                        err?.error?.message
+                        || 'Unable to load sampling accounts.',
+                    );
+                },
+            });
+    }
+
+    toggleSamplingAccount(
+        accountId: number,
+        checked: boolean,
+    ) {
+        const id =
+            Number(accountId);
+
+        if (
+            checked
+            &&
+            !this.samplingSelection.includes(id)
+        ) {
+            this.samplingSelection = [
+                ...this.samplingSelection,
+                id,
+            ];
+        } else if (
+            !checked
+        ) {
+            this.samplingSelection =
+                this.samplingSelection.filter(
+                    (value: number) =>
+                        value !== id,
+                );
+        }
+    }
+
+    toggleAllSamplingAccounts(
+        checked: boolean,
+    ) {
+        this.samplingSelection =
+            checked
+                ? (this.samplingData()?.candidates || [])
+                    .map(
+                        (account: any) =>
+                            Number(account.id),
+                    )
+                : [];
+    }
+
+    samplingAccountSelected(
+        accountId: number,
+    ) {
+        return this.samplingSelection.includes(
+            Number(accountId),
+        );
+    }
+
+    applySampling() {
+        const detail =
+            this.categoryDetail();
+
+        if (
+            !detail?.overview?.id
+            ||
+            !detail?.category?.id
+        ) {
+            return;
+        }
+
+        if (
+            !this.samplingSelection.length
+        ) {
+            this.notification.error(
+                'Select at least one account for sampling.',
+            );
+            return;
+        }
+
+        this.samplingSaving.set(true);
+
+        this.service
+            .applyInternalAuditAccountSampling(
+                Number(detail.overview.id),
+                Number(detail.category.id),
+                this.employeeId,
+                this.samplingSelection,
+            )
+            .subscribe({
+                next: (res: any) => {
+                    this.samplingSaving.set(false);
+                    this.notification.success(
+                        res?.message
+                        || 'Sampled accounts applied successfully.',
+                    );
+                    this.loadSampling();
+                    this.loadCategory(
+                        Number(detail.overview.id),
+                        Number(detail.category.id),
+                        false,
+                    );
+                },
+                error: (err) => {
+                    this.samplingSaving.set(false);
+                    this.notification.error(
+                        err?.error?.message
+                        || 'Unable to apply sampled accounts.',
+                    );
+                },
+            });
+    }
+
+    removeSampling(
+        account: any,
+    ) {
+        const detail =
+            this.categoryDetail();
+
+        if (
+            !detail?.overview?.id
+            ||
+            !detail?.category?.id
+            ||
+            !account?.id
+            ||
+            !window.confirm(
+                'Remove this account from sampling?',
+            )
+        ) {
+            return;
+        }
+
+        this.service
+            .removeInternalAuditAccountSampling(
+                Number(detail.overview.id),
+                Number(detail.category.id),
+                Number(account.id),
+                this.employeeId,
+            )
+            .subscribe({
+                next: (res: any) => {
+                    this.notification.success(
+                        res?.message
+                        || 'Sampled account removed successfully.',
+                    );
+                    this.selectedDumpId.set(0);
+                    this.loadCategory(
+                        Number(detail.overview.id),
+                        Number(detail.category.id),
+                        false,
+                        0,
+                    );
+
+                    if (
+                        this.samplingOpen()
+                    ) {
+                        this.loadSampling();
+                    }
+                },
+                error: (err) => {
+                    this.notification.error(
+                        err?.error?.message
+                        || 'Unable to remove sampled account.',
+                    );
+                },
+            });
     }
 
     selectAccount(

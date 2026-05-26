@@ -23,10 +23,17 @@ export class AuditDashboardService {
 
 getExecutiveSummary(
     assessment_id: number,
+    employeeId: number,
 ) {
 
     return this.http.get(
         `${this.apiUrl}/executive-summary/${assessment_id}`,
+        {
+          params: {
+            employee_id:
+              employeeId,
+          },
+        },
     );
 
 }
@@ -423,6 +430,72 @@ getBranchFinancialPosition(
     return this.http.post<any>(
 
       `${this.config.apiUrl}/internal-audit/${assessmentId}/category/${categoryId}/account/${dumpId}/complete`,
+
+      {
+        employee_id:
+          employeeId,
+      },
+    );
+  }
+
+  getInternalAuditAccountSampling(
+    assessmentId: number,
+    categoryId: number,
+    employeeId: number,
+    filterType = 0,
+    primaryValue = '',
+    secondaryValue = '',
+  ) {
+
+    return this.http.get<any>(
+
+      `${this.config.apiUrl}/internal-audit/${assessmentId}/category/${categoryId}/sampling`,
+
+      {
+        params: {
+          employee_id:
+            employeeId,
+          filter_type:
+            filterType,
+          primary_value:
+            primaryValue,
+          secondary_value:
+            secondaryValue,
+        },
+      },
+    );
+  }
+
+  applyInternalAuditAccountSampling(
+    assessmentId: number,
+    categoryId: number,
+    employeeId: number,
+    accountIds: number[],
+  ) {
+
+    return this.http.post<any>(
+
+      `${this.config.apiUrl}/internal-audit/${assessmentId}/category/${categoryId}/sampling/apply`,
+
+      {
+        employee_id:
+          employeeId,
+        account_ids:
+          accountIds,
+      },
+    );
+  }
+
+  removeInternalAuditAccountSampling(
+    assessmentId: number,
+    categoryId: number,
+    dumpId: number,
+    employeeId: number,
+  ) {
+
+    return this.http.post<any>(
+
+      `${this.config.apiUrl}/internal-audit/${assessmentId}/category/${categoryId}/account/${dumpId}/remove-sampling`,
 
       {
         employee_id:
