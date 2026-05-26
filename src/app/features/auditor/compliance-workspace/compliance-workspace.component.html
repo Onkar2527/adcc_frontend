@@ -1,0 +1,252 @@
+<div class="compliance-page">
+    <header class="compliance-header">
+        <div>
+            <h2>Manager Compliance</h2>
+            <p>Assessments awaiting compliance response or required correction.</p>
+        </div>
+
+        <button
+            pButton
+            type="button"
+            icon="pi pi-refresh"
+            severity="secondary"
+            aria-label="Refresh pending compliance"
+            [loading]="loadingQueue()"
+            (click)="loadQueue()"
+        ></button>
+    </header>
+
+    <div *ngIf="error()" class="compliance-error">
+        <i class="pi pi-exclamation-triangle"></i>
+        {{ error() }}
+    </div>
+
+    <section *ngIf="!selected()" class="queue-panel">
+        <div class="section-title">
+            Pending Compliance
+            <p-tag [value]="assessments().length + ' pending'" severity="contrast"></p-tag>
+        </div>
+
+        <div *ngIf="loadingQueue()" class="loading-stack">
+            <p-skeleton height="4.5rem"></p-skeleton>
+            <p-skeleton height="4.5rem"></p-skeleton>
+        </div>
+
+        <div *ngIf="!loadingQueue() && !assessments().length" class="empty-state">
+            No assessment is pending for compliance.
+        </div>
+
+        <button
+            *ngFor="let assessment of assessments()"
+            type="button"
+            class="queue-row"
+            (click)="openAssessment(assessment)"
+        >
+            <span class="queue-unit">
+                <strong>{{ assessment.audit_unit_name }}</strong>
+                <small>{{ assessment.audit_unit_code }} | F.Y. {{ assessment.year }}</small>
+                <p-tag [value]="assessment.compliance_stage" severity="secondary"></p-tag>
+            </span>
+
+            <span>
+                {{ assessment.assesment_period_from | date: 'mediumDate' }}
+                -
+                {{ assessment.assesment_period_to | date: 'mediumDate' }}
+            </span>
+
+            <span class="queue-counts">
+                <small>{{ assessment.responded_points }} saved</small>
+                <strong>{{ assessment.compliance_points }} points</strong>
+            </span>
+
+            <i class="pi pi-arrow-right"></i>
+        </button>
+    </section>
+
+    <section *ngIf="selected()" class="compliance-detail">
+        <div class="detail-toolbar">
+            <button
+                pButton
+                type="button"
+                icon="pi pi-arrow-left"
+                severity="secondary"
+                aria-label="Back to pending compliance"
+                (click)="closeAssessment()"
+            ></button>
+
+            <div>
+                <h3>{{ selected().audit_unit_name }}</h3>
+                <p>
+                    {{ selected().audit_unit_code }} |
+                    {{ isReCompliance() ? 'Re-Compliance Corrections' : 'Compliance Required Points' }}
+                </p>
+            </div>
+
+            <button
+                pButton
+                type="button"
+                label="Check Completion"
+                icon="pi pi-check-square"
+                severity="secondary"
+                [loading]="checkingSubmission()"
+                (click)="checkCompletion()"
+            ></button>
+
+            <button
+                pButton
+                type="button"
+                [label]="isReCompliance() ? 'Resubmit to Reviewer' : 'Submit to Reviewer'"
+                icon="pi pi-send"
+                [disabled]="!submissionPreview()?.can_submit || hasUnsavedChanges()"
+                [loading]="submitting()"
+                (click)="submitCompliance()"
+            ></button>
+        </div>
+
+        <div *ngIf="loadingDetail()" class="loading-stack">
+            <p-skeleton height="7rem"></p-skeleton>
+            <p-skeleton height="12rem"></p-skeleton>
+        </div>
+
+        <ng-container *ngIf="!loadingDetail() && detail() as compliance">
+            <div class="compliance-metrics">
+                <div><span>{{ isReCompliance() ? 'Returned Points' : 'Compliance Points' }}</span><strong>{{ compliance.counts.total }}</strong></div>
+                <div><span>{{ isReCompliance() ? 'Corrections Saved' : 'Responses Saved' }}</span><strong>{{ compliance.counts.completed }}</strong></div>
+                <div><span>Pending</span><strong class="red">{{ compliance.counts.pending }}</strong></div>
+            </div>
+
+            <div
+                *ngIf="submissionPreview() as preview"
+                class="completion-message"
+                [class.ready]="preview.can_submit && !hasUnsavedChanges()"
+            >
+                <i [class]="preview.can_submit && !hasUnsavedChanges() ? 'pi pi-check-circle' : 'pi pi-info-circle'"></i>
+                {{ hasUnsavedChanges() ? 'Save edited compliance responses before submitting.' : preview.message }}
+            </div>
+
+            <article
+                *ngFor="let answer of compliance.answers"
+                class="observation-row"
+            >
+                <div class="observation-head">
+                    <div>
+                        <small>
+                            {{ answer.menu_name }} / {{ answer.category_name }} / {{ answer.header_name }}
+                        </small>
+                        <h4>{{ answer.question || 'Assessment observation' }}</h4>
+                    </div>
+
+                    <p-tag value="Compliance Required" severity="danger"></p-tag>
+                </div>
+
+                <div class="observation-body">
+                    <div>
+                        <label>Auditor Answer</label>
+                        <p>{{ answer.answer_given || '-' }}</p>
+                    </div>
+
+                    <div>
+                        <label>Auditor Comment</label>
+                        <p>{{ answer.audit_comment || '-' }}</p>
+                    </div>
+
+                    <div>
+                        <label>Audit Reviewer Comment</label>
+                        <p>{{ answer.audit_reviewer_comment || '-' }}</p>
+                    </div>
+
+                    <div *ngIf="isReCompliance() && answer.compliance_reviewer_comment">
+                        <label>Compliance Reviewer Feedback</label>
+                        <p class="reviewer-feedback">{{ answer.compliance_reviewer_comment }}</p>
+                    </div>
+                </div>
+
+                <button
+                    *ngIf="answer.evidence"
+                    pButton
+                    type="button"
+                    class="evidence-link"
+                    icon="pi pi-paperclip"
+                    label="View Auditor Evidence"
+                    severity="secondary"
+                    (click)="viewEvidence(answer.evidence)"
+                ></button>
+
+                <div *ngIf="responseRequired(answer)" class="response-panel">
+                    <label>{{ isReCompliance() ? 'Corrected Compliance Response' : 'Compliance Response' }}</label>
+                    <textarea
+                        rows="3"
+                        [(ngModel)]="answer.compliance_response"
+                        [placeholder]="isReCompliance() ? 'Enter corrected compliance response' : 'Enter compliance response'"
+                    ></textarea>
+
+                    <div class="response-actions">
+                        <p-tag
+                            [value]="isSaved(answer) ? 'Saved' : 'Pending'"
+                            [severity]="isSaved(answer) ? 'success' : 'warn'"
+                        ></p-tag>
+                        <button
+                            pButton
+                            type="button"
+                            [label]="isReCompliance() ? 'Save Correction' : 'Save Response'"
+                            icon="pi pi-save"
+                            [loading]="responseSaving()[actionKey('answer', answer.id)]"
+                            (click)="saveResponse('answer', answer)"
+                        ></button>
+                    </div>
+                </div>
+
+                <div *ngIf="isReCompliance() && !responseRequired(answer)" class="context-note">
+                    Only the rejected annexure row below requires correction.
+                </div>
+
+                <div *ngIf="answer.annexure_rows?.length" class="annexure-section">
+                    <div class="annexure-title">Annexure Rows</div>
+
+                    <div *ngFor="let row of answer.annexure_rows" class="annexure-row">
+                        <div class="annexure-values">
+                            {{ row.values?.join(' | ') || '-' }}
+                            <small *ngIf="isReCompliance() && row.compliance_reviewer_comment" class="reviewer-feedback">
+                                Reviewer Feedback: {{ row.compliance_reviewer_comment }}
+                            </small>
+                        </div>
+
+                        <button
+                            *ngIf="row.evidence"
+                            pButton
+                            type="button"
+                            icon="pi pi-paperclip"
+                            severity="secondary"
+                            aria-label="View annexure evidence"
+                            (click)="viewEvidence(row.evidence)"
+                        ></button>
+
+                        <textarea
+                            *ngIf="responseRequired(row)"
+                            rows="2"
+                            [(ngModel)]="row.compliance_response"
+                            [placeholder]="isReCompliance() ? 'Corrected compliance response for this row' : 'Compliance response for this annexure row'"
+                        ></textarea>
+
+                        <p-tag
+                            *ngIf="responseRequired(row)"
+                            [value]="isSaved(row) ? 'Saved' : 'Pending'"
+                            [severity]="isSaved(row) ? 'success' : 'warn'"
+                        ></p-tag>
+
+                        <button
+                            *ngIf="responseRequired(row)"
+                            pButton
+                            type="button"
+                            icon="pi pi-save"
+                            severity="secondary"
+                            aria-label="Save annexure response"
+                            [loading]="responseSaving()[actionKey('annexure', row.id)]"
+                            (click)="saveResponse('annexure', row)"
+                        ></button>
+                    </div>
+                </div>
+            </article>
+        </ng-container>
+    </section>
+</div>

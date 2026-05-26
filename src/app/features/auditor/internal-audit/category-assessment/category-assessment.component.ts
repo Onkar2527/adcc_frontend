@@ -640,6 +640,22 @@ export class CategoryAssessmentComponent
         ) === 1;
     }
 
+    isReAudit(
+        detail: any = this.categoryDetail(),
+    ) {
+
+        return Number(
+            detail?.overview?.audit_status_id || 0,
+        ) === 3;
+    }
+
+    reviewerComment(
+        question: any,
+    ) {
+
+        return question?.answer?.audit_reviewer_comment || '';
+    }
+
     defaultAnswerValue(
         question: any,
     ): string | null {

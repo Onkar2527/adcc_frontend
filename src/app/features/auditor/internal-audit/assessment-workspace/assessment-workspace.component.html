@@ -142,7 +142,7 @@
             <div class="flex flex-column md:flex-row md:align-items-center md:justify-content-between gap-3">
                 <div>
                     <h3 class="text-xl font-bold text-900 m-0">
-                        Submit Audit
+                        {{ audit.audit_status_id == 3 ? 'Submit Re-Audit' : 'Submit Audit' }}
                     </h3>
 
                     <div
@@ -152,7 +152,7 @@
                         Pending points:
                         <strong>{{ preview.pending_count }}</strong>
                         &nbsp;|&nbsp;
-                        Compliance points:
+                        {{ audit.audit_status_id == 3 ? 'Returned points:' : 'Compliance points:' }}
                         <strong>{{ preview.compliance_count }}</strong>
                     </div>
                 </div>
@@ -162,7 +162,7 @@
                         pButton
                         type="button"
                         icon="pi pi-check-circle"
-                        label="Check Completion"
+                        [label]="audit.audit_status_id == 3 ? 'Check Re-Audit' : 'Check Completion'"
                         severity="secondary"
                         [loading]="checkingSubmission()"
                         [disabled]="submitting()"
@@ -173,7 +173,7 @@
                         pButton
                         type="button"
                         icon="pi pi-send"
-                        label="Submit for Review"
+                        [label]="audit.audit_status_id == 3 ? 'Resubmit to Reviewer' : 'Submit for Review'"
                         [loading]="submitting()"
                         [disabled]="!submissionPreview()?.can_submit || checkingSubmission()"
                         (click)="submitForReview()"

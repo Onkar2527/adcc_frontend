@@ -11,54 +11,54 @@ import { MessageService } from 'primeng/api';
 import { Toast } from "primeng/toast";
 
 @Component({
-    selector: 'app-login',
+  selector: 'app-login',
 
-    standalone: true,
+  standalone: true,
 
-    imports: [
+  imports: [
     CommonModule,
     FormsModule,
     InputTextModule,
     PasswordModule,
     ButtonModule,
     Toast
-],
+  ],
 
-    templateUrl: './login.component.html',
+  templateUrl: './login.component.html',
 
-    styleUrls: ['./login.component.css']
+  styleUrls: ['./login.component.css']
 })
 
 export class LoginComponent {
 
-   private authService = inject(AuthService);
+  private authService = inject(AuthService);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
-  private messageService = inject(MessageService);  
+  private messageService = inject(MessageService);
 
   username = '';
   password = '';
   rememberMe = false;
-  
+
   loading = signal(false);
   error = signal<string | undefined>(undefined);
-@HostListener('document:keydown', ['$event'])
+  @HostListener('document:keydown', ['$event'])
 
-handleKeyboardEvent(event: KeyboardEvent) {
+  handleKeyboardEvent(event: KeyboardEvent) {
 
-  if (
-    event.ctrlKey &&
-    event.key.toLowerCase() === 'k'
-  ) {
+    if (
+      event.ctrlKey &&
+      event.key.toLowerCase() === 'k'
+    ) {
 
-    event.preventDefault();
+      event.preventDefault();
 
-    this.username = 'ADMIN';
-    this.password = 'Emp@2024';
+      this.username = 'ADMIN';
+      this.password = 'Emp@2024';
 
-    this.onLogin();
+      this.onLogin();
+    }
   }
-}
   onLogin() {
     if (!this.username || !this.password) return;
 
@@ -70,13 +70,13 @@ handleKeyboardEvent(event: KeyboardEvent) {
       password: this.password
     }).subscribe({
       next: () => {
-         this.loading.set(false);
+        this.loading.set(false);
         this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Login successful' });
         setTimeout(() => {
-        const returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/home';
-        this.router.navigate([returnUrl]);
-      }, 1000);
-       
+          const returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/home';
+          this.router.navigate([returnUrl]);
+        }, 1000);
+
       },
       error: (err) => {
         this.loading.set(false);
@@ -86,21 +86,28 @@ handleKeyboardEvent(event: KeyboardEvent) {
   }
   setCredentials(type: string) {
 
-  if (type === 'auditor') {
+    if (type === 'auditor') {
 
-    this.username = '132';
-    this.password = 'Emp@2024';
+      this.username = '132';
+      this.password = 'Emp@2024';
 
+    }
+
+    else if (type === 'reviewer') {
+
+      this.username = '139';
+      this.password = 'Emp@2024';
+
+    }
+
+    else if (type === 'manager') {
+
+      this.username = '140';
+      this.password = 'Emp@2024';
+
+    }
+    this.onLogin();
   }
 
-  else if (type === 'reviewer') {
 
-    this.username = '139';
-    this.password = 'Emp@2024';
-
-  }
-  this.onLogin();
-}
-
-  
 }

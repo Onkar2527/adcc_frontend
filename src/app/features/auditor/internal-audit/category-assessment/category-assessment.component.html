@@ -83,11 +83,20 @@
                     </h3>
 
                     <p
-                        *ngIf="pendingOnly()"
-                        class="text-orange-700 font-medium mt-2 mb-0"
+                        *ngIf="isReAudit(detail); else pendingLabel"
+                        class="text-red-700 font-medium mt-2 mb-0"
                     >
-                        Pending questions
+                        Re-Audit: Reviewer rejected points only
                     </p>
+
+                    <ng-template #pendingLabel>
+                        <p
+                            *ngIf="pendingOnly()"
+                            class="text-orange-700 font-medium mt-2 mb-0"
+                        >
+                            Pending questions
+                        </p>
+                    </ng-template>
 
                     <p class="text-600 mt-2 mb-0">
                         {{ detail.overview?.audit_unit_name }}
@@ -421,7 +430,10 @@
                     *ngFor="let question of header.questions; let i = index"
                 >
 
-                    <div class="question-card">
+                    <div
+                        class="question-card"
+                        [class.re-audit-question]="isReAudit(detail)"
+                    >
 
                         <div class="question-main">
 
@@ -455,6 +467,14 @@
                                         {{ question.weightage }}
                                     </span>
 
+                                </div>
+
+                                <div
+                                    *ngIf="isReAudit(detail) && reviewerComment(question)"
+                                    class="reviewer-feedback"
+                                >
+                                    <span>Reviewer Comment</span>
+                                    {{ reviewerComment(question) }}
                                 </div>
 
                             </div>
@@ -531,6 +551,13 @@
                                 </span>
 
                             </label>
+
+                            <div
+                                *ngIf="isReAudit(detail) && question.re_audit_annexure_only"
+                                class="reviewer-feedback"
+                            >
+                                Update only the rejected annexure row below.
+                            </div>
 
                             <div
                                 *ngIf="!buildIsAnnexureSelected(question) || question.answer?.evidence"
@@ -961,6 +988,7 @@
 
                             <div
                                 class="question-card"
+                                [class.re-audit-question]="isReAudit(detail)"
                                 *ngFor="let subsetQuestion of subsetHeader.questions; let si = index"
                             >
 
@@ -989,6 +1017,14 @@
                                                 {{ subsetQuestion.risk_category_name }}
                                             </span>
 
+                                        </div>
+
+                                        <div
+                                            *ngIf="isReAudit(detail) && reviewerComment(subsetQuestion)"
+                                            class="reviewer-feedback"
+                                        >
+                                            <span>Reviewer Comment</span>
+                                            {{ reviewerComment(subsetQuestion) }}
                                         </div>
 
                                     </div>
@@ -1065,6 +1101,13 @@
                                         </span>
 
                                     </label>
+
+                                    <div
+                                        *ngIf="isReAudit(detail) && subsetQuestion.re_audit_annexure_only"
+                                        class="reviewer-feedback"
+                                    >
+                                        Update only the rejected annexure row below.
+                                    </div>
 
                                     <div
                                         *ngIf="!buildIsAnnexureSelected(subsetQuestion) || subsetQuestion.answer?.evidence"

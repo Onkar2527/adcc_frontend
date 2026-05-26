@@ -655,9 +655,13 @@ export class AssessmentWorkspaceComponent implements OnInit {
 
         this.confirmationService.confirm({
             header:
-                'Submit Audit',
+                Number(assessment.audit_status_id) === 3
+                    ? 'Submit Re-Audit'
+                    : 'Submit Audit',
             message:
-                'Submit this audit for reviewer action?',
+                Number(assessment.audit_status_id) === 3
+                    ? 'Resubmit corrected audit points for reviewer action?'
+                    : 'Submit this audit for reviewer action?',
             icon:
                 'pi pi-send',
             acceptLabel:

@@ -208,17 +208,31 @@
 
                             <ng-template #normalValue>
 
+                                <ng-container *ngIf="i === 13">
+                                    {{ cdRatio() | number:'1.2-2' }}
+                                </ng-container>
+
+                                <ng-container *ngIf="i === 14">
+                                    {{ perEmployeeBusiness() | number:'1.2-2' }}
+                                </ng-container>
+
 
                                 <ng-container *ngIf="
-                    item?.value === null ||
-                    item?.value === undefined ||
-                    item?.value === ''
+                    i !== 13 &&
+                    i !== 14 &&
+                    (
+                        item?.value === null ||
+                        item?.value === undefined ||
+                        item?.value === ''
+                    )
                 ">
                                     -
                                 </ng-container>
 
 
                                 <ng-container *ngIf="
+                    i !== 13 &&
+                    i !== 14 &&
                     item?.value &&
                     (
                         item.value.toString().includes('T00:00:00')
@@ -235,6 +249,8 @@
 
                                 <!-- Text -->
                                 <ng-container *ngIf="
+                    i !== 13 &&
+                    i !== 14 &&
                     item?.value &&
                     !(
                         item.value.toString().includes('T00:00:00')
@@ -455,9 +471,7 @@
 
                         <td class="text-center">
 
-                            <input pInputText type="number" [(ngModel)]="
-                                row.account_input
-                            " class="w-6rem" />
+                            {{ row.total_accounts }}
 
                         </td>
 
@@ -473,7 +487,7 @@
                         <td class="text-right">
 
                             <input pInputText type="number" [(ngModel)]="
-                                row.amount_input
+                                row.total_amount
                             " class="w-full
                               text-right" />
                             <div class="
@@ -483,7 +497,7 @@
                                     ">
                                 {{
                                 (
-                                row.amount_input / 100000
+                                row.total_amount
                                 )
                                 | number:'1.2-2'
                                 }}
@@ -497,7 +511,7 @@
                             {{
                             (
                             (
-                            row.amount_input || 0
+                            row.total_amount || 0
                             ) -
                             (
                             row.march_position || 0

@@ -48,11 +48,11 @@ saveExecutiveSummary(
 
 }
 getBranchFinancialPosition(
-    branch_id: number,
+    assessmentId: number,
 ) {
 
     return this.http.get(
-        `${this.apiUrl}/branch-financial-position/${branch_id}`,
+        `${this.apiUrl}/branch-financial-position/${assessmentId}`,
     );
 
 }
@@ -133,6 +133,287 @@ getBranchFinancialPosition(
     return this.http.post<any>(
 
       `${this.config.apiUrl}/internal-audit/${assessmentId}/submit`,
+
+      {
+        employee_id:
+          employeeId,
+      },
+    );
+  }
+
+  getReviewerPending(
+    employeeId: number,
+  ) {
+
+    return this.http.get<any>(
+
+      `${this.config.apiUrl}/internal-audit/reviewer/pending`,
+
+      {
+        params: {
+          employee_id:
+            employeeId,
+        },
+      },
+    );
+  }
+
+  getReviewerAssessment(
+    assessmentId: number,
+    employeeId: number,
+  ) {
+
+    return this.http.get<any>(
+
+      `${this.config.apiUrl}/internal-audit/reviewer/${assessmentId}`,
+
+      {
+        params: {
+          employee_id:
+            employeeId,
+        },
+      },
+    );
+  }
+
+  getReviewerComplianceAssessment(
+    assessmentId: number,
+    employeeId: number,
+  ) {
+
+    return this.http.get<any>(
+
+      `${this.config.apiUrl}/internal-audit/reviewer/compliance/${assessmentId}`,
+
+      {
+        params: {
+          employee_id:
+            employeeId,
+        },
+      },
+    );
+  }
+
+  saveReviewerAction(
+    assessmentId: number,
+    targetType: 'answer' | 'annexure',
+    observationId: number,
+    employeeId: number,
+    action: number,
+    comment: string,
+  ) {
+
+    return this.http.post<any>(
+
+      `${this.config.apiUrl}/internal-audit/reviewer/${assessmentId}/observation/${targetType}/${observationId}/action`,
+
+      {
+        employee_id:
+          employeeId,
+        action,
+        comment,
+      },
+    );
+  }
+
+  saveReviewerComplianceAction(
+    assessmentId: number,
+    targetType: 'answer' | 'annexure',
+    observationId: number,
+    employeeId: number,
+    action: number,
+    comment: string,
+  ) {
+
+    return this.http.post<any>(
+
+      `${this.config.apiUrl}/internal-audit/reviewer/compliance/${assessmentId}/observation/${targetType}/${observationId}/action`,
+
+      {
+        employee_id:
+          employeeId,
+        action,
+        comment,
+      },
+    );
+  }
+
+  viewReviewerEvidence(
+    assessmentId: number,
+    evidenceId: number,
+    employeeId: number,
+  ) {
+
+    return this.http.get(
+
+      `${this.config.apiUrl}/internal-audit/reviewer/${assessmentId}/evidence/${evidenceId}/view`,
+
+      {
+        params: {
+          employee_id:
+            employeeId,
+        },
+        responseType:
+          'blob',
+      },
+    );
+  }
+
+  viewReviewerComplianceEvidence(
+    assessmentId: number,
+    evidenceId: number,
+    employeeId: number,
+  ) {
+
+    return this.http.get(
+
+      `${this.config.apiUrl}/internal-audit/reviewer/compliance/${assessmentId}/evidence/${evidenceId}/view`,
+
+      {
+        params: {
+          employee_id:
+            employeeId,
+        },
+        responseType:
+          'blob',
+      },
+    );
+  }
+
+  submitReviewerAssessment(
+    assessmentId: number,
+    employeeId: number,
+  ) {
+
+    return this.http.post<any>(
+
+      `${this.config.apiUrl}/internal-audit/reviewer/${assessmentId}/submit`,
+
+      {
+        employee_id:
+          employeeId,
+      },
+    );
+  }
+
+  submitReviewerComplianceAssessment(
+    assessmentId: number,
+    employeeId: number,
+  ) {
+
+    return this.http.post<any>(
+
+      `${this.config.apiUrl}/internal-audit/reviewer/compliance/${assessmentId}/submit`,
+
+      {
+        employee_id:
+          employeeId,
+      },
+    );
+  }
+
+  getCompliancePending(
+    employeeId: number,
+  ) {
+
+    return this.http.get<any>(
+
+      `${this.config.apiUrl}/internal-audit/compliance/pending`,
+
+      {
+        params: {
+          employee_id:
+            employeeId,
+        },
+      },
+    );
+  }
+
+  getComplianceAssessment(
+    assessmentId: number,
+    employeeId: number,
+  ) {
+
+    return this.http.get<any>(
+
+      `${this.config.apiUrl}/internal-audit/compliance/${assessmentId}`,
+
+      {
+        params: {
+          employee_id:
+            employeeId,
+        },
+      },
+    );
+  }
+
+  saveComplianceResponse(
+    assessmentId: number,
+    targetType: 'answer' | 'annexure',
+    observationId: number,
+    employeeId: number,
+    response: string,
+  ) {
+
+    return this.http.post<any>(
+
+      `${this.config.apiUrl}/internal-audit/compliance/${assessmentId}/observation/${targetType}/${observationId}/response`,
+
+      {
+        employee_id:
+          employeeId,
+        response,
+      },
+    );
+  }
+
+  getComplianceSubmissionPreview(
+    assessmentId: number,
+    employeeId: number,
+  ) {
+
+    return this.http.get<any>(
+
+      `${this.config.apiUrl}/internal-audit/compliance/${assessmentId}/submission-preview`,
+
+      {
+        params: {
+          employee_id:
+            employeeId,
+        },
+      },
+    );
+  }
+
+  viewComplianceEvidence(
+    assessmentId: number,
+    evidenceId: number,
+    employeeId: number,
+  ) {
+
+    return this.http.get(
+
+      `${this.config.apiUrl}/internal-audit/compliance/${assessmentId}/evidence/${evidenceId}/view`,
+
+      {
+        params: {
+          employee_id:
+            employeeId,
+        },
+        responseType:
+          'blob',
+      },
+    );
+  }
+
+  submitComplianceAssessment(
+    assessmentId: number,
+    employeeId: number,
+  ) {
+
+    return this.http.post<any>(
+
+      `${this.config.apiUrl}/internal-audit/compliance/${assessmentId}/submit`,
 
       {
         employee_id:

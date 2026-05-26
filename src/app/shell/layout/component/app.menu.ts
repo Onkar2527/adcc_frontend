@@ -42,6 +42,16 @@ export class AppMenu implements OnInit {
             items: [{ label: 'Internal Audit', icon: 'pi pi-fw pi-exclamation-triangle', routerLink: ['/auditor/audit-dashboard'] }],
         },
         {
+            label: 'Audit Review',
+            authority: ['4'],
+            items: [{ label: 'Pending Reviews', icon: 'pi pi-fw pi-verified', routerLink: ['/auditor/reviewer'] }],
+        },
+        {
+            label: 'Compliance',
+            authority: ['3'],
+            items: [{ label: 'Pending Compliance', icon: 'pi pi-fw pi-clipboard', routerLink: ['/auditor/compliance'] }],
+        },
+        {
             label: 'Masters',
             authority: ['1'],
             items: [

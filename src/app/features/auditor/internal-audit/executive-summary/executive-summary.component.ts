@@ -121,6 +121,7 @@ export class ExecutiveSummaryComponent
 
     private prepareFinancialPositionRows(
         rows: any[],
+        calculatedRows: any[] = [],
     ) {
         const groups = [
             'Deposits',
@@ -139,6 +140,47 @@ export class ExecutiveSummaryComponent
                         (row: any) =>
                             row.group === group,
                     );
+                const detailRows =
+                    items.map(
+                        (
+                            row: any,
+                            itemIndex: number,
+                        ) => {
+                            const calculated =
+                                this.findCalculatedPosition(
+                                    row,
+                                    calculatedRows,
+                                );
+                            const savedAmount =
+                                row.amount !== ''
+                                && row.amount !== null
+                                && row.amount !== undefined;
+
+                            return {
+                                ...row,
+                                isHeader:
+                                    false,
+                                isNpa:
+                                    group === 'NPA',
+                                index:
+                                    itemIndex + 1,
+                                scheme_name:
+                                    row.name,
+                                total_accounts:
+                                    Number(
+                                        calculated?.total_accounts || 0,
+                                    ),
+                                total_amount:
+                                    savedAmount
+                                        ? Number(row.amount)
+                                        : group === 'NPA'
+                                            ? ''
+                                            : this.toLakhs(
+                                                calculated?.total_amount,
+                                            ),
+                            };
+                        },
+                    );
 
                 result.push({
                     isHeader:
@@ -148,9 +190,16 @@ export class ExecutiveSummaryComponent
                     scheme_type:
                         group.toUpperCase(),
                     total_accounts:
-                        '-',
+                        detailRows.reduce(
+                            (
+                                total: number,
+                                row: any,
+                            ) =>
+                                total + Number(row.total_accounts || 0),
+                            0,
+                        ),
                     march_position:
-                        items.reduce(
+                        detailRows.reduce(
                             (
                                 total: number,
                                 row: any,
@@ -159,42 +208,57 @@ export class ExecutiveSummaryComponent
                             0,
                         ),
                     total_amount:
-                        items.reduce(
+                        detailRows.reduce(
                             (
                                 total: number,
                                 row: any,
                             ) =>
-                                total + Number(row.amount || 0),
+                                total + Number(row.total_amount || 0),
                             0,
                         ),
                 });
 
-                items.forEach(
-                    (
-                        row: any,
-                        itemIndex: number,
-                    ) => {
-                        result.push({
-                            ...row,
-                            isHeader:
-                                false,
-                            isNpa:
-                                false,
-                            index:
-                                itemIndex + 1,
-                            scheme_name:
-                                row.name,
-                            total_accounts:
-                                '-',
-                            total_amount:
-                                row.amount,
-                        });
-                    },
-                );
+                result.push(...detailRows);
             },
         );
 
         return result;
+    }
+
+    private findCalculatedPosition(
+        line: any,
+        calculatedRows: any[],
+    ) {
+        const sourceGroup =
+            line.group === 'NPA'
+                ? 'ADVANCES'
+                : String(line.group || '').toUpperCase();
+        const lineName =
+            this.normalizedPositionName(line.name);
+
+        return calculatedRows.find(
+            (row: any) =>
+                String(row.scheme_type || '').toUpperCase()
+                === sourceGroup
+                && this.normalizedPositionName(row.scheme_name)
+                === lineName,
+        );
+    }
+
+    private normalizedPositionName(
+        value: string,
+    ) {
+        return String(value || '')
+            .replace(/\b(advances|npa)\b/gi, '')
+            .replace(/[^a-z0-9]/gi, '')
+            .replace(/loans$/i, 'loan')
+            .toLowerCase();
+    }
+
+    private toLakhs(
+        value: any,
+    ) {
+        return Number(value || 0) / 100000;
     }
 
     financialGroupTotal(
@@ -219,261 +283,73 @@ export class ExecutiveSummaryComponent
             );
     }
 
-    getBranchFinancialPosition() {
+    cdRatio() {
+        const deposits =
+            this.financialGroupTotal(
+                'DEPOSITS',
+                'total_amount',
+            );
+        const advances =
+            this.financialGroupTotal(
+                'ADVANCES',
+                'total_amount',
+            );
+
+        return deposits
+            ? (advances / deposits) * 100
+            : 0;
+    }
+
+    perEmployeeBusiness() {
+        const staffCount =
+            Number(
+                this.summary_detail[11]?.value || 0,
+            );
+        const deposits =
+            this.financialGroupTotal(
+                'DEPOSITS',
+                'total_amount',
+            );
+        const advances =
+            this.financialGroupTotal(
+                'ADVANCES',
+                'total_amount',
+            );
+
+        return staffCount
+            && deposits
+            && advances
+                ? (deposits + advances) / staffCount
+                : 0;
+    }
+
+    getBranchFinancialPosition(
+        savedRows: any[],
+    ) {
 
         this.loading.set(true);
 
         this.service
             .getBranchFinancialPosition(
-                this.summary?.branch_code,
+                this.assessmentId,
             )
             .subscribe({
 
                 next: (res: any) => {
 
-                    setTimeout(() => {
-
-                        const groupedData: any[] = [];
-
-                        const grouped =
-                            res.reduce(
-                                (
-                                    acc: any,
-                                    item: any,
-                                ) => {
-
-                                    if (
-                                        !acc[
-                                        item.scheme_type
-                                        ]
-                                    ) {
-
-                                        acc[
-                                            item.scheme_type
-                                        ] = [];
-
-                                    }
-
-                                    acc[
-                                        item.scheme_type
-                                    ].push(item);
-
-                                    return acc;
-
-                                },
-                                {},
-                            );
-
-                        let prefixIndex = 0;
-
-                        Object.keys(grouped)
-                            .forEach(
-                                (
-                                    type: string,
-                                ) => {
-
-                                    const items =
-                                        grouped[type];
-
-                                    const totalMarch =
-                                        items.reduce(
-                                            (
-                                                sum: number,
-                                                x: any,
-                                            ) =>
-                                                sum +
-                                                Number(
-                                                    x.march_position || 0,
-                                                ),
-                                            0,
-                                        );
-
-                                    const totalAmount =
-    items.reduce(
-        (
-            sum: number,
-            x: any,
-        ) =>
-            sum +
-            Math.abs(
-                Number(
-                    x.total_amount || 0,
-                ),
-            ),
-        0,
-    );
-
-                                    const totalAccounts =
-                                        items.reduce(
-                                            (
-                                                sum: number,
-                                                x: any,
-                                            ) =>
-                                                sum +
-                                                Number(
-                                                    x.total_accounts || 0,
-                                                ),
-                                            0,
-                                        );
-
-                                    groupedData.push({
-
-                                        isHeader:
-                                            true,
-
-                                        prefix:
-                                            String.fromCharCode(
-                                                65 + prefixIndex,
-                                            ),
-
-                                        scheme_type:
-                                            type,
-
-                                        total_accounts:
-                                            totalAccounts,
-
-                                        march_position:
-                                            totalMarch,
-
-                                        total_amount:
-                                            totalAmount,
-
-                                    });
-
-                                    items.forEach(
-                                        (
-                                            item: any,
-                                            index: number,
-                                        ) => {
-
-                                            groupedData.push({
-
-                                                isHeader:
-                                                    false,
-
-                                                isNpa:
-                                                    false,
-
-                                                index:
-                                                    index + 1,
-
-                                                scheme_name:
-                                                    item.scheme_name,
-
-                                                total_accounts:
-                                                    Number(
-                                                        item.total_accounts || 0,
-                                                    ),
-
-                                                march_position:
-                                                    Number(
-                                                        item.march_position || 0,
-                                                    ),
-
-                                               total_amount:
-    Math.abs(
-        Number(
-            item.total_amount || 0,
-        ),
-    ),
-
-
-                                            });
-
-                                        },
-                                    );
-
-                                    prefixIndex++;
-
-                                },
-                            );
-
-                        // NPA SECTION
-
-                        const advanceItems =
-                            grouped['ADVANCES'] || [];
-
-                        const totalNpaMarch =
-                            advanceItems.reduce(
-                                (
-                                    sum: number,
-                                    x: any,
-                                ) =>
-                                    sum +
-                                    Number(
-                                        x.march_position || 0,
-                                    ),
-                                0,
-                            );
-
-                        groupedData.push({
-
-                            isHeader: true,
-
-                            prefix: 'C',
-
-                            scheme_type: 'NPA',
-
-                            total_accounts: '-',
-
-                            march_position:
-                                totalNpaMarch,
-
-                            total_amount: 0,
-
-                        });
-
-                        advanceItems.forEach(
-                            (
-                                item: any,
-                                index: number,
-                            ) => {
-
-                                groupedData.push({
-
-                                    isHeader:
-                                        false,
-
-                                    isNpa:
-                                        true,
-
-                                    index:
-                                        index + 1,
-
-                                    scheme_name:
-                                        item.scheme_name,
-
-                                    account_input:
-                                        '',
-
-                                    amount_input:
-                                        '',
-
-                                    march_position:
-                                        Number(
-                                            item.march_position || 0,
-                                        ),
-
-                                });
-
-                            },
+                    this.financialPositionData =
+                        this.prepareFinancialPositionRows(
+                            savedRows,
+                            Array.isArray(res)
+                                ? res
+                                : [],
                         );
-
-                        this.financialPositionData =
-                            groupedData;
-
-                        this.cdr.detectChanges();
-
-                        this.loading.set(false);
-
-                    });
+                    this.cdr.detectChanges();
+                    this.loading.set(false);
 
                 },
 
-                error: (err: any) => {
-
-                    console.log(err);
-
+                error: () => {
                     this.loading.set(false);
 
                 },
@@ -515,10 +391,10 @@ export class ExecutiveSummaryComponent
                         );
                     this.freshAccountsData =
                         res.fresh_accounts || [];
-
-                    this.loading.set(
-                        false,
+                    this.getBranchFinancialPosition(
+                        res.branch_positions || [],
                     );
+
                     this.cdr.detectChanges();
 
                 },

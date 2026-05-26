@@ -6,6 +6,11 @@ import { LoanApplicationComponent } from './features/proposals/forms-proposal/lo
 export const routes: Routes = [
   {
     path: '',
+    redirectTo: '/login',
+    pathMatch: 'full'
+  },
+  {
+    path: '',
     component: AppLayout,
     // canActivate: [authGuard],
     children: [
