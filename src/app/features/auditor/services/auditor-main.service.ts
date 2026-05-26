@@ -52,6 +52,7 @@ export class AuditDashboardService {
     assessmentId: number,
     categoryId: number,
     employeeId: number,
+    dumpId = 0,
   ) {
 
     return this.http.get<any>(
@@ -62,6 +63,8 @@ export class AuditDashboardService {
         params: {
           employee_id:
             employeeId,
+          dump_id:
+            dumpId,
         },
       },
     );
@@ -176,6 +179,7 @@ export class AuditDashboardService {
     categoryId: number,
     employeeId: number,
     answers: any[],
+    dumpId = 0,
   ) {
 
     return this.http.post<any>(
@@ -185,6 +189,8 @@ export class AuditDashboardService {
       {
         employee_id:
           employeeId,
+        dump_id:
+          dumpId,
         answers,
       },
     );
@@ -196,6 +202,7 @@ export class AuditDashboardService {
     questionId: number,
     employeeId: number,
     payload: any,
+    dumpId = 0,
   ) {
 
     return this.http.post<any>(
@@ -206,6 +213,8 @@ export class AuditDashboardService {
         ...payload,
         employee_id:
           employeeId,
+        dump_id:
+          dumpId,
       },
     );
   }
@@ -216,6 +225,7 @@ export class AuditDashboardService {
     questionId: number,
     annexureRowId: number,
     employeeId: number,
+    dumpId = 0,
   ) {
 
     return this.http.post<any>(
@@ -225,6 +235,8 @@ export class AuditDashboardService {
       {
         employee_id:
           employeeId,
+        dump_id:
+          dumpId,
       },
     );
   }
@@ -234,6 +246,7 @@ export class AuditDashboardService {
     categoryId: number,
     questionId: number,
     employeeId: number,
+    dumpId = 0,
   ) {
 
     return this.http.get<any>(
@@ -244,6 +257,8 @@ export class AuditDashboardService {
         params: {
           employee_id:
             employeeId,
+          dump_id:
+            dumpId,
         },
       },
     );
@@ -255,6 +270,7 @@ export class AuditDashboardService {
     questionId: number,
     employeeId: number,
     file: File,
+    dumpId = 0,
   ) {
 
     const formData =
@@ -268,6 +284,10 @@ export class AuditDashboardService {
     formData.append(
       'file',
       file,
+    );
+    formData.append(
+      'dump_id',
+      String(dumpId),
     );
 
     return this.http.post<any>(
@@ -285,6 +305,7 @@ export class AuditDashboardService {
     annexureRowId: number,
     employeeId: number,
     file: File,
+    dumpId = 0,
   ) {
 
     const formData =
@@ -297,6 +318,10 @@ export class AuditDashboardService {
     formData.append(
       'file',
       file,
+    );
+    formData.append(
+      'dump_id',
+      String(dumpId),
     );
 
     const targetPath =
@@ -317,6 +342,7 @@ export class AuditDashboardService {
     categoryId: number,
     evidenceId: number,
     employeeId: number,
+    dumpId = 0,
   ) {
 
     return this.http.get(
@@ -327,6 +353,8 @@ export class AuditDashboardService {
         params: {
           employee_id:
             employeeId,
+          dump_id:
+            dumpId,
         },
         responseType:
           'blob',
@@ -339,11 +367,32 @@ export class AuditDashboardService {
     categoryId: number,
     evidenceId: number,
     employeeId: number,
+    dumpId = 0,
   ) {
 
     return this.http.post<any>(
 
       `${this.config.apiUrl}/internal-audit/${assessmentId}/category/${categoryId}/evidence/${evidenceId}/delete`,
+
+      {
+        employee_id:
+          employeeId,
+        dump_id:
+          dumpId,
+      },
+    );
+  }
+
+  completeInternalAuditAccount(
+    assessmentId: number,
+    categoryId: number,
+    dumpId: number,
+    employeeId: number,
+  ) {
+
+    return this.http.post<any>(
+
+      `${this.config.apiUrl}/internal-audit/${assessmentId}/category/${categoryId}/account/${dumpId}/complete`,
 
       {
         employee_id:

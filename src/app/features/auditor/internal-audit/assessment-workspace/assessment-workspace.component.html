@@ -522,15 +522,28 @@
                             </span>
 
                             <span class="category-meta">
-                                {{ category.answered_count }}
-                                /
-                                {{ category.question_count }}
-                                answered
+                                <ng-container *ngIf="category.account_based; else questionProgress">
+                                    {{ category.completed_account_count }}
+                                    /
+                                    {{ category.account_count }}
+                                    accounts completed
+                                </ng-container>
+
+                                <ng-template #questionProgress>
+                                    {{ category.answered_count }}
+                                    /
+                                    {{ category.question_count }}
+                                    answered
+                                </ng-template>
                             </span>
 
                             <p-progressBar
                                 [value]="
-                                    category.question_count
+                                    category.account_based
+                                        ? (category.account_count
+                                            ? (category.completed_account_count / category.account_count) * 100
+                                            : 0)
+                                        : category.question_count
                                         ? (category.answered_count / category.question_count) * 100
                                         : 0
                                 "

@@ -551,6 +551,10 @@ export class AssessmentWorkspaceComponent implements OnInit {
                             (issue: any) =>
                                 Number(issue.question_id),
                         ),
+                    dumpId:
+                        Number(
+                            pendingIssues[0]?.dump_id || 0,
+                        ),
                 },
             },
         );
@@ -684,6 +688,13 @@ export class AssessmentWorkspaceComponent implements OnInit {
                         (pendingIssue: any) =>
                             Number(pendingIssue.category_id)
                             === Number(issue?.category_id),
+                    )
+                    .filter(
+                        (pendingIssue: any) =>
+                            !Number(issue?.dump_id || 0)
+                            ||
+                            Number(pendingIssue.dump_id || 0)
+                            === Number(issue?.dump_id),
                     );
 
             this.openCategory(

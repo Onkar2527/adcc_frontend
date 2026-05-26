@@ -125,6 +125,14 @@ export class CategoryAssessmentComponent
     savedAny =
         signal(false);
 
+    selectedDumpId =
+        signal(0);
+
+    completingAccount =
+        signal(false);
+
+    accountSearch = '';
+
     employeeId = 0;
 
     private pendingQuestionIds =
@@ -155,6 +163,12 @@ export class CategoryAssessmentComponent
 
         this.pendingOnly.set(
             this.pendingQuestionIds.size > 0,
+        );
+
+        this.selectedDumpId.set(
+            Number(
+                drawerData.dumpId || 0,
+            ),
         );
 
         const assessmentId =
@@ -198,6 +212,7 @@ export class CategoryAssessmentComponent
         assessmentId: number,
         categoryId: number,
         showLoader = true,
+        dumpId = this.selectedDumpId(),
     ) {
 
         if (
@@ -213,6 +228,7 @@ export class CategoryAssessmentComponent
                 assessmentId,
                 categoryId,
                 this.employeeId,
+                dumpId,
             )
             .subscribe({
 
@@ -225,6 +241,12 @@ export class CategoryAssessmentComponent
 
                     this.categoryDetail.set(
                         prepared,
+                    );
+
+                    this.selectedDumpId.set(
+                        Number(
+                            prepared?.selected_account?.id || 0,
+                        ),
                     );
 
                     if (
@@ -747,6 +769,7 @@ export class CategoryAssessmentComponent
                 Number(detail.category.id),
                 this.employeeId,
                 answers,
+                this.selectedDumpId(),
             )
             .subscribe({
 
@@ -955,6 +978,7 @@ export class CategoryAssessmentComponent
                 Number(question.id),
                 this.employeeId,
                 question.annexure_draft,
+                this.selectedDumpId(),
             )
             .subscribe({
                 next: (res: any) => {
@@ -1082,6 +1106,7 @@ export class CategoryAssessmentComponent
                 Number(question.id),
                 Number(row.id),
                 this.employeeId,
+                this.selectedDumpId(),
             )
             .subscribe({
                 next: (res: any) => {
@@ -1154,6 +1179,7 @@ export class CategoryAssessmentComponent
                 Number(detail.category.id),
                 Number(question.id),
                 this.employeeId,
+                this.selectedDumpId(),
             )
             .subscribe({
                 next: (res: any) => {
@@ -1250,6 +1276,7 @@ export class CategoryAssessmentComponent
                 Number(question.id),
                 this.employeeId,
                 file,
+                this.selectedDumpId(),
             )
             .subscribe({
                 next: (res: any) => {
@@ -1286,6 +1313,139 @@ export class CategoryAssessmentComponent
                     this.notification.error(
                         err?.error?.message
                         || 'Unable to upload annexure CSV.',
+                    );
+                },
+            });
+    }
+
+    isAccountCategory(
+        detail: any =
+            this.categoryDetail(),
+    ) {
+        return [1, 2].includes(
+            Number(
+                detail?.category?.linked_table_id,
+            ),
+        );
+    }
+
+    filteredAccounts() {
+        const accounts =
+            this.categoryDetail()?.accounts || [];
+        const search =
+            this.accountSearch
+                .trim()
+                .toLowerCase();
+
+        return search
+            ? accounts.filter(
+                (account: any) =>
+                    String(account.account_no || '')
+                        .toLowerCase()
+                        .includes(search)
+                    ||
+                    String(account.account_holder_name || '')
+                        .toLowerCase()
+                        .includes(search)
+                    ||
+                    String(account.scheme_code || '')
+                        .toLowerCase()
+                        .includes(search),
+            )
+            : accounts;
+    }
+
+    selectAccount(
+        account: any,
+    ) {
+        const detail =
+            this.categoryDetail();
+
+        if (
+            !detail?.overview?.id
+            ||
+            !detail?.category?.id
+            ||
+            !account?.id
+        ) {
+            return;
+        }
+
+        this.selectedDumpId.set(
+            Number(account.id),
+        );
+        this.loadCategory(
+            Number(detail.overview.id),
+            Number(detail.category.id),
+            true,
+            Number(account.id),
+        );
+    }
+
+    completeAccount() {
+        const detail =
+            this.categoryDetail();
+        const dumpId =
+            this.selectedDumpId();
+
+        if (
+            !detail?.overview?.id
+            ||
+            !detail?.category?.id
+            ||
+            !dumpId
+        ) {
+            return;
+        }
+
+        this.completingAccount.set(
+            true,
+        );
+
+        this.service
+            .completeInternalAuditAccount(
+                Number(detail.overview.id),
+                Number(detail.category.id),
+                dumpId,
+                this.employeeId,
+            )
+            .subscribe({
+                next: (res: any) => {
+                    this.completingAccount.set(
+                        false,
+                    );
+
+                    if (
+                        !res?.success
+                    ) {
+                        this.notification.error(
+                            res?.message
+                            || 'Complete pending account points first.',
+                        );
+                        return;
+                    }
+
+                    this.notification.success(
+                        res?.message
+                        || 'Account assessment marked complete.',
+                    );
+                    this.savedAny.set(
+                        true,
+                    );
+                    this.loadCategory(
+                        Number(detail.overview.id),
+                        Number(detail.category.id),
+                        false,
+                        dumpId,
+                    );
+                },
+                error: (err) => {
+                    this.completingAccount.set(
+                        false,
+                    );
+                    this.notification.error(
+                        err?.error?.message
+                        || 'Unable to complete account assessment.',
                     );
                 },
             });
@@ -1383,6 +1543,7 @@ export class CategoryAssessmentComponent
                 Number(row?.id || 0),
                 this.employeeId,
                 file,
+                this.selectedDumpId(),
             )
             .subscribe({
                 next: (res: any) => {
@@ -1440,6 +1601,7 @@ export class CategoryAssessmentComponent
                 Number(detail.category.id),
                 Number(evidence.id),
                 this.employeeId,
+                this.selectedDumpId(),
             )
             .subscribe({
                 next: (blob: Blob) => {
@@ -1489,6 +1651,7 @@ export class CategoryAssessmentComponent
                 Number(detail.category.id),
                 Number(evidence.id),
                 this.employeeId,
+                this.selectedDumpId(),
             )
             .subscribe({
                 next: (res: any) => {

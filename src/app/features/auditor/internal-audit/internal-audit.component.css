@@ -551,6 +551,81 @@
     box-shadow: 0 0 0 1px var(--primary-color);
 }
 
+.account-list-panel {
+    flex: 0 0 min(21rem, 100%);
+}
+
+.account-total {
+    padding: .18rem .5rem;
+    border-radius: .35rem;
+    background: var(--surface-100);
+    color: var(--text-color-secondary);
+    font-size: .8rem;
+    font-weight: 700;
+}
+
+.account-items {
+    display: flex;
+    flex-direction: column;
+    gap: .5rem;
+    max-height: 21rem;
+    overflow: auto;
+}
+
+.account-item {
+    display: flex;
+    flex-direction: column;
+    gap: .25rem;
+    padding: .7rem .8rem;
+    border: 1px solid var(--surface-200);
+    border-radius: .5rem;
+    background: var(--surface-0);
+    color: inherit;
+    text-align: left;
+    cursor: pointer;
+}
+
+.account-item:hover,
+.account-item.active {
+    border-color: var(--primary-color);
+}
+
+.account-item.active {
+    background: var(--primary-50);
+}
+
+.account-item.completed:not(.active) {
+    border-color: var(--green-200);
+    background: var(--green-50);
+}
+
+.account-item small {
+    color: var(--text-color-secondary);
+}
+
+.account-status {
+    align-self: flex-start;
+    margin-top: .15rem;
+    color: var(--green-700);
+    font-size: .75rem;
+    font-weight: 700;
+}
+
+.account-detail {
+    flex: 1;
+    min-width: 0;
+    padding: 1rem;
+    border: 1px solid var(--surface-200);
+    border-radius: .5rem;
+    background: var(--surface-50);
+}
+
+.account-prompt {
+    display: flex;
+    align-items: center;
+    color: var(--text-color-secondary);
+}
+
 .compliance-check {
     display: flex;
     align-items: center;

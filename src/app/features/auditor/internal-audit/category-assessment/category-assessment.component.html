@@ -112,7 +112,94 @@
         </div>
 
         <div
-            *ngIf="!detail.sets?.length"
+            *ngIf="isAccountCategory(detail)"
+            class="account-assessment surface-card border-round-xl shadow-1 p-4 mb-4"
+        >
+            <div class="flex flex-column lg:flex-row gap-4">
+                <aside class="account-list-panel">
+                    <div class="flex align-items-center justify-content-between gap-2 mb-3">
+                        <div class="font-bold text-900">
+                            Sampled Accounts
+                        </div>
+                        <span class="account-total">
+                            {{ detail.accounts?.length || 0 }}
+                        </span>
+                    </div>
+
+                    <input
+                        type="text"
+                        class="answer-control mb-3"
+                        [(ngModel)]="accountSearch"
+                        placeholder="Search account"
+                    />
+
+                    <div
+                        *ngIf="!detail.accounts?.length"
+                        class="text-600 text-sm"
+                    >
+                        No sampled account is available for this category.
+                    </div>
+
+                    <div class="account-items">
+                        <button
+                            type="button"
+                            class="account-item"
+                            *ngFor="let account of filteredAccounts()"
+                            [class.active]="selectedDumpId() === account.id"
+                            [class.completed]="account.is_completed"
+                            (click)="selectAccount(account)"
+                        >
+                            <strong>{{ account.account_no }}</strong>
+                            <small>
+                                {{ account.scheme_code || '-' }}
+                                <span *ngIf="account.account_holder_name">
+                                    | {{ account.account_holder_name }}
+                                </span>
+                            </small>
+                            <span *ngIf="account.is_completed" class="account-status">
+                                Completed
+                            </span>
+                        </button>
+                    </div>
+                </aside>
+
+                <div class="account-detail" *ngIf="detail.selected_account as account">
+                    <div class="flex flex-column md:flex-row md:align-items-start md:justify-content-between gap-3">
+                        <div>
+                            <div class="text-sm text-600 mb-1">
+                                Selected Account
+                            </div>
+                            <div class="text-lg font-bold text-900">
+                                {{ account.account_no }}
+                            </div>
+                            <div class="text-600 mt-1">
+                                {{ account.scheme_name || account.scheme_code || '-' }}
+                                <span *ngIf="account.account_holder_name">
+                                    | {{ account.account_holder_name }}
+                                </span>
+                            </div>
+                        </div>
+
+                        <button
+                            pButton
+                            type="button"
+                            icon="pi pi-check-circle"
+                            label="Mark Account Complete"
+                            [disabled]="account.is_completed"
+                            [loading]="completingAccount()"
+                            (click)="completeAccount()"
+                        ></button>
+                    </div>
+                </div>
+
+                <div class="account-detail account-prompt" *ngIf="!detail.selected_account">
+                    Select a sampled account to answer its audit questions.
+                </div>
+            </div>
+        </div>
+
+        <div
+            *ngIf="!detail.sets?.length && !isAccountCategory(detail)"
             class="surface-card border-round-xl shadow-1 p-4 text-600"
         >
             No question is configured for this audit category.
@@ -120,7 +207,7 @@
 
         <div
             class="question-set"
-            *ngFor="let set of detail.sets"
+            *ngFor="let set of (isAccountCategory(detail) && !detail.selected_account ? [] : detail.sets)"
         >
 
             <div class="question-set-title">
