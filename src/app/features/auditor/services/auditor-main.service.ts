@@ -19,6 +19,36 @@ export class AuditDashboardService {
       payload,
     );
   }
+  // service.ts (frontend)
+
+getExecutiveSummary(
+    assessment_id: number,
+) {
+
+    return this.http.get(
+        `${this.apiUrl}/executive-summary/${assessment_id}`,
+    );
+
+}
+saveExecutiveSummary(
+    payload: any,
+) {
+
+    return this.http.post(
+        `${this.apiUrl}/save-executive-summary`,
+        payload,
+    );
+
+}
+getBranchFinancialPosition(
+    branch_id: number,
+) {
+
+    return this.http.get(
+        `${this.apiUrl}/branch-financial-position/${branch_id}`,
+    );
+
+}
 
   openAssessment(payload: any) {
 

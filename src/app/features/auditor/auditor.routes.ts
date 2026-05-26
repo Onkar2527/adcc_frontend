@@ -4,6 +4,7 @@ import { AssessmentWorkspaceComponent } from './internal-audit/assessment-worksp
 import { AuditUnitDashboardComponent } from './internal-audit/audit-unit-dashboard/audit-unit-dashboard.component';
 import { CategoryAssessmentComponent } from './internal-audit/category-assessment/category-assessment.component';
 import { StartAssessmentComponent } from './internal-audit/start-assessment/start-assessment.component';
+import { ExecutiveSummaryComponent } from './internal-audit/executive-summary/executive-summary.component';
 
 export const AUDITOR_ROUTES: Routes = [
     { path: 'audit-dashboard', component: AuditDashboardComponent },
@@ -11,5 +12,6 @@ export const AUDITOR_ROUTES: Routes = [
     { path: 'internal-audit/unit/:auditUnitId', component: AuditUnitDashboardComponent },
     { path: 'internal-audit/:assessmentId/category/:categoryId', component: CategoryAssessmentComponent },
     { path: 'internal-audit/:assessmentId', component: AssessmentWorkspaceComponent },
+    {path:'internal-audit/executive-summary/:assessmentId', component: ExecutiveSummaryComponent },
 
 ];

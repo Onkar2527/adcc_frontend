@@ -12,14 +12,8 @@
             </p>
         </div>
 
-        <button
-            pButton
-            type="button"
-            icon="pi pi-arrow-left"
-            label="Dashboard"
-            severity="secondary"
-            (click)="backToDashboard()"
-        ></button>
+        <button pButton type="button" icon="pi pi-arrow-left" label="Dashboard" severity="secondary"
+            (click)="backToDashboard()"></button>
 
     </div>
 
@@ -33,10 +27,7 @@
         </div>
     </div>
 
-    <div
-        *ngIf="!loading() && error()"
-        class="surface-card border-round-xl shadow-1 p-4"
-    >
+    <div *ngIf="!loading() && error()" class="surface-card border-round-xl shadow-1 p-4">
         <div class="flex align-items-center gap-3 text-red-600">
             <i class="pi pi-exclamation-triangle text-2xl"></i>
             <span class="font-medium">{{ error() }}</span>
@@ -60,10 +51,7 @@
                             </div>
                         </div>
 
-                        <p-tag
-                            [value]="audit.latest_status"
-                            [severity]="getStatusSeverity(audit)"
-                        ></p-tag>
+                        <p-tag [value]="audit.latest_status" [severity]="getStatusSeverity(audit)"></p-tag>
                     </div>
 
                     <div class="detail-row">
@@ -96,10 +84,7 @@
                         </strong>
                     </div>
 
-                    <div
-                        *ngIf="audit.block_reason"
-                        class="mt-4 p-3 border-round-lg bg-red-50 text-red-700 font-medium"
-                    >
+                    <div *ngIf="audit.block_reason" class="mt-4 p-3 border-round-lg bg-red-50 text-red-700 font-medium">
                         {{ audit.block_reason }}
                     </div>
                 </p-card>
@@ -490,10 +475,8 @@
                     Audit Sections
                 </h3>
 
-                <p-tag
-                    [value]="audit.can_continue ? 'Active' : 'Locked'"
-                    [severity]="audit.can_continue ? 'success' : 'danger'"
-                ></p-tag>
+                <p-tag [value]="audit.can_continue ? 'Active' : 'Locked'"
+                    [severity]="audit.can_continue ? 'success' : 'danger'"></p-tag>
             </div>
 
             <div *ngIf="menus().length === 0" class="text-600">
@@ -501,22 +484,41 @@
             </div>
 
             <div class="menu-list" *ngIf="menus().length > 0">
-                <section
-                    class="menu-block"
-                    *ngFor="let menu of menus()"
-                >
+                <!-- Executive Summary -->
+                <!-- Executive Summary -->
+                <section class="menu-block">
+
+                    <div class="menu-title">
+                        Executive Summary
+                    </div>
+
+                    <div class="category-grid">
+
+                        <button type="button" class="category-tile" [disabled]="!audit.can_continue"
+                            (click)="openExecutiveSummary()">
+
+                            <span class="category-name">
+                                Executive Summary
+                            </span>
+
+                            <span class="category-meta">
+                                View and edit the executive summary of this audit.
+                            </span>
+
+                        </button>
+
+                    </div>
+
+                </section>
+
+                <section class="menu-block" *ngFor="let menu of menus()">
                     <div class="menu-title">
                         {{ menu.name }}
                     </div>
 
                     <div class="category-grid">
-                        <button
-                            type="button"
-                            class="category-tile"
-                            *ngFor="let category of menu.categories"
-                            [disabled]="!audit.can_continue"
-                            (click)="openCategory(category)"
-                        >
+                        <button type="button" class="category-tile" *ngFor="let category of menu.categories"
+                            [disabled]="!audit.can_continue" (click)="openCategory(category)">
                             <span class="category-name">
                                 {{ category.name }}
                             </span>
@@ -546,9 +548,7 @@
                                         : category.question_count
                                         ? (category.answered_count / category.question_count) * 100
                                         : 0
-                                "
-                                [showValue]="false"
-                            ></p-progressBar>
+                                " [showValue]="false"></p-progressBar>
                         </button>
                     </div>
                 </section>
