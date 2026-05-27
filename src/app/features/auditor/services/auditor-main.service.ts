@@ -48,11 +48,11 @@ saveExecutiveSummary(
 
 }
 getBranchFinancialPosition(
-    assessmentId: number,
+    branch_id: number,
 ) {
 
     return this.http.get(
-        `${this.apiUrl}/branch-financial-position/${assessmentId}`,
+        `${this.apiUrl}/branch-financial-position/${branch_id}`,
     );
 
 }
