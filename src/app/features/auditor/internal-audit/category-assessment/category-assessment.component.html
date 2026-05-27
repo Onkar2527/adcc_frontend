@@ -601,13 +601,17 @@
 
                                     <button pButton type="button" icon="pi pi-upload" label="Upload CSV"
                                         severity="secondary" [loading]="uploadingAnnexureQuestion() === question.id"
+                                        [disabled]="savingAnnexureQuestion() === question.id"
                                         (click)="annexCsvInput.click()"></button>
 
                                     <button pButton type="button" icon="pi pi-times" label="Clear" severity="secondary"
+                                        [disabled]="savingAnnexureQuestion() === question.id"
                                         (click)="clearAnnexureDraft(question)"></button>
 
                                     <button pButton type="button" icon="pi pi-save"
                                         [label]="question.annexure_draft.id ? 'Update Row' : 'Add Row'"
+                                        [loading]="savingAnnexureQuestion() === question.id"
+                                        [disabled]="uploadingAnnexureQuestion() === question.id"
                                         (click)="saveAnnexureRow(question)"></button>
 
                                 </div>
@@ -722,6 +726,8 @@
                                                         (click)="editAnnexureRow(question, row)"></button>
 
                                                     <button pButton type="button" icon="pi pi-trash" severity="danger"
+                                                        [loading]="deletingAnnexureRowKey() === annexureRowKey(question.id, row.id)"
+                                                        [disabled]="savingAnnexureQuestion() === question.id"
                                                         (click)="deleteAnnexureRow(question, row)"></button>
 
                                                 </span>
@@ -1048,14 +1054,18 @@
                                                 <button pButton type="button" icon="pi pi-upload" label="Upload CSV"
                                                     severity="secondary"
                                                     [loading]="uploadingAnnexureQuestion() === subsetQuestion.id"
+                                                    [disabled]="savingAnnexureQuestion() === subsetQuestion.id"
                                                     (click)="subsetAnnexCsvInput.click()"></button>
 
                                                 <button pButton type="button" icon="pi pi-times" label="Clear"
                                                     severity="secondary"
+                                                    [disabled]="savingAnnexureQuestion() === subsetQuestion.id"
                                                     (click)="clearAnnexureDraft(subsetQuestion)"></button>
 
                                                 <button pButton type="button" icon="pi pi-save"
                                                     [label]="subsetQuestion.annexure_draft.id ? 'Update Row' : 'Add Row'"
+                                                    [loading]="savingAnnexureQuestion() === subsetQuestion.id"
+                                                    [disabled]="uploadingAnnexureQuestion() === subsetQuestion.id"
                                                     (click)="saveAnnexureRow(subsetQuestion)"></button>
                                             </div>
 
@@ -1119,6 +1129,8 @@
 
                                                         <button pButton type="button" icon="pi pi-trash"
                                                             severity="danger"
+                                                            [loading]="deletingAnnexureRowKey() === annexureRowKey(subsetQuestion.id, row.id)"
+                                                            [disabled]="savingAnnexureQuestion() === subsetQuestion.id"
                                                             (click)="deleteAnnexureRow(subsetQuestion, row)"></button>
                                                     </span>
                                                 </div>

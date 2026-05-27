@@ -115,8 +115,14 @@ export class CategoryAssessmentComponent
     savingHeader =
         signal<number | null>(null);
 
+    savingAnnexureQuestion =
+        signal<number | null>(null);
+
     uploadingAnnexureQuestion =
         signal<number | null>(null);
+
+    deletingAnnexureRowKey =
+        signal('');
 
     uploadingEvidenceKey =
         signal('');
@@ -997,6 +1003,13 @@ export class CategoryAssessmentComponent
             : [];
     }
 
+    annexureRowKey(
+        questionId: any,
+        rowId: any,
+    ) {
+        return `${Number(questionId) || 0}:${Number(rowId) || 0}`;
+    }
+
     saveAnnexureRow(
         question: any,
     ) {
@@ -1016,6 +1029,17 @@ export class CategoryAssessmentComponent
             return;
         }
 
+        if (
+            this.savingAnnexureQuestion()
+            === Number(question.id)
+        ) {
+            return;
+        }
+
+        this.savingAnnexureQuestion.set(
+            Number(question.id),
+        );
+
         this.service
             .saveInternalAuditAnnexureRow(
                 Number(detail.overview.id),
@@ -1027,6 +1051,10 @@ export class CategoryAssessmentComponent
             )
             .subscribe({
                 next: (res: any) => {
+                    this.savingAnnexureQuestion.set(
+                        null,
+                    );
+
                     if (
                         !res?.success
                     ) {
@@ -1044,7 +1072,7 @@ export class CategoryAssessmentComponent
                     if (
                         res?.row?.id
                     ) {
-                        question.answer = {
+                        const nextAnswer = {
                             ...(question.answer || {}),
                             id:
                                 Number(
@@ -1064,22 +1092,34 @@ export class CategoryAssessmentComponent
                                         === Number(res.row.id),
                                 );
 
-                        if (
-                            rowIndex >= 0
-                        ) {
-                            question.annexure_rows[rowIndex] = {
-                                ...question.annexure_rows[rowIndex],
-                                ...res.row,
-                            };
-                        } else {
-                            question.annexure_rows = [
-                                ...(question.annexure_rows || []),
-                                res.row,
-                            ];
-                        }
+                        const currentRows =
+                            question.annexure_rows || [];
 
-                        question.answer.annexure_rows =
-                            question.annexure_rows;
+                        question.annexure_rows =
+                            rowIndex >= 0
+                                ? currentRows.map(
+                                    (
+                                        currentRow: any,
+                                        index: number,
+                                    ) =>
+                                        index === rowIndex
+                                            ? {
+                                                ...currentRow,
+                                                ...res.row,
+                                            }
+                                            : currentRow,
+                                )
+                                : [
+                                    ...currentRows,
+                                    res.row,
+                                ];
+
+                        question.answer = {
+                            ...nextAnswer,
+                            annexure_rows: [
+                                ...question.annexure_rows,
+                            ],
+                        };
 
                         this.clearAnnexureDraft(
                             question,
@@ -1093,6 +1133,10 @@ export class CategoryAssessmentComponent
                     }
                 },
                 error: (err) => {
+                    this.savingAnnexureQuestion.set(
+                        null,
+                    );
+
                     this.notification.error(
                         err?.error?.message
                         || 'Unable to save annexure row.',
@@ -1144,6 +1188,23 @@ export class CategoryAssessmentComponent
             return;
         }
 
+        const rowKey =
+            this.annexureRowKey(
+                question.id,
+                row.id,
+            );
+
+        if (
+            this.deletingAnnexureRowKey()
+            === rowKey
+        ) {
+            return;
+        }
+
+        this.deletingAnnexureRowKey.set(
+            rowKey,
+        );
+
         this.service
             .deleteInternalAuditAnnexureRow(
                 Number(detail.overview.id),
@@ -1155,6 +1216,10 @@ export class CategoryAssessmentComponent
             )
             .subscribe({
                 next: (res: any) => {
+                    this.deletingAnnexureRowKey.set(
+                        '',
+                    );
+
                     if (
                         !res?.success
                     ) {
@@ -1179,8 +1244,12 @@ export class CategoryAssessmentComponent
                     if (
                         question.answer
                     ) {
-                        question.answer.annexure_rows =
-                            question.annexure_rows;
+                        question.answer = {
+                            ...question.answer,
+                            annexure_rows: [
+                                ...question.annexure_rows,
+                            ],
+                        };
                     }
 
                     if (
@@ -1193,6 +1262,10 @@ export class CategoryAssessmentComponent
                     }
                 },
                 error: (err) => {
+                    this.deletingAnnexureRowKey.set(
+                        '',
+                    );
+
                     this.notification.error(
                         err?.error?.message
                         || 'Unable to delete annexure row.',
