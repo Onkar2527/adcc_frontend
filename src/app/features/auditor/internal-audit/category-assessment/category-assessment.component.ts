@@ -18,7 +18,7 @@ import {
     ActivatedRoute,
     Router,
 } from '@angular/router';
-
+import { CardModule } from 'primeng/card';
 import {
     ButtonModule,
 } from 'primeng/button';
@@ -38,6 +38,7 @@ import {
 import {
     AuditDashboardService,
 } from '../../services/auditor-main.service';
+import { TableModule } from 'primeng/table';
 
 @Component({
     selector: 'app-category-assessment',
@@ -49,6 +50,10 @@ import {
         FormsModule,
         ButtonModule,
         SkeletonModule,
+        CardModule,
+        TableModule,
+
+
     ],
 
     templateUrl:
@@ -154,6 +159,9 @@ export class CategoryAssessmentComponent
     samplingSelection: number[] = [];
 
     employeeId = 0;
+    riskOptions: any = {};
+
+    columnOptionsMap: any = {};
 
     private pendingQuestionIds =
         new Set<number>();
@@ -423,7 +431,8 @@ export class CategoryAssessmentComponent
                         this.buildAnswerOptions(
                             question,
                         );
-
+                    question.is_re_audit =
+                        this.isReAudit
                     question.selectedSubsetSets =
                         this.buildSelectedSubsetSets(
                             question,

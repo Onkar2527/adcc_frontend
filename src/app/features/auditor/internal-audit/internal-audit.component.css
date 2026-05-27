@@ -566,6 +566,16 @@
     color: var(--text-color);
     font: inherit;
 }
+.answer-control1 {
+    width: 70%;
+    min-height: 2.5rem;
+    padding: .55rem .65rem;
+    border: 1px solid var(--surface-300);
+    border-radius: .5rem;
+    background: var(--surface-0);
+    color: var(--text-color);
+    font: inherit;
+}
 
 .answer-control:focus {
     outline: 0;

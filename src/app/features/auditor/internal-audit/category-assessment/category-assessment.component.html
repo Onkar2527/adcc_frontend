@@ -1,9 +1,7 @@
 <div class="internal-audit min-h-screen bg-gray-100 p-4 md:p-5">
 
-    <div
-        *ngIf="!drawerMode()"
-        class="flex flex-column md:flex-row md:align-items-center md:justify-content-between gap-3 mb-4"
-    >
+    <div *ngIf="!drawerMode()"
+        class="flex flex-column md:flex-row md:align-items-center md:justify-content-between gap-3 mb-4">
 
         <div>
 
@@ -17,21 +15,12 @@
 
         </div>
 
-        <button
-            pButton
-            type="button"
-            icon="pi pi-arrow-left"
-            label="Dashboard"
-            severity="secondary"
-            (click)="backToDashboard()"
-        ></button>
+        <button pButton type="button" icon="pi pi-arrow-left" label="Dashboard" severity="secondary"
+            (click)="backToDashboard()"></button>
 
     </div>
 
-    <div
-        *ngIf="loading()"
-        class="grid"
-    >
+    <div *ngIf="loading()" class="grid">
 
         <div class="col-12 lg:col-4">
             <p-skeleton height="10rem"></p-skeleton>
@@ -43,10 +32,7 @@
 
     </div>
 
-    <div
-        *ngIf="!loading() && error()"
-        class="surface-card border-round-xl shadow-1 p-4"
-    >
+    <div *ngIf="!loading() && error()" class="surface-card border-round-xl shadow-1 p-4">
 
         <div class="flex align-items-center gap-3 text-red-600">
 
@@ -60,17 +46,11 @@
 
     </div>
 
-    <ng-container
-        *ngIf="!loading() && !error() && categoryDetail() as detail"
-    >
+    <ng-container *ngIf="!loading() && !error() && categoryDetail() as detail">
 
-        <div
-            class="surface-card border-round-xl shadow-1 p-4 mb-4"
-        >
+        <div class="surface-card border-round-xl shadow-1 p-4 mb-4">
 
-            <div
-                class="flex flex-column md:flex-row md:align-items-start md:justify-content-between gap-3"
-            >
+            <div class="flex flex-column md:flex-row md:align-items-start md:justify-content-between gap-3">
 
                 <div>
 
@@ -82,18 +62,12 @@
                         {{ detail.category?.name }}
                     </h3>
 
-                    <p
-                        *ngIf="isReAudit(detail); else pendingLabel"
-                        class="text-red-700 font-medium mt-2 mb-0"
-                    >
+                    <p *ngIf="isReAudit(detail); else pendingLabel" class="text-red-700 font-medium mt-2 mb-0">
                         Re-Audit: Reviewer rejected points only
                     </p>
 
                     <ng-template #pendingLabel>
-                        <p
-                            *ngIf="pendingOnly()"
-                            class="text-orange-700 font-medium mt-2 mb-0"
-                        >
+                        <p *ngIf="pendingOnly()" class="text-orange-700 font-medium mt-2 mb-0">
                             Pending questions
                         </p>
                     </ng-template>
@@ -107,41 +81,22 @@
 
                 </div>
 
-                <button
-                    pButton
-                    type="button"
-                    icon="pi pi-arrow-left"
-                    [label]="drawerMode() ? 'Close' : 'Back'"
-                    severity="secondary"
-                    (click)="backToWorkspace()"
-                ></button>
+                <button pButton type="button" icon="pi pi-arrow-left" [label]="drawerMode() ? 'Close' : 'Back'"
+                    severity="secondary" (click)="backToWorkspace()"></button>
 
             </div>
 
         </div>
 
-        <div
-            *ngIf="isAccountCategory(detail)"
-            class="account-assessment surface-card border-round-xl shadow-1 p-4 mb-4"
-        >
-            <div
-                *ngIf="canManageSampling(detail)"
-                class="flex justify-content-end mb-3"
-            >
-                <button
-                    pButton
-                    type="button"
-                    icon="pi pi-sliders-h"
-                    [label]="samplingOpen() ? 'Close Sampling' : 'Manage Sampling'"
-                    severity="secondary"
-                    (click)="toggleSampling()"
-                ></button>
+        <div *ngIf="isAccountCategory(detail)"
+            class="account-assessment surface-card border-round-xl shadow-1 p-4 mb-4">
+            <div *ngIf="canManageSampling(detail)" class="flex justify-content-end mb-3">
+                <button pButton type="button" icon="pi pi-sliders-h"
+                    [label]="samplingOpen() ? 'Close Sampling' : 'Manage Sampling'" severity="secondary"
+                    (click)="toggleSampling()"></button>
             </div>
 
-            <section
-                *ngIf="samplingOpen()"
-                class="sampling-panel mb-4"
-            >
+            <section *ngIf="samplingOpen()" class="sampling-panel mb-4">
                 <div class="font-bold text-900 mb-3">
                     Select Accounts For Sampling
                 </div>
@@ -149,88 +104,49 @@
                 <div class="sampling-filters">
                     <label class="sampling-field">
                         <span>Filter Type</span>
-                        <select
-                            class="answer-control"
-                            [(ngModel)]="samplingFilterType"
-                        >
+                        <select class="answer-control" [(ngModel)]="samplingFilterType">
                             <option [ngValue]="0">
                                 All Available Accounts
                             </option>
-                            <option
-                                *ngFor="let filter of samplingData()?.filter_types || []"
-                                [ngValue]="filter.id"
-                            >
+                            <option *ngFor="let filter of samplingData()?.filter_types || []" [ngValue]="filter.id">
                                 {{ filter.name }}
                             </option>
                         </select>
                     </label>
 
-                    <label
-                        *ngIf="samplingFilterType"
-                        class="sampling-field"
-                    >
+                    <label *ngIf="samplingFilterType" class="sampling-field">
                         <span>
                             {{ samplingFilterType === 1 ? 'From Account' : 'Percentage' }}
                         </span>
-                        <input
-                            type="text"
-                            class="answer-control"
-                            [(ngModel)]="samplingPrimaryValue"
-                        />
+                        <input type="text" class="answer-control" [(ngModel)]="samplingPrimaryValue" />
                     </label>
 
-                    <label
-                        *ngIf="samplingFilterType === 1"
-                        class="sampling-field"
-                    >
+                    <label *ngIf="samplingFilterType === 1" class="sampling-field">
                         <span>To Account</span>
-                        <input
-                            type="text"
-                            class="answer-control"
-                            [(ngModel)]="samplingSecondaryValue"
-                        />
+                        <input type="text" class="answer-control" [(ngModel)]="samplingSecondaryValue" />
                     </label>
 
-                    <button
-                        pButton
-                        type="button"
-                        icon="pi pi-search"
-                        label="Search"
-                        severity="secondary"
-                        [loading]="samplingLoading()"
-                        (click)="loadSampling()"
-                    ></button>
+                    <button pButton type="button" icon="pi pi-search" label="Search" severity="secondary"
+                        [loading]="samplingLoading()" (click)="loadSampling()"></button>
                 </div>
 
-                <div
-                    *ngIf="!samplingLoading() && samplingData() as sampling"
-                    class="sampling-result"
-                >
+                <div *ngIf="!samplingLoading() && samplingData() as sampling" class="sampling-result">
                     <div class="text-sm text-600 mb-3">
                         Showing {{ sampling.displayed_count }} of
                         {{ sampling.matching_count }} available account(s).
                     </div>
 
-                    <div
-                        *ngIf="!sampling.candidates?.length"
-                        class="text-600 text-sm"
-                    >
+                    <div *ngIf="!sampling.candidates?.length" class="text-600 text-sm">
                         No unsampled account is available for the selected filter.
                     </div>
 
-                    <div
-                        *ngIf="sampling.candidates?.length"
-                        class="sampling-table-wrap"
-                    >
+                    <div *ngIf="sampling.candidates?.length" class="sampling-table-wrap">
                         <table class="sampling-table">
                             <thead>
                                 <tr>
                                     <th>
-                                        <input
-                                            type="checkbox"
-                                            aria-label="Select all accounts"
-                                            (change)="toggleAllSamplingAccounts($any($event.target).checked)"
-                                        />
+                                        <input type="checkbox" aria-label="Select all accounts"
+                                            (change)="toggleAllSamplingAccounts($any($event.target).checked)" />
                                     </th>
                                     <th>Scheme</th>
                                     <th>Account No.</th>
@@ -242,11 +158,8 @@
                             <tbody>
                                 <tr *ngFor="let account of sampling.candidates">
                                     <td>
-                                        <input
-                                            type="checkbox"
-                                            [checked]="samplingAccountSelected(account.id)"
-                                            (change)="toggleSamplingAccount(account.id, $any($event.target).checked)"
-                                        />
+                                        <input type="checkbox" [checked]="samplingAccountSelected(account.id)"
+                                            (change)="toggleSamplingAccount(account.id, $any($event.target).checked)" />
                                     </td>
                                     <td>{{ account.scheme_code }}</td>
                                     <td>{{ account.account_no }}</td>
@@ -264,8 +177,8 @@
                                     </td>
                                     <td>
                                         {{
-                                            (account.principal_amount || account.sanction_amount || 0)
-                                                | number:'1.2-2'
+                                        (account.principal_amount || account.sanction_amount || 0)
+                                        | number:'1.2-2'
                                         }}
                                     </td>
                                 </tr>
@@ -273,17 +186,9 @@
                         </table>
                     </div>
 
-                    <button
-                        *ngIf="sampling.candidates?.length"
-                        pButton
-                        type="button"
-                        icon="pi pi-check"
-                        label="Apply Selected Samples"
-                        class="mt-3"
-                        [loading]="samplingSaving()"
-                        [disabled]="!samplingSelection.length"
-                        (click)="applySampling()"
-                    ></button>
+                    <button *ngIf="sampling.candidates?.length" pButton type="button" icon="pi pi-check"
+                        label="Apply Selected Samples" class="mt-3" [loading]="samplingSaving()"
+                        [disabled]="!samplingSelection.length" (click)="applySampling()"></button>
                 </div>
             </section>
 
@@ -298,29 +203,17 @@
                         </span>
                     </div>
 
-                    <input
-                        type="text"
-                        class="answer-control mb-3"
-                        [(ngModel)]="accountSearch"
-                        placeholder="Search account"
-                    />
+                    <input type="text" class="answer-control mb-3" [(ngModel)]="accountSearch"
+                        placeholder="Search account" />
 
-                    <div
-                        *ngIf="!detail.accounts?.length"
-                        class="text-600 text-sm"
-                    >
+                    <div *ngIf="!detail.accounts?.length" class="text-600 text-sm">
                         No sampled account is available for this category.
                     </div>
 
                     <div class="account-items">
-                        <button
-                            type="button"
-                            class="account-item"
-                            *ngFor="let account of filteredAccounts()"
-                            [class.active]="selectedDumpId() === account.id"
-                            [class.completed]="account.is_completed"
-                            (click)="selectAccount(account)"
-                        >
+                        <button type="button" class="account-item" *ngFor="let account of filteredAccounts()"
+                            [class.active]="selectedDumpId() === account.id" [class.completed]="account.is_completed"
+                            (click)="selectAccount(account)">
                             <strong>{{ account.account_no }}</strong>
                             <small>
                                 {{ account.scheme_code || '-' }}
@@ -353,25 +246,13 @@
                         </div>
 
                         <div class="flex gap-2 flex-wrap">
-                            <button
-                                *ngIf="canManageSampling(detail) && !account.is_completed"
-                                pButton
-                                type="button"
-                                icon="pi pi-times"
-                                label="Remove Sample"
-                                severity="secondary"
-                                (click)="removeSampling(account)"
-                            ></button>
+                            <button *ngIf="canManageSampling(detail) && !account.is_completed" pButton type="button"
+                                icon="pi pi-times" label="Remove Sample" severity="secondary"
+                                (click)="removeSampling(account)"></button>
 
-                            <button
-                                pButton
-                                type="button"
-                                icon="pi pi-check-circle"
-                                label="Mark Account Complete"
-                                [disabled]="account.is_completed"
-                                [loading]="completingAccount()"
-                                (click)="completeAccount()"
-                            ></button>
+                            <button pButton type="button" icon="pi pi-check-circle" label="Mark Account Complete"
+                                [disabled]="account.is_completed" [loading]="completingAccount()"
+                                (click)="completeAccount()"></button>
                         </div>
                     </div>
                 </div>
@@ -382,58 +263,38 @@
             </div>
         </div>
 
-        <div
-            *ngIf="!detail.sets?.length && !isAccountCategory(detail)"
-            class="surface-card border-round-xl shadow-1 p-4 text-600"
-        >
+        <div *ngIf="!detail.sets?.length && !isAccountCategory(detail)"
+            class="surface-card border-round-xl shadow-1 p-4 text-600">
             No question is configured for this audit category.
         </div>
 
-        <div
-            class="question-set"
-            *ngFor="let set of (isAccountCategory(detail) && !detail.selected_account ? [] : detail.sets)"
-        >
+        <div class="question-set"
+            *ngFor="let set of (isAccountCategory(detail) && !detail.selected_account ? [] : detail.sets)">
 
             <div class="question-set-title">
                 {{ set.name }}
             </div>
 
-            <section
-                class="question-header"
-                *ngFor="let header of set.headers"
-            >
+            <section class="question-header" *ngFor="let header of set.headers">
 
-                <div
-                    class="flex flex-column md:flex-row md:align-items-center md:justify-content-between gap-3 mb-3"
-                >
+                <div class="flex flex-column md:flex-row md:align-items-center md:justify-content-between gap-3 mb-3">
 
                     <div class="question-header-title m-0">
                         {{ header.name }}
                     </div>
 
                     @if (canApplyDefaults()) {
-                        <div class="flex gap-2 flex-wrap">
-                            <button
-                                pButton
-                                type="button"
-                                icon="pi pi-check-square"
-                                label="Default"
-                                severity="secondary"
-                                (click)="selectDefaultAnswers(header)"
-                            ></button>
-                        </div>
+                    <div class="flex gap-2 flex-wrap">
+                        <button pButton type="button" icon="pi pi-check-square" label="Default" severity="secondary"
+                            (click)="selectDefaultAnswers(header)"></button>
+                    </div>
                     }
 
                 </div>
 
-                <ng-container
-                    *ngFor="let question of header.questions; let i = index"
-                >
+                <ng-container *ngFor="let question of header.questions; let i = index">
 
-                    <div
-                        class="question-card"
-                        [class.re-audit-question]="isReAudit(detail)"
-                    >
+                    <p-card styleClass="mb-4 border-round-xl shadow-2" [class.re-audit-question]="isReAudit(detail)">
 
                         <div class="question-main">
 
@@ -453,26 +314,19 @@
                                         {{ question.option_name }}
                                     </span>
 
-                                    <span
-                                        *ngIf="question.risk_category_name"
-                                    >
+                                    <span *ngIf="question.risk_category_name">
                                         Risk:
                                         {{ question.risk_category_name }}
                                     </span>
 
-                                    <span
-                                        *ngIf="question.weightage"
-                                    >
+                                    <span *ngIf="question.weightage">
                                         Weightage:
                                         {{ question.weightage }}
                                     </span>
 
                                 </div>
 
-                                <div
-                                    *ngIf="isReAudit(detail) && reviewerComment(question)"
-                                    class="reviewer-feedback"
-                                >
+                                <div *ngIf="isReAudit(detail) && reviewerComment(question)" class="reviewer-feedback">
                                     <span>Reviewer Comment</span>
                                     {{ reviewerComment(question) }}
                                 </div>
@@ -487,28 +341,18 @@
                                 Answer
                             </label>
 
-                            <textarea
-                                *ngIf="isTextAnswer(question); else optionAnswer"
-                                class="answer-control"
-                                rows="3"
-                                [(ngModel)]="question.answer_value"
-                            ></textarea>
+                            <textarea *ngIf="isTextAnswer(question); else optionAnswer" class="answer-control" rows="3"
+                                [(ngModel)]="question.answer_value"></textarea>
 
                             <ng-template #optionAnswer>
 
-                                <select
-                                    class="answer-control"
-                                    [(ngModel)]="question.answer_value"
-                                >
+                                <select class="answer-control" [(ngModel)]="question.answer_value">
 
                                     <option value="">
                                         Please select
                                     </option>
 
-                                    <option
-                                        *ngFor="let option of question.options"
-                                        [value]="option.value"
-                                    >
+                                    <option *ngFor="let option of question.options" [value]="option.value">
                                         {{ option.label }}
                                     </option>
 
@@ -520,18 +364,11 @@
                                 Audit Comment
                             </label>
 
-                            <textarea
-                                class="answer-control"
-                                rows="2"
-                                [(ngModel)]="question.audit_comment"
-                            ></textarea>
+                            <textarea class="answer-control" rows="2" [(ngModel)]="question.audit_comment"></textarea>
 
                             <label class="compliance-check mt-3">
 
-                                <input
-                                    type="checkbox"
-                                    [(ngModel)]="question.is_compliance"
-                                />
+                                <input type="checkbox" [(ngModel)]="question.is_compliance" />
 
                                 <span>
                                     Compliance required
@@ -541,10 +378,7 @@
 
                             <label class="compliance-check mt-3">
 
-                                <input
-                                    type="checkbox"
-                                    [(ngModel)]="question.audit_compulsary_ev_upload"
-                                />
+                                <input type="checkbox" [(ngModel)]="question.audit_compulsary_ev_upload" />
 
                                 <span>
                                     Evidence to be uploaded
@@ -552,394 +386,359 @@
 
                             </label>
 
-                            <div
-                                *ngIf="isReAudit(detail) && question.re_audit_annexure_only"
-                                class="reviewer-feedback"
-                            >
+                            <div *ngIf="isReAudit(detail) && question.re_audit_annexure_only" class="reviewer-feedback">
                                 Update only the rejected annexure row below.
                             </div>
 
-                            <div
-                                *ngIf="!buildIsAnnexureSelected(question) || question.answer?.evidence"
-                                class="evidence-panel"
-                            >
+                            <div *ngIf="!buildIsAnnexureSelected(question) || question.answer?.evidence"
+                                class="evidence-panel">
 
                                 <div class="evidence-title">
                                     <span>Audit Evidence</span>
-                                    <span
-                                        *ngIf="isEvidenceRequired(question)"
-                                        class="evidence-required"
-                                    >
+                                    <span *ngIf="isEvidenceRequired(question)" class="evidence-required">
                                         Required
                                     </span>
                                 </div>
 
                                 <ng-container
-                                    *ngIf="question.answer?.evidence as evidence; else questionEvidenceUpload"
-                                >
+                                    *ngIf="question.answer?.evidence as evidence; else questionEvidenceUpload">
                                     <div class="evidence-file">
                                         <span>
                                             {{ evidence.description || evidence.file_name }}
                                         </span>
 
-                                        <button
-                                            pButton
-                                            type="button"
-                                            icon="pi pi-eye"
-                                            severity="secondary"
-                                            title="View evidence"
-                                            (click)="viewEvidence(evidence)"
-                                        ></button>
+                                        <button pButton type="button" icon="pi pi-eye" severity="secondary"
+                                            title="View evidence" (click)="viewEvidence(evidence)"></button>
 
-                                        <button
-                                            pButton
-                                            type="button"
-                                            icon="pi pi-trash"
-                                            severity="danger"
-                                            title="Remove evidence"
-                                            (click)="deleteEvidence(evidence)"
-                                        ></button>
+                                        <button pButton type="button" icon="pi pi-trash" severity="danger"
+                                            title="Remove evidence" (click)="deleteEvidence(evidence)"></button>
                                     </div>
                                 </ng-container>
 
                                 <ng-template #questionEvidenceUpload>
-                                    <input
-                                        #questionEvidenceInput
-                                        type="file"
+                                    <input #questionEvidenceInput type="file"
                                         accept=".jpg,.jpeg,.png,.pdf,image/jpeg,image/png,application/pdf"
-                                        style="display: none"
-                                        (change)="uploadEvidence(question, $event)"
-                                    />
+                                        style="display: none" (change)="uploadEvidence(question, $event)" />
 
-                                    <button
-                                        pButton
-                                        type="button"
-                                        icon="pi pi-upload"
-                                        label="Upload Evidence"
-                                        severity="secondary"
-                                        [disabled]="!question.answer?.id"
+                                    <button pButton type="button" icon="pi pi-upload" label="Upload Evidence"
+                                        severity="secondary" [disabled]="!question.answer?.id"
                                         [loading]="uploadingEvidenceKey() === evidenceKey(question)"
-                                        (click)="questionEvidenceInput.click()"
-                                    ></button>
+                                        (click)="questionEvidenceInput.click()"></button>
 
-                                    <div
-                                        *ngIf="!question.answer?.id"
-                                        class="evidence-hint"
-                                    >
+                                    <div *ngIf="!question.answer?.id" class="evidence-hint">
                                         Save the answer first to upload evidence.
                                     </div>
                                 </ng-template>
 
                             </div>
 
-                            <div
-                                *ngIf="buildIsAnnexureSelected(question) && !question.answer?.evidence"
-                                class="evidence-panel evidence-hint"
-                            >
-                                Upload evidence from the annexure row after adding the row.
-                            </div>
+                            <div *ngIf="buildIsAnnexureSelected(question)" class="annexure-preview">
 
-                            <div
-                                *ngIf="buildIsAnnexureSelected(question)"
-                                class="annexure-preview"
-                            >
+                                <!-- TITLE -->
 
-                                <div class="font-medium text-900 mb-2">
+                                <div class="font-medium text-900 mb-3">
                                     {{ question.annexure?.name || 'Annexure' }}
                                 </div>
 
-                                <div
-                                    *ngIf="question.annexure?.columns?.length; else noAnnexureColumns"
-                                    class="annexure-column-list"
-                                >
 
-                                    <span
-                                        *ngFor="let column of question.annexure.columns"
-                                    >
-                                        {{ column.name }}
-                                    </span>
 
-                                </div>
+                                <div class="surface-100 border-round-lg p-3 mb-3">
 
-                                <ng-template #noAnnexureColumns>
-
-                                    <div class="text-600 text-sm">
-                                        No annexure columns configured.
+                                    <div class="font-semibold text-900 mb-3">
+                                        Input Section
                                     </div>
 
-                                </ng-template>
+                                    <!-- INPUT SCROLL -->
 
-                                <div
-                                    *ngIf="question.annexure?.columns?.length"
-                                    class="annexure-editor"
-                                >
-                                    <div class="annexure-grid">
-                                        <div
-                                            class="annexure-field"
-                                            *ngFor="let column of question.annexure.columns; let ci = index"
-                                        >
-                                            <label class="answer-label">
-                                                {{ column.name }}
-                                            </label>
+                                    <div class="overflow-auto" style="
+                width: 100%;
+                max-height: 400px;
+                overflow-x: auto;
+            ">
 
-                                            <textarea
-                                                *ngIf="column.column_type_id == 2; else annexureInput"
-                                                class="answer-control"
-                                                rows="2"
-                                                [(ngModel)]="question.annexure_draft.values[ci]"
-                                            ></textarea>
+                                        <div class="annexure-grid" style="
+                    min-width: 2200px;
+                    width: max-content;
+                ">
 
-                                            <ng-template #annexureInput>
-                                                <select
-                                                    *ngIf="column.column_type_id == 3; else annexureText"
-                                                    class="answer-control"
-                                                    [(ngModel)]="question.annexure_draft.values[ci]"
-                                                >
+                                            <!-- DYNAMIC COLUMNS -->
+
+                                            <div class="annexure-field"
+                                                *ngFor="let column of question.annexure.columns; let ci = index">
+
+                                                <label class="answer-label">
+                                                    {{ column.name }}
+                                                </label>
+
+                                                <!-- TEXTAREA -->
+
+                                                <textarea *ngIf="column.column_type_id == 2; else annexureInput"
+                                                    class="answer-control1" rows="2"
+                                                    [(ngModel)]="question.annexure_draft.values[ci]"></textarea>
+
+                                                <ng-template #annexureInput>
+
+                                                    <!-- SELECT -->
+
+                                                    <select *ngIf="column.column_type_id == 3; else annexureText"
+                                                        class="answer-control1"
+                                                        [(ngModel)]="question.annexure_draft.values[ci]">
+
+                                                        <option value="">
+                                                            Please select
+                                                        </option>
+
+                                                        <option *ngFor="let option of annexureColumnOptions(column)"
+                                                            [value]="option.option_label">
+                                                            {{ option.option_label }}
+                                                        </option>
+
+                                                    </select>
+
+                                                    <!-- INPUT -->
+
+                                                    <ng-template #annexureText>
+
+                                                        <input type="text" class="answer-control1"
+                                                            [(ngModel)]="question.annexure_draft.values[ci]" />
+
+                                                    </ng-template>
+
+                                                </ng-template>
+
+                                            </div>
+
+                                            <!-- BUSINESS RISK -->
+
+                                            <div class="annexure-field">
+
+                                                <label class="answer-label">
+                                                    Business Risk
+                                                </label>
+
+                                                <select class="answer-control1"
+                                                    [(ngModel)]="question.annexure_draft.business_risk"
+                                                    [disabled]="!isCustomAnnexureRisk(question)">
+
                                                     <option value="">
                                                         Please select
                                                     </option>
 
-                                                    <option
-                                                        *ngFor="let option of annexureColumnOptions(column)"
-                                                        [value]="option.option_label"
-                                                    >
-                                                        {{ option.option_label }}
+                                                    <option *ngFor="let risk of annexureRiskOptions().business_risks"
+                                                        [value]="risk.id">
+                                                        {{ risk.label }}
                                                     </option>
+
                                                 </select>
 
-                                                <ng-template #annexureText>
-                                                    <input
-                                                        type="text"
-                                                        class="answer-control"
-                                                        [(ngModel)]="question.annexure_draft.values[ci]"
-                                                    />
-                                                </ng-template>
-                                            </ng-template>
+                                            </div>
+
+                                            <!-- CONTROL RISK -->
+
+                                            <div class="annexure-field">
+
+                                                <label class="answer-label">
+                                                    Control Risk
+                                                </label>
+
+                                                <select class="answer-control1"
+                                                    [(ngModel)]="question.annexure_draft.control_risk"
+                                                    [disabled]="!isCustomAnnexureRisk(question)">
+
+                                                    <option value="">
+                                                        Please select
+                                                    </option>
+
+                                                    <option *ngFor="let risk of annexureRiskOptions().control_risks"
+                                                        [value]="risk.id">
+                                                        {{ risk.label }}
+                                                    </option>
+
+                                                </select>
+
+                                            </div>
+
+                                            <!-- RISK TYPE -->
+
+                                            <div class="annexure-field">
+
+                                                <label class="answer-label">
+                                                    Risk Type
+                                                </label>
+
+                                                <select class="answer-control1"
+                                                    [(ngModel)]="question.annexure_draft.risk_cat_id"
+                                                    [disabled]="!isCustomAnnexureRisk(question)">
+
+                                                    <option value="">
+                                                        Please select
+                                                    </option>
+
+                                                    <option *ngFor="let risk of annexureRiskOptions().risk_categories"
+                                                        [value]="risk.id">
+                                                        {{ risk.risk_category }}
+                                                    </option>
+
+                                                </select>
+
+                                            </div>
+
                                         </div>
 
-                                        <div class="annexure-field">
-                                            <label class="answer-label">
-                                                Business Risk
-                                            </label>
-
-                                            <select
-                                                class="answer-control"
-                                                [(ngModel)]="question.annexure_draft.business_risk"
-                                                [disabled]="!isCustomAnnexureRisk(question)"
-                                            >
-                                                <option value="">
-                                                    Please select
-                                                </option>
-
-                                                <option
-                                                    *ngFor="let risk of annexureRiskOptions().business_risks"
-                                                    [value]="risk.id"
-                                                >
-                                                    {{ risk.label }}
-                                                </option>
-                                            </select>
-                                        </div>
-
-                                        <div class="annexure-field">
-                                            <label class="answer-label">
-                                                Control Risk
-                                            </label>
-
-                                            <select
-                                                class="answer-control"
-                                                [(ngModel)]="question.annexure_draft.control_risk"
-                                                [disabled]="!isCustomAnnexureRisk(question)"
-                                            >
-                                                <option value="">
-                                                    Please select
-                                                </option>
-
-                                                <option
-                                                    *ngFor="let risk of annexureRiskOptions().control_risks"
-                                                    [value]="risk.id"
-                                                >
-                                                    {{ risk.label }}
-                                                </option>
-                                            </select>
-                                        </div>
-
-                                        <div class="annexure-field">
-                                            <label class="answer-label">
-                                                Risk Type
-                                            </label>
-
-                                            <select
-                                                class="answer-control"
-                                                [(ngModel)]="question.annexure_draft.risk_cat_id"
-                                                [disabled]="!isCustomAnnexureRisk(question)"
-                                            >
-                                                <option value="">
-                                                    Please select
-                                                </option>
-
-                                                <option
-                                                    *ngFor="let risk of annexureRiskOptions().risk_categories"
-                                                    [value]="risk.id"
-                                                >
-                                                    {{ risk.risk_category }}
-                                                </option>
-                                            </select>
-                                        </div>
                                     </div>
 
-                                    <div class="flex flex-wrap justify-content-end gap-2 mt-3">
-                                        <input
-                                            #annexCsvInput
-                                            type="file"
-                                            accept=".csv,text/csv"
-                                            style="display: none"
-                                            (change)="uploadAnnexureCsv(question, $event)"
-                                        />
+                                </div>
 
-                                        <button
-                                            pButton
-                                            type="button"
-                                            icon="pi pi-download"
-                                            label="Sample CSV"
-                                            severity="secondary"
-                                            (click)="downloadAnnexureSample(question)"
-                                        ></button>
 
-                                        <button
-                                            pButton
-                                            type="button"
-                                            icon="pi pi-upload"
-                                            label="Upload CSV"
-                                            severity="secondary"
-                                            [loading]="uploadingAnnexureQuestion() === question.id"
-                                            (click)="annexCsvInput.click()"
-                                        ></button>
 
-                                        <button
-                                            pButton
-                                            type="button"
-                                            icon="pi pi-times"
-                                            label="Clear"
-                                            severity="secondary"
-                                            (click)="clearAnnexureDraft(question)"
-                                        ></button>
+                                <div class="flex flex-wrap justify-content-end gap-2 mb-4">
 
-                                        <button
-                                            pButton
-                                            type="button"
-                                            icon="pi pi-save"
-                                            [label]="question.annexure_draft.id ? 'Update Row' : 'Add Row'"
-                                            (click)="saveAnnexureRow(question)"
-                                        ></button>
+                                    <input #annexCsvInput type="file" accept=".csv,text/csv" style="display: none"
+                                        (change)="uploadAnnexureCsv(question, $event)" />
+
+                                    <button pButton type="button" icon="pi pi-download" label="Sample CSV"
+                                        severity="secondary" (click)="downloadAnnexureSample(question)"></button>
+
+                                    <button pButton type="button" icon="pi pi-upload" label="Upload CSV"
+                                        severity="secondary" [loading]="uploadingAnnexureQuestion() === question.id"
+                                        (click)="annexCsvInput.click()"></button>
+
+                                    <button pButton type="button" icon="pi pi-times" label="Clear" severity="secondary"
+                                        (click)="clearAnnexureDraft(question)"></button>
+
+                                    <button pButton type="button" icon="pi pi-save"
+                                        [label]="question.annexure_draft.id ? 'Update Row' : 'Add Row'"
+                                        (click)="saveAnnexureRow(question)"></button>
+
+                                </div>
+
+
+                                <div *ngIf="question.annexure_rows?.length" class="surface-100 border-round-lg p-3">
+
+                                    <div class="font-semibold text-900 mb-3">
+                                        Output Table
                                     </div>
 
-                                    <div
-                                        *ngIf="question.annexure_rows?.length"
-                                        class="annexure-table"
-                                    >
-                                        <div class="annexure-table-row annexure-table-head">
-                                            <span
-                                                *ngFor="let column of question.annexure.columns"
-                                            >
-                                                {{ column.name }}
-                                            </span>
-                                            <span>Business Risk</span>
-                                            <span>Control Risk</span>
-                                            <span>Risk Type</span>
-                                            <span>
-                                                Evidence
-                                                <small
-                                                    *ngIf="isEvidenceRequired(question)"
-                                                    class="evidence-required"
-                                                >
-                                                    Required
-                                                </small>
-                                            </span>
-                                            <span>Action</span>
-                                        </div>
+                                    <!-- TABLE SCROLL -->
 
-                                        <div
-                                            class="annexure-table-row"
-                                            *ngFor="let row of question.annexure_rows"
-                                        >
-                                            <span
-                                                *ngFor="let column of question.annexure.columns; let ci = index"
-                                            >
-                                                {{ row.values?.[ci] || '-' }}
-                                            </span>
-                                            <span>{{ riskLabel(row.business_risk, 'business_risks') }}</span>
-                                            <span>{{ riskLabel(row.control_risk, 'control_risks') }}</span>
-                                            <span>{{ riskCategoryLabel(row.risk_cat_id) }}</span>
+                                    <div class="overflow-auto border-1 surface-border border-round-lg" style="
+                width: 100%;
+                max-height: 400px;
+                overflow: auto;
+            ">
 
-                                            <span class="evidence-cell">
-                                                <ng-container *ngIf="row.evidence as evidence; else rowEvidenceUpload">
-                                                    <button
-                                                        pButton
-                                                        type="button"
-                                                        icon="pi pi-eye"
+                                        <div class="annexure-table" style="
+                    min-width: 2200px;
+                    width: max-content;
+                ">
+
+                                            <!-- HEADER -->
+
+                                            <div class="annexure-table-row annexure-table-head">
+
+                                                <span *ngFor="let column of question.annexure.columns">
+                                                    {{ column.name }}
+                                                </span>
+
+                                                <span>Business Risk</span>
+
+                                                <span>Control Risk</span>
+
+                                                <span>Risk Type</span>
+
+                                                <span>
+                                                    Evidence
+
+                                                    <small *ngIf="isEvidenceRequired(question)"
+                                                        class="evidence-required">
+                                                        Required
+                                                    </small>
+
+                                                </span>
+
+                                                <span>Action</span>
+
+                                            </div>
+
+                                            <!-- BODY -->
+
+                                            <div class="annexure-table-row" *ngFor="let row of question.annexure_rows">
+
+                                                <span *ngFor="let column of question.annexure.columns; let ci = index">
+                                                    {{ row.values?.[ci] || '-' }}
+                                                </span>
+
+                                                <span>
+                                                    {{ riskLabel(row.business_risk, 'business_risks') }}
+                                                </span>
+
+                                                <span>
+                                                    {{ riskLabel(row.control_risk, 'control_risks') }}
+                                                </span>
+
+                                                <span>
+                                                    {{ riskCategoryLabel(row.risk_cat_id) }}
+                                                </span>
+
+                                                <!-- EVIDENCE -->
+
+                                                <span class="evidence-cell">
+
+                                                    <ng-container
+                                                        *ngIf="row.evidence as evidence; else rowEvidenceUpload">
+
+                                                        <button pButton type="button" icon="pi pi-eye"
+                                                            severity="secondary"
+                                                            (click)="viewEvidence(evidence)"></button>
+
+                                                        <button pButton type="button" icon="pi pi-trash"
+                                                            severity="danger"
+                                                            (click)="deleteEvidence(evidence)"></button>
+
+                                                    </ng-container>
+
+                                                    <ng-template #rowEvidenceUpload>
+
+                                                        <input #rowEvidenceInput type="file"
+                                                            accept=".jpg,.jpeg,.png,.pdf,image/jpeg,image/png,application/pdf"
+                                                            style="display: none"
+                                                            (change)="uploadEvidence(question, $event, row)" />
+
+                                                        <button pButton type="button" icon="pi pi-upload"
+                                                            severity="secondary"
+                                                            [loading]="uploadingEvidenceKey() === evidenceKey(question, row)"
+                                                            (click)="rowEvidenceInput.click()"></button>
+
+                                                    </ng-template>
+
+                                                </span>
+
+                                                <!-- ACTION -->
+
+                                                <span class="flex gap-2">
+
+                                                    <button pButton type="button" icon="pi pi-pencil"
                                                         severity="secondary"
-                                                        title="View evidence"
-                                                        (click)="viewEvidence(evidence)"
-                                                    ></button>
+                                                        (click)="editAnnexureRow(question, row)"></button>
 
-                                                    <button
-                                                        pButton
-                                                        type="button"
-                                                        icon="pi pi-trash"
-                                                        severity="danger"
-                                                        title="Remove evidence"
-                                                        (click)="deleteEvidence(evidence)"
-                                                    ></button>
-                                                </ng-container>
+                                                    <button pButton type="button" icon="pi pi-trash" severity="danger"
+                                                        (click)="deleteAnnexureRow(question, row)"></button>
 
-                                                <ng-template #rowEvidenceUpload>
-                                                    <input
-                                                        #rowEvidenceInput
-                                                        type="file"
-                                                        accept=".jpg,.jpeg,.png,.pdf,image/jpeg,image/png,application/pdf"
-                                                        style="display: none"
-                                                        (change)="uploadEvidence(question, $event, row)"
-                                                    />
+                                                </span>
 
-                                                    <button
-                                                        pButton
-                                                        type="button"
-                                                        icon="pi pi-upload"
-                                                        severity="secondary"
-                                                        title="Upload evidence"
-                                                        [loading]="uploadingEvidenceKey() === evidenceKey(question, row)"
-                                                        (click)="rowEvidenceInput.click()"
-                                                    ></button>
-                                                </ng-template>
-                                            </span>
+                                            </div>
 
-                                            <span class="flex gap-2">
-                                                <button
-                                                    pButton
-                                                    type="button"
-                                                    icon="pi pi-pencil"
-                                                    severity="secondary"
-                                                    (click)="editAnnexureRow(question, row)"
-                                                ></button>
-
-                                                <button
-                                                    pButton
-                                                    type="button"
-                                                    icon="pi pi-trash"
-                                                    severity="danger"
-                                                    (click)="deleteAnnexureRow(question, row)"
-                                                ></button>
-                                            </span>
                                         </div>
+
                                     </div>
+
                                 </div>
 
                             </div>
 
-                            <div
-                                *ngIf="answerErrors()[question.id]"
-                                class="text-red-600 text-sm font-medium mt-2"
-                            >
+
+
+                            <div *ngIf="answerErrors()[question.id]" class="text-red-600 text-sm font-medium mt-2">
 
                                 {{ answerErrors()[question.id] }}
 
@@ -947,50 +746,34 @@
 
                         </div>
 
-                    </div>
+                    </p-card>
 
-                    <div
-                        *ngFor="let subsetSet of buildSelectedSubsetSets(question)"
-                        class="subset-panel"
-                    >
+                    <div *ngFor="let subsetSet of buildSelectedSubsetSets(question)" class="subset-panel">
 
                         <div class="question-set-title">
                             {{ subsetSet.name }}
                         </div>
 
-                        <section
-                            class="question-header"
-                            *ngFor="let subsetHeader of subsetSet.headers"
-                        >
+                        <section class="question-header" *ngFor="let subsetHeader of subsetSet.headers">
 
                             <div
-                                class="flex flex-column md:flex-row md:align-items-center md:justify-content-between gap-3 mb-3"
-                            >
+                                class="flex flex-column md:flex-row md:align-items-center md:justify-content-between gap-3 mb-3">
 
                                 <div class="question-header-title m-0">
                                     {{ subsetHeader.name }}
                                 </div>
 
                                 @if (canApplyDefaults()) {
-                                    <div class="flex gap-2 flex-wrap">
-                                        <button
-                                            pButton
-                                            type="button"
-                                            icon="pi pi-check-square"
-                                            label="Default"
-                                            severity="secondary"
-                                            (click)="selectDefaultAnswers(subsetHeader)"
-                                        ></button>
-                                    </div>
+                                <div class="flex gap-2 flex-wrap">
+                                    <button pButton type="button" icon="pi pi-check-square" label="Default"
+                                        severity="secondary" (click)="selectDefaultAnswers(subsetHeader)"></button>
+                                </div>
                                 }
 
                             </div>
 
-                            <div
-                                class="question-card"
-                                [class.re-audit-question]="isReAudit(detail)"
-                                *ngFor="let subsetQuestion of subsetHeader.questions; let si = index"
-                            >
+                            <div class="question-card" [class.re-audit-question]="isReAudit(detail)"
+                                *ngFor="let subsetQuestion of subsetHeader.questions; let si = index">
 
                                 <div class="question-main">
 
@@ -1010,19 +793,15 @@
                                                 {{ subsetQuestion.option_name }}
                                             </span>
 
-                                            <span
-                                                *ngIf="subsetQuestion.risk_category_name"
-                                            >
+                                            <span *ngIf="subsetQuestion.risk_category_name">
                                                 Risk:
                                                 {{ subsetQuestion.risk_category_name }}
                                             </span>
 
                                         </div>
 
-                                        <div
-                                            *ngIf="isReAudit(detail) && reviewerComment(subsetQuestion)"
-                                            class="reviewer-feedback"
-                                        >
+                                        <div *ngIf="isReAudit(detail) && reviewerComment(subsetQuestion)"
+                                            class="reviewer-feedback">
                                             <span>Reviewer Comment</span>
                                             {{ reviewerComment(subsetQuestion) }}
                                         </div>
@@ -1037,28 +816,20 @@
                                         Answer
                                     </label>
 
-                                    <textarea
-                                        *ngIf="isTextAnswer(subsetQuestion); else subsetOptionAnswer"
-                                        class="answer-control"
-                                        rows="3"
-                                        [(ngModel)]="subsetQuestion.answer_value"
-                                    ></textarea>
+                                    <textarea *ngIf="isTextAnswer(subsetQuestion); else subsetOptionAnswer"
+                                        class="answer-control" rows="3"
+                                        [(ngModel)]="subsetQuestion.answer_value"></textarea>
 
                                     <ng-template #subsetOptionAnswer>
 
-                                        <select
-                                            class="answer-control"
-                                            [(ngModel)]="subsetQuestion.answer_value"
-                                        >
+                                        <select class="answer-control" [(ngModel)]="subsetQuestion.answer_value">
 
                                             <option value="">
                                                 Please select
                                             </option>
 
-                                            <option
-                                                *ngFor="let option of subsetQuestion.options"
-                                                [value]="option.value"
-                                            >
+                                            <option *ngFor="let option of subsetQuestion.options"
+                                                [value]="option.value">
                                                 {{ option.label }}
                                             </option>
 
@@ -1070,18 +841,12 @@
                                         Audit Comment
                                     </label>
 
-                                    <textarea
-                                        class="answer-control"
-                                        rows="2"
-                                        [(ngModel)]="subsetQuestion.audit_comment"
-                                    ></textarea>
+                                    <textarea class="answer-control" rows="2"
+                                        [(ngModel)]="subsetQuestion.audit_comment"></textarea>
 
                                     <label class="compliance-check mt-3">
 
-                                        <input
-                                            type="checkbox"
-                                            [(ngModel)]="subsetQuestion.is_compliance"
-                                        />
+                                        <input type="checkbox" [(ngModel)]="subsetQuestion.is_compliance" />
 
                                         <span>
                                             Compliance required
@@ -1091,10 +856,8 @@
 
                                     <label class="compliance-check mt-3">
 
-                                        <input
-                                            type="checkbox"
-                                            [(ngModel)]="subsetQuestion.audit_compulsary_ev_upload"
-                                        />
+                                        <input type="checkbox"
+                                            [(ngModel)]="subsetQuestion.audit_compulsary_ev_upload" />
 
                                         <span>
                                             Evidence to be uploaded
@@ -1102,110 +865,69 @@
 
                                     </label>
 
-                                    <div
-                                        *ngIf="isReAudit(detail) && subsetQuestion.re_audit_annexure_only"
-                                        class="reviewer-feedback"
-                                    >
+                                    <div *ngIf="isReAudit(detail) && subsetQuestion.re_audit_annexure_only"
+                                        class="reviewer-feedback">
                                         Update only the rejected annexure row below.
                                     </div>
 
-                                    <div
-                                        *ngIf="!buildIsAnnexureSelected(subsetQuestion) || subsetQuestion.answer?.evidence"
-                                        class="evidence-panel"
-                                    >
+                                    <div *ngIf="!buildIsAnnexureSelected(subsetQuestion) || subsetQuestion.answer?.evidence"
+                                        class="evidence-panel">
 
                                         <div class="evidence-title">
                                             <span>Audit Evidence</span>
-                                            <span
-                                                *ngIf="isEvidenceRequired(subsetQuestion)"
-                                                class="evidence-required"
-                                            >
+                                            <span *ngIf="isEvidenceRequired(subsetQuestion)" class="evidence-required">
                                                 Required
                                             </span>
                                         </div>
 
                                         <ng-container
-                                            *ngIf="subsetQuestion.answer?.evidence as evidence; else subsetEvidenceUpload"
-                                        >
+                                            *ngIf="subsetQuestion.answer?.evidence as evidence; else subsetEvidenceUpload">
                                             <div class="evidence-file">
                                                 <span>
                                                     {{ evidence.description || evidence.file_name }}
                                                 </span>
 
-                                                <button
-                                                    pButton
-                                                    type="button"
-                                                    icon="pi pi-eye"
-                                                    severity="secondary"
-                                                    title="View evidence"
-                                                    (click)="viewEvidence(evidence)"
-                                                ></button>
+                                                <button pButton type="button" icon="pi pi-eye" severity="secondary"
+                                                    title="View evidence" (click)="viewEvidence(evidence)"></button>
 
-                                                <button
-                                                    pButton
-                                                    type="button"
-                                                    icon="pi pi-trash"
-                                                    severity="danger"
-                                                    title="Remove evidence"
-                                                    (click)="deleteEvidence(evidence)"
-                                                ></button>
+                                                <button pButton type="button" icon="pi pi-trash" severity="danger"
+                                                    title="Remove evidence" (click)="deleteEvidence(evidence)"></button>
                                             </div>
                                         </ng-container>
 
                                         <ng-template #subsetEvidenceUpload>
-                                            <input
-                                                #subsetEvidenceInput
-                                                type="file"
+                                            <input #subsetEvidenceInput type="file"
                                                 accept=".jpg,.jpeg,.png,.pdf,image/jpeg,image/png,application/pdf"
                                                 style="display: none"
-                                                (change)="uploadEvidence(subsetQuestion, $event)"
-                                            />
+                                                (change)="uploadEvidence(subsetQuestion, $event)" />
 
-                                            <button
-                                                pButton
-                                                type="button"
-                                                icon="pi pi-upload"
-                                                label="Upload Evidence"
-                                                severity="secondary"
-                                                [disabled]="!subsetQuestion.answer?.id"
+                                            <button pButton type="button" icon="pi pi-upload" label="Upload Evidence"
+                                                severity="secondary" [disabled]="!subsetQuestion.answer?.id"
                                                 [loading]="uploadingEvidenceKey() === evidenceKey(subsetQuestion)"
-                                                (click)="subsetEvidenceInput.click()"
-                                            ></button>
+                                                (click)="subsetEvidenceInput.click()"></button>
 
-                                            <div
-                                                *ngIf="!subsetQuestion.answer?.id"
-                                                class="evidence-hint"
-                                            >
+                                            <div *ngIf="!subsetQuestion.answer?.id" class="evidence-hint">
                                                 Save the answer first to upload evidence.
                                             </div>
                                         </ng-template>
 
                                     </div>
 
-                                    <div
-                                        *ngIf="buildIsAnnexureSelected(subsetQuestion) && !subsetQuestion.answer?.evidence"
-                                        class="evidence-panel evidence-hint"
-                                    >
+                                    <div *ngIf="buildIsAnnexureSelected(subsetQuestion) && !subsetQuestion.answer?.evidence"
+                                        class="evidence-panel evidence-hint">
                                         Upload evidence from the annexure row after adding the row.
                                     </div>
 
-                                    <div
-                                        *ngIf="buildIsAnnexureSelected(subsetQuestion)"
-                                        class="annexure-preview"
-                                    >
+                                    <div *ngIf="buildIsAnnexureSelected(subsetQuestion)" class="annexure-preview">
 
                                         <div class="font-medium text-900 mb-2">
                                             {{ subsetQuestion.annexure?.name || 'Annexure' }}
                                         </div>
 
-                                        <div
-                                            *ngIf="subsetQuestion.annexure?.columns?.length; else noSubsetAnnexureColumns"
-                                            class="annexure-column-list"
-                                        >
+                                        <div *ngIf="subsetQuestion.annexure?.columns?.length; else noSubsetAnnexureColumns"
+                                            class="annexure-column-list">
 
-                                            <span
-                                                *ngFor="let column of subsetQuestion.annexure.columns"
-                                            >
+                                            <span *ngFor="let column of subsetQuestion.annexure.columns">
                                                 {{ column.name }}
                                             </span>
 
@@ -1219,50 +941,37 @@
 
                                         </ng-template>
 
-                                        <div
-                                            *ngIf="subsetQuestion.annexure?.columns?.length"
-                                            class="annexure-editor"
-                                        >
+                                        <div *ngIf="subsetQuestion.annexure?.columns?.length" class="annexure-editor">
                                             <div class="annexure-grid">
-                                                <div
-                                                    class="annexure-field"
-                                                    *ngFor="let column of subsetQuestion.annexure.columns; let ci = index"
-                                                >
+                                                <div class="annexure-field"
+                                                    *ngFor="let column of subsetQuestion.annexure.columns; let ci = index">
                                                     <label class="answer-label">
                                                         {{ column.name }}
                                                     </label>
 
                                                     <textarea
                                                         *ngIf="column.column_type_id == 2; else subsetAnnexureInput"
-                                                        class="answer-control"
-                                                        rows="2"
-                                                        [(ngModel)]="subsetQuestion.annexure_draft.values[ci]"
-                                                    ></textarea>
+                                                        class="answer-control" rows="2"
+                                                        [(ngModel)]="subsetQuestion.annexure_draft.values[ci]"></textarea>
 
                                                     <ng-template #subsetAnnexureInput>
                                                         <select
                                                             *ngIf="column.column_type_id == 3; else subsetAnnexureText"
                                                             class="answer-control"
-                                                            [(ngModel)]="subsetQuestion.annexure_draft.values[ci]"
-                                                        >
+                                                            [(ngModel)]="subsetQuestion.annexure_draft.values[ci]">
                                                             <option value="">
                                                                 Please select
                                                             </option>
 
-                                                            <option
-                                                                *ngFor="let option of annexureColumnOptions(column)"
-                                                                [value]="option.option_label"
-                                                            >
+                                                            <option *ngFor="let option of annexureColumnOptions(column)"
+                                                                [value]="option.option_label">
                                                                 {{ option.option_label }}
                                                             </option>
                                                         </select>
 
                                                         <ng-template #subsetAnnexureText>
-                                                            <input
-                                                                type="text"
-                                                                class="answer-control"
-                                                                [(ngModel)]="subsetQuestion.annexure_draft.values[ci]"
-                                                            />
+                                                            <input type="text" class="answer-control"
+                                                                [(ngModel)]="subsetQuestion.annexure_draft.values[ci]" />
                                                         </ng-template>
                                                     </ng-template>
                                                 </div>
@@ -1272,19 +981,16 @@
                                                         Business Risk
                                                     </label>
 
-                                                    <select
-                                                        class="answer-control"
+                                                    <select class="answer-control"
                                                         [(ngModel)]="subsetQuestion.annexure_draft.business_risk"
-                                                        [disabled]="!isCustomAnnexureRisk(subsetQuestion)"
-                                                    >
+                                                        [disabled]="!isCustomAnnexureRisk(subsetQuestion)">
                                                         <option value="">
                                                             Please select
                                                         </option>
 
                                                         <option
                                                             *ngFor="let risk of annexureRiskOptions().business_risks"
-                                                            [value]="risk.id"
-                                                        >
+                                                            [value]="risk.id">
                                                             {{ risk.label }}
                                                         </option>
                                                     </select>
@@ -1295,19 +1001,15 @@
                                                         Control Risk
                                                     </label>
 
-                                                    <select
-                                                        class="answer-control"
+                                                    <select class="answer-control"
                                                         [(ngModel)]="subsetQuestion.annexure_draft.control_risk"
-                                                        [disabled]="!isCustomAnnexureRisk(subsetQuestion)"
-                                                    >
+                                                        [disabled]="!isCustomAnnexureRisk(subsetQuestion)">
                                                         <option value="">
                                                             Please select
                                                         </option>
 
-                                                        <option
-                                                            *ngFor="let risk of annexureRiskOptions().control_risks"
-                                                            [value]="risk.id"
-                                                        >
+                                                        <option *ngFor="let risk of annexureRiskOptions().control_risks"
+                                                            [value]="risk.id">
                                                             {{ risk.label }}
                                                         </option>
                                                     </select>
@@ -1318,19 +1020,16 @@
                                                         Risk Type
                                                     </label>
 
-                                                    <select
-                                                        class="answer-control"
+                                                    <select class="answer-control"
                                                         [(ngModel)]="subsetQuestion.annexure_draft.risk_cat_id"
-                                                        [disabled]="!isCustomAnnexureRisk(subsetQuestion)"
-                                                    >
+                                                        [disabled]="!isCustomAnnexureRisk(subsetQuestion)">
                                                         <option value="">
                                                             Please select
                                                         </option>
 
                                                         <option
                                                             *ngFor="let risk of annexureRiskOptions().risk_categories"
-                                                            [value]="risk.id"
-                                                        >
+                                                            [value]="risk.id">
                                                             {{ risk.risk_category }}
                                                         </option>
                                                     </select>
@@ -1338,59 +1037,31 @@
                                             </div>
 
                                             <div class="flex flex-wrap justify-content-end gap-2 mt-3">
-                                                <input
-                                                    #subsetAnnexCsvInput
-                                                    type="file"
-                                                    accept=".csv,text/csv"
+                                                <input #subsetAnnexCsvInput type="file" accept=".csv,text/csv"
                                                     style="display: none"
-                                                    (change)="uploadAnnexureCsv(subsetQuestion, $event)"
-                                                />
+                                                    (change)="uploadAnnexureCsv(subsetQuestion, $event)" />
 
-                                                <button
-                                                    pButton
-                                                    type="button"
-                                                    icon="pi pi-download"
-                                                    label="Sample CSV"
+                                                <button pButton type="button" icon="pi pi-download" label="Sample CSV"
                                                     severity="secondary"
-                                                    (click)="downloadAnnexureSample(subsetQuestion)"
-                                                ></button>
+                                                    (click)="downloadAnnexureSample(subsetQuestion)"></button>
 
-                                                <button
-                                                    pButton
-                                                    type="button"
-                                                    icon="pi pi-upload"
-                                                    label="Upload CSV"
+                                                <button pButton type="button" icon="pi pi-upload" label="Upload CSV"
                                                     severity="secondary"
                                                     [loading]="uploadingAnnexureQuestion() === subsetQuestion.id"
-                                                    (click)="subsetAnnexCsvInput.click()"
-                                                ></button>
+                                                    (click)="subsetAnnexCsvInput.click()"></button>
 
-                                                <button
-                                                    pButton
-                                                    type="button"
-                                                    icon="pi pi-times"
-                                                    label="Clear"
+                                                <button pButton type="button" icon="pi pi-times" label="Clear"
                                                     severity="secondary"
-                                                    (click)="clearAnnexureDraft(subsetQuestion)"
-                                                ></button>
+                                                    (click)="clearAnnexureDraft(subsetQuestion)"></button>
 
-                                                <button
-                                                    pButton
-                                                    type="button"
-                                                    icon="pi pi-save"
+                                                <button pButton type="button" icon="pi pi-save"
                                                     [label]="subsetQuestion.annexure_draft.id ? 'Update Row' : 'Add Row'"
-                                                    (click)="saveAnnexureRow(subsetQuestion)"
-                                                ></button>
+                                                    (click)="saveAnnexureRow(subsetQuestion)"></button>
                                             </div>
 
-                                            <div
-                                                *ngIf="subsetQuestion.annexure_rows?.length"
-                                                class="annexure-table"
-                                            >
+                                            <div *ngIf="subsetQuestion.annexure_rows?.length" class="annexure-table">
                                                 <div class="annexure-table-row annexure-table-head">
-                                                    <span
-                                                        *ngFor="let column of subsetQuestion.annexure.columns"
-                                                    >
+                                                    <span *ngFor="let column of subsetQuestion.annexure.columns">
                                                         {{ column.name }}
                                                     </span>
                                                     <span>Business Risk</span>
@@ -1398,23 +1069,18 @@
                                                     <span>Risk Type</span>
                                                     <span>
                                                         Evidence
-                                                        <small
-                                                            *ngIf="isEvidenceRequired(subsetQuestion)"
-                                                            class="evidence-required"
-                                                        >
+                                                        <small *ngIf="isEvidenceRequired(subsetQuestion)"
+                                                            class="evidence-required">
                                                             Required
                                                         </small>
                                                     </span>
                                                     <span>Action</span>
                                                 </div>
 
-                                                <div
-                                                    class="annexure-table-row"
-                                                    *ngFor="let row of subsetQuestion.annexure_rows"
-                                                >
+                                                <div class="annexure-table-row"
+                                                    *ngFor="let row of subsetQuestion.annexure_rows">
                                                     <span
-                                                        *ngFor="let column of subsetQuestion.annexure.columns; let ci = index"
-                                                    >
+                                                        *ngFor="let column of subsetQuestion.annexure.columns; let ci = index">
                                                         {{ row.values?.[ci] || '-' }}
                                                     </span>
                                                     <span>{{ riskLabel(row.business_risk, 'business_risks') }}</span>
@@ -1422,63 +1088,38 @@
                                                     <span>{{ riskCategoryLabel(row.risk_cat_id) }}</span>
 
                                                     <span class="evidence-cell">
-                                                        <ng-container *ngIf="row.evidence as evidence; else subsetRowEvidenceUpload">
-                                                            <button
-                                                                pButton
-                                                                type="button"
-                                                                icon="pi pi-eye"
-                                                                severity="secondary"
-                                                                title="View evidence"
-                                                                (click)="viewEvidence(evidence)"
-                                                            ></button>
+                                                        <ng-container
+                                                            *ngIf="row.evidence as evidence; else subsetRowEvidenceUpload">
+                                                            <button pButton type="button" icon="pi pi-eye"
+                                                                severity="secondary" title="View evidence"
+                                                                (click)="viewEvidence(evidence)"></button>
 
-                                                            <button
-                                                                pButton
-                                                                type="button"
-                                                                icon="pi pi-trash"
-                                                                severity="danger"
-                                                                title="Remove evidence"
-                                                                (click)="deleteEvidence(evidence)"
-                                                            ></button>
+                                                            <button pButton type="button" icon="pi pi-trash"
+                                                                severity="danger" title="Remove evidence"
+                                                                (click)="deleteEvidence(evidence)"></button>
                                                         </ng-container>
 
                                                         <ng-template #subsetRowEvidenceUpload>
-                                                            <input
-                                                                #subsetRowEvidenceInput
-                                                                type="file"
+                                                            <input #subsetRowEvidenceInput type="file"
                                                                 accept=".jpg,.jpeg,.png,.pdf,image/jpeg,image/png,application/pdf"
                                                                 style="display: none"
-                                                                (change)="uploadEvidence(subsetQuestion, $event, row)"
-                                                            />
+                                                                (change)="uploadEvidence(subsetQuestion, $event, row)" />
 
-                                                            <button
-                                                                pButton
-                                                                type="button"
-                                                                icon="pi pi-upload"
-                                                                severity="secondary"
-                                                                title="Upload evidence"
+                                                            <button pButton type="button" icon="pi pi-upload"
+                                                                severity="secondary" title="Upload evidence"
                                                                 [loading]="uploadingEvidenceKey() === evidenceKey(subsetQuestion, row)"
-                                                                (click)="subsetRowEvidenceInput.click()"
-                                                            ></button>
+                                                                (click)="subsetRowEvidenceInput.click()"></button>
                                                         </ng-template>
                                                     </span>
 
                                                     <span class="flex gap-2">
-                                                        <button
-                                                            pButton
-                                                            type="button"
-                                                            icon="pi pi-pencil"
+                                                        <button pButton type="button" icon="pi pi-pencil"
                                                             severity="secondary"
-                                                            (click)="editAnnexureRow(subsetQuestion, row)"
-                                                        ></button>
+                                                            (click)="editAnnexureRow(subsetQuestion, row)"></button>
 
-                                                        <button
-                                                            pButton
-                                                            type="button"
-                                                            icon="pi pi-trash"
+                                                        <button pButton type="button" icon="pi pi-trash"
                                                             severity="danger"
-                                                            (click)="deleteAnnexureRow(subsetQuestion, row)"
-                                                        ></button>
+                                                            (click)="deleteAnnexureRow(subsetQuestion, row)"></button>
                                                     </span>
                                                 </div>
                                             </div>
@@ -1486,10 +1127,8 @@
 
                                     </div>
 
-                                    <div
-                                        *ngIf="answerErrors()[subsetQuestion.id]"
-                                        class="text-red-600 text-sm font-medium mt-2"
-                                    >
+                                    <div *ngIf="answerErrors()[subsetQuestion.id]"
+                                        class="text-red-600 text-sm font-medium mt-2">
 
                                         {{ answerErrors()[subsetQuestion.id] }}
 
@@ -1500,14 +1139,9 @@
                             </div>
 
                             <div class="flex justify-content-end mt-3">
-                                <button
-                                    pButton
-                                    type="button"
-                                    icon="pi pi-save"
-                                    label="Save Answers"
+                                <button pButton type="button" icon="pi pi-save" label="Save Answers"
                                     [loading]="savingHeader() === subsetHeader.id"
-                                    (click)="saveHeader(subsetHeader)"
-                                ></button>
+                                    (click)="saveHeader(subsetHeader)"></button>
                             </div>
 
                         </section>
@@ -1517,14 +1151,8 @@
                 </ng-container>
 
                 <div class="flex justify-content-end mt-3">
-                    <button
-                        pButton
-                        type="button"
-                        icon="pi pi-save"
-                        label="Save Answers"
-                        [loading]="savingHeader() === header.id"
-                        (click)="saveHeader(header)"
-                    ></button>
+                    <button pButton type="button" icon="pi pi-save" label="Save Answers"
+                        [loading]="savingHeader() === header.id" (click)="saveHeader(header)"></button>
                 </div>
 
             </section>
