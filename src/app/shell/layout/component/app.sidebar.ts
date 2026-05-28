@@ -21,8 +21,9 @@ import { LayoutService } from '../service/layout.service';
             height: calc(100vh - 3.5rem);
             top: 3.5rem; /* Below topbar */
             left: 0;
-            background-color: var(--surface-card);
-            border-right: 1px solid var(--surface-border);
+            background: linear-gradient(180deg, #f4f8fc 0%, #f8fafc 42%, #f7f9fc 100%);
+            border-right: 1px solid #d9e2ec;
+            box-shadow: inset -1px 0 0 rgba(31, 59, 87, 0.04);
             z-index: 999;
             transition: width 0.3s;
             display: flex;
@@ -58,7 +59,7 @@ import { LayoutService } from '../service/layout.service';
     `]
 })
 export class AppSidebar implements OnInit, OnDestroy {
-    sidebarWidth: number = 16; // Default 16rem
+    sidebarWidth: number = 15; // Compact default for audit workspace
     private startX = 0;
     private startWidth = 0;
     private mouseMoveListener: (() => void) | null = null;
@@ -76,8 +77,30 @@ export class AppSidebar implements OnInit, OnDestroy {
     ngOnInit() {
         // Load saved width from localStorage
         const savedWidth = localStorage.getItem('sidebarWidth');
+        const compactWidthApplied =
+            localStorage.getItem('sidebarCompactWidthApplied');
+
         if (savedWidth) {
-            this.sidebarWidth = parseFloat(savedWidth);
+            const parsedWidth =
+                parseFloat(savedWidth);
+
+            if (!Number.isNaN(parsedWidth)) {
+                this.sidebarWidth =
+                    compactWidthApplied
+                        ? parsedWidth
+                        : Math.min(parsedWidth, 15);
+            }
+
+            if (!compactWidthApplied) {
+                localStorage.setItem(
+                    'sidebarCompactWidthApplied',
+                    '1',
+                );
+                localStorage.setItem(
+                    'sidebarWidth',
+                    this.sidebarWidth.toString(),
+                );
+            }
         }
 
         // Always update CSS variable on init for breadcrumb positioning
@@ -118,8 +141,8 @@ export class AppSidebar implements OnInit, OnDestroy {
         const deltaRem = deltaX / 16; // Convert pixels to rem (assuming 16px = 1rem)
         let newWidth = this.startWidth + deltaRem;
 
-        // Constrain width between 12rem and 30rem
-        newWidth = Math.max(12, Math.min(30, newWidth));
+        // Constrain width between 12rem and 24rem
+        newWidth = Math.max(12, Math.min(24, newWidth));
 
         this.sidebarWidth = newWidth;
 

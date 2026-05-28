@@ -4,7 +4,6 @@ import { NavigationEnd, Router, RouterModule } from '@angular/router';
 import { filter, Subscription } from 'rxjs';
 import { AppTopbar } from './app.topbar';
 import { AppSidebar } from './app.sidebar';
-import { AppBreadcrumb } from './app.breadcrumb';
 import { LayoutService } from '../service/layout.service';
 import { ToastModule } from 'primeng/toast';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
@@ -12,10 +11,9 @@ import { ConfirmDialogModule } from 'primeng/confirmdialog';
 @Component({
     selector: 'app-layout',
     standalone: true,
-    imports: [CommonModule, AppTopbar, AppSidebar, AppBreadcrumb, RouterModule, ToastModule, ConfirmDialogModule],
+    imports: [CommonModule, AppTopbar, AppSidebar, RouterModule, ToastModule, ConfirmDialogModule],
     template: `<div class="layout-wrapper" [ngClass]="containerClass">
         <app-topbar></app-topbar>
-        <app-breadcrumb></app-breadcrumb>
         <app-sidebar></app-sidebar>
         <div class="layout-main-container" [class.no-transition]="layoutService.isSidebarResizing()">
             <div class="layout-main">

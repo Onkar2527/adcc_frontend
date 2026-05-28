@@ -95,21 +95,20 @@ interface SearchItem {
 
         <p-button class="layout-topbar-action hide-on-small"
                   [icon]="layoutService.layoutConfig().darkTheme ? 'pi pi-moon' : 'pi pi-sun'"
-                  [rounded]="true"
                   severity="secondary"
                   (click)="toggleTheme()"></p-button>
 
         <p-button icon="pi pi-bell" pTooltip="Notification"
-                  tooltipPosition="bottom" [rounded]="true" styleClass="hide-on-small"
+                  tooltipPosition="bottom" styleClass="hide-on-small"
                   severity="secondary" (click)="logout()"></p-button>
                   
         <p-button icon="pi pi-user" pTooltip="User Profile"
-                  tooltipPosition="bottom" [rounded]="true" styleClass="hide-on-small"
+                  tooltipPosition="bottom" styleClass="hide-on-small"
                   severity="secondary" (click)="logout()"></p-button>
 
         <div class="window-controls">
             <p-button icon="pi pi-power-off" pTooltip="Logout"
-                  tooltipPosition="bottom" [rounded]="true" styleClass="hide-on-small"
+                  tooltipPosition="bottom" styleClass="hide-on-small"
                   severity="danger" (click)="logout()"></p-button>
         </div>
        
@@ -121,8 +120,8 @@ interface SearchItem {
 `,
     styles: [`
         .topbar-search-wrapper {
-            margin-right: 1.5rem;
-            width: 250px;
+            margin-right: .25rem;
+            width: 240px;
             flex: none;
         }
 
@@ -136,9 +135,9 @@ interface SearchItem {
                 background-color: var(--surface-card) !important; 
                 color: var(--text-color) !important;
                 border: 1px solid var(--surface-border);
-                border-radius: 8px; /* Restore radius */
+                border-radius: 4px;
                 padding-left: 2.5rem !important; /* Make room for icon */
-                height: 3rem; 
+                height: 2.25rem;
             }
             
             /* Remove the complex focus/border logic since IconField handles it */
@@ -146,8 +145,8 @@ interface SearchItem {
             .topbar-search-autocomplete .p-autocomplete-panel {
                 background: white;
                 color: #333;
-                border-radius: 8px;
-                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                border-radius: 4px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.12);
                 margin-top: 0.5rem;
             }
             
@@ -159,6 +158,50 @@ interface SearchItem {
              .topbar-search-autocomplete .p-autocomplete-item:hover {
                 background: #f0f0f0;
              }
+
+            .layout-topbar-actions .p-button {
+                width: 2.25rem;
+                height: 2.25rem;
+                border-radius: 4px;
+                box-shadow: none;
+            }
+
+            .layout-topbar-actions .p-button.p-button-secondary {
+                background: rgba(255, 255, 255, 0.1);
+                border-color: rgba(255, 255, 255, 0.2);
+                color: #ffffff;
+            }
+
+            .layout-topbar-actions .p-button.p-button-secondary .p-button-icon {
+                color: #ffffff;
+            }
+
+            .layout-topbar-actions .p-button.p-button-secondary:hover {
+                background: rgba(255, 255, 255, 0.16);
+                border-color: rgba(255, 255, 255, 0.28);
+            }
+
+            .layout-topbar-actions .p-select {
+                height: 2.25rem;
+                border-radius: 4px;
+                align-items: center;
+                background: rgba(255, 255, 255, 0.1);
+                border-color: rgba(255, 255, 255, 0.2);
+                color: #ffffff;
+            }
+
+            .layout-topbar-actions .p-select-label {
+                display: flex;
+                align-items: center;
+                padding-top: 0;
+                padding-bottom: 0;
+                font-size: .875rem;
+                color: #ffffff;
+            }
+
+            .layout-topbar-actions .p-select-dropdown {
+                color: #ffffff;
+            }
         }
 
         /* Search Item Styles */
@@ -215,7 +258,7 @@ interface SearchItem {
         }
 
         .win-btn:hover {
-            background-color: rgba(255, 255, 255, 0.1);
+            background-color: rgba(255, 255, 255, 0.12);
         }
 
         .win-btn.win-close:hover {
@@ -223,7 +266,7 @@ interface SearchItem {
         }
 
         .win-btn:active {
-            background-color: rgba(255, 255, 255, 0.15);
+            background-color: rgba(255, 255, 255, 0.16);
         }
 
         /* Separator */
@@ -231,7 +274,7 @@ interface SearchItem {
             display: inline-block;
             width: 1px;
             height: 2.5rem;
-            background: rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.18);
             margin: 0 8px;
             align-self: center;
         }

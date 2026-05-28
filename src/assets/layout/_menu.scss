@@ -8,13 +8,21 @@
     overflow-y: auto;
     user-select: none;
     top: 3.5rem;
-    left: 0.75rem; // Closer to edge
+    left: 0;
     transition:
         transform var(--layout-section-transition-duration),
         left var(--layout-section-transition-duration);
-    background-color: var(--surface-overlay);
-    border-radius: var(--content-border-radius);
-    padding: 0.5rem 1rem;
+    background:
+        linear-gradient(
+            180deg,
+            #f4f8fc 0%,
+            #f8fafc 42%,
+            #f7f9fc 100%
+        );
+    border-right: 1px solid #d9e2ec;
+    box-shadow: inset -1px 0 0 rgba(31, 59, 87, 0.04);
+    border-radius: 0;
+    padding: 0.5rem 0.625rem;
 }
 
 .layout-menu {
@@ -24,11 +32,14 @@
 
     .layout-root-menuitem {
         > .layout-menuitem-root-text {
-            font-size: 0.857rem;
+            font-size: 0.72rem;
             text-transform: uppercase;
-            font-weight: 700;
-            color: var(--text-color);
-            margin: 0.75rem 0;
+            font-weight: 800;
+            letter-spacing: 0;
+            color: #52677a;
+            margin: 0.85rem 0.35rem 0.4rem;
+            padding: 0.35rem 0.5rem;
+            border-bottom: 1px solid #e2eaf2;
         }
 
         > a {
@@ -66,29 +77,40 @@
             outline: 0 none;
             color: var(--text-color);
             cursor: pointer;
-            padding: 0.75rem 1rem;
-            border-radius: var(--content-border-radius);
+            padding: 0.5rem 0.6rem;
+            border-left: 3px solid transparent;
+            border-radius: 4px;
             transition:
                 background-color var(--element-transition-duration),
                 box-shadow var(--element-transition-duration);
 
             .layout-menuitem-icon {
                 margin-right: 0.5rem;
+                color: #496a86;
+                font-size: 0.95rem;
             }
 
             .layout-submenu-toggler {
                 font-size: 75%;
                 margin-left: auto;
                 transition: transform var(--element-transition-duration);
+                color: #7a8fa1;
             }
 
             &.active-route {
                 font-weight: 700;
-                color: var(--primary-color);
+                color: #14395c;
+                background: #dfeaf5;
+                border-left-color: #1f5f93;
+
+                .layout-menuitem-icon,
+                .layout-submenu-toggler {
+                    color: #1f5f93;
+                }
             }
 
             &:hover {
-                background-color: var(--surface-hover);
+                background-color: #eaf1f7;
             }
 
             &:focus {
@@ -102,32 +124,32 @@
 
             li {
                 a {
-                    margin-left: 1rem;
+                    margin-left: 0.5rem;
                 }
 
                 li {
                     a {
-                        margin-left: 2rem;
+                        margin-left: 1rem;
                     }
 
                     li {
                         a {
-                            margin-left: 2.5rem;
+                            margin-left: 1.25rem;
                         }
 
                         li {
                             a {
-                                margin-left: 3rem;
+                                margin-left: 1.5rem;
                             }
 
                             li {
                                 a {
-                                    margin-left: 3.5rem;
+                                    margin-left: 1.75rem;
                                 }
 
                                 li {
                                     a {
-                                        margin-left: 4rem;
+                                        margin-left: 2rem;
                                     }
                                 }
                             }

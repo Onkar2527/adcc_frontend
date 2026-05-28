@@ -334,9 +334,7 @@ export class AppMenu implements OnInit, OnDestroy {
                                     category,
                                 ),
                             icon:
-                                this.dynamicCategoryIcon(
-                                    category,
-                                ),
+                                'pi pi-fw pi-angle-right',
                             routerLink: [
                                 '/auditor/internal-audit',
                                 assessmentId,
@@ -378,9 +376,7 @@ export class AppMenu implements OnInit, OnDestroy {
                 label:
                     menu.name,
                 icon:
-                    this.dynamicMenuIcon(
-                        menu,
-                    ),
+                    'pi pi-fw pi-folder',
                 items:
                     categoryItems,
             });
@@ -434,118 +430,6 @@ export class AppMenu implements OnInit, OnDestroy {
             );
 
         return `${answered}/${total} answered, ${remaining} remaining`;
-    }
-
-    private dynamicMenuIcon(
-        menu: any,
-    ) {
-        const name =
-            String(menu?.name || '')
-                .trim()
-                .toLowerCase();
-
-        if (
-            name.includes('deposit')
-        ) {
-            return 'pi pi-fw pi-wallet';
-        }
-
-        if (
-            name.includes('advance')
-            ||
-            name.includes('loan')
-        ) {
-            return 'pi pi-fw pi-credit-card';
-        }
-
-        if (
-            name.includes('cash')
-            ||
-            name.includes('financial')
-        ) {
-            return 'pi pi-fw pi-chart-line';
-        }
-
-        if (
-            name.includes('compliance')
-        ) {
-            return 'pi pi-fw pi-verified';
-        }
-
-        if (
-            name.includes('document')
-            ||
-            name.includes('record')
-        ) {
-            return 'pi pi-fw pi-folder';
-        }
-
-        return 'pi pi-fw pi-list-check';
-    }
-
-    private dynamicCategoryIcon(
-        category: any,
-    ) {
-        const name =
-            String(category?.name || '')
-                .trim()
-                .toLowerCase();
-
-        if (
-            category?.account_based
-        ) {
-            return 'pi pi-fw pi-id-card';
-        }
-
-        if (
-            name.includes('annexure')
-        ) {
-            return 'pi pi-fw pi-table';
-        }
-
-        if (
-            name.includes('compliance')
-        ) {
-            return 'pi pi-fw pi-verified';
-        }
-
-        if (
-            name.includes('cash')
-        ) {
-            return 'pi pi-fw pi-money-bill';
-        }
-
-        if (
-            name.includes('advance')
-            ||
-            name.includes('loan')
-        ) {
-            return 'pi pi-fw pi-credit-card';
-        }
-
-        if (
-            name.includes('deposit')
-        ) {
-            return 'pi pi-fw pi-wallet';
-        }
-
-        if (
-            name.includes('security')
-            ||
-            name.includes('control')
-        ) {
-            return 'pi pi-fw pi-shield';
-        }
-
-        if (
-            name.includes('document')
-            ||
-            name.includes('register')
-        ) {
-            return 'pi pi-fw pi-folder-open';
-        }
-
-        return 'pi pi-fw pi-angle-right';
     }
 
     private currentAssessmentIdFromRoute() {
