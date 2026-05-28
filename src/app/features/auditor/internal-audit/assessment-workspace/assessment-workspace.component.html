@@ -36,7 +36,10 @@
 
     <ng-container *ngIf="!loading() && !error() && overview() as audit">
 
-        <div class="grid mb-4">
+        <div
+            *ngIf="selectedView() === 'summary'"
+            class="grid mb-4"
+        >
 
             <div class="col-12 lg:col-4">
                 <p-card styleClass="h-full shadow-1 border-round-xl">
@@ -136,7 +139,7 @@
         </div>
 
         <div
-            *ngIf="audit.can_continue"
+            *ngIf="audit.can_continue && selectedView() === 'summary'"
             class="surface-card border-round-xl shadow-1 p-4 mb-4"
         >
             <div class="flex flex-column md:flex-row md:align-items-center md:justify-content-between gap-3">
@@ -251,7 +254,7 @@
         </div>
 
         <section
-            *ngIf="canUseRemarks(audit)"
+            *ngIf="canUseRemarks(audit) && selectedView() === 'summary'"
             class="remark-panel surface-card border-round-xl shadow-1 p-4 mb-4"
         >
             <div class="flex flex-column md:flex-row md:align-items-center md:justify-content-between gap-3 mb-3">
@@ -470,89 +473,21 @@
         </section>
 
         <div class="surface-card border-round-xl shadow-1 p-4">
-            <div class="flex align-items-center justify-content-between gap-3 mb-4">
-                <h3 class="text-xl font-bold text-900 m-0">
-                    Audit Sections
-                </h3>
-
-                <p-tag [value]="audit.can_continue ? 'Active' : 'Locked'"
-                    [severity]="audit.can_continue ? 'success' : 'danger'"></p-tag>
+            <div
+                *ngIf="selectedView() === 'summary'"
+                class="workspace-empty"
+            >
+                Assessment info, remarks, and submission actions are shown above. Select a category from the left sidebar to answer questions.
             </div>
 
-            <div *ngIf="menus().length === 0" class="text-600">
-                No audit menu is available for this assessment.
-            </div>
-
-            <div class="menu-list" *ngIf="menus().length > 0">
-                <!-- Executive Summary -->
-                <!-- Executive Summary -->
-                <section class="menu-block">
-
-                    <div class="menu-title">
-                        Executive Summary
-                    </div>
-
-                    <div class="category-grid">
-
-                        <button type="button" class="category-tile" [disabled]="!audit.can_continue"
-                            (click)="openExecutiveSummary()">
-
-                            <span class="category-name">
-                                Executive Summary
-                            </span>
-
-                            <span class="category-meta">
-                                View and edit the executive summary of this audit.
-                            </span>
-
-                        </button>
-
-                    </div>
-
-                </section>
-
-                <section class="menu-block" *ngFor="let menu of menus()">
-                    <div class="menu-title">
-                        {{ menu.name }}
-                    </div>
-
-                    <div class="category-grid">
-                        <button type="button" class="category-tile" *ngFor="let category of menu.categories"
-                            [disabled]="!audit.can_continue" (click)="openCategory(category)">
-                            <span class="category-name">
-                                {{ category.name }}
-                            </span>
-
-                            <span class="category-meta">
-                                <ng-container *ngIf="category.account_based; else questionProgress">
-                                    {{ category.completed_account_count }}
-                                    /
-                                    {{ category.account_count }}
-                                    accounts completed
-                                </ng-container>
-
-                                <ng-template #questionProgress>
-                                    {{ category.answered_count }}
-                                    /
-                                    {{ category.question_count }}
-                                    answered
-                                </ng-template>
-                            </span>
-
-                            <p-progressBar
-                                [value]="
-                                    category.account_based
-                                        ? (category.account_count
-                                            ? (category.completed_account_count / category.account_count) * 100
-                                            : 0)
-                                        : category.question_count
-                                        ? (category.answered_count / category.question_count) * 100
-                                        : 0
-                                " [showValue]="false"></p-progressBar>
-                        </button>
-                    </div>
-                </section>
-            </div>
+            <app-category-assessment
+                *ngIf="selectedView() === 'category' && selectedCategory() as category"
+                [assessmentIdInput]="audit.id"
+                [categoryIdInput]="category.id"
+                [pendingQuestionIdsInput]="selectedPendingQuestionIds()"
+                [dumpIdInput]="selectedDumpId()"
+                [workspaceMode]="true"
+            ></app-category-assessment>
         </div>
 
     </ng-container>

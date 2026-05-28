@@ -1,6 +1,6 @@
 <div class="internal-audit min-h-screen bg-gray-100 p-4 md:p-5">
 
-    <div *ngIf="!drawerMode()"
+    <div *ngIf="!drawerMode() && !workspaceMode"
         class="flex flex-column md:flex-row md:align-items-center md:justify-content-between gap-3 mb-4">
 
         <div>
@@ -48,7 +48,10 @@
 
     <ng-container *ngIf="!loading() && !error() && categoryDetail() as detail">
 
-        <div class="surface-card border-round-xl shadow-1 p-4 mb-4">
+        <div
+            class="surface-card border-round-xl shadow-1 p-4 mb-4"
+            [class.workspace-category-header]="workspaceMode"
+        >
 
             <div class="flex flex-column md:flex-row md:align-items-start md:justify-content-between gap-3">
 
@@ -81,8 +84,15 @@
 
                 </div>
 
-                <button pButton type="button" icon="pi pi-arrow-left" [label]="drawerMode() ? 'Close' : 'Back'"
-                    severity="secondary" (click)="backToWorkspace()"></button>
+                <button
+                    *ngIf="!workspaceMode"
+                    pButton
+                    type="button"
+                    icon="pi pi-arrow-left"
+                    [label]="drawerMode() ? 'Close' : 'Back'"
+                    severity="secondary"
+                    (click)="backToWorkspace()"
+                ></button>
 
             </div>
 

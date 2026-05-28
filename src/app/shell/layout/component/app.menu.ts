@@ -1,9 +1,11 @@
-import { Component, OnInit, inject, effect } from '@angular/core';
+import { Component, OnDestroy, OnInit, inject, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { NavigationEnd, Router, RouterModule } from '@angular/router';
 import { MenuItem } from 'primeng/api';
 import { AppMenuitem } from './app.menuitem';
 import { LayoutService } from '../service/layout.service';
+import { filter, Subscription } from 'rxjs';
+import { InternalAuditNavService } from '../../../features/auditor/services/internal-audit-nav.service';
 
 @Component({
     selector: 'app-menu',
@@ -18,19 +20,42 @@ import { LayoutService } from '../service/layout.service';
     </ul>
   `,
 })
-export class AppMenu implements OnInit {
+export class AppMenu implements OnInit, OnDestroy {
     private layoutService = inject(LayoutService);
+    private router = inject(Router);
+    private auditNavService = inject(InternalAuditNavService);
+
+    private routeSubscription?: Subscription;
+
+    private userTypeId = '';
+
+    private lastAssessmentMenuKey = '';
+
     ngOnInit(): void {
         const user =
             JSON.parse(localStorage.getItem('user') || '{}');
 
-        this.model =
-            this.model.filter((menu: any) =>
-                !menu.authority ||
-                menu.authority.includes(user.user_type_id)
-            );
+        this.userTypeId =
+            String(user.user_type_id || '');
+
+        this.refreshModel();
+
+        this.routeSubscription =
+            this.router.events
+                .pipe(
+                    filter(
+                        (event) =>
+                            event instanceof NavigationEnd,
+                    ),
+                )
+                .subscribe(
+                    () =>
+                        this.refreshModel(),
+                );
     }
-    model: MenuItem[] = [
+    model: MenuItem[] = [];
+
+    private baseModel: MenuItem[] = [
         {
             label: 'Home',
             authority: ['1'],
@@ -178,8 +203,380 @@ export class AppMenu implements OnInit {
 
     constructor() {
         effect(() => {
-
+            this.auditNavService.assessmentId();
+            this.auditNavService.menus();
+            this.auditNavService.overview();
+            this.refreshModel();
         });
+    }
+
+    private refreshModel() {
+        const filtered =
+            this.baseModel.filter((menu: any) =>
+                !menu.authority ||
+                menu.authority.includes(this.userTypeId)
+            );
+
+        const currentAssessmentId =
+            this.currentAssessmentIdFromRoute();
+
+        const assessmentMenuKey =
+            JSON.stringify({
+                currentAssessmentId,
+                navAssessmentId:
+                    this.auditNavService.assessmentId(),
+                menus:
+                    this.auditNavService.menus()
+                        .map(
+                            (menu: any) => ({
+                                name:
+                                    menu?.name,
+                                categories:
+                                    (menu?.categories || [])
+                                        .map(
+                                            (category: any) =>
+                                                `${category?.id}:${category?.name}`,
+                                        ),
+                            }),
+                        ),
+            });
+
+        if (
+            currentAssessmentId
+            &&
+            currentAssessmentId
+            === Number(
+                this.auditNavService.assessmentId(),
+            )
+        ) {
+            filtered.push(
+                this.buildAssessmentMenu(
+                    currentAssessmentId,
+                ),
+            );
+        }
+
+        if (
+            assessmentMenuKey
+            === this.lastAssessmentMenuKey
+            &&
+            this.model.length
+        ) {
+            return;
+        }
+
+        this.lastAssessmentMenuKey =
+            assessmentMenuKey;
+
+        this.model = filtered;
+    }
+
+    private buildAssessmentMenu(
+        assessmentId: number,
+    ): MenuItem {
+        const normalized =
+            (value: any) =>
+                String(value || '')
+                    .trim()
+                    .toLowerCase();
+
+        const dynamicItems: MenuItem[] = [
+            {
+                label: 'Assessment Info',
+                icon: 'pi pi-fw pi-info-circle',
+                routerLink: [
+                    '/auditor/internal-audit',
+                    assessmentId,
+                ],
+                queryParams: {
+                    view: 'summary',
+                },
+                routerLinkActiveOptions: {
+                    paths: 'exact',
+                    queryParams: 'exact',
+                    matrixParams: 'ignored',
+                    fragment: 'ignored',
+                },
+            },
+            {
+                label: 'Executive Summary',
+                icon: 'pi pi-fw pi-file-edit',
+                routerLink: [
+                    '/auditor/internal-audit/executive-summary',
+                    assessmentId,
+                ],
+            },
+        ];
+
+        for (
+            const menu
+            of this.auditNavService.menus()
+        ) {
+            const categoryItems =
+                (menu.categories || [])
+                    .filter(
+                        (category: any) =>
+                            ![
+                                'executive summary',
+                                'assessment info',
+                            ].includes(
+                                normalized(
+                                    category?.name,
+                                ),
+                            ),
+                    )
+                    .map(
+                        (category: any) => ({
+                            label:
+                                category.name,
+                            meta:
+                                this.categoryProgressText(
+                                    category,
+                                ),
+                            icon:
+                                this.dynamicCategoryIcon(
+                                    category,
+                                ),
+                            routerLink: [
+                                '/auditor/internal-audit',
+                                assessmentId,
+                            ],
+                            queryParams: {
+                                view: 'category',
+                                categoryId:
+                                    Number(category.id),
+                            },
+                            routerLinkActiveOptions: {
+                                paths:
+                                    'exact',
+                                queryParams:
+                                    'exact',
+                                matrixParams:
+                                    'ignored',
+                                fragment:
+                                    'ignored',
+                            },
+                        }),
+                    );
+
+            if (
+                !categoryItems.length
+                ||
+                [
+                    'executive summary',
+                    'assessment info',
+                ].includes(
+                    normalized(
+                        menu?.name,
+                    ),
+                )
+            ) {
+                continue;
+            }
+
+            dynamicItems.push({
+                label:
+                    menu.name,
+                icon:
+                    this.dynamicMenuIcon(
+                        menu,
+                    ),
+                items:
+                    categoryItems,
+            });
+        }
+
+        return {
+            label:
+                'Current Assessment',
+            authority:
+                ['2'],
+            items:
+                dynamicItems,
+        } as MenuItem;
+    }
+
+    private categoryProgressText(
+        category: any,
+    ) {
+        if (
+            category?.account_based
+        ) {
+            const completed =
+                Number(
+                    category?.completed_account_count || 0,
+                );
+            const total =
+                Number(
+                    category?.account_count || 0,
+                );
+            const remaining =
+                Math.max(
+                    total - completed,
+                    0,
+                );
+
+            return `${completed}/${total} accounts completed, ${remaining} remaining`;
+        }
+
+        const answered =
+            Number(
+                category?.answered_count || 0,
+            );
+        const total =
+            Number(
+                category?.question_count || 0,
+            );
+        const remaining =
+            Math.max(
+                total - answered,
+                0,
+            );
+
+        return `${answered}/${total} answered, ${remaining} remaining`;
+    }
+
+    private dynamicMenuIcon(
+        menu: any,
+    ) {
+        const name =
+            String(menu?.name || '')
+                .trim()
+                .toLowerCase();
+
+        if (
+            name.includes('deposit')
+        ) {
+            return 'pi pi-fw pi-wallet';
+        }
+
+        if (
+            name.includes('advance')
+            ||
+            name.includes('loan')
+        ) {
+            return 'pi pi-fw pi-credit-card';
+        }
+
+        if (
+            name.includes('cash')
+            ||
+            name.includes('financial')
+        ) {
+            return 'pi pi-fw pi-chart-line';
+        }
+
+        if (
+            name.includes('compliance')
+        ) {
+            return 'pi pi-fw pi-verified';
+        }
+
+        if (
+            name.includes('document')
+            ||
+            name.includes('record')
+        ) {
+            return 'pi pi-fw pi-folder';
+        }
+
+        return 'pi pi-fw pi-list-check';
+    }
+
+    private dynamicCategoryIcon(
+        category: any,
+    ) {
+        const name =
+            String(category?.name || '')
+                .trim()
+                .toLowerCase();
+
+        if (
+            category?.account_based
+        ) {
+            return 'pi pi-fw pi-id-card';
+        }
+
+        if (
+            name.includes('annexure')
+        ) {
+            return 'pi pi-fw pi-table';
+        }
+
+        if (
+            name.includes('compliance')
+        ) {
+            return 'pi pi-fw pi-verified';
+        }
+
+        if (
+            name.includes('cash')
+        ) {
+            return 'pi pi-fw pi-money-bill';
+        }
+
+        if (
+            name.includes('advance')
+            ||
+            name.includes('loan')
+        ) {
+            return 'pi pi-fw pi-credit-card';
+        }
+
+        if (
+            name.includes('deposit')
+        ) {
+            return 'pi pi-fw pi-wallet';
+        }
+
+        if (
+            name.includes('security')
+            ||
+            name.includes('control')
+        ) {
+            return 'pi pi-fw pi-shield';
+        }
+
+        if (
+            name.includes('document')
+            ||
+            name.includes('register')
+        ) {
+            return 'pi pi-fw pi-folder-open';
+        }
+
+        return 'pi pi-fw pi-angle-right';
+    }
+
+    private currentAssessmentIdFromRoute() {
+        const url =
+            this.router.url || '';
+
+        let match =
+            url.match(
+                /\/auditor\/internal-audit\/(\d+)(?:\?|$)/,
+            );
+
+        if (
+            match?.[1]
+        ) {
+            return Number(
+                match[1],
+            );
+        }
+
+        match =
+            url.match(
+                /\/auditor\/internal-audit\/executive-summary\/(\d+)(?:\?|$)/,
+            );
+
+        return match?.[1]
+            ? Number(match[1])
+            : 0;
+    }
+
+    ngOnDestroy() {
+        this.routeSubscription?.unsubscribe();
     }
 
 

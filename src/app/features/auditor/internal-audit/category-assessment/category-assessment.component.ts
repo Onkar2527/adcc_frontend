@@ -4,8 +4,11 @@ import {
 
 import {
     Component,
+    Input,
     OnInit,
+    OnChanges,
     Optional,
+    SimpleChanges,
     inject,
     signal,
 } from '@angular/core';
@@ -64,7 +67,7 @@ import { TableModule } from 'primeng/table';
 })
 
 export class CategoryAssessmentComponent
-    implements OnInit {
+    implements OnInit, OnChanges {
 
     private route =
         inject(ActivatedRoute);
@@ -169,6 +172,26 @@ export class CategoryAssessmentComponent
 
     columnOptionsMap: any = {};
 
+    private activeLoadKey = '';
+
+    @Input()
+    assessmentIdInput:
+        number | null = null;
+
+    @Input()
+    categoryIdInput:
+        number | null = null;
+
+    @Input()
+    pendingQuestionIdsInput:
+        number[] = [];
+
+    @Input()
+    dumpIdInput = 0;
+
+    @Input()
+    workspaceMode = false;
+
     private pendingQuestionIds =
         new Set<number>();
 
@@ -187,7 +210,11 @@ export class CategoryAssessmentComponent
 
         this.pendingQuestionIds =
             new Set<number>(
-                (drawerData.pendingQuestionIds || [])
+                (
+                    this.pendingQuestionIdsInput?.length
+                        ? this.pendingQuestionIdsInput
+                        : drawerData.pendingQuestionIds || []
+                )
                     .map(
                         (questionId: any) =>
                             Number(questionId),
@@ -201,12 +228,14 @@ export class CategoryAssessmentComponent
 
         this.selectedDumpId.set(
             Number(
-                drawerData.dumpId || 0,
+                this.dumpIdInput || drawerData.dumpId || 0,
             ),
         );
 
         const assessmentId =
             Number(
+                this.assessmentIdInput
+                ||
                 drawerData.assessmentId
                 ||
                 this.route.snapshot.paramMap.get(
@@ -216,6 +245,8 @@ export class CategoryAssessmentComponent
 
         const categoryId =
             Number(
+                this.categoryIdInput
+                ||
                 drawerData.categoryId
                 ||
                 this.route.snapshot.paramMap.get(
@@ -236,10 +267,81 @@ export class CategoryAssessmentComponent
             return;
         }
 
+        if (
+            this.workspaceMode
+            &&
+            this.assessmentIdInput
+            &&
+            this.categoryIdInput
+        ) {
+            return;
+        }
+
         this.loadCategory(
             assessmentId,
             categoryId,
         );
+    }
+
+    ngOnChanges(
+        changes: SimpleChanges,
+    ) {
+        if (
+            !this.workspaceMode
+            ||
+            !this.assessmentIdInput
+            ||
+            !this.categoryIdInput
+        ) {
+            return;
+        }
+
+        if (
+            changes['pendingQuestionIdsInput']
+        ) {
+            this.pendingQuestionIds =
+                new Set<number>(
+                    (this.pendingQuestionIdsInput || [])
+                        .map(
+                            (questionId: any) =>
+                                Number(questionId),
+                        )
+                        .filter(Boolean),
+                );
+
+            this.pendingOnly.set(
+                this.pendingQuestionIds.size > 0,
+            );
+        }
+
+        if (
+            changes['dumpIdInput']
+        ) {
+            this.selectedDumpId.set(
+                Number(
+                    this.dumpIdInput || 0,
+                ),
+            );
+        }
+
+        if (
+            changes['assessmentIdInput']
+            ||
+            changes['categoryIdInput']
+            ||
+            changes['dumpIdInput']
+            ||
+            changes['pendingQuestionIdsInput']
+        ) {
+            this.loadCategory(
+                Number(
+                    this.assessmentIdInput,
+                ),
+                Number(
+                    this.categoryIdInput,
+                ),
+            );
+        }
     }
 
     loadCategory(
@@ -248,6 +350,22 @@ export class CategoryAssessmentComponent
         showLoader = true,
         dumpId = this.selectedDumpId(),
     ) {
+        const loadKey =
+            [
+                Number(assessmentId) || 0,
+                Number(categoryId) || 0,
+                Number(dumpId) || 0,
+                this.pendingOnly() ? 'pending' : 'all',
+            ].join(':');
+
+        if (
+            this.activeLoadKey === loadKey
+        ) {
+            return;
+        }
+
+        this.activeLoadKey =
+            loadKey;
 
         if (
             showLoader
@@ -267,6 +385,7 @@ export class CategoryAssessmentComponent
             .subscribe({
 
                 next: (res: any) => {
+                    this.activeLoadKey = '';
 
                     const prepared =
                         this.prepareCategoryDetail(
@@ -291,6 +410,7 @@ export class CategoryAssessmentComponent
                 },
 
                 error: (err) => {
+                    this.activeLoadKey = '';
 
                     if (
                         showLoader

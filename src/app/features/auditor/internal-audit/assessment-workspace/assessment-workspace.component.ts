@@ -20,10 +20,10 @@ import { ProgressBarModule } from 'primeng/progressbar';
 import { SkeletonModule } from 'primeng/skeleton';
 import { TagModule } from 'primeng/tag';
 import { ConfirmationService } from 'primeng/api';
-import { FormDrawerService } from '../../../../core/services/drawer/form-drawer.service';
 import { NotificationService } from '../../../../core/services/notification/notification.service';
 import { AuditDashboardService } from '../../services/auditor-main.service';
 import { CategoryAssessmentComponent } from '../category-assessment/category-assessment.component';
+import { InternalAuditNavService } from '../../services/internal-audit-nav.service';
 
 @Component({
     selector: 'app-assessment-workspace',
@@ -37,6 +37,7 @@ import { CategoryAssessmentComponent } from '../category-assessment/category-ass
         ProgressBarModule,
         SkeletonModule,
         TagModule,
+        CategoryAssessmentComponent,
     ],
     templateUrl: './assessment-workspace.component.html',
     styleUrl: '../internal-audit.component.css',
@@ -51,14 +52,14 @@ export class AssessmentWorkspaceComponent implements OnInit {
     private service =
         inject(AuditDashboardService);
 
-    private drawer =
-        inject(FormDrawerService);
-
     private confirmationService =
         inject(ConfirmationService);
 
     private notification =
         inject(NotificationService);
+
+    private navService =
+        inject(InternalAuditNavService);
 
     loading =
         signal(false);
@@ -83,6 +84,18 @@ export class AssessmentWorkspaceComponent implements OnInit {
 
     submissionMessage =
         signal('');
+
+    selectedCategoryId =
+        signal<number | null>(null);
+
+    selectedView =
+        signal<'summary' | 'category'>('summary');
+
+    selectedPendingQuestionIds =
+        signal<number[]>([]);
+
+    selectedDumpId =
+        signal(0);
 
     remarks =
         signal<any>(null);
@@ -148,6 +161,23 @@ export class AssessmentWorkspaceComponent implements OnInit {
                 ),
         );
 
+    selectedCategory =
+        computed(() =>
+            this.menus()
+                .flatMap(
+                    (menu: any) =>
+                        menu.categories || [],
+                )
+                .find(
+                    (category: any) =>
+                        Number(category.id)
+                        === Number(
+                            this.selectedCategoryId(),
+                        ),
+                )
+            || null,
+        );
+
     ngOnInit() {
         const assessmentId =
             Number(
@@ -165,6 +195,16 @@ export class AssessmentWorkspaceComponent implements OnInit {
 
         this.loadMenu(
             assessmentId,
+        );
+
+        this.route.queryParamMap.subscribe(
+            (params) =>
+                this.applyRouteSelection(
+                    params.get('view'),
+                    params.get('categoryId'),
+                    params.get('dumpId'),
+                    params.get('pending'),
+                ),
         );
     }
     openExecutiveSummary() {
@@ -216,6 +256,12 @@ export class AssessmentWorkspaceComponent implements OnInit {
                     this.menus.set(
                         res?.menus || [],
                     );
+                    this.navService.setAssessmentMenus(
+                        assessmentId,
+                        res?.menus || [],
+                        res?.overview || null,
+                    );
+                    this.ensureSelectedCategory();
                     this.loading.set(false);
 
                     if (
@@ -248,6 +294,7 @@ export class AssessmentWorkspaceComponent implements OnInit {
                     }
                 },
                 error: (err) => {
+                    this.navService.clear();
                     this.error.set(
                         err?.error?.message
                         || 'Unable to load internal audit.',
@@ -524,59 +571,61 @@ export class AssessmentWorkspaceComponent implements OnInit {
         ]);
     }
 
-    async openCategory(
+    openCategory(
         category: any,
         pendingIssues: any[] = [],
     ) {
-        const assessment =
-            this.overview();
-        const refreshSubmission =
-            Boolean(
-                this.submissionPreview(),
-            );
-
         if (
-            !assessment?.id
-            ||
             !category?.id
         ) {
             return;
         }
 
-        await this.drawer.open(
-            CategoryAssessmentComponent,
+        this.selectedCategoryId.set(
+            Number(category.id),
+        );
+        this.selectedPendingQuestionIds.set(
+            pendingIssues.map(
+                (issue: any) =>
+                    Number(issue.question_id),
+            ),
+        );
+        this.selectedDumpId.set(
+            Number(
+                pendingIssues[0]?.dump_id || 0,
+            ),
+        );
+
+        this.router.navigate(
+            [],
             {
-                header:
-                    pendingIssues.length
-                        ? `Pending: ${category.name || 'Category Assessment'}`
-                        : category.name || 'Category Assessment',
-                icon:
-                    'pi pi-list-check',
-                width:
-                    '100vw',
-                dismissible:
-                    false,
-                data: {
-                    assessmentId:
-                        assessment.id,
+                relativeTo:
+                    this.route,
+                queryParams: {
+                    view:
+                        'category',
                     categoryId:
-                        category.id,
-                    pendingQuestionIds:
-                        pendingIssues.map(
-                            (issue: any) =>
-                                Number(issue.question_id),
-                        ),
+                        Number(category.id),
                     dumpId:
                         Number(
                             pendingIssues[0]?.dump_id || 0,
-                        ),
+                        ) || null,
+                    pending:
+                        pendingIssues.length
+                            ? pendingIssues
+                                .map(
+                                    (issue: any) =>
+                                        Number(issue.question_id),
+                                )
+                                .filter(Boolean)
+                                .join(',')
+                            : null,
                 },
+                queryParamsHandling:
+                    'merge',
+                replaceUrl:
+                    false,
             },
-        );
-
-        this.loadMenu(
-            assessment.id,
-            refreshSubmission,
         );
     }
 
@@ -728,6 +777,127 @@ export class AssessmentWorkspaceComponent implements OnInit {
                 pendingIssues,
             );
         }
+    }
+
+    isSelectedCategory(
+        categoryId: any,
+    ) {
+        return Number(categoryId)
+            === Number(
+                this.selectedCategoryId(),
+            );
+    }
+
+    private ensureSelectedCategory() {
+        const categories =
+            this.menus()
+                .flatMap(
+                    (menu: any) =>
+                        menu.categories || [],
+                );
+
+        if (
+            !categories.length
+        ) {
+            this.selectedCategoryId.set(
+                null,
+            );
+            return;
+        }
+
+        const exists =
+            categories.some(
+                (category: any) =>
+                    Number(category.id)
+                    === Number(
+                        this.selectedCategoryId(),
+                    ),
+            );
+
+        if (
+            exists
+        ) {
+            return;
+        }
+
+        this.selectedCategoryId.set(
+            null,
+        );
+        this.selectedPendingQuestionIds.set(
+            [],
+        );
+        this.selectedDumpId.set(0);
+
+        this.router.navigate(
+            [],
+            {
+                relativeTo:
+                    this.route,
+                queryParams: {
+                    view:
+                        'summary',
+                    categoryId:
+                        null,
+                    dumpId:
+                        null,
+                    pending:
+                        null,
+                },
+                queryParamsHandling:
+                    'merge',
+                replaceUrl:
+                    true,
+            },
+        );
+    }
+
+    private applyRouteSelection(
+        viewParam: string | null,
+        categoryIdParam: string | null,
+        dumpIdParam: string | null,
+        pendingParam: string | null,
+    ) {
+        const view =
+            viewParam === 'category'
+                ? 'category'
+                : 'summary';
+
+        this.selectedView.set(
+            view,
+        );
+
+        const categoryId =
+            Number(categoryIdParam || 0);
+
+        if (
+            view === 'category'
+            &&
+            categoryId
+        ) {
+            this.selectedCategoryId.set(
+                categoryId,
+            );
+        } else if (
+            view === 'summary'
+        ) {
+            this.selectedCategoryId.set(
+                null,
+            );
+        }
+
+        this.selectedDumpId.set(
+            Number(dumpIdParam || 0),
+        );
+
+        this.selectedPendingQuestionIds.set(
+            String(pendingParam || '')
+                .split(',')
+                .map(
+                    (questionId: string) =>
+                        Number(questionId),
+                )
+                .filter(Boolean),
+        );
     }
 
     private performSubmit(

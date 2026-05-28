@@ -17,7 +17,10 @@ import { LayoutService } from '../service/layout.service';
             <div *ngIf="root && item.visible !== false" class="layout-menuitem-root-text">{{ item.label }}</div>
             <a *ngIf="(!item.routerLink || item.items) && item.visible !== false" [attr.href]="item.url" (click)="itemClick($event)" [ngClass]="item.styleClass" [attr.target]="item.target" tabindex="0" pRipple>
                 <i [ngClass]="item.icon" class="layout-menuitem-icon"></i>
-                <span class="layout-menuitem-text">{{ item.label }}</span>
+                <span class="layout-menuitem-copy">
+                    <span class="layout-menuitem-text">{{ item.label }}</span>
+                    <small *ngIf="item['meta']" class="layout-menuitem-meta">{{ item['meta'] }}</small>
+                </span>
                 <i class="pi pi-fw pi-angle-down layout-submenu-toggler" *ngIf="item.items"></i>
             </a>
             <a
@@ -39,7 +42,10 @@ import { LayoutService } from '../service/layout.service';
                 pRipple
             >
                 <i [ngClass]="item.icon" class="layout-menuitem-icon"></i>
-                <span class="layout-menuitem-text">{{ item.label }}</span>
+                <span class="layout-menuitem-copy">
+                    <span class="layout-menuitem-text">{{ item.label }}</span>
+                    <small *ngIf="item['meta']" class="layout-menuitem-meta">{{ item['meta'] }}</small>
+                </span>
                 <i class="pi pi-fw pi-angle-down layout-submenu-toggler" *ngIf="item.items"></i>
             </a>
 
@@ -66,7 +72,23 @@ import { LayoutService } from '../service/layout.service';
             ),
             transition('collapsed <=> expanded', animate('400ms cubic-bezier(0.86, 0, 0.07, 1)'))
         ])
-    ]
+    ],
+    styles: [`
+        .layout-menuitem-copy {
+            display: flex;
+            min-width: 0;
+            flex: 1;
+            flex-direction: column;
+        }
+
+        .layout-menuitem-meta {
+            margin-top: .15rem;
+            color: var(--text-color-secondary);
+            font-size: .72rem;
+            font-weight: 500;
+            line-height: 1.25;
+        }
+    `]
 })
 export class AppMenuitem {
     @Input() item!: MenuItem;
@@ -129,7 +151,37 @@ export class AppMenuitem {
     }
 
     updateActiveStateFromRoute() {
-        let activeRoute = this.router.isActive(this.item.routerLink[0], { paths: 'exact', queryParams: 'ignored', matrixParams: 'ignored', fragment: 'ignored' });
+        const urlTree =
+            this.router.createUrlTree(
+                Array.isArray(this.item.routerLink)
+                    ? this.item.routerLink
+                    : [
+                        this.item.routerLink,
+                    ],
+                {
+                    queryParams:
+                        this.item.queryParams,
+                    fragment:
+                        this.item.fragment,
+                },
+            );
+
+        const activeRoute =
+            this.router.isActive(
+                urlTree,
+                {
+                    paths:
+                        'exact',
+                    queryParams:
+                        this.item.queryParams
+                            ? 'exact'
+                            : 'ignored',
+                    matrixParams:
+                        'ignored',
+                    fragment:
+                        'ignored',
+                },
+            );
 
         if (activeRoute) {
             this.layoutService.onMenuStateChange({ key: this.key, routeEvent: true });
