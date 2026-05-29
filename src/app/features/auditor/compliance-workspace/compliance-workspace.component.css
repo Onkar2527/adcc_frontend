@@ -212,6 +212,21 @@
     border: 1px solid var(--surface-border);
 }
 
+.compliance-evidence {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: .75rem;
+    padding-bottom: .6rem;
+    border-bottom: 1px solid var(--surface-border);
+}
+
+.compliance-evidence span {
+    color: var(--text-color-secondary);
+    font-size: .78rem;
+    font-weight: 600;
+}
+
 .response-panel textarea,
 .annexure-row textarea {
     resize: vertical;
@@ -243,12 +258,17 @@
 
 .annexure-row {
     display: grid;
-    grid-template-columns: minmax(11rem, 1fr) auto minmax(16rem, 1.3fr) auto auto;
+    grid-template-columns: minmax(11rem, 1fr) auto auto minmax(16rem, 1.3fr) auto auto;
     align-items: center;
     gap: .55rem;
     padding: .55rem;
     background: var(--surface-50);
     margin-bottom: .45rem;
+}
+
+.annexure-evidence-actions {
+    display: inline-flex;
+    align-items: center;
 }
 
 .compliance-error {

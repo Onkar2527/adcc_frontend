@@ -403,28 +403,61 @@ export class CategoryAssessmentComponent
                         return;
                     }
 
-                    this.activeLoadKey = '';
-
-                    const prepared =
-                        this.prepareCategoryDetail(
-                            structuredClone(res),
-                        );
-
-                    this.categoryDetail.set(
-                        prepared,
-                    );
-
-                    this.selectedDumpId.set(
-                        Number(
-                            prepared?.selected_account?.id || 0,
-                        ),
-                    );
+                    const responseDetail =
+                        structuredClone(res);
 
                     if (
-                        showLoader
+                        Number(dumpId)
+                        &&
+                        this.hasMissingSubsetSetStructure(responseDetail)
+                        &&
+                        !this.hasSubsetSetStructure(this.categoryDetail())
                     ) {
-                        this.loading.set(false);
+                        this.service
+                            .getInternalAuditCategory(
+                                assessmentId,
+                                categoryId,
+                                this.employeeId,
+                                0,
+                            )
+                            .subscribe({
+                                next: (baseRes: any) => {
+                                    if (
+                                        requestId !== this.categoryLoadRequest
+                                    ) {
+                                        return;
+                                    }
+
+                                    this.finishCategoryLoad(
+                                        responseDetail,
+                                        structuredClone(baseRes),
+                                        showLoader,
+                                    );
+                                },
+
+                                error: () => {
+                                    if (
+                                        requestId !== this.categoryLoadRequest
+                                    ) {
+                                        return;
+                                    }
+
+                                    this.finishCategoryLoad(
+                                        responseDetail,
+                                        this.categoryDetail(),
+                                        showLoader,
+                                    );
+                                },
+                            });
+
+                        return;
                     }
+
+                    this.finishCategoryLoad(
+                        responseDetail,
+                        this.categoryDetail(),
+                        showLoader,
+                    );
                 },
 
                 error: (err) => {
@@ -455,6 +488,38 @@ export class CategoryAssessmentComponent
             });
     }
 
+    private finishCategoryLoad(
+        responseDetail: any,
+        structureSource: any,
+        showLoader: boolean,
+    ) {
+        this.activeLoadKey = '';
+
+                    const prepared =
+                        this.prepareCategoryDetail(
+                            this.mergeMissingSubsetSets(
+                                responseDetail,
+                                structureSource,
+                            ),
+                        );
+
+                    this.categoryDetail.set(
+                        prepared,
+                    );
+
+                    this.selectedDumpId.set(
+                        Number(
+                            prepared?.selected_account?.id || 0,
+                        ),
+                    );
+
+                    if (
+                        showLoader
+                    ) {
+                        this.loading.set(false);
+                    }
+    }
+
     prepareCategoryDetail(
         detail: any,
     ) {
@@ -474,6 +539,226 @@ export class CategoryAssessmentComponent
         );
 
         return detail;
+    }
+
+    private hasSubsetSetStructure(
+        detail: any,
+    ) {
+        return this.someQuestion(
+            detail?.sets || [],
+            (question: any) =>
+                Boolean(question?.subset_sets?.length),
+        );
+    }
+
+    private hasMissingSubsetSetStructure(
+        detail: any,
+    ) {
+        return this.someQuestion(
+            detail?.sets || [],
+            (question: any) =>
+                Number(question?.option_id) === 5
+                &&
+                !question?.subset_sets?.length,
+        );
+    }
+
+    private someQuestion(
+        sets: any[],
+        predicate: (question: any) => boolean,
+    ): boolean {
+        for (
+            const set
+            of sets || []
+        ) {
+            for (
+                const header
+                of set.headers || []
+            ) {
+                for (
+                    const question
+                    of header.questions || []
+                ) {
+                    if (
+                        predicate(question)
+                        ||
+                        this.someQuestion(
+                            question?.subset_sets || [],
+                            predicate,
+                        )
+                    ) {
+                        return true;
+                    }
+                }
+            }
+        }
+
+        return false;
+    }
+
+    private mergeMissingSubsetSets(
+        detail: any,
+        structureSource: any,
+    ) {
+        const subsetMap =
+            new Map<number, any[]>();
+
+        this.collectSubsetSetStructure(
+            structureSource?.sets || [],
+            subsetMap,
+        );
+
+        if (
+            subsetMap.size
+        ) {
+            this.applyMissingSubsetSetStructure(
+                detail?.sets || [],
+                subsetMap,
+            );
+        }
+
+        return detail;
+    }
+
+    private collectSubsetSetStructure(
+        sets: any[],
+        subsetMap: Map<number, any[]>,
+    ) {
+        for (
+            const set
+            of sets || []
+        ) {
+            for (
+                const header
+                of set.headers || []
+            ) {
+                for (
+                    const question
+                    of header.questions || []
+                ) {
+                    const questionId =
+                        Number(question?.id || 0);
+
+                    if (
+                        questionId
+                        &&
+                        question?.subset_sets?.length
+                    ) {
+                        subsetMap.set(
+                            questionId,
+                            this.cloneQuestionStructureSets(
+                                question.subset_sets,
+                            ),
+                        );
+
+                        this.collectSubsetSetStructure(
+                            question.subset_sets,
+                            subsetMap,
+                        );
+                    }
+                }
+            }
+        }
+    }
+
+    private applyMissingSubsetSetStructure(
+        sets: any[],
+        subsetMap: Map<number, any[]>,
+    ) {
+        for (
+            const set
+            of sets || []
+        ) {
+            for (
+                const header
+                of set.headers || []
+            ) {
+                for (
+                    const question
+                    of header.questions || []
+                ) {
+                    const questionId =
+                        Number(question?.id || 0);
+
+                    if (
+                        questionId
+                        &&
+                        !question?.subset_sets?.length
+                        &&
+                        subsetMap.has(questionId)
+                    ) {
+                        question.subset_sets =
+                            this.cloneQuestionStructureSets(
+                                subsetMap.get(questionId) || [],
+                            );
+                    }
+
+                    this.applyMissingSubsetSetStructure(
+                        question.subset_sets || [],
+                        subsetMap,
+                    );
+                }
+            }
+        }
+    }
+
+    private cloneQuestionStructureSets(
+        sets: any[],
+    ) {
+        return structuredClone(sets || [])
+            .map(
+                (set: any) => ({
+                    ...set,
+                    headers:
+                        (set.headers || [])
+                            .map(
+                                (header: any) => ({
+                                    ...header,
+                                    questions:
+                                        (header.questions || [])
+                                            .map(
+                                                (question: any) =>
+                                                    this.clearQuestionAnswerState(
+                                                        question,
+                                                    ),
+                                            ),
+                                }),
+                            ),
+                }),
+            );
+    }
+
+    private clearQuestionAnswerState(
+        question: any,
+    ) {
+        const cleaned = {
+            ...question,
+            answer:
+                null,
+            answer_value:
+                '',
+            audit_comment:
+                '',
+            is_compliance:
+                false,
+            audit_compulsary_ev_upload:
+                false,
+            annexure_rows:
+                [],
+            annexure_draft:
+                undefined,
+            selectedSubsetSets:
+                [],
+            pending_subset_sets:
+                undefined,
+        };
+
+        cleaned.subset_sets =
+            this.cloneQuestionStructureSets(
+                cleaned.subset_sets || [],
+            );
+
+        return cleaned;
     }
 
     filterPendingSets(
@@ -738,8 +1023,16 @@ export class CategoryAssessmentComponent
         }
 
         const selected =
-            String(
-                question.answer_value || '',
+            new Set(
+                String(
+                    question.answer_value || '',
+                )
+                    .split(',')
+                    .map(
+                        (item) =>
+                            item.trim(),
+                    )
+                    .filter(Boolean),
             );
 
         const subsetSets =
@@ -750,9 +1043,9 @@ export class CategoryAssessmentComponent
         return subsetSets
             .filter(
                 (set: any) =>
-                    String(set.id)
-                    ===
-                    selected,
+                    selected.has(
+                        String(set.id),
+                    ),
             );
     }
 
@@ -2036,12 +2329,32 @@ export class CategoryAssessmentComponent
             this.selectedDumpId();
 
         if (
+            this.completingAccount()
+        ) {
+            return;
+        }
+
+        if (
             !detail?.overview?.id
             ||
             !detail?.category?.id
             ||
             !dumpId
         ) {
+            return;
+        }
+
+        const localPending =
+            this.accountCompletionPendingMessages(
+                detail,
+            );
+
+        if (
+            localPending.length
+        ) {
+            this.notification.error(
+                localPending[0],
+            );
             return;
         }
 
@@ -2096,6 +2409,125 @@ export class CategoryAssessmentComponent
                     );
                 },
             });
+    }
+
+    private accountCompletionPendingMessages(
+        detail: any,
+    ) {
+        const messages: string[] = [];
+
+        for (
+            const question
+            of this.flattenQuestions(
+                detail?.sets || [],
+            )
+        ) {
+            if (
+                this.isQuestionPendingForCompletion(question)
+            ) {
+                messages.push(
+                    'Save all account answers before marking the account complete.',
+                );
+                break;
+            }
+
+            if (
+                this.isQuestionEvidencePending(question)
+            ) {
+                messages.push(
+                    'Upload required evidence before marking the account complete.',
+                );
+                break;
+            }
+        }
+
+        return messages;
+    }
+
+    private flattenQuestions(
+        sets: any[],
+    ): any[] {
+        const questions: any[] = [];
+
+        for (
+            const set
+            of sets || []
+        ) {
+            for (
+                const header
+                of set.headers || []
+            ) {
+                for (
+                    const question
+                    of header.questions || []
+                ) {
+                    questions.push(
+                        question,
+                    );
+
+                    questions.push(
+                        ...this.flattenQuestions(
+                            this.buildSelectedSubsetSets(question),
+                        ),
+                    );
+                }
+            }
+        }
+
+        return questions;
+    }
+
+    private isQuestionPendingForCompletion(
+        question: any,
+    ) {
+        const hasAnswer =
+            String(question?.answer_value || '')
+                .trim()
+                .length > 0;
+
+        if (
+            !hasAnswer
+            ||
+            !question?.answer?.id
+        ) {
+            return true;
+        }
+
+        if (
+            this.buildIsAnnexureSelected(question)
+            &&
+            !question?.annexure_rows?.length
+        ) {
+            return true;
+        }
+
+        return false;
+    }
+
+    private isQuestionEvidencePending(
+        question: any,
+    ) {
+        if (
+            !this.isEvidenceRequired(question)
+        ) {
+            return false;
+        }
+
+        if (
+            this.buildIsAnnexureSelected(question)
+        ) {
+            const rows =
+                question?.annexure_rows || [];
+
+            return !rows.length
+                ||
+                rows.some(
+                    (row: any) =>
+                        !row?.evidence,
+                );
+        }
+
+        return !question?.answer?.evidence;
     }
 
     isEvidenceRequired(

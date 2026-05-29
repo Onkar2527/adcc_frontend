@@ -346,7 +346,7 @@
                                 (click)="removeSampling(account)"></button>
 
                             <button pButton type="button" icon="pi pi-check-circle" label="Mark Account Complete"
-                                [disabled]="account.is_completed" [loading]="completingAccount()"
+                                [disabled]="account.is_completed || completingAccount()" [loading]="completingAccount()"
                                 (click)="completeAccount()"></button>
                         </div>
                     </div>

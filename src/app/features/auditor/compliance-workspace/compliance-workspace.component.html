@@ -173,6 +173,41 @@
                 ></button>
 
                 <div *ngIf="responseRequired(answer)" class="response-panel">
+                    <div class="compliance-evidence">
+                        <span>Compliance Evidence</span>
+
+                        <ng-container *ngIf="answer.compliance_evidence as evidence; else answerEvidenceUpload">
+                            <button
+                                pButton
+                                type="button"
+                                icon="pi pi-eye"
+                                label="View Evidence"
+                                severity="secondary"
+                                (click)="viewComplianceEvidence(evidence)"
+                            ></button>
+                        </ng-container>
+
+                        <ng-template #answerEvidenceUpload>
+                            <input
+                                #answerEvidenceInput
+                                type="file"
+                                accept=".jpg,.jpeg,.png,.pdf,image/jpeg,image/png,application/pdf"
+                                style="display: none"
+                                (change)="uploadEvidence('answer', answer, $event)"
+                            />
+
+                            <button
+                                pButton
+                                type="button"
+                                icon="pi pi-upload"
+                                label="Upload Evidence"
+                                severity="secondary"
+                                [loading]="uploadingEvidenceKey() === evidenceKey('answer', answer.id)"
+                                (click)="answerEvidenceInput.click()"
+                            ></button>
+                        </ng-template>
+                    </div>
+
                     <label>{{ isReCompliance() ? 'Corrected Compliance Response' : 'Compliance Response' }}</label>
                     <textarea
                         rows="3"
@@ -220,6 +255,39 @@
                             aria-label="View annexure evidence"
                             (click)="viewEvidence(row.evidence)"
                         ></button>
+
+                        <span *ngIf="responseRequired(row)" class="annexure-evidence-actions">
+                            <ng-container *ngIf="row.compliance_evidence as evidence; else rowEvidenceUpload">
+                                <button
+                                    pButton
+                                    type="button"
+                                    icon="pi pi-eye"
+                                    severity="secondary"
+                                    aria-label="View compliance evidence"
+                                    (click)="viewComplianceEvidence(evidence)"
+                                ></button>
+                            </ng-container>
+
+                            <ng-template #rowEvidenceUpload>
+                                <input
+                                    #rowEvidenceInput
+                                    type="file"
+                                    accept=".jpg,.jpeg,.png,.pdf,image/jpeg,image/png,application/pdf"
+                                    style="display: none"
+                                    (change)="uploadEvidence('annexure', row, $event)"
+                                />
+
+                                <button
+                                    pButton
+                                    type="button"
+                                    icon="pi pi-upload"
+                                    severity="secondary"
+                                    aria-label="Upload compliance evidence"
+                                    [loading]="uploadingEvidenceKey() === evidenceKey('annexure', row.id)"
+                                    (click)="rowEvidenceInput.click()"
+                                ></button>
+                            </ng-template>
+                        </span>
 
                         <textarea
                             *ngIf="responseRequired(row)"

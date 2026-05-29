@@ -149,16 +149,32 @@
                     </div>
                 </div>
 
-                <button
-                    *ngIf="answer.evidence"
-                    pButton
-                    type="button"
-                    class="evidence-link"
-                    icon="pi pi-paperclip"
-                    label="View Evidence"
-                    severity="secondary"
-                    (click)="viewEvidence(answer.evidence)"
-                ></button>
+                <div
+                    *ngIf="answer.evidence || (isComplianceReview() && answer.compliance_evidence)"
+                    class="evidence-actions"
+                >
+                    <button
+                        *ngIf="answer.evidence"
+                        pButton
+                        type="button"
+                        class="evidence-link"
+                        icon="pi pi-paperclip"
+                        [label]="isComplianceReview() ? 'View Auditor Evidence' : 'View Evidence'"
+                        severity="secondary"
+                        (click)="viewEvidence(answer.evidence)"
+                    ></button>
+
+                    <button
+                        *ngIf="isComplianceReview() && answer.compliance_evidence"
+                        pButton
+                        type="button"
+                        class="evidence-link"
+                        icon="pi pi-paperclip"
+                        label="View Manager Evidence"
+                        severity="secondary"
+                        (click)="viewEvidence(answer.compliance_evidence)"
+                    ></button>
+                </div>
 
                 <div class="review-action">
                     <textarea
@@ -217,8 +233,19 @@
                             type="button"
                             icon="pi pi-paperclip"
                             severity="secondary"
-                            aria-label="View annexure evidence"
+                            [attr.aria-label]="isComplianceReview() ? 'View auditor annexure evidence' : 'View annexure evidence'"
+                            [title]="isComplianceReview() ? 'View auditor evidence' : 'View evidence'"
                             (click)="viewEvidence(row.evidence)"
+                        ></button>
+                        <button
+                            *ngIf="isComplianceReview() && row.compliance_evidence"
+                            pButton
+                            type="button"
+                            icon="pi pi-paperclip"
+                            severity="secondary"
+                            aria-label="View manager annexure evidence"
+                            title="View manager evidence"
+                            (click)="viewEvidence(row.compliance_evidence)"
                         ></button>
                         <textarea
                             *ngIf="!isComplianceReview()"

@@ -406,6 +406,56 @@ getBranchFinancialPosition(
     );
   }
 
+  viewComplianceUploadedEvidence(
+    assessmentId: number,
+    evidenceId: number,
+    employeeId: number,
+  ) {
+
+    return this.http.get(
+
+      `${this.config.apiUrl}/internal-audit/compliance/${assessmentId}/compliance-evidence/${evidenceId}/view`,
+
+      {
+        params: {
+          employee_id:
+            employeeId,
+        },
+        responseType:
+          'blob',
+      },
+    );
+  }
+
+  uploadComplianceEvidence(
+    assessmentId: number,
+    targetType: 'answer' | 'annexure',
+    observationId: number,
+    employeeId: number,
+    file: File,
+  ) {
+
+    const formData =
+      new FormData();
+
+    formData.append(
+      'employee_id',
+      String(employeeId),
+    );
+
+    formData.append(
+      'file',
+      file,
+    );
+
+    return this.http.post<any>(
+
+      `${this.config.apiUrl}/internal-audit/compliance/${assessmentId}/observation/${targetType}/${observationId}/evidence/upload`,
+
+      formData,
+    );
+  }
+
   submitComplianceAssessment(
     assessmentId: number,
     employeeId: number,

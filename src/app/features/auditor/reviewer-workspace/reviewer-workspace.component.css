@@ -205,6 +205,13 @@
     margin-top: .75rem;
 }
 
+.evidence-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .5rem;
+    margin-top: .1rem;
+}
+
 .evidence-link {
     margin-top: .1rem;
 }

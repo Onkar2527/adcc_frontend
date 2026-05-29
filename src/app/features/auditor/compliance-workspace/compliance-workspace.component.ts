@@ -55,6 +55,9 @@ export class ComplianceWorkspaceComponent implements OnInit {
     responseSaving =
         signal<Record<string, boolean>>({});
 
+    uploadingEvidenceKey =
+        signal('');
+
     assessments =
         signal<any[]>([]);
 
@@ -148,6 +151,13 @@ export class ComplianceWorkspaceComponent implements OnInit {
     }
 
     actionKey(
+        targetType: string,
+        observationId: number,
+    ) {
+        return `${targetType}-${observationId}`;
+    }
+
+    evidenceKey(
         targetType: string,
         observationId: number,
     ) {
@@ -357,6 +367,152 @@ export class ComplianceWorkspaceComponent implements OnInit {
                     this.notification.error(
                         err?.error?.message
                         || 'Unable to open evidence.',
+                    );
+                },
+            });
+    }
+
+    viewComplianceEvidence(
+        evidence: any,
+    ) {
+        const assessmentId =
+            Number(
+                this.detail()?.overview?.id || 0,
+            );
+
+        if (
+            !assessmentId
+            ||
+            !evidence?.id
+        ) {
+            return;
+        }
+
+        this.service
+            .viewComplianceUploadedEvidence(
+                assessmentId,
+                Number(evidence.id),
+                this.employeeId(),
+            )
+            .subscribe({
+                next: (blob: Blob) => {
+                    const url =
+                        URL.createObjectURL(blob);
+
+                    window.open(
+                        url,
+                        '_blank',
+                    );
+
+                    setTimeout(
+                        () =>
+                            URL.revokeObjectURL(url),
+                        60000,
+                    );
+                },
+                error: (err) => {
+                    this.notification.error(
+                        err?.error?.message
+                        || 'Unable to open compliance evidence.',
+                    );
+                },
+            });
+    }
+
+    uploadEvidence(
+        targetType: 'answer' | 'annexure',
+        observation: any,
+        event: Event,
+    ) {
+        const input =
+            event.target as HTMLInputElement;
+        const file =
+            input.files?.[0];
+
+        input.value = '';
+
+        const assessmentId =
+            Number(
+                this.detail()?.overview?.id || 0,
+            );
+
+        if (
+            !file
+            ||
+            !assessmentId
+            ||
+            !observation?.id
+        ) {
+            return;
+        }
+
+        const allowedTypes = [
+            'image/jpeg',
+            'image/jpg',
+            'image/png',
+            'application/pdf',
+        ];
+
+        if (
+            !allowedTypes.includes(file.type)
+        ) {
+            this.notification.error(
+                'Only JPG, JPEG, PNG and PDF evidence files are allowed.',
+            );
+            return;
+        }
+
+        if (
+            file.size > 5 * 1024 * 1024
+        ) {
+            this.notification.error(
+                'Evidence file size must be less than or equal to 5 MB.',
+            );
+            return;
+        }
+
+        const key =
+            this.evidenceKey(
+                targetType,
+                observation.id,
+            );
+
+        this.uploadingEvidenceKey.set(key);
+
+        this.service
+            .uploadComplianceEvidence(
+                assessmentId,
+                targetType,
+                Number(observation.id),
+                this.employeeId(),
+                file,
+            )
+            .subscribe({
+                next: (res: any) => {
+                    this.uploadingEvidenceKey.set('');
+
+                    if (
+                        !res?.success
+                    ) {
+                        this.notification.error(
+                            res?.message
+                            || 'Unable to upload compliance evidence.',
+                        );
+                        return;
+                    }
+
+                    this.notification.success(
+                        res?.message
+                        || 'Compliance evidence uploaded successfully.',
+                    );
+                    this.loadDetail(assessmentId);
+                    this.checkCompletion();
+                },
+                error: (err) => {
+                    this.uploadingEvidenceKey.set('');
+                    this.notification.error(
+                        err?.error?.message
+                        || 'Unable to upload compliance evidence.',
                     );
                 },
             });

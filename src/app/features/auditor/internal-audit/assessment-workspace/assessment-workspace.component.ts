@@ -661,6 +661,12 @@ export class AssessmentWorkspaceComponent implements OnInit {
             this.overview();
 
         if (
+            this.checkingSubmission()
+        ) {
+            return;
+        }
+
+        if (
             !assessment?.id
         ) {
             return;

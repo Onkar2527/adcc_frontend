@@ -165,12 +165,12 @@
                         pButton
                         type="button"
                         icon="pi pi-check-circle"
-                        [label]="audit.audit_status_id == 3 ? 'Check Re-Audit' : 'Check Completion'"
-                        severity="secondary"
-                        [loading]="checkingSubmission()"
-                        [disabled]="submitting()"
-                        (click)="checkSubmission()"
-                    ></button>
+        [label]="audit.audit_status_id == 3 ? 'Check Re-Audit' : 'Check Completion'"
+        severity="secondary"
+        [loading]="checkingSubmission()"
+        [disabled]="submitting() || checkingSubmission()"
+        (click)="checkSubmission()"
+    ></button>
 
                     <button
                         pButton
