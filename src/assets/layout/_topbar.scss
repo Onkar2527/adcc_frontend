@@ -8,9 +8,12 @@
     top: 0;
     width: 100%;
     padding: 0 0.75rem;
-    background: #1f3b57;
-    border-bottom: 1px solid #173047;
-    box-shadow: none;
+     background-color: rgba(63, 81, 181, 0.85);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     
     transition: left var(--layout-section-transition-duration);
     display: flex;
