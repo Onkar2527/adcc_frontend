@@ -1097,6 +1097,95 @@ textarea.answer-control1 {
     flex: 0 0 min(21rem, 100%);
 }
 
+.account-select-panel {
+    display: grid;
+    gap: .65rem;
+}
+
+.account-select-title {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.account-select-title strong {
+    display: block;
+    color: var(--text-color);
+    font-size: .92rem;
+}
+
+.account-select-title small {
+    display: block;
+    margin-top: .18rem;
+    color: var(--text-color-secondary);
+    font-size: .74rem;
+    font-weight: 700;
+}
+
+.account-select-title .answer-control {
+    max-width: 20rem;
+}
+
+.account-select-table-wrap {
+    max-height: 22rem;
+    overflow: auto;
+    border: 1px solid var(--surface-200);
+    border-radius: .35rem;
+    background: var(--surface-0);
+}
+
+.account-select-table,
+.account-detail-table {
+    width: 100%;
+    border-collapse: collapse;
+    color: var(--text-color);
+    font-size: .84rem;
+}
+
+.account-select-table th,
+.account-select-table td,
+.account-detail-table th,
+.account-detail-table td {
+    padding: .48rem .55rem;
+    border: 1px solid var(--surface-200);
+    text-align: left;
+    vertical-align: top;
+}
+
+.account-select-table th {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    background: #eaf0f7;
+    font-size: .7rem;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+
+.account-select-table tbody tr:nth-child(even) {
+    background: var(--surface-50);
+}
+
+.account-select-table small {
+    display: block;
+    margin-top: .18rem;
+    color: var(--text-color-secondary);
+}
+
+.account-detail-table th {
+    width: 10.5rem;
+    background: var(--surface-100);
+    color: var(--text-color);
+    font-size: .72rem;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+
+.account-detail-table td {
+    background: var(--surface-0);
+}
+
 .account-total {
     padding: .18rem .5rem;
     border-radius: .35rem;
@@ -1151,6 +1240,12 @@ textarea.answer-control1 {
     color: var(--green-700);
     font-size: .75rem;
     font-weight: 700;
+}
+
+.account-open-status {
+    color: var(--orange-700);
+    font-size: .75rem;
+    font-weight: 800;
 }
 
 .account-detail {

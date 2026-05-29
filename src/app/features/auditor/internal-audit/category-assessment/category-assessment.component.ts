@@ -793,27 +793,10 @@ export class CategoryAssessmentComponent
             return;
         }
 
-        let appliedCount = 0;
-
-        for (
-            const question
-            of header?.questions || []
-        ) {
-
-            const defaultAnswer =
-                this.defaultAnswerValue(
-                    question,
-                );
-
-            if (
-                defaultAnswer !== null
-            ) {
-                question.answer_value =
-                    defaultAnswer;
-
-                appliedCount++;
-            }
-        }
+        const appliedCount =
+            this.applyDefaultAnswersToQuestions(
+                header.questions || [],
+            );
 
         if (!appliedCount) {
             this.notification.error(
@@ -826,6 +809,106 @@ export class CategoryAssessmentComponent
         this.notification.success(
             `${appliedCount} default answer${appliedCount === 1 ? '' : 's'} applied. Please review and save.`,
         );
+    }
+
+    selectDefaultAnswersForAccount() {
+        const detail =
+            this.categoryDetail();
+
+        if (
+            !this.canApplyDefaults()
+        ) {
+            this.notification.error(
+                'Default answers can be applied only during active audit entry.',
+            );
+
+            return;
+        }
+
+        if (
+            !this.isAccountCategory(detail)
+            ||
+            !detail?.selected_account
+        ) {
+            this.notification.error(
+                'Select an account before applying default answers.',
+            );
+
+            return;
+        }
+
+        const questions =
+            (detail.sets || [])
+                .flatMap(
+                    (set: any) =>
+                        set.headers || [],
+                )
+                .flatMap(
+                    (header: any) =>
+                        header.questions || [],
+                );
+
+        const appliedCount =
+            this.applyDefaultAnswersToQuestions(
+                questions,
+            );
+
+        if (
+            !appliedCount
+        ) {
+            this.notification.error(
+                'No default answers are configured for this account.',
+            );
+
+            return;
+        }
+
+        this.notification.success(
+            `${appliedCount} default answer${appliedCount === 1 ? '' : 's'} applied for this account. Please review and save.`,
+        );
+    }
+
+    private applyDefaultAnswersToQuestions(
+        questions: any[],
+    ) {
+        let appliedCount = 0;
+
+        for (
+            const question
+            of questions || []
+        ) {
+            const defaultAnswer =
+                this.defaultAnswerValue(
+                    question,
+                );
+
+            if (
+                defaultAnswer !== null
+            ) {
+                question.answer_value =
+                    defaultAnswer;
+                appliedCount++;
+            }
+
+            for (
+                const subsetSet
+                of this.buildSelectedSubsetSets(question)
+            ) {
+                const subsetQuestions =
+                    (subsetSet.headers || [])
+                        .flatMap(
+                            (header: any) =>
+                                header.questions || [],
+                        );
+
+                appliedCount +=
+                    this.applyDefaultAnswersToQuestions(
+                        subsetQuestions,
+                    );
+            }
+        }
+
+        return appliedCount;
     }
 
     canApplyDefaults() {

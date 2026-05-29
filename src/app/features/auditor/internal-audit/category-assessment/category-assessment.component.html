@@ -205,7 +205,85 @@
                 </div>
             </section>
 
-            <div class="flex flex-column lg:flex-row gap-4">
+            <div *ngIf="!detail.selected_account" class="account-select-panel">
+                <div class="account-select-title">
+                    <div>
+                        <strong>Select Account To Audit</strong>
+                        <small>{{ detail.accounts?.length || 0 }} sampled account(s)</small>
+                    </div>
+
+                    <input type="text" class="answer-control" [(ngModel)]="accountSearch"
+                        placeholder="Search account number or holder" />
+                </div>
+
+                <div *ngIf="!detail.accounts?.length" class="account-detail account-prompt">
+                    No sampled account is available for this category.
+                </div>
+
+                <div *ngIf="detail.accounts?.length" class="account-select-table-wrap">
+                    <table class="account-select-table">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Scheme</th>
+                                <th>Account No.</th>
+                                <th>Account Details</th>
+                                <th>Open Date</th>
+                                <th>Amount</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            <tr *ngFor="let account of filteredAccounts(); let ai = index">
+                                <td>{{ ai + 1 }}</td>
+                                <td>
+                                    {{ account.scheme_name || account.scheme_code || '-' }}
+                                    <small *ngIf="account.scheme_code && account.scheme_name">
+                                        {{ account.scheme_code }}
+                                    </small>
+                                </td>
+                                <td>
+                                    <strong>{{ account.account_no }}</strong>
+                                </td>
+                                <td>
+                                    {{ account.account_holder_name || '-' }}
+                                    <small *ngIf="account.ucic">
+                                        UCIC: {{ account.ucic }}
+                                    </small>
+                                </td>
+                                <td>
+                                    {{ account.account_opening_date | date:'dd/MM/yyyy' }}
+                                    <small *ngIf="account.renewal_date">
+                                        Renewal: {{ account.renewal_date | date:'dd/MM/yyyy' }}
+                                    </small>
+                                </td>
+                                <td>
+                                    {{
+                                        (account.principal_amount || account.sanction_amount || 0)
+                                        | number:'1.2-2'
+                                    }}
+                                </td>
+                                <td>
+                                    <span class="account-status" *ngIf="account.is_completed; else accountOpen">
+                                        Completed
+                                    </span>
+                                    <ng-template #accountOpen>
+                                        <span class="account-open-status">Pending</span>
+                                    </ng-template>
+                                </td>
+                                <td>
+                                    <button pButton type="button" icon="pi pi-arrow-right" label="Open"
+                                        class="p-button-sm" (click)="selectAccount(account)"></button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div *ngIf="detail.selected_account" class="flex flex-column lg:flex-row gap-4">
                 <aside class="account-list-panel">
                     <div class="flex align-items-center justify-content-between gap-2 mb-3">
                         <div class="font-bold text-900">
@@ -242,7 +320,7 @@
                 </aside>
 
                 <div class="account-detail" *ngIf="detail.selected_account as account">
-                    <div class="flex flex-column md:flex-row md:align-items-start md:justify-content-between gap-3">
+                    <div class="flex flex-column md:flex-row md:align-items-start md:justify-content-between gap-3 mb-3">
                         <div>
                             <div class="text-sm text-600 mb-1">
                                 Selected Account
@@ -259,6 +337,10 @@
                         </div>
 
                         <div class="flex gap-2 flex-wrap">
+                            <button pButton type="button" icon="pi pi-check-square"
+                                label="Apply Defaults to Account" severity="secondary"
+                                (click)="selectDefaultAnswersForAccount()"></button>
+
                             <button *ngIf="canManageSampling(detail) && !account.is_completed" pButton type="button"
                                 icon="pi pi-times" label="Remove Sample" severity="secondary"
                                 (click)="removeSampling(account)"></button>
@@ -268,10 +350,40 @@
                                 (click)="completeAccount()"></button>
                         </div>
                     </div>
-                </div>
 
-                <div class="account-detail account-prompt" *ngIf="!detail.selected_account">
-                    Select a sampled account to answer its audit questions.
+                    <table class="account-detail-table">
+                        <tbody>
+                            <tr>
+                                <th>Branch</th>
+                                <td>{{ detail.overview?.audit_unit_name || '-' }}</td>
+                                <th>Scheme</th>
+                                <td>{{ account.scheme_name || account.scheme_code || '-' }}</td>
+                            </tr>
+                            <tr>
+                                <th>A/C Number</th>
+                                <td>{{ account.account_no || '-' }}</td>
+                                <th>A/C Open Date</th>
+                                <td>{{ account.account_opening_date | date:'dd/MM/yyyy' }}</td>
+                            </tr>
+                            <tr>
+                                <th>A/C Holder Name</th>
+                                <td>{{ account.account_holder_name || '-' }}</td>
+                                <th>UCIC</th>
+                                <td>{{ account.ucic || '-' }}</td>
+                            </tr>
+                            <tr>
+                                <th>Renewal Date</th>
+                                <td>{{ account.renewal_date ? (account.renewal_date | date:'dd/MM/yyyy') : '-' }}</td>
+                                <th>Amount</th>
+                                <td>
+                                    {{
+                                        (account.principal_amount || account.sanction_amount || 0)
+                                        | number:'1.2-2'
+                                    }}
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
