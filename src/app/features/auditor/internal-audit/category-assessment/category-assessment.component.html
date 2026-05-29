@@ -1,4 +1,7 @@
-<div class="internal-audit min-h-screen bg-gray-100 p-4 md:p-5">
+<div
+    class="internal-audit min-h-screen bg-gray-100 p-4 md:p-5"
+    [class.category-workspace-mode]="workspaceMode"
+>
 
     <div *ngIf="!drawerMode() && !workspaceMode"
         class="flex flex-column md:flex-row md:align-items-center md:justify-content-between gap-3 mb-4">
@@ -293,18 +296,19 @@
                         {{ header.name }}
                     </div>
 
-                    @if (canApplyDefaults()) {
-                    <div class="flex gap-2 flex-wrap">
-                        <button pButton type="button" icon="pi pi-check-square" label="Default" severity="secondary"
+                    <div class="header-answer-actions">
+                        @if (canApplyDefaults()) {
+                        <button pButton type="button" icon="pi pi-check-square" label="Apply Defaults"
+                            severity="secondary" class="p-button-sm" [disabled]="savingHeader() === header.id"
                             (click)="selectDefaultAnswers(header)"></button>
+                        }
                     </div>
-                    }
 
                 </div>
 
                 <ng-container *ngFor="let question of header.questions; let i = index">
 
-                    <p-card styleClass="mb-4 border-round-xl shadow-2" [class.re-audit-question]="isReAudit(detail)">
+                    <div class="question-card" [class.re-audit-question]="isReAudit(detail)">
 
                         <div class="question-main">
 
@@ -347,99 +351,89 @@
 
                         <div class="answer-form">
 
-                            <label class="answer-label">
-                                Answer
-                            </label>
+                            <div class="answer-form-grid">
+                                <div class="answer-field">
+                                    <label class="answer-label">
+                                        Answer
+                                    </label>
 
-                            <textarea *ngIf="isTextAnswer(question); else optionAnswer" class="answer-control" rows="3"
-                                [(ngModel)]="question.answer_value"></textarea>
+                                    <textarea *ngIf="isTextAnswer(question); else optionAnswer" class="answer-control"
+                                        rows="2" [(ngModel)]="question.answer_value"></textarea>
 
-                            <ng-template #optionAnswer>
+                                    <ng-template #optionAnswer>
 
-                                <select class="answer-control" [(ngModel)]="question.answer_value">
+                                        <select class="answer-control" [(ngModel)]="question.answer_value">
 
-                                    <option value="">
-                                        Please select
-                                    </option>
+                                            <option value="">
+                                                Please select
+                                            </option>
 
-                                    <option *ngFor="let option of question.options" [value]="option.value">
-                                        {{ option.label }}
-                                    </option>
+                                            <option *ngFor="let option of question.options" [value]="option.value">
+                                                {{ option.label }}
+                                            </option>
 
-                                </select>
+                                        </select>
 
-                            </ng-template>
+                                    </ng-template>
 
-                            <label class="answer-label mt-3">
-                                Audit Comment
-                            </label>
+                                    <div class="answer-checks">
+                                        <label class="compliance-check">
+                                            <input type="checkbox" [(ngModel)]="question.is_compliance" />
+                                            <span>Compliance required</span>
+                                        </label>
 
-                            <textarea class="answer-control" rows="2" [(ngModel)]="question.audit_comment"></textarea>
+                                        <div class="inline-evidence">
+                                            <label class="compliance-check">
+                                                <input type="checkbox"
+                                                    [(ngModel)]="question.audit_compulsary_ev_upload" />
+                                                <span>Evidence to be uploaded</span>
+                                            </label>
 
-                            <label class="compliance-check mt-3">
+                                            <ng-container
+                                                *ngIf="!buildIsAnnexureSelected(question) || question.answer?.evidence">
+                                                <ng-container
+                                                    *ngIf="question.answer?.evidence as evidence; else questionEvidenceUpload">
+                                                    <button pButton type="button" icon="pi pi-eye" severity="secondary"
+                                                        title="View evidence" (click)="viewEvidence(evidence)"></button>
 
-                                <input type="checkbox" [(ngModel)]="question.is_compliance" />
+                                                    <button pButton type="button" icon="pi pi-trash" severity="danger"
+                                                        title="Remove evidence" (click)="deleteEvidence(evidence)"></button>
+                                                </ng-container>
 
-                                <span>
-                                    Compliance required
-                                </span>
+                                                <ng-template #questionEvidenceUpload>
+                                                    <input #questionEvidenceInput type="file"
+                                                        accept=".jpg,.jpeg,.png,.pdf,image/jpeg,image/png,application/pdf"
+                                                        style="display: none" (change)="uploadEvidence(question, $event)" />
 
-                            </label>
+                                                    <button pButton type="button" icon="pi pi-upload"
+                                                        severity="secondary" title="Upload evidence"
+                                                        [disabled]="!question.answer?.id"
+                                                        [loading]="uploadingEvidenceKey() === evidenceKey(question)"
+                                                        (click)="questionEvidenceInput.click()"></button>
+                                                </ng-template>
+                                            </ng-container>
+                                        </div>
+                                    </div>
+                                </div>
 
-                            <label class="compliance-check mt-3">
+                                <div class="answer-field">
+                                    <label class="answer-label">
+                                        Audit Comment
+                                    </label>
 
-                                <input type="checkbox" [(ngModel)]="question.audit_compulsary_ev_upload" />
-
-                                <span>
-                                    Evidence to be uploaded
-                                </span>
-
-                            </label>
+                                    <textarea class="answer-control" rows="2"
+                                        [(ngModel)]="question.audit_comment"></textarea>
+                                </div>
+                            </div>
 
                             <div *ngIf="isReAudit(detail) && question.re_audit_annexure_only" class="reviewer-feedback">
                                 Update only the rejected annexure row below.
                             </div>
 
-                            <div *ngIf="!buildIsAnnexureSelected(question) || question.answer?.evidence"
-                                class="evidence-panel">
-
-                                <div class="evidence-title">
-                                    <span>Audit Evidence</span>
-                                    <span *ngIf="isEvidenceRequired(question)" class="evidence-required">
-                                        Required
-                                    </span>
-                                </div>
-
-                                <ng-container
-                                    *ngIf="question.answer?.evidence as evidence; else questionEvidenceUpload">
-                                    <div class="evidence-file">
-                                        <span>
-                                            {{ evidence.description || evidence.file_name }}
-                                        </span>
-
-                                        <button pButton type="button" icon="pi pi-eye" severity="secondary"
-                                            title="View evidence" (click)="viewEvidence(evidence)"></button>
-
-                                        <button pButton type="button" icon="pi pi-trash" severity="danger"
-                                            title="Remove evidence" (click)="deleteEvidence(evidence)"></button>
-                                    </div>
-                                </ng-container>
-
-                                <ng-template #questionEvidenceUpload>
-                                    <input #questionEvidenceInput type="file"
-                                        accept=".jpg,.jpeg,.png,.pdf,image/jpeg,image/png,application/pdf"
-                                        style="display: none" (change)="uploadEvidence(question, $event)" />
-
-                                    <button pButton type="button" icon="pi pi-upload" label="Upload Evidence"
-                                        severity="secondary" [disabled]="!question.answer?.id"
-                                        [loading]="uploadingEvidenceKey() === evidenceKey(question)"
-                                        (click)="questionEvidenceInput.click()"></button>
-
-                                    <div *ngIf="!question.answer?.id" class="evidence-hint">
-                                        Save the answer first to upload evidence.
-                                    </div>
-                                </ng-template>
-
+                            <div
+                                *ngIf="!question.answer?.id && (!buildIsAnnexureSelected(question) || question.answer?.evidence)"
+                                class="evidence-hint">
+                                Save the answer first to upload evidence.
                             </div>
 
                             <div *ngIf="buildIsAnnexureSelected(question)" class="annexure-preview">
@@ -762,7 +756,7 @@
 
                         </div>
 
-                    </p-card>
+                    </div>
 
                     <div *ngFor="let subsetSet of buildSelectedSubsetSets(question)" class="subset-panel">
 
@@ -779,12 +773,14 @@
                                     {{ subsetHeader.name }}
                                 </div>
 
-                                @if (canApplyDefaults()) {
-                                <div class="flex gap-2 flex-wrap">
-                                    <button pButton type="button" icon="pi pi-check-square" label="Default"
-                                        severity="secondary" (click)="selectDefaultAnswers(subsetHeader)"></button>
+                                <div class="header-answer-actions">
+                                    @if (canApplyDefaults()) {
+                                    <button pButton type="button" icon="pi pi-check-square" label="Apply Defaults"
+                                        severity="secondary" class="p-button-sm"
+                                        [disabled]="savingHeader() === subsetHeader.id"
+                                        (click)="selectDefaultAnswers(subsetHeader)"></button>
+                                    }
                                 </div>
-                                }
 
                             </div>
 
@@ -828,105 +824,96 @@
 
                                 <div class="answer-form">
 
-                                    <label class="answer-label">
-                                        Answer
-                                    </label>
+                                    <div class="answer-form-grid">
+                                        <div class="answer-field">
+                                            <label class="answer-label">
+                                                Answer
+                                            </label>
 
-                                    <textarea *ngIf="isTextAnswer(subsetQuestion); else subsetOptionAnswer"
-                                        class="answer-control" rows="3"
-                                        [(ngModel)]="subsetQuestion.answer_value"></textarea>
+                                            <textarea *ngIf="isTextAnswer(subsetQuestion); else subsetOptionAnswer"
+                                                class="answer-control" rows="2"
+                                                [(ngModel)]="subsetQuestion.answer_value"></textarea>
 
-                                    <ng-template #subsetOptionAnswer>
+                                            <ng-template #subsetOptionAnswer>
 
-                                        <select class="answer-control" [(ngModel)]="subsetQuestion.answer_value">
+                                                <select class="answer-control"
+                                                    [(ngModel)]="subsetQuestion.answer_value">
 
-                                            <option value="">
-                                                Please select
-                                            </option>
+                                                    <option value="">
+                                                        Please select
+                                                    </option>
 
-                                            <option *ngFor="let option of subsetQuestion.options"
-                                                [value]="option.value">
-                                                {{ option.label }}
-                                            </option>
+                                                    <option *ngFor="let option of subsetQuestion.options"
+                                                        [value]="option.value">
+                                                        {{ option.label }}
+                                                    </option>
 
-                                        </select>
+                                                </select>
 
-                                    </ng-template>
+                                            </ng-template>
 
-                                    <label class="answer-label mt-3">
-                                        Audit Comment
-                                    </label>
+                                            <div class="answer-checks">
+                                                <label class="compliance-check">
+                                                    <input type="checkbox" [(ngModel)]="subsetQuestion.is_compliance" />
+                                                    <span>Compliance required</span>
+                                                </label>
 
-                                    <textarea class="answer-control" rows="2"
-                                        [(ngModel)]="subsetQuestion.audit_comment"></textarea>
+                                                <div class="inline-evidence">
+                                                    <label class="compliance-check">
+                                                        <input type="checkbox"
+                                                            [(ngModel)]="subsetQuestion.audit_compulsary_ev_upload" />
+                                                        <span>Evidence to be uploaded</span>
+                                                    </label>
 
-                                    <label class="compliance-check mt-3">
+                                                    <ng-container
+                                                        *ngIf="!buildIsAnnexureSelected(subsetQuestion) || subsetQuestion.answer?.evidence">
+                                                        <ng-container
+                                                            *ngIf="subsetQuestion.answer?.evidence as evidence; else subsetEvidenceUpload">
+                                                            <button pButton type="button" icon="pi pi-eye"
+                                                                severity="secondary" title="View evidence"
+                                                                (click)="viewEvidence(evidence)"></button>
 
-                                        <input type="checkbox" [(ngModel)]="subsetQuestion.is_compliance" />
+                                                            <button pButton type="button" icon="pi pi-trash"
+                                                                severity="danger" title="Remove evidence"
+                                                                (click)="deleteEvidence(evidence)"></button>
+                                                        </ng-container>
 
-                                        <span>
-                                            Compliance required
-                                        </span>
+                                                        <ng-template #subsetEvidenceUpload>
+                                                            <input #subsetEvidenceInput type="file"
+                                                                accept=".jpg,.jpeg,.png,.pdf,image/jpeg,image/png,application/pdf"
+                                                                style="display: none"
+                                                                (change)="uploadEvidence(subsetQuestion, $event)" />
 
-                                    </label>
+                                                            <button pButton type="button" icon="pi pi-upload"
+                                                                severity="secondary" title="Upload evidence"
+                                                                [disabled]="!subsetQuestion.answer?.id"
+                                                                [loading]="uploadingEvidenceKey() === evidenceKey(subsetQuestion)"
+                                                                (click)="subsetEvidenceInput.click()"></button>
+                                                        </ng-template>
+                                                    </ng-container>
+                                                </div>
+                                            </div>
+                                        </div>
 
-                                    <label class="compliance-check mt-3">
+                                        <div class="answer-field">
+                                            <label class="answer-label">
+                                                Audit Comment
+                                            </label>
 
-                                        <input type="checkbox"
-                                            [(ngModel)]="subsetQuestion.audit_compulsary_ev_upload" />
-
-                                        <span>
-                                            Evidence to be uploaded
-                                        </span>
-
-                                    </label>
+                                            <textarea class="answer-control" rows="2"
+                                                [(ngModel)]="subsetQuestion.audit_comment"></textarea>
+                                        </div>
+                                    </div>
 
                                     <div *ngIf="isReAudit(detail) && subsetQuestion.re_audit_annexure_only"
                                         class="reviewer-feedback">
                                         Update only the rejected annexure row below.
                                     </div>
 
-                                    <div *ngIf="!buildIsAnnexureSelected(subsetQuestion) || subsetQuestion.answer?.evidence"
-                                        class="evidence-panel">
-
-                                        <div class="evidence-title">
-                                            <span>Audit Evidence</span>
-                                            <span *ngIf="isEvidenceRequired(subsetQuestion)" class="evidence-required">
-                                                Required
-                                            </span>
-                                        </div>
-
-                                        <ng-container
-                                            *ngIf="subsetQuestion.answer?.evidence as evidence; else subsetEvidenceUpload">
-                                            <div class="evidence-file">
-                                                <span>
-                                                    {{ evidence.description || evidence.file_name }}
-                                                </span>
-
-                                                <button pButton type="button" icon="pi pi-eye" severity="secondary"
-                                                    title="View evidence" (click)="viewEvidence(evidence)"></button>
-
-                                                <button pButton type="button" icon="pi pi-trash" severity="danger"
-                                                    title="Remove evidence" (click)="deleteEvidence(evidence)"></button>
-                                            </div>
-                                        </ng-container>
-
-                                        <ng-template #subsetEvidenceUpload>
-                                            <input #subsetEvidenceInput type="file"
-                                                accept=".jpg,.jpeg,.png,.pdf,image/jpeg,image/png,application/pdf"
-                                                style="display: none"
-                                                (change)="uploadEvidence(subsetQuestion, $event)" />
-
-                                            <button pButton type="button" icon="pi pi-upload" label="Upload Evidence"
-                                                severity="secondary" [disabled]="!subsetQuestion.answer?.id"
-                                                [loading]="uploadingEvidenceKey() === evidenceKey(subsetQuestion)"
-                                                (click)="subsetEvidenceInput.click()"></button>
-
-                                            <div *ngIf="!subsetQuestion.answer?.id" class="evidence-hint">
-                                                Save the answer first to upload evidence.
-                                            </div>
-                                        </ng-template>
-
+                                    <div
+                                        *ngIf="!subsetQuestion.answer?.id && (!buildIsAnnexureSelected(subsetQuestion) || subsetQuestion.answer?.evidence)"
+                                        class="evidence-hint">
+                                        Save the answer first to upload evidence.
                                     </div>
 
                                     <div *ngIf="buildIsAnnexureSelected(subsetQuestion) && !subsetQuestion.answer?.evidence"
@@ -1160,8 +1147,9 @@
 
                             </div>
 
-                            <div class="flex justify-content-end mt-3">
-                                <button pButton type="button" icon="pi pi-save" label="Save Answers"
+                            <div class="header-save-row">
+                                <button pButton type="button" icon="pi pi-save" label="Save Header Answers"
+                                    class="p-button-sm"
                                     [loading]="savingHeader() === subsetHeader.id"
                                     (click)="saveHeader(subsetHeader)"></button>
                             </div>
@@ -1172,8 +1160,8 @@
 
                 </ng-container>
 
-                <div class="flex justify-content-end mt-3">
-                    <button pButton type="button" icon="pi pi-save" label="Save Answers"
+                <div class="header-save-row">
+                    <button pButton type="button" icon="pi pi-save" label="Save Header Answers" class="p-button-sm"
                         [loading]="savingHeader() === header.id" (click)="saveHeader(header)"></button>
                 </div>
 
