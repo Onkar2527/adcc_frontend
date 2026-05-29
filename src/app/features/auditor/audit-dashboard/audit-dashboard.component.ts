@@ -6,7 +6,7 @@ import {
     computed,
 } from '@angular/core';
 
-import { CommonModule, DatePipe } from '@angular/common';
+import { CommonModule } from '@angular/common';
 
 import { Router } from '@angular/router';
 
@@ -15,8 +15,6 @@ import { FormsModule } from '@angular/forms';
 import { AuditDashboardService }
     from '../services/auditor-main.service';
 
-import { CardModule } from 'primeng/card';
-
 import { ButtonModule } from 'primeng/button';
 
 import { TagModule } from 'primeng/tag';
@@ -24,14 +22,8 @@ import { TagModule } from 'primeng/tag';
 import { InputTextModule }
     from 'primeng/inputtext';
 
-import { ProgressBarModule }
-    from 'primeng/progressbar';
-
 import { SkeletonModule }
     from 'primeng/skeleton';
-
-import { DividerModule }
-    from 'primeng/divider';
 
 import { SelectModule }
     from 'primeng/select';
@@ -49,8 +41,6 @@ import { SelectModule }
 
         FormsModule,
 
-        CardModule,
-
         ButtonModule,
 
         TagModule,
@@ -59,39 +49,22 @@ import { SelectModule }
 
         SelectModule,
 
-        ProgressBarModule,
-
         SkeletonModule,
-
-        DividerModule,
-
-        DatePipe
     ],
 
-    providers: [DatePipe],
+    templateUrl: './audit-dashboard.component.html',
 
-    templateUrl: './audit-dashboard.component.html'
+    styleUrl: './audit-dashboard.component.css',
 })
 
 export class AuditDashboardComponent
     implements OnInit {
-
-    /* ===================================================== */
-    /* SERVICES */
-    /* ===================================================== */
 
     private service =
         inject(AuditDashboardService);
 
     private router =
         inject(Router);
-
-    // private datePipe =
-    //     inject(DatePipe);
-
-    /* ===================================================== */
-    /* SIGNALS */
-    /* ===================================================== */
 
     loading =
         signal(false);
@@ -104,10 +77,6 @@ export class AuditDashboardComponent
 
     selectedStatus =
         signal<any>(null);
-
-    /* ===================================================== */
-    /* FILTER OPTIONS */
-    /* ===================================================== */
 
     statusOptions = [
 
@@ -220,6 +189,26 @@ export class AuditDashboardComponent
                 ),
         );
 
+    totalReviewPending =
+        computed(() =>
+
+            this.dashboardData()
+                .reduce(
+
+                    (
+                        sum,
+                        item: any,
+                    ) =>
+
+                        sum +
+                        Number(
+                            item.review_pending || 0,
+                        ),
+
+                    0,
+                ),
+        );
+
     totalCompleted =
         computed(() =>
 
@@ -240,18 +229,12 @@ export class AuditDashboardComponent
                 ),
         );
 
-    /* ===================================================== */
-    /* INIT */
-    /* ===================================================== */
 
     ngOnInit() {
 
         this.loadData();
     }
 
-    /* ===================================================== */
-    /* USER */
-    /* ===================================================== */
 
     employee_id(): number {
 
@@ -271,9 +254,6 @@ export class AuditDashboardComponent
         );
     }
 
-    /* ===================================================== */
-    /* LOAD */
-    /* ===================================================== */
 
     loadData() {
 
@@ -317,24 +297,6 @@ export class AuditDashboardComponent
                 },
             });
     }
-
-    // formatDate(
-    //     date: string,
-    // ) {
-
-    //     if (!date) {
-
-    //         return '-';
-    //     }
-
-    //     return this.datePipe.transform(
-
-    //         date,
-
-    //         'dd MMM yyyy',
-
-    //     );
-    // }
 
     /* ===================================================== */
     /* PARSE */
@@ -432,9 +394,6 @@ export class AuditDashboardComponent
         return 'secondary';
     }
 
-    /* ===================================================== */
-    /* OPEN */
-    /* ===================================================== */
 
     openAssessment(
         item: any,

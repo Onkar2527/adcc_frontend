@@ -1,835 +1,162 @@
-<div class="min-h-screen bg-gray-100 p-4 md:p-5">
-
-    <!-- ===================================================== -->
-    <!-- HEADER -->
-    <!-- ===================================================== -->
-
-    <div
-        class="
-            flex
-            flex-column
-            md:flex-row
-            md:align-items-center
-            md:justify-content-between
-            gap-3
-            mb-4
-        "
-    >
-
+<section class="audit-dashboard-page">
+    <header class="dashboard-header">
         <div>
-
-            <h2
-                class="
-                    text-2xl
-                    font-bold
-                    text-900
-                    m-0
-                "
-            >
-                Internal Audit Dashboard
-            </h2>
-
-            <p
-                class="
-                    text-600
-                    mt-2
-                    mb-0
-                "
-            >
-                Select audit unit to continue workflow
-            </p>
-
+            <p class="dashboard-eyebrow">Internal Audit</p>
+            <h1>Assigned Audit Units</h1>
         </div>
 
-    </div>
+        <div class="dashboard-header__meta">
+            <span>Units Shown</span>
+            <strong>{{ filteredData().length }}</strong>
+        </div>
+    </header>
 
-    <!-- ===================================================== -->
-    <!-- FILTER TOOLBAR -->
-    <!-- ===================================================== -->
+    <section class="dashboard-toolbar" aria-label="Audit unit filters">
+        <div class="filter-field filter-field--search">
+            <label>Search audit unit</label>
+            <span class="search-control">
+                <i class="pi pi-search"></i>
+                <input
+                    pInputText
+                    type="text"
+                    [ngModel]="search()"
+                    (ngModelChange)="search.set($event)"
+                    placeholder="Audit unit name or code"
+                />
+            </span>
+        </div>
 
-    <div
-        class="
-            surface-card
-            border-round-2xl
-            shadow-1
-            p-3
-            mb-4
-        "
-    >
-
-        <div
-            class="
-                flex
-                flex-column
-                lg:flex-row
-                gap-3
-            "
-        >
-
-            <div class="relative w-full">
-
-    <i
-        class="
-            pi pi-search
-            absolute
-            left-3
-            top-50
-            -mt-2
-            text-500
-            z-1
-        "
-    ></i>
-
-    <input
-
-        pInputText
-
-        type="text"
-
-        [ngModel]="search()"
-
-        (ngModelChange)="
-            search.set($event)
-        "
-
-        placeholder="Search audit unit"
-
-        class="w-full pl-6"
-
-    />
-
-</div>
-
+        <div class="filter-field">
+            <label>Status</label>
             <p-select
-
                 [options]="statusOptions"
-
                 [ngModel]="selectedStatus()"
-
-                (ngModelChange)="
-                    selectedStatus.set($event)
-                "
-
+                (ngModelChange)="selectedStatus.set($event)"
                 optionLabel="label"
-
                 optionValue="value"
-
-                placeholder="Filter Status"
-
+                placeholder="All Status"
                 [showClear]="true"
-
-                styleClass="w-full lg:w-18rem"
-
+                styleClass="dashboard-select"
             ></p-select>
-
         </div>
+    </section>
 
-    </div>
+    <section class="summary-strip">
+        <article>
+            <span>Total</span>
+            <strong>{{ dashboardData().length }}</strong>
+        </article>
 
-    <!-- ===================================================== -->
-    <!-- SUMMARY -->
-    <!-- ===================================================== -->
+        <article>
+            <span>Audit</span>
+            <strong class="text-warn">{{ totalAuditPending() }}</strong>
+        </article>
 
-    <div class="grid mb-4">
+        <article>
+            <span>Review</span>
+            <strong class="text-info">{{ totalReviewPending() }}</strong>
+        </article>
 
-        <!-- TOTAL -->
+        <article>
+            <span>Compliance</span>
+            <strong class="text-danger">{{ totalCompliancePending() }}</strong>
+        </article>
 
-        <div class="col-12 md:col-6 xl:col-3">
+        <article>
+            <span>Completed</span>
+            <strong class="text-success">{{ totalCompleted() }}</strong>
+        </article>
+    </section>
 
-            <div
-                class="
-                    surface-card
-                    border-round-2xl
-                    shadow-2
-                    p-4
-                    h-full
-                "
-            >
-
-                <div
-                    class="
-                        flex
-                        justify-content-between
-                        align-items-center
-                    "
-                >
-
-                    <div>
-
-                        <div
-                            class="
-                                text-600
-                                text-sm
-                                mb-2
-                            "
-                        >
-                            Total Units
-                        </div>
-
-                        <div
-                            class="
-                                text-3xl
-                                font-bold
-                                text-900
-                            "
-                        >
-                            {{
-                                dashboardData().length
-                            }}
-                        </div>
-
-                    </div>
-
-                    <i
-                        class="
-                            pi pi-building
-                            text-4xl
-                            text-primary
-                        "
-                    ></i>
-
-                </div>
-
+    <section class="unit-grid-panel">
+        <div class="table-titlebar">
+            <div>
+                <h2>Assigned Branches</h2>
             </div>
 
+            <button
+                pButton
+                type="button"
+                icon="pi pi-refresh"
+                label="Refresh"
+                severity="secondary"
+                class="p-button-outlined p-button-secondary"
+                (click)="loadData()"
+            ></button>
         </div>
 
-        <!-- AUDIT -->
-
-        <div class="col-12 md:col-6 xl:col-3">
-
-            <div
-                class="
-                    surface-card
-                    border-round-2xl
-                    shadow-2
-                    p-4
-                    h-full
-                "
-            >
-
-                <div
-                    class="
-                        flex
-                        justify-content-between
-                        align-items-center
-                    "
-                >
-
-                    <div>
-
-                        <div
-                            class="
-                                text-600
-                                text-sm
-                                mb-2
-                            "
-                        >
-                            Audit Pending
-                        </div>
-
-                        <div
-                            class="
-                                text-3xl
-                                font-bold
-                                text-orange-500
-                            "
-                        >
-                            {{
-                                totalAuditPending()
-                            }}
-                        </div>
-
-                    </div>
-
-                    <i
-                        class="
-                            pi pi-clock
-                            text-4xl
-                            text-orange-400
-                        "
-                    ></i>
-
-                </div>
-
-            </div>
-
+        <div *ngIf="!loading() && filteredData().length === 0" class="empty-state">
+            <i class="pi pi-inbox"></i>
+            <strong>No audit units found</strong>
+            <span>Try changing the search or status filter.</span>
         </div>
 
-        <!-- COMPLIANCE -->
-
-        <div class="col-12 md:col-6 xl:col-3">
-
-            <div
-                class="
-                    surface-card
-                    border-round-2xl
-                    shadow-2
-                    p-4
-                    h-full
-                "
-            >
-
-                <div
-                    class="
-                        flex
-                        justify-content-between
-                        align-items-center
-                    "
-                >
-
-                    <div>
-
-                        <div
-                            class="
-                                text-600
-                                text-sm
-                                mb-2
-                            "
-                        >
-                            Compliance Pending
-                        </div>
-
-                        <div
-                            class="
-                                text-3xl
-                                font-bold
-                                text-red-500
-                            "
-                        >
-                            {{
-                                totalCompliancePending()
-                            }}
-                        </div>
-
-                    </div>
-
-                    <i
-                        class="
-                            pi pi-exclamation-circle
-                            text-4xl
-                            text-red-400
-                        "
-                    ></i>
-
-                </div>
-
-            </div>
-
+        <div *ngIf="loading()" class="unit-grid">
+            <article class="unit-card unit-card--loading" *ngFor="let item of [1,2,3,4,5,6]">
+                <p-skeleton width="68%" height="1.1rem"></p-skeleton>
+                <p-skeleton width="42%" height="0.8rem"></p-skeleton>
+                <p-skeleton width="100%" height="3.6rem"></p-skeleton>
+                <p-skeleton width="7rem" height="2rem"></p-skeleton>
+            </article>
         </div>
 
-        <!-- COMPLETED -->
-
-        <div class="col-12 md:col-6 xl:col-3">
-
-            <div
-                class="
-                    surface-card
-                    border-round-2xl
-                    shadow-2
-                    p-4
-                    h-full
-                "
+        <div *ngIf="!loading() && filteredData().length > 0" class="unit-grid">
+            <article
+                class="unit-card"
+                tabindex="0"
+                role="button"
+                *ngFor="let item of filteredData()"
+                (click)="openAssessment(item)"
+                (keydown.enter)="openAssessment(item)"
+                (keydown.space)="openAssessment(item)"
             >
-
-                <div
-                    class="
-                        flex
-                        justify-content-between
-                        align-items-center
-                    "
-                >
-
-                    <div>
-
-                        <div
-                            class="
-                                text-600
-                                text-sm
-                                mb-2
-                            "
-                        >
-                            Completed
-                        </div>
-
-                        <div
-                            class="
-                                text-3xl
-                                font-bold
-                                text-green-500
-                            "
-                        >
-                            {{
-                                totalCompleted()
-                            }}
-                        </div>
-
-                    </div>
-
-                    <i
-                        class="
-                            pi pi-check-circle
-                            text-4xl
-                            text-green-400
-                        "
-                    ></i>
-
-                </div>
-
-            </div>
-
-        </div>
-
-    </div>
-
-    <!-- ===================================================== -->
-    <!-- LOADING -->
-    <!-- ===================================================== -->
-
-    <div
-        *ngIf="loading()"
-        class="grid"
-    >
-
-        <div
-            class="
-                col-12
-                md:col-6
-                xl:col-4
-            "
-            *ngFor="let item of [1,2,3,4,5,6]"
-        >
-
-            <p-card
-                styleClass="
-                    border-round-2xl
-                    shadow-2
-                "
-            >
-
-                <p-skeleton
-                    width="60%"
-                    height="1.5rem"
-                    styleClass="mb-3"
-                ></p-skeleton>
-
-                <p-skeleton
-                    width="40%"
-                    height="1rem"
-                    styleClass="mb-4"
-                ></p-skeleton>
-
-                <p-skeleton
-                    width="100%"
-                    height="8rem"
-                ></p-skeleton>
-
-            </p-card>
-
-        </div>
-
-    </div>
-
-    <!-- ===================================================== -->
-    <!-- EMPTY -->
-    <!-- ===================================================== -->
-
-    <div
-
-        *ngIf="
-            !loading()
-            &&
-            filteredData().length === 0
-        "
-
-        class="
-            surface-card
-            border-round-2xl
-            shadow-2
-            p-6
-            text-center
-        "
-
-    >
-
-        <i
-            class="
-                pi pi-inbox
-                text-5xl
-                text-400
-                mb-3
-            "
-        ></i>
-
-        <h3
-            class="
-                text-900
-                mb-2
-            "
-        >
-            No Audit Units Found
-        </h3>
-
-        <p
-            class="
-                text-600
-                mb-0
-            "
-        >
-            No matching audit units available
-        </p>
-
-    </div>
-
-    <!-- ===================================================== -->
-    <!-- CARDS -->
-    <!-- ===================================================== -->
-
-    <div
-        class="grid"
-        *ngIf="
-            !loading()
-            &&
-            filteredData().length > 0
-        "
-    >
-
-        <div
-            class="
-                col-12
-                md:col-6
-                xl:col-4
-            "
-            *ngFor="
-                let item of filteredData()
-            "
-        >
-
-            <p-card
-                styleClass="
-                    border-round-2xl
-                    shadow-2
-                    h-full
-                "
-            >
-
-                <!-- TOP -->
-
-                <div
-                    class="
-                        flex
-                        justify-content-between
-                        align-items-start
-                        mb-4
-                        gap-3
-                    "
-                >
-
-                    <div>
-
-                        <div
-                            class="
-                                text-xl
-                                font-bold
-                                text-900
-                                mb-1
-                            "
-                        >
-                            {{
-                                item.audit_unit_name
-                            }}
-                        </div>
-
-                        <div
-                            class="
-                                text-600
-                                text-sm
-                            "
-                        >
-                            {{
-                                item.audit_unit_code
-                            }}
-                        </div>
-
+                <div class="unit-card__top">
+                    <div class="unit-card__title">
+                        <span>Audit Unit</span>
+                        <h3>{{ item.audit_unit_name }}</h3>
+                        <small>{{ item.audit_unit_code }}</small>
                     </div>
 
                     <p-tag
-
-                        [value]="
-                            item.latest_status
-                        "
-
-                        [severity]="
-                            getSeverity(
-                                item.latest_status
-                            )
-                        "
-
+                        [value]="item.latest_status || 'NOT STARTED'"
+                        [severity]="getSeverity(item.latest_status)"
                     ></p-tag>
-
                 </div>
 
-                <!-- METRICS -->
-
-                <div
-                    class="
-                        flex
-                        justify-content-between
-                        gap-2
-                        mb-4
-                    "
-                >
-
-                    <div
-                        class="
-                            text-center
-                            flex-1
-                        "
-                    >
-
-                        <div
-                            class="
-                                text-xs
-                                text-500
-                                mb-1
-                            "
-                        >
-                            Audit
-                        </div>
-
-                        <div
-                            class="
-                                text-orange-500
-                                font-bold
-                                text-xl
-                            "
-                        >
-                            {{
-                                item.audit_pending
-                            }}
-                        </div>
-
+                <div class="unit-card__metrics">
+                    <div>
+                        <span>Audit</span>
+                        <strong class="text-warn">{{ item.audit_pending || 0 }}</strong>
                     </div>
 
-                    <div
-                        class="
-                            text-center
-                            flex-1
-                        "
-                    >
-
-                        <div
-                            class="
-                                text-xs
-                                text-500
-                                mb-1
-                            "
-                        >
-                            Review
-                        </div>
-
-                        <div
-                            class="
-                                text-primary
-                                font-bold
-                                text-xl
-                            "
-                        >
-                            {{
-                                item.review_pending
-                            }}
-                        </div>
-
+                    <div>
+                        <span>Review</span>
+                        <strong class="text-info">{{ item.review_pending || 0 }}</strong>
                     </div>
 
-                    <div
-                        class="
-                            text-center
-                            flex-1
-                        "
-                    >
-
-                        <div
-                            class="
-                                text-xs
-                                text-500
-                                mb-1
-                            "
-                        >
-                            Compliance
-                        </div>
-
-                        <div
-                            class="
-                                text-red-500
-                                font-bold
-                                text-xl
-                            "
-                        >
-                            {{
-                                item.compliance_pending
-                            }}
-                        </div>
-
+                    <div>
+                        <span>Compliance</span>
+                        <strong class="text-danger">{{ item.compliance_pending || 0 }}</strong>
                     </div>
 
-                    <div
-                        class="
-                            text-center
-                            flex-1
-                        "
-                    >
-
-                        <div
-                            class="
-                                text-xs
-                                text-500
-                                mb-1
-                            "
-                        >
-                            Done
-                        </div>
-
-                        <div
-                            class="
-                                text-green-500
-                                font-bold
-                                text-xl
-                            "
-                        >
-                            {{
-                                item.audit_completed
-                            }}
-                        </div>
-
+                    <div>
+                        <span>Done</span>
+                        <strong class="text-success">{{ item.audit_completed || 0 }}</strong>
                     </div>
-
                 </div>
 
-                <!-- DETAILS -->
+                <div class="unit-card__footer">
+                    <span>
+                        <ng-container *ngIf="item.not_started_count > 0; else readyToOpen">
+                            {{ item.not_started_count }} audit{{ item.not_started_count === 1 ? '' : 's' }} not started
+                        </ng-container>
 
-                <div
-                    class="
-                        surface-100
-                        border-round-xl
-                        p-3
-                        mb-4
-                    "
-                >
+                        <ng-template #readyToOpen>Ready to open</ng-template>
+                    </span>
 
-                    <div
-                        class="
-                            flex
-                            justify-content-between
-                            mb-2
-                        "
-                    >
-
-                        <span
-                            class="text-600"
-                        >
-                            Frequency
-                        </span>
-
-                        <span
-                            class="
-                                font-medium
-                                text-900
-                            "
-                        >
-                            {{
-                                item.frequency
-                            }}
-                            Months
-                        </span>
-
-                    </div>
-
-                    <div
-                        class="
-                            flex
-                            justify-content-between
-                            mb-3
-                        "
-                    >
-
-                        <span
-                            class="text-600"
-                        >
-                            Last Audit
-                        </span>
-
-                        <span
-                            class="
-                                font-medium
-                                text-900
-                            "
-                        >
-                            {{
-                            
-                                item.last_audit_date | date: 'mediumDate'
-                            
-                        }}
-                        </span>
-
-                    </div>
-
-                    <p-tag
-
-                        *ngIf="
-                            item.not_started_count > 0
-                        "
-
-                        severity="info"
-
-                        [value]="
-                            item.not_started_count
-                            + ' Audit Cycles Pending'
-                        "
-
-                    ></p-tag>
-
+                    <i class="pi pi-arrow-right"></i>
                 </div>
-
-                <!-- ACTION -->
-
-                <div
-                    class="
-                        flex
-                        justify-content-end
-                    "
-                >
-
-                    <button
-
-                        pButton
-
-                        type="button"
-
-                        [label]="
-                            item.latest_assessment_id
-                            ? 'Continue'
-                            : 'Start Audit'
-                        "
-
-                        [icon]="
-                            item.latest_assessment_id
-                            ? 'pi pi-arrow-right'
-                            : 'pi pi-play'
-                        "
-
-                        (click)="
-                            openAssessment(item)
-                        "
-
-                    ></button>
-
-                </div>
-
-            </p-card>
-
+            </article>
         </div>
-
-    </div>
-
-</div>
+    </section>
+</section>
