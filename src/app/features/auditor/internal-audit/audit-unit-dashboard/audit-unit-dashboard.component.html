@@ -1,229 +1,211 @@
-<div class="internal-audit min-h-screen bg-gray-100 p-4 md:p-5">
-
-    <div class="flex flex-column md:flex-row md:align-items-center md:justify-content-between gap-3 mb-4">
-
+<section class="unit-assessment-page">
+    <header class="unit-assessment-header">
         <div>
-            <h2 class="text-2xl font-bold text-900 m-0">
-                Internal Audit
-            </h2>
-
-            <p class="text-600 mt-2 mb-0">
-                Assessment details
-            </p>
+            <p>Internal Audit</p>
+            <h1>Assessment Details</h1>
         </div>
 
         <button
             pButton
             type="button"
             icon="pi pi-arrow-left"
-            label="Dashboard"
+            label="Assigned Units"
             severity="secondary"
+            class="p-button-outlined"
             (click)="backToDashboard()"
         ></button>
+    </header>
 
+    <div *ngIf="loading()" class="unit-assessment-loading">
+        <p-skeleton height="5.5rem"></p-skeleton>
+        <p-skeleton height="20rem"></p-skeleton>
     </div>
 
-    <div *ngIf="loading()" class="grid">
-        <div class="col-12 lg:col-4">
-            <p-skeleton height="10rem"></p-skeleton>
-        </div>
-
-        <div class="col-12 lg:col-8">
-            <p-skeleton height="18rem"></p-skeleton>
-        </div>
-    </div>
-
-    <div
-        *ngIf="!loading() && error()"
-        class="surface-card border-round-xl shadow-1 p-4"
-    >
-        <div class="flex align-items-center gap-3 text-red-600">
-            <i class="pi pi-exclamation-triangle text-2xl"></i>
-            <span class="font-medium">{{ error() }}</span>
-        </div>
+    <div *ngIf="!loading() && error()" class="unit-assessment-error">
+        <i class="pi pi-exclamation-triangle"></i>
+        <span>{{ error() }}</span>
     </div>
 
     <ng-container *ngIf="!loading() && !error() && auditUnit() as unit">
-
-        <div class="grid mb-4">
-            <div class="col-12 lg:col-4">
-                <p-card styleClass="h-full shadow-1 border-round-xl">
-                    <div class="text-xl font-bold text-900 mb-1">
-                        {{ unit.name }}
-                    </div>
-
-                    <div class="text-600 mb-4">
-                        {{ unit.audit_unit_code }}
-                    </div>
-
-                    <div class="detail-row">
-                        <span>Section</span>
-                        <strong>{{ unit.section_type_name || '-' }}</strong>
-                    </div>
-
-                    <div class="detail-row">
-                        <span>Frequency</span>
-                        <strong>{{ unit.frequency }} Months</strong>
-                    </div>
-
-                    <div class="detail-row">
-                        <span>Last Audit Date</span>
-                        <strong>{{ unit.last_audit_date | date: 'mediumDate' }}</strong>
-                    </div>
-                </p-card>
+        <section class="unit-assessment-summary">
+            <div class="unit-identity">
+                <span>Audit Unit</span>
+                <h2>{{ unit.name }}</h2>
+                <small>{{ unit.audit_unit_code }}</small>
             </div>
 
-            <div class="col-12 lg:col-8">
-                <div class="grid h-full">
-                    <div class="col-12 md:col-3">
-                        <div class="metric-card">
-                            <span>Total Audit</span>
-                            <strong>{{ metrics()?.total || 0 }}</strong>
-                        </div>
-                    </div>
-
-                    <div class="col-12 md:col-3">
-                        <div class="metric-card">
-                            <span>Audit Pending</span>
-                            <strong>{{ metrics()?.audit_pending || 0 }}</strong>
-                        </div>
-                    </div>
-
-                    <div class="col-12 md:col-3">
-                        <div class="metric-card">
-                            <span>Review Pending</span>
-                            <strong>{{ metrics()?.review_pending || 0 }}</strong>
-                        </div>
-                    </div>
-
-                    <div class="col-12 md:col-3">
-                        <div class="metric-card">
-                            <span>Completed</span>
-                            <strong>{{ metrics()?.completed || 0 }}</strong>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="surface-card border-round-xl shadow-1 p-4">
-            <div class="flex align-items-center justify-content-between gap-3 mb-4">
-                <h3 class="text-xl font-bold text-900 m-0">
-                    Assessment Details
-                </h3>
-            </div>
-
-            <div
-                class="year-block"
-                *ngFor="let year of visibleYears()"
-            >
-                <div class="flex flex-column md:flex-row md:align-items-center md:justify-content-between gap-3 mb-3">
-                    <h4 class="text-primary font-bold m-0">
-                        Financial Year:
-                        <span class="text-900">
-                            {{ financialYearLabel(year) }}
-                        </span>
-                    </h4>
-
-                    <button
-                        *ngIf="year.can_start"
-                        pButton
-                        type="button"
-                        icon="pi pi-play"
-                        label="Start Assessment"
-                        (click)="startAssessment(year)"
-                    ></button>
+            <div class="unit-detail-strip">
+                <div>
+                    <span>Section</span>
+                    <strong>{{ unit.section_type_name || '-' }}</strong>
                 </div>
 
-                <div class="assessment-table">
-                    <div class="assessment-row assessment-head">
-                        <div>Sr. No.</div>
-                        <div>Assessment Details</div>
-                        <div>Audit Status</div>
-                        <div>Compliance Status</div>
-                        <div>Action</div>
-                    </div>
+                <div>
+                    <span>Frequency</span>
+                    <strong>{{ unit.frequency || '-' }} Months</strong>
+                </div>
 
-                    <div
-                        *ngIf="!year.assessments?.length"
-                        class="assessment-row empty-row"
-                    >
-                        <div class="text-600">
-                            No assessment found
-                        </div>
-                    </div>
-
-                    <div
-                        class="assessment-row"
-                        *ngFor="let assessment of year.assessments; let i = index"
-                    >
-                        <div>{{ i + 1 }}</div>
-
-                        <div>
-                            <div class="font-medium text-900">
-                                {{ assessment.assesment_period_from | date: 'mediumDate' }}
-                                -
-                                {{ assessment.assesment_period_to | date: 'mediumDate' }}
-                            </div>
-
-                            <div class="text-600 text-sm">
-                                Frequency - {{ assessment.frequency }} Months
-                            </div>
-
-                            <div
-                                *ngIf="assessment.audit_due_date && [1, 3].includes(assessment.audit_status_id)"
-                                class="text-red-600 text-sm font-medium mt-1"
-                            >
-                                Audit Due Date:
-                                {{ assessment.audit_due_date | date: 'mediumDate' }}
-                            </div>
-
-                            <div
-                                *ngIf="assessment.compliance_due_date && [4, 6].includes(assessment.audit_status_id)"
-                                class="text-red-600 text-sm font-medium mt-1"
-                            >
-                                Compliance Due Date:
-                                {{ assessment.compliance_due_date | date: 'mediumDate' }}
-                            </div>
-                        </div>
-
-                        <div>
-                            <div>{{ assessment.audit_status_label }}</div>
-
-                            <div
-                                *ngIf="assessment.reviewer_status_label"
-                                class="text-red-600 text-sm font-medium mt-1"
-                            >
-                                Reviewer Status:
-                                {{ assessment.reviewer_status_label }}
-                            </div>
-                        </div>
-
-                        <div>
-                            {{ assessment.compliance_status_label }}
-                        </div>
-
-                        <div>
-                            <button
-                                *ngIf="assessment.can_continue"
-                                pButton
-                                type="button"
-                                [label]="assessment.action_label"
-                                icon="pi pi-arrow-right"
-                                (click)="openAssessment(assessment)"
-                            ></button>
-
-                            <p-tag
-                                *ngIf="!assessment.can_continue"
-                                [value]="assessment.action_label || '-'"
-                                [severity]="getActionSeverity(assessment)"
-                            ></p-tag>
-                        </div>
-                    </div>
+                <div>
+                    <span>Last Audit</span>
+                    <strong>{{ unit.last_audit_date ? (unit.last_audit_date | date: 'dd MMM yyyy') : '-' }}</strong>
                 </div>
             </div>
-        </div>
 
+            <div class="unit-metrics">
+                <article>
+                    <span>Total</span>
+                    <strong>{{ metrics()?.total || 0 }}</strong>
+                </article>
+
+                <article>
+                    <span>Audit</span>
+                    <strong class="text-warn">{{ metrics()?.audit_pending || 0 }}</strong>
+                </article>
+
+                <article>
+                    <span>Review</span>
+                    <strong class="text-info">{{ metrics()?.review_pending || 0 }}</strong>
+                </article>
+
+                <article>
+                    <span>Completed</span>
+                    <strong class="text-success">{{ metrics()?.completed || 0 }}</strong>
+                </article>
+            </div>
+        </section>
+
+        <section class="assessment-list-panel">
+            <div class="assessment-list-toolbar">
+                <div>
+                    <h2>Financial Year Wise Assessment Details</h2>
+                    <span>{{ assessmentRows().length }} record{{ assessmentRows().length === 1 ? '' : 's' }} shown</span>
+                </div>
+
+                <div class="year-filter">
+                    <label>Financial Year</label>
+                    <p-select
+                        [options]="yearFilterOptions()"
+                        [ngModel]="selectedYearId()"
+                        (ngModelChange)="selectedYearId.set($event)"
+                        optionLabel="label"
+                        optionValue="value"
+                        placeholder="All Years"
+                        [showClear]="true"
+                        styleClass="assessment-year-select"
+                    ></p-select>
+                </div>
+            </div>
+
+            <div class="assessment-table-wrap">
+                <table class="assessment-detail-table">
+                    <thead>
+                        <tr>
+                            <th>FY</th>
+                            <th>Assessment Period</th>
+                            <th>Audit Status</th>
+                            <th>Compliance Status</th>
+                            <th>Due Date</th>
+                            <th class="text-right">Action</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        <tr *ngIf="assessmentRows().length === 0">
+                            <td colspan="6" class="empty-cell">
+                                No assessment details found.
+                            </td>
+                        </tr>
+
+                        <tr *ngFor="let row of assessmentRows()">
+                            <td class="fy-cell">
+                                {{ financialYearLabel(row.year) }}
+                            </td>
+
+                            <td>
+                                <ng-container *ngIf="row.assessment; else noAssessmentPeriod">
+                                    <strong>
+                                        {{ row.assessment.assesment_period_from | date: 'dd MMM yyyy' }}
+                                        -
+                                        {{ row.assessment.assesment_period_to | date: 'dd MMM yyyy' }}
+                                    </strong>
+                                    <span>Frequency: {{ row.assessment.frequency || unit.frequency || '-' }} Months</span>
+                                </ng-container>
+
+                                <ng-template #noAssessmentPeriod>
+                                    <strong>Assessment not started</strong>
+                                    <span>Audit period is available for this financial year.</span>
+                                </ng-template>
+                            </td>
+
+                            <td>
+                                <p-tag
+                                    [value]="row.assessment?.audit_status_label || 'NOT STARTED'"
+                                    [severity]="getStatusSeverity(row.assessment)"
+                                ></p-tag>
+
+                                <span
+                                    *ngIf="row.assessment?.reviewer_status_label"
+                                    class="reviewer-note"
+                                >
+                                    Reviewer: {{ row.assessment.reviewer_status_label }}
+                                </span>
+                            </td>
+
+                            <td>
+                                {{ row.assessment?.compliance_status_label || '-' }}
+                            </td>
+
+                            <td>
+                                <ng-container *ngIf="row.assessment?.audit_due_date && [1, 3].includes(row.assessment.audit_status_id)">
+                                    Audit:
+                                    {{ row.assessment.audit_due_date | date: 'dd MMM yyyy' }}
+                                </ng-container>
+
+                                <ng-container *ngIf="row.assessment?.compliance_due_date && [4, 6].includes(row.assessment.audit_status_id)">
+                                    Compliance:
+                                    {{ row.assessment.compliance_due_date | date: 'dd MMM yyyy' }}
+                                </ng-container>
+
+                                <span *ngIf="!hasVisibleDueDate(row.assessment)">-</span>
+                            </td>
+
+                            <td class="text-right">
+                                <button
+                                    *ngIf="row.assessment?.can_continue"
+                                    pButton
+                                    type="button"
+                                    class="p-button-sm"
+                                    [label]="row.assessment.action_label"
+                                    icon="pi pi-arrow-right"
+                                    (click)="openAssessment(row.assessment)"
+                                ></button>
+
+                                <button
+                                    *ngIf="!row.assessment && row.year.can_start"
+                                    pButton
+                                    type="button"
+                                    class="p-button-sm"
+                                    icon="pi pi-play"
+                                    label="Start Assessment"
+                                    (click)="startAssessment(row.year)"
+                                ></button>
+
+                                <p-tag
+                                    *ngIf="row.assessment && !row.assessment.can_continue"
+                                    [value]="row.assessment.action_label || '-'"
+                                    [severity]="getActionSeverity(row.assessment)"
+                                ></p-tag>
+
+                                <p-tag
+                                    *ngIf="!row.assessment && !row.year.can_start"
+                                    value="Not Available"
+                                    severity="secondary"
+                                ></p-tag>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
     </ng-container>
-
-</div>
+</section>

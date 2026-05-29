@@ -13,8 +13,9 @@ import {
     ActivatedRoute,
     Router,
 } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 import { ButtonModule } from 'primeng/button';
-import { CardModule } from 'primeng/card';
+import { SelectModule } from 'primeng/select';
 import { SkeletonModule } from 'primeng/skeleton';
 import { TagModule } from 'primeng/tag';
 import { AuditDashboardService } from '../../services/auditor-main.service';
@@ -24,9 +25,10 @@ import { AuditDashboardService } from '../../services/auditor-main.service';
     standalone: true,
     imports: [
         CommonModule,
+        FormsModule,
         DatePipe,
         ButtonModule,
-        CardModule,
+        SelectModule,
         SkeletonModule,
         TagModule,
     ],
@@ -55,6 +57,9 @@ export class AuditUnitDashboardComponent implements OnInit {
     metrics =
         signal<any>(null);
 
+    selectedYearId =
+        signal<number | null>(null);
+
     error =
         signal('');
 
@@ -68,6 +73,60 @@ export class AuditUnitDashboardComponent implements OnInit {
                         (year.assessments || []).length > 0,
                 ),
         );
+
+    yearFilterOptions =
+        computed(() =>
+            this.visibleYears()
+                .map((year: any) => ({
+                    label: this.financialYearLabel(year),
+                    value: Number(year.id),
+                })),
+        );
+
+    filteredYears =
+        computed(() => {
+            const yearId =
+                this.selectedYearId();
+
+            if (!yearId) {
+                return this.visibleYears();
+            }
+
+            return this.visibleYears()
+                .filter(
+                    (year: any) =>
+                        Number(year.id) === Number(yearId),
+                );
+        });
+
+    assessmentRows =
+        computed(() => {
+            const rows: any[] = [];
+
+            this.filteredYears()
+                .forEach((year: any) => {
+                    const assessments =
+                        year.assessments || [];
+
+                    if (!assessments.length) {
+                        rows.push({
+                            year,
+                            assessment: null,
+                        });
+                        return;
+                    }
+
+                    assessments.forEach(
+                        (assessment: any) =>
+                            rows.push({
+                                year,
+                                assessment,
+                            }),
+                    );
+                });
+
+            return rows;
+        });
 
     ngOnInit() {
         const auditUnitId =
@@ -112,6 +171,17 @@ export class AuditUnitDashboardComponent implements OnInit {
                     this.metrics.set(
                         res?.metrics || null,
                     );
+
+                    const latestYear =
+                        (res?.years || [])
+                            .find((year: any) => year.is_latest);
+
+                    this.selectedYearId.set(
+                        latestYear?.id
+                            ? Number(latestYear.id)
+                            : null,
+                    );
+
                     this.loading.set(false);
                 },
                 error: (err) => {
@@ -203,6 +273,63 @@ export class AuditUnitDashboardComponent implements OnInit {
         }
 
         return 'secondary';
+    }
+
+    getStatusSeverity(
+        assessment: any,
+    ) {
+
+        if (!assessment) {
+            return 'info';
+        }
+
+        const statusId =
+            Number(
+                assessment.audit_status_id || 0,
+            );
+
+        if ([1, 3].includes(statusId)) {
+            return 'warn';
+        }
+
+        if ([2, 5].includes(statusId)) {
+            return 'contrast';
+        }
+
+        if ([4, 6].includes(statusId)) {
+            return 'danger';
+        }
+
+        if (statusId === 7) {
+            return 'success';
+        }
+
+        return 'secondary';
+    }
+
+    hasVisibleDueDate(
+        assessment: any,
+    ) {
+
+        if (!assessment) {
+            return false;
+        }
+
+        return (
+            assessment.audit_due_date
+            &&
+            [1, 3].includes(
+                Number(assessment.audit_status_id),
+            )
+        )
+            ||
+            (
+                assessment.compliance_due_date
+                &&
+                [4, 6].includes(
+                    Number(assessment.audit_status_id),
+                )
+            );
     }
 
     financialYearLabel(
