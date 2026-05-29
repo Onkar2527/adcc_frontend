@@ -21,7 +21,6 @@ import {
     ActivatedRoute,
     Router,
 } from '@angular/router';
-import { CardModule } from 'primeng/card';
 import {
     ButtonModule,
 } from 'primeng/button';
@@ -53,7 +52,6 @@ import { TableModule } from 'primeng/table';
         FormsModule,
         ButtonModule,
         SkeletonModule,
-        CardModule,
         TableModule,
 
 
@@ -173,6 +171,8 @@ export class CategoryAssessmentComponent
     columnOptionsMap: any = {};
 
     private activeLoadKey = '';
+
+    private categoryLoadRequest = 0;
 
     @Input()
     assessmentIdInput:
@@ -356,6 +356,15 @@ export class CategoryAssessmentComponent
                 Number(categoryId) || 0,
                 Number(dumpId) || 0,
                 this.pendingOnly() ? 'pending' : 'all',
+                Array.from(this.pendingQuestionIds)
+                    .sort(
+                        (
+                            first,
+                            second,
+                        ) =>
+                            first - second,
+                    )
+                    .join(','),
             ].join(':');
 
         if (
@@ -366,6 +375,9 @@ export class CategoryAssessmentComponent
 
         this.activeLoadKey =
             loadKey;
+
+        const requestId =
+            ++this.categoryLoadRequest;
 
         if (
             showLoader
@@ -385,6 +397,12 @@ export class CategoryAssessmentComponent
             .subscribe({
 
                 next: (res: any) => {
+                    if (
+                        requestId !== this.categoryLoadRequest
+                    ) {
+                        return;
+                    }
+
                     this.activeLoadKey = '';
 
                     const prepared =
@@ -410,6 +428,12 @@ export class CategoryAssessmentComponent
                 },
 
                 error: (err) => {
+                    if (
+                        requestId !== this.categoryLoadRequest
+                    ) {
+                        return;
+                    }
+
                     this.activeLoadKey = '';
 
                     if (
@@ -749,6 +773,28 @@ export class CategoryAssessmentComponent
         header: any,
     ) {
 
+        if (
+            !this.canApplyDefaults()
+        ) {
+            this.notification.error(
+                'Default answers can be applied only during active audit entry.',
+            );
+
+            return;
+        }
+
+        if (
+            !header?.questions?.length
+        ) {
+            this.notification.error(
+                'No questions are available for default answers.',
+            );
+
+            return;
+        }
+
+        let appliedCount = 0;
+
         for (
             const question
             of header?.questions || []
@@ -764,8 +810,22 @@ export class CategoryAssessmentComponent
             ) {
                 question.answer_value =
                     defaultAnswer;
+
+                appliedCount++;
             }
         }
+
+        if (!appliedCount) {
+            this.notification.error(
+                'No default answers are configured for this header.',
+            );
+
+            return;
+        }
+
+        this.notification.success(
+            `${appliedCount} default answer${appliedCount === 1 ? '' : 's'} applied. Please review and save.`,
+        );
     }
 
     canApplyDefaults() {
@@ -899,6 +959,10 @@ export class CategoryAssessmentComponent
             ||
             !header?.questions?.length
         ) {
+            this.notification.error(
+                'No answers are available to save for this header.',
+            );
+
             return;
         }
 

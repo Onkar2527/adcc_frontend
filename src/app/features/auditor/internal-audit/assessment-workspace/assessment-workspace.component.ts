@@ -581,19 +581,52 @@ export class AssessmentWorkspaceComponent implements OnInit {
             return;
         }
 
-        this.selectedCategoryId.set(
-            Number(category.id),
-        );
-        this.selectedPendingQuestionIds.set(
-            pendingIssues.map(
-                (issue: any) =>
-                    Number(issue.question_id),
-            ),
-        );
-        this.selectedDumpId.set(
+        const categoryId =
+            Number(category.id);
+
+        const pendingQuestionIds =
+            pendingIssues
+                .map(
+                    (issue: any) =>
+                        Number(issue.question_id),
+                )
+                .filter(Boolean);
+
+        const dumpId =
             Number(
                 pendingIssues[0]?.dump_id || 0,
-            ),
+            );
+
+        const currentPending =
+            this.selectedPendingQuestionIds();
+
+        const isSameSelection =
+            this.selectedView() === 'category'
+            && Number(this.selectedCategoryId()) === categoryId
+            && Number(this.selectedDumpId()) === dumpId
+            && currentPending.length === pendingQuestionIds.length
+            && currentPending.every(
+                (
+                    questionId,
+                    index,
+                ) =>
+                    Number(questionId) === Number(pendingQuestionIds[index]),
+            );
+
+        if (
+            isSameSelection
+        ) {
+            return;
+        }
+
+        this.selectedCategoryId.set(
+            categoryId,
+        );
+        this.selectedPendingQuestionIds.set(
+            pendingQuestionIds,
+        );
+        this.selectedDumpId.set(
+            dumpId,
         );
 
         this.router.navigate(
@@ -605,19 +638,12 @@ export class AssessmentWorkspaceComponent implements OnInit {
                     view:
                         'category',
                     categoryId:
-                        Number(category.id),
+                        categoryId,
                     dumpId:
-                        Number(
-                            pendingIssues[0]?.dump_id || 0,
-                        ) || null,
+                        dumpId || null,
                     pending:
-                        pendingIssues.length
-                            ? pendingIssues
-                                .map(
-                                    (issue: any) =>
-                                        Number(issue.question_id),
-                                )
-                                .filter(Boolean)
+                        pendingQuestionIds.length
+                            ? pendingQuestionIds
                                 .join(',')
                             : null,
                 },
