@@ -912,11 +912,18 @@
     gap: .65rem;
     align-items: start;
     padding: .55rem .62rem;
+
     border: 1px solid var(--surface-200);
     border-left: 3px solid var(--surface-300);
+    border-bottom: 1px solid #e5e7eb;
     border-radius: .35rem;
     background: var(--surface-0);
+    
+    margin-bottom: .5rem;
+    position: relative;
 }
+
+
 
 .question-card + .question-card {
     margin-top: .5rem;
@@ -932,6 +939,32 @@
 
 .question-card.annexure-question .answer-form-grid {
     grid-template-columns: minmax(14rem, .75fr) minmax(18rem, 1fr);
+}
+
+.annexure-answer-grid {
+    width: max-content;
+    min-width: 42rem;
+    grid-template-columns: minmax(13rem, 16rem) minmax(18rem, 26rem);
+    align-items: start;
+    margin-bottom: .45rem;
+    margin-left: 18px;
+}
+
+.annexure-answer-grid .answer-field {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+}
+
+.annexure-answer-grid .answer-label {
+    margin-bottom: .16rem;
+    font-size: .66rem;
+}
+
+.annexure-answer-grid .answer-control {
+    min-height: 2.15rem;
+    padding: .42rem .5rem;
+    font-size: .84rem;
 }
 
 .re-audit-question {
@@ -1015,6 +1048,11 @@
     padding: .5rem;
     border-radius: .35rem;
     background: var(--surface-50);
+}
+
+.annexure-answer-form {
+    overflow-x: auto;
+    scrollbar-gutter: stable;
 }
 
 .answer-form-grid {

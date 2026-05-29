@@ -435,23 +435,7 @@
                                     {{ question.question }}
                                 </div>
 
-                                <div class="question-meta">
-
-                                    <span>
-                                        {{ question.option_name }}
-                                    </span>
-
-                                    <span *ngIf="question.risk_category_name">
-                                        Risk:
-                                        {{ question.risk_category_name }}
-                                    </span>
-
-                                    <span *ngIf="question.weightage">
-                                        Weightage:
-                                        {{ question.weightage }}
-                                    </span>
-
-                                </div>
+                               
 
                                 <div *ngIf="isReAudit(detail) && reviewerComment(question)" class="reviewer-feedback">
                                     <span>Reviewer Comment</span>
@@ -462,13 +446,14 @@
 
                         </div>
 
-                        <div class="answer-form">
+                        <div class="answer-form" [class.annexure-answer-form]="buildIsAnnexureSelected(question)">
 
-                            <div class="answer-form-grid">
+                            <div class="answer-form-grid" [class.annexure-answer-grid]="buildIsAnnexureSelected(question)">
                                 <div class="answer-field">
-                                    <label class="answer-label">
+                                    <label *ngIf="buildIsAnnexureSelected(question)" class="answer-label">
                                         Answer
                                     </label>
+                                  
 
                                     <textarea *ngIf="isTextAnswer(question); else optionAnswer" class="answer-control"
                                         rows="2" [(ngModel)]="question.answer_value"></textarea>
@@ -530,11 +515,12 @@
                                 </div>
 
                                 <div class="answer-field">
-                                    <label class="answer-label">
+                                    <label *ngIf="buildIsAnnexureSelected(question)" class="answer-label">
                                         Audit Comment
                                     </label>
+                                    
 
-                                    <textarea class="answer-control" rows="2"
+                                    <textarea class="answer-control" rows="2" placeholder="Audit Comment"
                                         [(ngModel)]="question.audit_comment"></textarea>
                                 </div>
                             </div>
@@ -543,28 +529,11 @@
                                 Update only the rejected annexure row below.
                             </div>
 
-                            <div
-                                *ngIf="!question.answer?.id && (!buildIsAnnexureSelected(question) || question.answer?.evidence)"
-                                class="evidence-hint">
-                                Save the answer first to upload evidence.
-                            </div>
+        
 
                             <div *ngIf="buildIsAnnexureSelected(question)" class="annexure-preview">
 
-                                <div class="annexure-title-row">
-                                    <div>
-                                        <div class="annexure-title">
-                                            {{ question.annexure?.name || 'Annexure' }}
-                                        </div>
-                                        <small>
-                                            Add one annexure row at a time. Use CSV for bulk entry.
-                                        </small>
-                                    </div>
-
-                                    <span class="annexure-row-count">
-                                        {{ question.annexure_rows?.length || 0 }} rows
-                                    </span>
-                                </div>
+                                
 
                                 <div class="annexure-entry-panel">
 
@@ -914,13 +883,16 @@
 
                                 </div>
 
-                                <div class="answer-form">
+                                <div class="answer-form"
+                                    [class.annexure-answer-form]="buildIsAnnexureSelected(subsetQuestion)">
 
-                                    <div class="answer-form-grid">
+                                    <div class="answer-form-grid"
+                                        [class.annexure-answer-grid]="buildIsAnnexureSelected(subsetQuestion)">
                                         <div class="answer-field">
-                                            <label class="answer-label">
+                                            <label *ngIf="buildIsAnnexureSelected(subsetQuestion)" class="answer-label">
                                                 Answer
                                             </label>
+                                            
 
                                             <textarea *ngIf="isTextAnswer(subsetQuestion); else subsetOptionAnswer"
                                                 class="answer-control" rows="2"
@@ -988,11 +960,12 @@
                                         </div>
 
                                         <div class="answer-field">
-                                            <label class="answer-label">
+                                            <label *ngIf="buildIsAnnexureSelected(subsetQuestion)" class="answer-label">
                                                 Audit Comment
                                             </label>
+                                           
 
-                                            <textarea class="answer-control" rows="2"
+                                            <textarea class="answer-control" rows="2" placeholder="Audit Comment"
                                                 [(ngModel)]="subsetQuestion.audit_comment"></textarea>
                                         </div>
                                     </div>
