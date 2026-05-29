@@ -912,11 +912,18 @@
     gap: .65rem;
     align-items: start;
     padding: .55rem .62rem;
+
     border: 1px solid var(--surface-200);
     border-left: 3px solid var(--surface-300);
+    border-bottom: 1px solid #e5e7eb;
     border-radius: .35rem;
     background: var(--surface-0);
+    
+    margin-bottom: .5rem;
+    position: relative;
 }
+
+
 
 .question-card + .question-card {
     margin-top: .5rem;
