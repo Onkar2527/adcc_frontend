@@ -1,311 +1,391 @@
 .login-page {
+
     height: 100vh;
+
     overflow: hidden;
-    background: #f4f7fa;
+
+    background: #ececf1;
+
     font-family: 'Poppins', sans-serif;
+
     position: relative;
 }
 
-
+/* Fixed Banner */
 
 .top-banner {
+
     position: fixed;
+
     top: 0;
+
     left: 0;
+
     width: 100%;
-    height: 400px;
 
-    background: linear-gradient(
-        135deg,
-        #1f3b57 0%,
-        #2a5277 45%,
-        #3d6d9b 100%
-    );
+    height: 430px;
 
-    overflow: hidden;
+    background:
+        linear-gradient(
+            rgba(103, 92, 255, 0.35),
+            rgba(103, 92, 255, 0.35)
+        ),
+        url('/assets/images/dashboard/banner.png');
+
+    background-size: cover;
+
+    background-position: center;
+
+    background-repeat: no-repeat;
+
     z-index: 1;
 
-    border-bottom-left-radius: 80px;
-    border-bottom-right-radius: 80px;
+    border-bottom-left-radius: 50% 70px;
+
+    border-bottom-right-radius: 50% 70px;
+
+    overflow: hidden;
 }
 
-
-.top-banner::before {
-    content: '';
-
-    position: absolute;
-
-    left: -10%;
-    top: -180px;
-
-    width: 120%;
-    height: 420px;
-
-    background: rgba(255,255,255,0.05);
-
-    border-radius: 0 0 50% 50%;
-}
-
+/* Scrollable Content */
 
 .content-section {
+
     position: relative;
+
     z-index: 2;
+
     height: 100vh;
 
+    overflow-y: auto;
+
     display: flex;
+
     flex-direction: column;
+
     align-items: center;
 
-    overflow-y: auto;
+    padding-bottom: 20px;
 }
 
-
+/* Brand */
 
 .brand-section {
+
     text-align: center;
-    color: #fff;
-    margin-top: 25px;
-    position: relative;
-}
-
-.brand-section h1 {
-    font-size: 3rem;
-    font-weight: 800;
-    margin: 0;
-    letter-spacing: 1px;
-}
-
-.brand-section p {
-    margin-top: 5px;
-    font-size: 12px;
-    font-weight: 600;
-    letter-spacing: 3px;
-    color: rgba(255,255,255,.9);
-}
-
-.brand-section::after {
-   
-
-    display: inline-block;
-
-    margin-top: 14px;
-
-    padding: 8px 18px;
-
-    border-radius: 30px;
-
-    background: rgba(255,255,255,.12);
-
-    border: 1px solid rgba(255,255,255,.15);
 
     color: white;
 
-    font-size: 11px;
-    font-weight: 600;
+    margin-top: 50px;
 }
 
+.brand-section h1 {
 
+    font-size: 54px;
+
+    font-weight: 700;
+
+    margin: 0;
+
+    line-height: 1;
+
+    text-shadow:
+        0 4px 10px rgba(0,0,0,0.2);
+}
+
+.brand-section p {
+
+    margin-top: 10px;
+
+    font-size: 15px;
+
+    font-weight: 600;
+
+    letter-spacing: 1px;
+
+    text-shadow:
+        0 2px 8px rgba(0,0,0,0.2);
+}
+
+/* Login Wrapper */
 
 .login-wrapper {
+
     width: 100%;
+
     display: flex;
+
     justify-content: center;
 
-    margin-top: 25px;
-    padding: 0 15px 20px;
+    margin-top: 50px;
+
+    padding: 0 15px 40px;
 }
 
-
+/* Login Card */
 
 .login-card {
-    width: 380px;
 
-    background: rgba(255,255,255,.98);
+    width: 430px;
 
-    padding: 28px;
+    background: rgba(255, 255, 255, 0.96);
+
+    padding: 35px;
 
     border-radius: 24px;
 
     box-shadow:
-        0 15px 40px rgba(31,59,87,.15);
+        0 12px 35px rgba(0,0,0,0.18);
 
-    border: 1px solid rgba(255,255,255,.4);
+    backdrop-filter: blur(8px);
 
-    backdrop-filter: blur(12px);
-}
-
-.login-card:hover {
-    transform: translateY(-2px);
+    border: 1px solid rgba(255,255,255,0.4);
 }
 
 .login-card h2 {
+
     text-align: center;
-    color: #1f3b57;
-    font-size: 1.8rem;
-    font-weight: 700;
+
+    font-size: 22px;
+
     margin-bottom: 10px;
+
+    color: #1d2940;
+
+    font-weight: 700;
 }
 
 .company-name {
+
     text-align: center;
-    color: #36597a;
-    font-size: 15px;
-    font-weight: 600;
-    margin-bottom: 15px;
+
+    color: #1565ff;
+
+    font-size: 16px;
+
+    margin-bottom: 20px;
+
+    font-weight: 500;
 }
 
 .login-text {
-    margin: 15px 0;
+
+    margin: 20px 0;
+
+    color: #666;
+
     text-align: center;
-    color: #667085;
-    font-size: 14px;
 }
 
-hr {
-    border: none;
-    border-top: 1px solid #e5e7eb;
-}
-
-
+/* Inputs */
 
 .input-group {
-    margin-bottom: 16px;
+
+    margin-bottom: 20px;
 }
 
 .input-group label {
+
     display: block;
-    margin-bottom: 6px;
+
+    margin-bottom: 8px;
 
     font-weight: 600;
-    color: #344054;
-    font-size: 14px;
+
+    color: #333;
 }
 
+.custom-input {
 
+    width: 100%;
+
+    height: 46px;
+}
+
+/* Login Button */
+
+.login-btn {
+
+    width: 100%;
+
+    margin-top: 10px;
+}
+
+/* Role Buttons */
 
 .user-types {
+
     display: flex;
+
+    justify-content: space-between;
+
     gap: 10px;
-    margin-top: 15px;
+
+    margin-top: 18px;
 }
 
 .user-btn {
+
     flex: 1;
 
     height: 40px;
 
     border-radius: 12px;
 
-    border: 1px solid #dbe4ef;
+    border: 1px solid #cfd3dc;
 
-    background: #f8fafc;
+    background: white;
 
-    color: #1f3b57;
-
-    font-weight: 600;
+    color: #666;
 
     cursor: pointer;
 
-    transition: all .25s ease;
+    font-weight: 600;
+
+    transition: all 0.2s ease;
 }
 
 .user-btn:hover {
-    background: #1f3b57;
-    color: #fff;
-    border-color: #1f3b57;
+
+    background: #f1f3f8;
+
+    transform: translateY(-1px);
 }
 
+/* PrimeNG */
 
-:host ::ng-deep .p-inputtext,
-:host ::ng-deep .p-password-input {
-    width: 100%;
-    height: 46px;
+:host ::ng-deep {
 
-    border-radius: 12px;
+    .p-inputtext,
+    .p-password-input {
 
-    border: 1px solid #dbe4ef;
+        width: 100%;
 
-    background: #f8fafc;
+        border-radius: 12px;
 
-    transition: all .2s ease;
+        border: 1px solid #cfd3dc;
+
+        padding-left: 2.5rem;
+    }
+
+    .p-password {
+
+        width: 100%;
+    }
+
+    .p-button {
+
+        width: 100%;
+
+        height: 46px;
+
+        border: none;
+
+        border-radius: 12px;
+
+        background:
+            linear-gradient(
+                90deg,
+                #1565ff,
+                #4f7dff
+            );
+
+        font-weight: 600;
+
+        font-size: 15px;
+    }
+
+    .p-button:hover {
+
+        background:
+            linear-gradient(
+                90deg,
+                #0d56e0,
+                #3f6df0
+            ) !important;
+    }
+
+    .p-inputtext:focus,
+    .p-password-input:focus {
+
+        border-color: #1565ff;
+
+        box-shadow:
+            0 0 0 3px rgba(21,101,255,0.12);
+    }
+
+    .p-input-icon-left > i {
+
+        left: 0.9rem;
+
+        color: #777;
+    }
+
+    .p-password .p-icon {
+
+        color: #777;
+    }
 }
 
-:host ::ng-deep .p-inputtext:focus,
-:host ::ng-deep .p-password-input:focus {
-    border-color: #1f3b57;
-
-    box-shadow:
-        0 0 0 3px rgba(31,59,87,.12);
-}
-
-:host ::ng-deep .p-password {
-    width: 100%;
-}
-
-:host ::ng-deep .p-button {
-    width: 100%;
-    height: 46px;
-
-    border: none;
-    border-radius: 12px;
-
-    background: linear-gradient(
-        135deg,
-        #1f3b57,
-        #2f5d86
-    );
-
-    font-size: 14px;
-    font-weight: 600;
-
-    box-shadow:
-        0 8px 20px rgba(31,59,87,.20);
-}
-
-:host ::ng-deep .p-button:hover {
-    background: linear-gradient(
-        135deg,
-        #183148,
-        #274a6b
-    ) !important;
-}
-
+/* Scrollbar */
 
 .content-section::-webkit-scrollbar {
-    width: 5px;
+
+    width: 6px;
 }
 
 .content-section::-webkit-scrollbar-thumb {
-    background: rgba(31,59,87,.25);
+
+    background: rgba(255,255,255,0.5);
+
     border-radius: 10px;
 }
 
+/* Responsive */
 
-
-@media (max-width: 768px) {
+@media screen and (max-width: 768px) {
 
     .top-banner {
-        height: 150px;
+
+        height: 260px;
     }
 
     .brand-section {
-        margin-top: 20px;
+
+        margin-top: 50px;
     }
 
     .brand-section h1 {
-        font-size: 2.3rem;
+
+        font-size: 48px;
     }
 
-    .brand-section::after {
-        display: none;
+    .brand-section p {
+
+        font-size: 14px;
+    }
+
+    .login-wrapper {
+
+        margin-top: 30px;
     }
 
     .login-card {
+
         width: 100%;
-        padding: 22px;
+
+        padding: 25px;
+
+        border-radius: 20px;
     }
 
     .user-types {
+
         flex-direction: column;
+    }
+
+    .user-btn {
+
+        width: 100%;
     }
 }
