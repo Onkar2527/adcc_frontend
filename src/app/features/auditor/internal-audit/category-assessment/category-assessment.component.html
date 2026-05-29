@@ -308,7 +308,8 @@
 
                 <ng-container *ngFor="let question of header.questions; let i = index">
 
-                    <div class="question-card" [class.re-audit-question]="isReAudit(detail)">
+                    <div class="question-card" [class.re-audit-question]="isReAudit(detail)"
+                        [class.annexure-question]="buildIsAnnexureSelected(question)">
 
                         <div class="question-main">
 
@@ -438,32 +439,30 @@
 
                             <div *ngIf="buildIsAnnexureSelected(question)" class="annexure-preview">
 
-                                <!-- TITLE -->
-
-                                <div class="font-medium text-900 mb-3">
-                                    {{ question.annexure?.name || 'Annexure' }}
-                                </div>
-
-
-
-                                <div class="surface-100 border-round-lg p-3 mb-3">
-
-                                    <div class="font-semibold text-900 mb-3">
-                                        Input Section
+                                <div class="annexure-title-row">
+                                    <div>
+                                        <div class="annexure-title">
+                                            {{ question.annexure?.name || 'Annexure' }}
+                                        </div>
+                                        <small>
+                                            Add one annexure row at a time. Use CSV for bulk entry.
+                                        </small>
                                     </div>
 
-                                    <!-- INPUT SCROLL -->
+                                    <span class="annexure-row-count">
+                                        {{ question.annexure_rows?.length || 0 }} rows
+                                    </span>
+                                </div>
 
-                                    <div class="overflow-auto" style="
-                width: 100%;
-                max-height: 400px;
-                overflow-x: auto;
-            ">
+                                <div class="annexure-entry-panel">
 
-                                        <div class="annexure-grid" style="
-                    min-width: 2200px;
-                    width: max-content;
-                ">
+                                    <div class="annexure-scroll-frame">
+
+                                        <div
+                                            class="annexure-grid annexure-entry-grid"
+                                            [style.grid-template-columns]="annexureEntryGridTemplate(question)"
+                                            [style.min-width]="annexureEntryMinWidth(question)"
+                                        >
 
                                             <!-- DYNAMIC COLUMNS -->
 
@@ -477,7 +476,7 @@
                                                 <!-- TEXTAREA -->
 
                                                 <textarea *ngIf="column.column_type_id == 2; else annexureInput"
-                                                    class="answer-control1" rows="2"
+                                                    class="answer-control" rows="2"
                                                     [(ngModel)]="question.annexure_draft.values[ci]"></textarea>
 
                                                 <ng-template #annexureInput>
@@ -485,7 +484,7 @@
                                                     <!-- SELECT -->
 
                                                     <select *ngIf="column.column_type_id == 3; else annexureText"
-                                                        class="answer-control1"
+                                                        class="answer-control"
                                                         [(ngModel)]="question.annexure_draft.values[ci]">
 
                                                         <option value="">
@@ -503,7 +502,7 @@
 
                                                     <ng-template #annexureText>
 
-                                                        <input type="text" class="answer-control1"
+                                                        <input type="text" class="answer-control"
                                                             [(ngModel)]="question.annexure_draft.values[ci]" />
 
                                                     </ng-template>
@@ -520,7 +519,7 @@
                                                     Business Risk
                                                 </label>
 
-                                                <select class="answer-control1"
+                                                <select class="answer-control"
                                                     [(ngModel)]="question.annexure_draft.business_risk"
                                                     [disabled]="!isCustomAnnexureRisk(question)">
 
@@ -545,7 +544,7 @@
                                                     Control Risk
                                                 </label>
 
-                                                <select class="answer-control1"
+                                                <select class="answer-control"
                                                     [(ngModel)]="question.annexure_draft.control_risk"
                                                     [disabled]="!isCustomAnnexureRisk(question)">
 
@@ -570,7 +569,7 @@
                                                     Risk Type
                                                 </label>
 
-                                                <select class="answer-control1"
+                                                <select class="answer-control"
                                                     [(ngModel)]="question.annexure_draft.risk_cat_id"
                                                     [disabled]="!isCustomAnnexureRisk(question)">
 
@@ -595,7 +594,7 @@
 
 
 
-                                <div class="flex flex-wrap justify-content-end gap-2 mb-4">
+                                <div class="annexure-actions">
 
                                     <input #annexCsvInput type="file" accept=".csv,text/csv" style="display: none"
                                         (change)="uploadAnnexureCsv(question, $event)" />
@@ -621,76 +620,55 @@
                                 </div>
 
 
-                                <div *ngIf="question.annexure_rows?.length" class="surface-100 border-round-lg p-3">
+                                <div *ngIf="question.annexure_rows?.length" class="annexure-saved-panel">
 
-                                    <div class="font-semibold text-900 mb-3">
-                                        Output Table
+                                    <div class="annexure-saved-title">
+                                        <span>Saved Annexure Rows</span>
+                                        <small>{{ question.annexure_rows?.length || 0 }} record(s)</small>
                                     </div>
 
-                                    <!-- TABLE SCROLL -->
+                                    <div class="annexure-scroll-frame annexure-table-frame compact-annexure-table">
 
-                                    <div class="overflow-auto border-1 surface-border border-round-lg" style="
-                width: 100%;
-                max-height: 400px;
-                overflow: auto;
-            ">
+                                        <table class="annexure-data-table" [style.min-width]="annexureTableMinWidth(question)">
+                                            <thead>
+                                                <tr>
+                                                    <th *ngFor="let column of question.annexure.columns">
+                                                        {{ column.name }}
+                                                    </th>
+                                                    <th>Business Risk</th>
+                                                    <th>Control Risk</th>
+                                                    <th>Risk Type</th>
+                                                    <th>
+                                                        Evidence
+                                                        <small *ngIf="isEvidenceRequired(question)"
+                                                            class="evidence-required">
+                                                            Required
+                                                        </small>
+                                                    </th>
+                                                    <th>Action</th>
+                                                </tr>
+                                            </thead>
 
-                                        <div class="annexure-table" style="
-                    min-width: 2200px;
-                    width: max-content;
-                ">
+                                            <tbody>
+                                                <tr *ngFor="let row of question.annexure_rows">
+                                                    <td *ngFor="let column of question.annexure.columns; let ci = index">
+                                                        {{ row.values?.[ci] || '-' }}
+                                                    </td>
 
-                                            <!-- HEADER -->
+                                                    <td>
+                                                        {{ riskLabel(row.business_risk, 'business_risks') }}
+                                                    </td>
 
-                                            <div class="annexure-table-row annexure-table-head">
+                                                    <td>
+                                                        {{ riskLabel(row.control_risk, 'control_risks') }}
+                                                    </td>
 
-                                                <span *ngFor="let column of question.annexure.columns">
-                                                    {{ column.name }}
-                                                </span>
+                                                    <td>
+                                                        {{ riskCategoryLabel(row.risk_cat_id) }}
+                                                    </td>
 
-                                                <span>Business Risk</span>
-
-                                                <span>Control Risk</span>
-
-                                                <span>Risk Type</span>
-
-                                                <span>
-                                                    Evidence
-
-                                                    <small *ngIf="isEvidenceRequired(question)"
-                                                        class="evidence-required">
-                                                        Required
-                                                    </small>
-
-                                                </span>
-
-                                                <span>Action</span>
-
-                                            </div>
-
-                                            <!-- BODY -->
-
-                                            <div class="annexure-table-row" *ngFor="let row of question.annexure_rows">
-
-                                                <span *ngFor="let column of question.annexure.columns; let ci = index">
-                                                    {{ row.values?.[ci] || '-' }}
-                                                </span>
-
-                                                <span>
-                                                    {{ riskLabel(row.business_risk, 'business_risks') }}
-                                                </span>
-
-                                                <span>
-                                                    {{ riskLabel(row.control_risk, 'control_risks') }}
-                                                </span>
-
-                                                <span>
-                                                    {{ riskCategoryLabel(row.risk_cat_id) }}
-                                                </span>
-
-                                                <!-- EVIDENCE -->
-
-                                                <span class="evidence-cell">
+                                                    <td>
+                                                        <span class="evidence-cell">
 
                                                     <ng-container
                                                         *ngIf="row.evidence as evidence; else rowEvidenceUpload">
@@ -719,26 +697,27 @@
 
                                                     </ng-template>
 
-                                                </span>
+                                                        </span>
+                                                    </td>
 
-                                                <!-- ACTION -->
+                                                    <td>
+                                                        <span class="annexure-row-actions">
 
-                                                <span class="flex gap-2">
+                                                            <button pButton type="button" icon="pi pi-pencil"
+                                                                severity="secondary"
+                                                                (click)="editAnnexureRow(question, row)"></button>
 
-                                                    <button pButton type="button" icon="pi pi-pencil"
-                                                        severity="secondary"
-                                                        (click)="editAnnexureRow(question, row)"></button>
+                                                            <button pButton type="button" icon="pi pi-trash"
+                                                                severity="danger"
+                                                                [loading]="deletingAnnexureRowKey() === annexureRowKey(question.id, row.id)"
+                                                                [disabled]="savingAnnexureQuestion() === question.id"
+                                                                (click)="deleteAnnexureRow(question, row)"></button>
 
-                                                    <button pButton type="button" icon="pi pi-trash" severity="danger"
-                                                        [loading]="deletingAnnexureRowKey() === annexureRowKey(question.id, row.id)"
-                                                        [disabled]="savingAnnexureQuestion() === question.id"
-                                                        (click)="deleteAnnexureRow(question, row)"></button>
-
-                                                </span>
-
-                                            </div>
-
-                                        </div>
+                                                        </span>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
 
                                     </div>
 
@@ -785,6 +764,7 @@
                             </div>
 
                             <div class="question-card" [class.re-audit-question]="isReAudit(detail)"
+                                [class.annexure-question]="buildIsAnnexureSelected(subsetQuestion)"
                                 *ngFor="let subsetQuestion of subsetHeader.questions; let si = index">
 
                                 <div class="question-main">
@@ -1066,71 +1046,82 @@
                                                     (click)="saveAnnexureRow(subsetQuestion)"></button>
                                             </div>
 
-                                            <div *ngIf="subsetQuestion.annexure_rows?.length" class="annexure-table">
-                                                <div class="annexure-table-row annexure-table-head">
-                                                    <span *ngFor="let column of subsetQuestion.annexure.columns">
-                                                        {{ column.name }}
-                                                    </span>
-                                                    <span>Business Risk</span>
-                                                    <span>Control Risk</span>
-                                                    <span>Risk Type</span>
-                                                    <span>
-                                                        Evidence
-                                                        <small *ngIf="isEvidenceRequired(subsetQuestion)"
-                                                            class="evidence-required">
-                                                            Required
-                                                        </small>
-                                                    </span>
-                                                    <span>Action</span>
-                                                </div>
+                                            <div *ngIf="subsetQuestion.annexure_rows?.length"
+                                                class="annexure-scroll-frame annexure-table-frame compact-annexure-table">
+                                                <table class="annexure-data-table"
+                                                    [style.min-width]="annexureTableMinWidth(subsetQuestion)">
+                                                    <thead>
+                                                        <tr>
+                                                            <th *ngFor="let column of subsetQuestion.annexure.columns">
+                                                                {{ column.name }}
+                                                            </th>
+                                                            <th>Business Risk</th>
+                                                            <th>Control Risk</th>
+                                                            <th>Risk Type</th>
+                                                            <th>
+                                                                Evidence
+                                                                <small *ngIf="isEvidenceRequired(subsetQuestion)"
+                                                                    class="evidence-required">
+                                                                    Required
+                                                                </small>
+                                                            </th>
+                                                            <th>Action</th>
+                                                        </tr>
+                                                    </thead>
 
-                                                <div class="annexure-table-row"
-                                                    *ngFor="let row of subsetQuestion.annexure_rows">
-                                                    <span
-                                                        *ngFor="let column of subsetQuestion.annexure.columns; let ci = index">
-                                                        {{ row.values?.[ci] || '-' }}
-                                                    </span>
-                                                    <span>{{ riskLabel(row.business_risk, 'business_risks') }}</span>
-                                                    <span>{{ riskLabel(row.control_risk, 'control_risks') }}</span>
-                                                    <span>{{ riskCategoryLabel(row.risk_cat_id) }}</span>
+                                                    <tbody>
+                                                        <tr *ngFor="let row of subsetQuestion.annexure_rows">
+                                                            <td
+                                                                *ngFor="let column of subsetQuestion.annexure.columns; let ci = index">
+                                                                {{ row.values?.[ci] || '-' }}
+                                                            </td>
+                                                            <td>{{ riskLabel(row.business_risk, 'business_risks') }}</td>
+                                                            <td>{{ riskLabel(row.control_risk, 'control_risks') }}</td>
+                                                            <td>{{ riskCategoryLabel(row.risk_cat_id) }}</td>
 
-                                                    <span class="evidence-cell">
-                                                        <ng-container
-                                                            *ngIf="row.evidence as evidence; else subsetRowEvidenceUpload">
-                                                            <button pButton type="button" icon="pi pi-eye"
-                                                                severity="secondary" title="View evidence"
-                                                                (click)="viewEvidence(evidence)"></button>
+                                                            <td>
+                                                                <span class="evidence-cell">
+                                                                    <ng-container
+                                                                        *ngIf="row.evidence as evidence; else subsetRowEvidenceUpload">
+                                                                        <button pButton type="button" icon="pi pi-eye"
+                                                                            severity="secondary" title="View evidence"
+                                                                            (click)="viewEvidence(evidence)"></button>
 
-                                                            <button pButton type="button" icon="pi pi-trash"
-                                                                severity="danger" title="Remove evidence"
-                                                                (click)="deleteEvidence(evidence)"></button>
-                                                        </ng-container>
+                                                                        <button pButton type="button" icon="pi pi-trash"
+                                                                            severity="danger" title="Remove evidence"
+                                                                            (click)="deleteEvidence(evidence)"></button>
+                                                                    </ng-container>
 
-                                                        <ng-template #subsetRowEvidenceUpload>
-                                                            <input #subsetRowEvidenceInput type="file"
-                                                                accept=".jpg,.jpeg,.png,.pdf,image/jpeg,image/png,application/pdf"
-                                                                style="display: none"
-                                                                (change)="uploadEvidence(subsetQuestion, $event, row)" />
+                                                                    <ng-template #subsetRowEvidenceUpload>
+                                                                        <input #subsetRowEvidenceInput type="file"
+                                                                            accept=".jpg,.jpeg,.png,.pdf,image/jpeg,image/png,application/pdf"
+                                                                            style="display: none"
+                                                                            (change)="uploadEvidence(subsetQuestion, $event, row)" />
 
-                                                            <button pButton type="button" icon="pi pi-upload"
-                                                                severity="secondary" title="Upload evidence"
-                                                                [loading]="uploadingEvidenceKey() === evidenceKey(subsetQuestion, row)"
-                                                                (click)="subsetRowEvidenceInput.click()"></button>
-                                                        </ng-template>
-                                                    </span>
+                                                                        <button pButton type="button" icon="pi pi-upload"
+                                                                            severity="secondary" title="Upload evidence"
+                                                                            [loading]="uploadingEvidenceKey() === evidenceKey(subsetQuestion, row)"
+                                                                            (click)="subsetRowEvidenceInput.click()"></button>
+                                                                    </ng-template>
+                                                                </span>
+                                                            </td>
 
-                                                    <span class="flex gap-2">
-                                                        <button pButton type="button" icon="pi pi-pencil"
-                                                            severity="secondary"
-                                                            (click)="editAnnexureRow(subsetQuestion, row)"></button>
+                                                            <td>
+                                                                <span class="annexure-row-actions">
+                                                                    <button pButton type="button" icon="pi pi-pencil"
+                                                                        severity="secondary"
+                                                                        (click)="editAnnexureRow(subsetQuestion, row)"></button>
 
-                                                        <button pButton type="button" icon="pi pi-trash"
-                                                            severity="danger"
-                                                            [loading]="deletingAnnexureRowKey() === annexureRowKey(subsetQuestion.id, row.id)"
-                                                            [disabled]="savingAnnexureQuestion() === subsetQuestion.id"
-                                                            (click)="deleteAnnexureRow(subsetQuestion, row)"></button>
-                                                    </span>
-                                                </div>
+                                                                    <button pButton type="button" icon="pi pi-trash"
+                                                                        severity="danger"
+                                                                        [loading]="deletingAnnexureRowKey() === annexureRowKey(subsetQuestion.id, row.id)"
+                                                                        [disabled]="savingAnnexureQuestion() === subsetQuestion.id"
+                                                                        (click)="deleteAnnexureRow(subsetQuestion, row)"></button>
+                                                                </span>
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
                                             </div>
                                         </div>
 

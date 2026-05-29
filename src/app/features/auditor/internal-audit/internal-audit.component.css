@@ -922,6 +922,18 @@
     margin-top: .5rem;
 }
 
+.question-card.annexure-question {
+    grid-template-columns: minmax(0, 1fr);
+}
+
+.question-card.annexure-question .answer-form {
+    grid-column: 1 / -1;
+}
+
+.question-card.annexure-question .answer-form-grid {
+    grid-template-columns: minmax(14rem, .75fr) minmax(18rem, 1fr);
+}
+
 .re-audit-question {
     border-left-color: var(--red-500);
 }
@@ -1302,11 +1314,45 @@ textarea.answer-control1 {
 }
 
 .annexure-preview {
-    margin-top: .65rem;
-    padding: .62rem;
+    margin-top: .45rem;
+    padding: .5rem;
     border: 1px solid var(--surface-200);
     border-radius: .35rem;
     background: var(--surface-0);
+}
+
+.annexure-title-row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    padding-bottom: .38rem;
+    border-bottom: 1px solid var(--surface-200);
+}
+
+.annexure-title {
+    color: var(--text-color);
+    font-size: .84rem;
+    font-weight: 800;
+}
+
+.annexure-title-row small {
+    display: block;
+    margin-top: .12rem;
+    color: var(--text-color-secondary);
+    font-size: .7rem;
+}
+
+.annexure-row-count {
+    flex: 0 0 auto;
+    padding: .2rem .45rem;
+    border: 1px solid var(--surface-200);
+    border-radius: .25rem;
+    background: var(--surface-50);
+    color: var(--text-color-secondary);
+    font-size: .72rem;
+    font-weight: 800;
+    text-transform: uppercase;
 }
 
 .annexure-column-list {
@@ -1330,41 +1376,166 @@ textarea.answer-control1 {
     border-top: 1px solid var(--surface-200);
 }
 
+.annexure-entry-panel,
+.annexure-saved-panel {
+    margin-top: .45rem;
+    padding: .42rem;
+    border: 1px solid var(--surface-200);
+    border-radius: .35rem;
+    background: var(--surface-50);
+}
+
+.annexure-scroll-frame {
+    width: 100%;
+    overflow: auto;
+    scrollbar-gutter: stable;
+}
+
+.annexure-entry-grid {
+    width: max-content;
+    align-items: end;
+}
+
 .annexure-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
-    gap: .75rem;
+    gap: .42rem;
 }
 
 .annexure-field {
     min-width: 0;
 }
 
-.annexure-table {
-    margin-top: 1rem;
-    border: 1px solid var(--surface-200);
-    border-radius: .5rem;
-    overflow: auto;
+.annexure-field .answer-label {
+    margin-bottom: .16rem;
+    font-size: .66rem;
 }
 
-.annexure-table-row {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
-    gap: .75rem;
+.annexure-field .answer-control {
+    min-height: 2.15rem;
+    padding: .42rem .5rem;
+    font-size: .84rem;
+}
+
+.annexure-actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: .35rem;
+    margin: .45rem 0 .5rem;
+}
+
+.annexure-saved-title {
+    display: flex;
     align-items: center;
-    min-width: 65rem;
-    padding: .75rem;
-    border-top: 1px solid var(--surface-200);
-}
-
-.annexure-table-row:first-child {
-    border-top: 0;
-}
-
-.annexure-table-head {
-    background: var(--surface-100);
+    justify-content: space-between;
+    gap: .75rem;
+    margin-bottom: .35rem;
     color: var(--text-color);
+    font-size: .76rem;
+    font-weight: 800;
+}
+
+.annexure-saved-title small {
+    color: var(--text-color-secondary);
+    font-size: .68rem;
     font-weight: 700;
+}
+
+.annexure-table-frame {
+    border: 1px solid var(--surface-200);
+    border-radius: .35rem;
+    background: var(--surface-0);
+}
+
+.compact-annexure-table {
+    max-height: 15rem;
+}
+
+.annexure-data-table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: auto;
+    background: var(--surface-0);
+    color: var(--text-color);
+    font-size: .78rem;
+    line-height: 1.2;
+}
+
+.annexure-data-table th,
+.annexure-data-table td {
+    min-width: 7rem;
+    max-width: 16rem;
+    padding: .28rem .38rem;
+    border-bottom: 1px solid var(--surface-200);
+    border-right: 1px solid var(--surface-200);
+    text-align: left;
+    vertical-align: middle;
+    overflow-wrap: anywhere;
+}
+
+.annexure-data-table th:last-child,
+.annexure-data-table td:last-child {
+    border-right: 0;
+}
+
+.annexure-data-table th {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    background: #eaf0f7;
+    color: var(--text-color);
+    font-size: .64rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.annexure-data-table tbody tr:nth-child(even) {
+    background: var(--surface-50);
+}
+
+.annexure-data-table tbody tr:hover {
+    background: #eef6ff;
+}
+
+.annexure-data-table tr:last-child td {
+    border-bottom: 0;
+}
+
+.annexure-data-table th:nth-last-child(1),
+.annexure-data-table td:nth-last-child(1),
+.annexure-data-table th:nth-last-child(2),
+.annexure-data-table td:nth-last-child(2) {
+    min-width: 5.6rem;
+    width: 5.6rem;
+    text-align: center;
+}
+
+.annexure-row-actions {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: .3rem;
+    white-space: nowrap;
+}
+
+.annexure-data-table .evidence-cell {
+    justify-content: center;
+}
+
+:host ::ng-deep .annexure-actions .p-button,
+:host ::ng-deep .annexure-data-table .p-button {
+    min-height: 1.7rem;
+    padding: .35rem .55rem;
+    font-size: .76rem;
+}
+
+:host ::ng-deep .annexure-data-table .p-button {
+    width: 1.65rem;
+    min-width: 1.65rem;
+    height: 1.65rem;
+    padding: 0;
 }
 
 @media (max-width: 768px) {

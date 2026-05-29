@@ -1187,6 +1187,45 @@ export class CategoryAssessmentComponent
             : [];
     }
 
+    annexureColumnCount(
+        question: any,
+    ) {
+        return Math.max(
+            question?.annexure?.columns?.length || 0,
+            1,
+        );
+    }
+
+    annexureEntryGridTemplate(
+        question: any,
+    ) {
+        return `repeat(${this.annexureColumnCount(question)}, minmax(8rem, 1fr)) repeat(3, minmax(7.5rem, .8fr))`;
+    }
+
+    annexureEntryMinWidth(
+        question: any,
+    ) {
+        return `${Math.max(
+            680,
+            (
+                this.annexureColumnCount(question)
+                + 3
+            ) * 124,
+        )}px`;
+    }
+
+    annexureTableMinWidth(
+        question: any,
+    ) {
+        return `${Math.max(
+            760,
+            (
+                this.annexureColumnCount(question)
+                + 5
+            ) * 116,
+        )}px`;
+    }
+
     annexureRowKey(
         questionId: any,
         rowId: any,
