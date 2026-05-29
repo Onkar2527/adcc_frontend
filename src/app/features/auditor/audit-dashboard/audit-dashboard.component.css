@@ -1,7 +1,8 @@
 .audit-dashboard-page {
     display: flex;
     flex-direction: column;
-    gap: 0.75rem;
+    gap: 1rem;
+    padding: 2rem;
     min-height: calc(100vh - 4.75rem);
     font-family: "Inter", "Segoe UI", Arial, sans-serif;
     font-size: 15px;
@@ -11,7 +12,7 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 1rem;
+    gap: 2rem;
     padding: 0.58rem 0.8rem;
     background: linear-gradient(90deg, #ffffff 0%, #f7fbff 100%);
     border: 1px solid #d8e2ec;
@@ -210,8 +211,8 @@
 .unit-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(22rem, 1fr));
-    gap: 0.9rem;
-    padding: 0.9rem;
+    gap: 2.5rem;
+    padding: 2rem;
 }
 
 .unit-card {
@@ -219,8 +220,8 @@
     min-height: 12.4rem;
     flex-direction: column;
     justify-content: space-between;
-    gap: 0.9rem;
-    padding: 0.95rem;
+    gap: 2.5rem;
+    padding: 2rem;
     background: linear-gradient(180deg, #ffffff 0%, #fbfdff 100%);
     border: 1px solid #d8e2ec;
     border-left: 5px solid #8ba1b4;
