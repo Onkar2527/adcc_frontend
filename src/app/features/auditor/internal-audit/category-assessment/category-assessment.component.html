@@ -334,10 +334,13 @@
 
                         </div>
 
-                        <div class="answer-form">
+                        <div class="answer-form" [class.annexure-answer-form]="buildIsAnnexureSelected(question)">
 
-                            <div class="answer-form-grid">
+                            <div class="answer-form-grid" [class.annexure-answer-grid]="buildIsAnnexureSelected(question)">
                                 <div class="answer-field">
+                                    <label *ngIf="buildIsAnnexureSelected(question)" class="answer-label">
+                                        Answer
+                                    </label>
                                   
 
                                     <textarea *ngIf="isTextAnswer(question); else optionAnswer" class="answer-control"
@@ -400,6 +403,9 @@
                                 </div>
 
                                 <div class="answer-field">
+                                    <label *ngIf="buildIsAnnexureSelected(question)" class="answer-label">
+                                        Audit Comment
+                                    </label>
                                     
 
                                     <textarea class="answer-control" rows="2" placeholder="Audit Comment"
@@ -765,10 +771,15 @@
 
                                 </div>
 
-                                <div class="answer-form">
+                                <div class="answer-form"
+                                    [class.annexure-answer-form]="buildIsAnnexureSelected(subsetQuestion)">
 
-                                    <div class="answer-form-grid">
+                                    <div class="answer-form-grid"
+                                        [class.annexure-answer-grid]="buildIsAnnexureSelected(subsetQuestion)">
                                         <div class="answer-field">
+                                            <label *ngIf="buildIsAnnexureSelected(subsetQuestion)" class="answer-label">
+                                                Answer
+                                            </label>
                                             
 
                                             <textarea *ngIf="isTextAnswer(subsetQuestion); else subsetOptionAnswer"
@@ -837,6 +848,9 @@
                                         </div>
 
                                         <div class="answer-field">
+                                            <label *ngIf="buildIsAnnexureSelected(subsetQuestion)" class="answer-label">
+                                                Audit Comment
+                                            </label>
                                            
 
                                             <textarea class="answer-control" rows="2" placeholder="Audit Comment"
