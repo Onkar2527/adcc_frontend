@@ -209,19 +209,19 @@ export class AssessmentWorkspaceComponent implements OnInit {
     }
     openExecutiveSummary() {
 
-    const assessmentId =
-        Number(
-            this.route.snapshot.paramMap.get(
-                'assessmentId',
-            ),
-        );
+        const assessmentId =
+            Number(
+                this.route.snapshot.paramMap.get(
+                    'assessmentId',
+                ),
+            );
 
-    this.router.navigate([
-        '/auditor/internal-audit/executive-summary',
-        assessmentId,
-    ]);
+        this.router.navigate([
+            '/auditor/internal-audit/executive-summary',
+            assessmentId,
+        ]);
 
-}
+    }
 
     loadMenu(
         assessmentId: number,
@@ -755,6 +755,44 @@ export class AssessmentWorkspaceComponent implements OnInit {
                         Number(assessment.id),
                     ),
         });
+    }
+
+    backToSummary() {
+        this.selectedView.set(
+            'summary',
+        );
+
+        this.selectedCategoryId.set(
+            null,
+        );
+
+        this.selectedPendingQuestionIds.set(
+            [],
+        );
+
+        this.selectedDumpId.set(
+            0,
+        );
+
+        this.router.navigate(
+            [],
+            {
+                relativeTo:
+                    this.route,
+                queryParams: {
+                    view:
+                        'summary',
+                    categoryId:
+                        null,
+                    dumpId:
+                        null,
+                    pending:
+                        null,
+                },
+                queryParamsHandling:
+                    'merge',
+            },
+        );
     }
 
     openPendingCategory(

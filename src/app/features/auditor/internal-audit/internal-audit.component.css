@@ -260,12 +260,12 @@
     background: #f8fbfd;
 }
 
-.assessment-detail-table td > strong,
-.assessment-detail-table td > span {
+.assessment-detail-table td>strong,
+.assessment-detail-table td>span {
     display: block;
 }
 
-.assessment-detail-table td > span,
+.assessment-detail-table td>span,
 .reviewer-note {
     margin-top: .15rem;
     color: #5f7182;
@@ -307,6 +307,7 @@
 }
 
 @media (max-width: 720px) {
+
     .unit-assessment-header,
     .assessment-list-toolbar {
         align-items: stretch;
@@ -818,6 +819,7 @@
 }
 
 @media (max-width: 960px) {
+
     .assessment-row,
     .assessment-head {
         grid-template-columns: 1fr;
@@ -918,14 +920,14 @@
     border-bottom: 1px solid #e5e7eb;
     border-radius: .35rem;
     background: var(--surface-0);
-    
+
     margin-bottom: .5rem;
     position: relative;
 }
 
 
 
-.question-card + .question-card {
+.question-card+.question-card {
     margin-top: .5rem;
 }
 
@@ -1100,6 +1102,7 @@
     font: inherit;
     font-size: .9rem;
 }
+
 .answer-control1 {
     width: 70%;
     min-height: 2.05rem;
@@ -1655,6 +1658,12 @@ textarea.answer-control1 {
 
 .annexure-data-table .evidence-cell {
     justify-content: center;
+}
+
+.workspace-category-back-row {
+    display: flex;
+    justify-content: flex-start;
+    margin-bottom: .75rem;
 }
 
 :host ::ng-deep .annexure-actions .p-button,

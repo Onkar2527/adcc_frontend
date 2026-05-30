@@ -480,6 +480,20 @@
                 Assessment info, remarks, and submission actions are shown above. Select a category from the left sidebar to answer questions.
             </div>
 
+            <div
+                *ngIf="selectedView() === 'category'"
+                class="workspace-category-back-row"
+            >
+                <button
+                    pButton
+                    type="button"
+                    icon="pi pi-arrow-left"
+                    label="Back to Summary"
+                    severity="secondary"
+                    (click)="backToSummary()"
+                ></button>
+            </div>
+
             <app-category-assessment
                 *ngIf="selectedView() === 'category' && selectedCategory() as category"
                 [assessmentIdInput]="audit.id"
