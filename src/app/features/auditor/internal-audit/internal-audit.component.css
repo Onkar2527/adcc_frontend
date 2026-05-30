@@ -896,7 +896,7 @@
 
 .header-save-row {
     display: flex;
-    justify-content: flex-end;
+    justify-content: center;
     margin-top: .55rem;
     padding-top: .5rem;
     border-top: 1px solid var(--surface-200);

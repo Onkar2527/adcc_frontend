@@ -795,6 +795,18 @@ export class AssessmentWorkspaceComponent implements OnInit {
         );
     }
 
+    showBackToSummaryButton() {
+        return (
+            this.selectedView() === 'category'
+            &&
+            (
+                this.selectedPendingQuestionIds().length > 0
+                ||
+                Number(this.selectedDumpId() || 0) > 0
+            )
+        );
+    }
+
     openPendingCategory(
         issue: any,
     ) {
