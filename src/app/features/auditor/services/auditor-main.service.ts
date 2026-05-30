@@ -21,41 +21,41 @@ export class AuditDashboardService {
   }
   // service.ts (frontend)
 
-getExecutiveSummary(
+  getExecutiveSummary(
     assessment_id: number,
     employeeId: number,
-) {
+  ) {
 
     return this.http.get(
-        `${this.apiUrl}/executive-summary/${assessment_id}`,
-        {
-          params: {
-            employee_id:
-              employeeId,
-          },
+      `${this.apiUrl}/executive-summary/${assessment_id}`,
+      {
+        params: {
+          employee_id:
+            employeeId,
         },
+      },
     );
 
-}
-saveExecutiveSummary(
+  }
+  saveExecutiveSummary(
     payload: any,
-) {
+  ) {
 
     return this.http.post(
-        `${this.apiUrl}/save-executive-summary`,
-        payload,
+      `${this.apiUrl}/save-executive-summary`,
+      payload,
     );
 
-}
-getBranchFinancialPosition(
+  }
+  getBranchFinancialPosition(
     branch_id: number,
-) {
+  ) {
 
     return this.http.get(
-        `${this.apiUrl}/branch-financial-position/${branch_id}`,
+      `${this.apiUrl}/branch-financial-position/${branch_id}`,
     );
 
-}
+  }
 
   openAssessment(payload: any) {
 
@@ -885,6 +885,27 @@ getBranchFinancialPosition(
       {
         employee_id:
           employeeId,
+      },
+    );
+  }
+
+  getInternalAuditCategorySubsetSet(
+    assessmentId: number,
+    categoryId: number,
+    subsetSetId: number,
+    employeeId: number,
+    dumpId = 0,
+  ) {
+    return this.http.get<any>(
+      `${this.config.apiUrl}/internal-audit/${assessmentId}/category/${categoryId}/subset/${subsetSetId}`,
+      {
+        params: {
+          employee_id:
+            String(employeeId),
+
+          dump_id:
+            String(dumpId || 0),
+        },
       },
     );
   }

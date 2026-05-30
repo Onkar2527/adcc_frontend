@@ -337,6 +337,14 @@
                         </div>
 
                         <div class="flex gap-2 flex-wrap">
+                            <button
+                                pButton
+                                type="button"
+                                icon="pi pi-arrow-left"
+                                label="Back to Account List"
+                                severity="secondary"
+                                (click)="backToAccountList(detail)"
+                            ></button>
                             <button pButton type="button" icon="pi pi-check-square"
                                 label="Apply Defaults to Account" severity="secondary"
                                 (click)="selectDefaultAnswersForAccount()"></button>
@@ -460,7 +468,7 @@
 
                                     <ng-template #optionAnswer>
 
-                                        <select class="answer-control" [(ngModel)]="question.answer_value">
+                                        <select class="answer-control" [(ngModel)]="question.answer_value" (ngModelChange)="onQuestionAnswerChange(question)">
 
                                             <option value="">
                                                 Please select
@@ -818,7 +826,7 @@
 
                     </div>
 
-                    <div *ngFor="let subsetSet of buildSelectedSubsetSets(question)" class="subset-panel">
+                    <div *ngFor="let subsetSet of question.selectedSubsetSets || []" class="subset-panel">
 
                         <div class="question-set-title">
                             {{ subsetSet.name }}
@@ -1223,12 +1231,12 @@
 
                             </div>
 
-                            <div class="header-save-row">
+                            <!-- <div class="header-save-row">
                                 <button pButton type="button" icon="pi pi-save" label="Save Header Answers"
                                     class="p-button-sm"
                                     [loading]="savingHeader() === subsetHeader.id"
                                     (click)="saveHeader(subsetHeader)"></button>
-                            </div>
+                            </div> -->
 
                         </section>
 
