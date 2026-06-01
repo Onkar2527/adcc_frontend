@@ -9,6 +9,7 @@ import {
     signal,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { forkJoin } from 'rxjs';
 import { ConfirmationService } from 'primeng/api';
 import { ButtonModule } from 'primeng/button';
 import { SkeletonModule } from 'primeng/skeleton';
@@ -47,6 +48,9 @@ export class ReviewerWorkspaceComponent implements OnInit {
         signal(false);
 
     submitting =
+        signal(false);
+
+    bulkSaving =
         signal(false);
 
     actionSaving =
@@ -217,6 +221,225 @@ export class ReviewerWorkspaceComponent implements OnInit {
         return `${targetType}-${observationId}`;
     }
 
+    totalQueuePoints() {
+        return this.assessments()
+            .reduce(
+                (total, assessment: any) =>
+                    total +
+                    Number(assessment.total_points || 0),
+                0,
+            );
+    }
+
+    totalQueueCompliancePoints() {
+        return this.assessments()
+            .reduce(
+                (total, assessment: any) =>
+                    total +
+                    Number(assessment.compliance_points || 0),
+                0,
+            );
+    }
+
+    reviewTargets() {
+        const answers =
+            (this.detail()?.answers || [])
+                .map(
+                    (answer: any) => ({
+                        type:
+                            'answer' as const,
+                        observation:
+                            answer,
+                    }),
+                );
+
+        const annexureRows =
+            (this.detail()?.answers || [])
+                .flatMap(
+                    (answer: any) =>
+                        answer.annexure_rows || [],
+                )
+                .map(
+                    (row: any) => ({
+                        type:
+                            'annexure' as const,
+                        observation:
+                            row,
+                    }),
+                );
+
+        return [
+            ...answers,
+            ...annexureRows,
+        ];
+    }
+
+    pendingReviewCount() {
+        return this.reviewTargets()
+            .filter(
+                (target) =>
+                    ![2, 3].includes(
+                        Number(
+                            this.reviewStatus(
+                                target.observation,
+                            ) || 0,
+                        ),
+                    ),
+            )
+            .length;
+    }
+
+    hasAccountDetails(
+        answer: any,
+    ) {
+        return Number(answer?.dump_id || 0) > 0
+            &&
+            (
+                answer?.account_no
+                ||
+                answer?.account_holder_name
+                ||
+                answer?.scheme_name
+                ||
+                answer?.scheme_code
+            );
+    }
+
+    annexureColumns(
+        answer: any,
+    ) {
+        const columns =
+            Array.isArray(answer?.annexure_columns)
+                ? answer.annexure_columns
+                : [];
+
+        if (
+            columns.length
+        ) {
+            return columns;
+        }
+
+        const valueCount =
+            Math.max(
+                ...(answer?.annexure_rows || [])
+                    .map(
+                        (row: any) =>
+                            row.values?.length || 0,
+                    ),
+                0,
+            );
+
+        return Array.from(
+            {
+                length:
+                    valueCount,
+            },
+            (
+                _item,
+                index,
+            ) => ({
+                name:
+                    `Column ${index + 1}`,
+            }),
+        );
+    }
+
+    saveBulkAction(
+        action: number,
+    ) {
+        const assessmentId =
+            Number(
+                this.detail()?.overview?.id || 0,
+            );
+
+        if (
+            !assessmentId
+            ||
+            this.bulkSaving()
+        ) {
+            return;
+        }
+
+        const targets =
+            this.reviewTargets();
+
+        if (
+            !targets.length
+        ) {
+            this.notification.error(
+                'No observations are available for review action.',
+            );
+            return;
+        }
+
+        this.confirmation.confirm({
+            header:
+                action === 2
+                    ? 'Accept All Observations'
+                    : 'Reject All Observations',
+            message:
+                `${action === 2 ? 'Accept' : 'Reject'} all ${targets.length} observation(s)?`,
+            icon:
+                action === 2
+                    ? 'pi pi-check-circle'
+                    : 'pi pi-exclamation-triangle',
+            acceptLabel:
+                action === 2
+                    ? 'Accept All'
+                    : 'Reject All',
+            rejectLabel:
+                'Cancel',
+            accept:
+                () => {
+                    this.bulkSaving.set(true);
+
+                    forkJoin(
+                        targets.map(
+                            (target) =>
+                                this.isComplianceReview()
+                                    ? this.service.saveReviewerComplianceAction(
+                                        assessmentId,
+                                        target.type,
+                                        Number(target.observation.id),
+                                        this.employeeId(),
+                                        action,
+                                        this.reviewComment(target.observation),
+                                    )
+                                    : this.service.saveReviewerAction(
+                                        assessmentId,
+                                        target.type,
+                                        Number(target.observation.id),
+                                        this.employeeId(),
+                                        action,
+                                        this.reviewComment(target.observation),
+                                    ),
+                        ),
+                    )
+                        .subscribe({
+                            next: () => {
+                                this.notification.success(
+                                    action === 2
+                                        ? 'All observations accepted.'
+                                        : 'All observations rejected.',
+                                );
+                                this.reloadDetail(
+                                    assessmentId,
+                                    '',
+                                );
+                                this.bulkSaving.set(false);
+                            },
+                            error: (err) => {
+                                this.bulkSaving.set(false);
+                                this.notification.error(
+                                    err?.error?.message
+                                    || 'Unable to save bulk review action.',
+                                );
+                            },
+                        });
+                },
+        });
+    }
+
     saveAction(
         targetType: 'answer' | 'annexure',
         observation: any,
@@ -355,6 +578,15 @@ export class ReviewerWorkspaceComponent implements OnInit {
             return;
         }
 
+        if (
+            this.pendingReviewCount() > 0
+        ) {
+            this.notification.error(
+                'Accept or reject all observations before submitting the review.',
+            );
+            return;
+        }
+
         const complianceReview =
             this.isComplianceReview();
 
@@ -365,8 +597,8 @@ export class ReviewerWorkspaceComponent implements OnInit {
                     : 'Submit Review',
             message:
                 complianceReview
-                    ? 'Submit this compliance review? Pending responses will be accepted.'
-                    : 'Submit this audit review? Any pending observations will be accepted.',
+                    ? 'Submit this completed compliance review?'
+                    : 'Submit this completed audit review?',
             icon:
                 'pi pi-send',
             acceptLabel:

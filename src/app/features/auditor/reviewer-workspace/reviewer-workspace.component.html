@@ -23,8 +23,26 @@
 
     <section *ngIf="!selected()" class="queue-panel">
         <div class="section-title">
-            Pending Reviews
+            <div>
+                <strong>Pending Reviews</strong>
+                <small>Assigned assessments waiting for reviewer action.</small>
+            </div>
             <p-tag [value]="assessments().length + ' pending'" severity="contrast"></p-tag>
+        </div>
+
+        <div class="queue-summary">
+            <div>
+                <span>Assessments</span>
+                <strong>{{ assessments().length }}</strong>
+            </div>
+            <div>
+                <span>Total Questions</span>
+                <strong>{{ totalQueuePoints() }}</strong>
+            </div>
+            <div>
+                <span>Compliance Marked</span>
+                <strong class="red">{{ totalQueueCompliancePoints() }}</strong>
+            </div>
         </div>
 
         <div *ngIf="loadingQueue()" class="queue-loading">
@@ -36,31 +54,49 @@
             No assessment is pending for review.
         </div>
 
-        <button
-            *ngFor="let assessment of assessments()"
-            type="button"
-            class="queue-row"
-            (click)="openAssessment(assessment)"
-        >
-            <span class="queue-unit">
-                <strong>{{ assessment.audit_unit_name }}</strong>
-                <small>{{ assessment.audit_unit_code }} | F.Y. {{ assessment.year }}</small>
-                <p-tag [value]="assessment.review_stage" severity="secondary"></p-tag>
-            </span>
+        <div *ngIf="!loadingQueue() && assessments().length" class="queue-table-wrap">
+            <table class="queue-table">
+                <thead>
+                    <tr>
+                        <th>Audit Unit</th>
+                        <th>Assessment Period</th>
+                        <th>Review Stage</th>
+                        <th>Questions</th>
+                        <th>Compliance</th>
+                        <th></th>
+                    </tr>
+                </thead>
 
-            <span>
-                {{ assessment.assesment_period_from | date: 'mediumDate' }}
-                -
-                {{ assessment.assesment_period_to | date: 'mediumDate' }}
-            </span>
-
-            <span class="queue-counts">
-                <small>{{ assessment.total_points }} questions</small>
-                <strong>{{ assessment.compliance_points }} compliance</strong>
-            </span>
-
-            <i class="pi pi-arrow-right"></i>
-        </button>
+                <tbody>
+                    <tr
+                        *ngFor="let assessment of assessments()"
+                        (click)="openAssessment(assessment)"
+                    >
+                        <td>
+                            <strong>{{ assessment.audit_unit_name }}</strong>
+                            <small>{{ assessment.audit_unit_code }} | F.Y. {{ assessment.year }}</small>
+                        </td>
+                        <td>
+                            {{ assessment.assesment_period_from | date: 'mediumDate' }}
+                            -
+                            {{ assessment.assesment_period_to | date: 'mediumDate' }}
+                        </td>
+                        <td>
+                            <p-tag [value]="assessment.review_stage" severity="secondary"></p-tag>
+                        </td>
+                        <td>
+                            <strong>{{ assessment.total_points }}</strong>
+                        </td>
+                        <td>
+                            <strong class="red">{{ assessment.compliance_points }}</strong>
+                        </td>
+                        <td class="queue-action">
+                            <i class="pi pi-arrow-right"></i>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
     </section>
 
     <section *ngIf="selected()" class="review-detail">
@@ -85,6 +121,7 @@
                 [label]="isComplianceReview() ? 'Submit Compliance Review' : 'Submit Review'"
                 icon="pi pi-send"
                 [loading]="submitting()"
+                [disabled]="submitting() || bulkSaving() || pendingReviewCount() > 0"
                 (click)="submitReview()"
             ></button>
         </div>
@@ -100,6 +137,42 @@
                 <div><span>Compliance Required</span><strong class="red">{{ review.counts.compliance }}</strong></div>
                 <div><span>Accepted</span><strong>{{ review.counts.accepted }}</strong></div>
                 <div><span>{{ isComplianceReview() ? 'Re-Compliance Needed' : 'Re-Audit Needed' }}</span><strong class="red">{{ review.counts.rejected }}</strong></div>
+            </div>
+
+            <div class="bulk-review-actions">
+                <div>
+                    <strong>Review Actions</strong>
+                    <small>{{ pendingReviewCount() }} pending observation(s)</small>
+                </div>
+
+                <div class="bulk-review-buttons">
+                    <button
+                        pButton
+                        type="button"
+                        icon="pi pi-check"
+                        label="Accept All Observations"
+                        severity="success"
+                        [loading]="bulkSaving()"
+                        [disabled]="submitting() || bulkSaving()"
+                        (click)="saveBulkAction(2)"
+                    ></button>
+
+                    <button
+                        pButton
+                        type="button"
+                        icon="pi pi-times"
+                        label="Reject All Observations"
+                        severity="danger"
+                        [loading]="bulkSaving()"
+                        [disabled]="submitting() || bulkSaving()"
+                        (click)="saveBulkAction(3)"
+                    ></button>
+                </div>
+            </div>
+
+            <div *ngIf="pendingReviewCount() > 0" class="review-submit-warning">
+                <i class="pi pi-info-circle"></i>
+                Accept or reject all observations before submitting the review.
             </div>
 
             <div *ngIf="!isComplianceReview()" class="review-key">
@@ -125,12 +198,46 @@
                         <h4>{{ answer.question || 'Assessment observation' }}</h4>
                     </div>
 
-                    <p-tag
-                        *ngIf="answer.is_compliance == 1"
-                        value="Compliance Required"
-                        severity="danger"
-                    ></p-tag>
+                    <div class="answer-status-stack">
+                        <p-tag
+                            *ngIf="answer.is_compliance == 1"
+                            value="Compliance Required"
+                            severity="danger"
+                        ></p-tag>
+
+                        <p-tag
+                            [value]="statusLabel(reviewStatus(answer))"
+                            [severity]="statusSeverity(reviewStatus(answer))"
+                        ></p-tag>
+                    </div>
                 </div>
+
+                <table *ngIf="hasAccountDetails(answer)" class="review-account-table">
+                    <tbody>
+                        <tr>
+                            <th>Scheme</th>
+                            <td>{{ answer.scheme_name || answer.scheme_code || '-' }}</td>
+                            <th>A/C Number</th>
+                            <td>{{ answer.account_no || '-' }}</td>
+                        </tr>
+                        <tr>
+                            <th>A/C Holder</th>
+                            <td>{{ answer.account_holder_name || '-' }}</td>
+                            <th>UCIC</th>
+                            <td>{{ answer.ucic || '-' }}</td>
+                        </tr>
+                        <tr>
+                            <th>Open Date</th>
+                            <td>{{ answer.account_opening_date ? (answer.account_opening_date | date: 'dd/MM/yyyy') : '-' }}</td>
+                            <th>Amount</th>
+                            <td>{{ (answer.account_amount || 0) | number:'1.2-2' }}</td>
+                        </tr>
+                        <tr *ngIf="answer.renewal_date">
+                            <th>Renewal Date</th>
+                            <td colspan="3">{{ answer.renewal_date | date: 'dd/MM/yyyy' }}</td>
+                        </tr>
+                    </tbody>
+                </table>
 
                 <div class="answer-body">
                     <div>
@@ -149,52 +256,47 @@
                     </div>
                 </div>
 
-                <div
-                    *ngIf="answer.evidence || (isComplianceReview() && answer.compliance_evidence)"
-                    class="evidence-actions"
-                >
-                    <button
-                        *ngIf="answer.evidence"
-                        pButton
-                        type="button"
-                        class="evidence-link"
-                        icon="pi pi-paperclip"
-                        [label]="isComplianceReview() ? 'View Auditor Evidence' : 'View Evidence'"
-                        severity="secondary"
-                        (click)="viewEvidence(answer.evidence)"
-                    ></button>
-
-                    <button
-                        *ngIf="isComplianceReview() && answer.compliance_evidence"
-                        pButton
-                        type="button"
-                        class="evidence-link"
-                        icon="pi pi-paperclip"
-                        label="View Manager Evidence"
-                        severity="secondary"
-                        (click)="viewEvidence(answer.compliance_evidence)"
-                    ></button>
-                </div>
-
                 <div class="review-action">
                     <textarea
                         *ngIf="!isComplianceReview()"
-                        rows="2"
+                        rows="1"
                         [(ngModel)]="answer.audit_reviewer_comment"
                         placeholder="Reviewer comment"
                     ></textarea>
 
                     <textarea
                         *ngIf="isComplianceReview()"
-                        rows="2"
+                        rows="1"
                         [(ngModel)]="answer.compliance_reviewer_comment"
                         placeholder="Compliance review comment"
                     ></textarea>
 
-                    <p-tag
-                        [value]="statusLabel(reviewStatus(answer))"
-                        [severity]="statusSeverity(reviewStatus(answer))"
-                    ></p-tag>
+                    <div
+                        *ngIf="answer.evidence || (isComplianceReview() && answer.compliance_evidence)"
+                        class="evidence-actions"
+                    >
+                        <button
+                            *ngIf="answer.evidence"
+                            pButton
+                            type="button"
+                            class="evidence-link"
+                            icon="pi pi-paperclip"
+                            [label]="isComplianceReview() ? 'Auditor Evidence' : 'Evidence'"
+                            severity="secondary"
+                            (click)="viewEvidence(answer.evidence)"
+                        ></button>
+
+                        <button
+                            *ngIf="isComplianceReview() && answer.compliance_evidence"
+                            pButton
+                            type="button"
+                            class="evidence-link"
+                            icon="pi pi-paperclip"
+                            label="Manager Evidence"
+                            severity="secondary"
+                            (click)="viewEvidence(answer.compliance_evidence)"
+                        ></button>
+                    </div>
 
                     <button
                         pButton
@@ -218,70 +320,102 @@
                 </div>
 
                 <div *ngIf="answer.annexure_rows?.length" class="annexure-review">
-                    <div class="annexure-title">Annexure Rows</div>
+                    <div class="annexure-title">
+                        <span>Annexure Rows</span>
+                        <small>{{ answer.annexure_rows.length }} row(s)</small>
+                    </div>
 
-                    <div *ngFor="let row of answer.annexure_rows" class="annexure-row">
-                        <span>
-                            {{ row.values?.join(' | ') || '-' }}
-                            <small *ngIf="isComplianceReview()" class="annexure-response">
-                                Manager Response: {{ row.compliance_response || '-' }}
-                            </small>
-                        </span>
-                        <button
-                            *ngIf="row.evidence"
-                            pButton
-                            type="button"
-                            icon="pi pi-paperclip"
-                            severity="secondary"
-                            [attr.aria-label]="isComplianceReview() ? 'View auditor annexure evidence' : 'View annexure evidence'"
-                            [title]="isComplianceReview() ? 'View auditor evidence' : 'View evidence'"
-                            (click)="viewEvidence(row.evidence)"
-                        ></button>
-                        <button
-                            *ngIf="isComplianceReview() && row.compliance_evidence"
-                            pButton
-                            type="button"
-                            icon="pi pi-paperclip"
-                            severity="secondary"
-                            aria-label="View manager annexure evidence"
-                            title="View manager evidence"
-                            (click)="viewEvidence(row.compliance_evidence)"
-                        ></button>
-                        <textarea
-                            *ngIf="!isComplianceReview()"
-                            rows="1"
-                            [(ngModel)]="row.audit_reviewer_comment"
-                            placeholder="Reviewer comment"
-                        ></textarea>
+                    <div class="annexure-review-table-wrap">
+                        <table class="annexure-review-table">
+                            <thead>
+                                <tr>
+                                    <th *ngFor="let column of annexureColumns(answer); let ci = index">
+                                        {{ column.name || column.column_name || ('Column ' + (ci + 1)) }}
+                                    </th>
+                                    <th *ngIf="isComplianceReview()">Manager Response</th>
+                                    <th>Evidence</th>
+                                    <th>Reviewer Comment</th>
+                                    <th>Status</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
 
-                        <textarea
-                            *ngIf="isComplianceReview()"
-                            rows="1"
-                            [(ngModel)]="row.compliance_reviewer_comment"
-                            placeholder="Compliance review comment"
-                        ></textarea>
-                        <p-tag
-                            [value]="statusLabel(reviewStatus(row))"
-                            [severity]="statusSeverity(reviewStatus(row))"
-                        ></p-tag>
-                        <button
-                            pButton
-                            type="button"
-                            label="Accept"
-                            icon="pi pi-check"
-                            severity="success"
-                            [loading]="actionSaving()[actionKey('annexure', row.id)]"
-                            (click)="saveAction('annexure', row, 2)"
-                        ></button>
-                        <button
-                            pButton
-                            type="button"
-                            [label]="isComplianceReview() ? 'Re-Compliance' : 'Re-Audit'"
-                            icon="pi pi-times"
-                            severity="danger"
-                            [loading]="actionSaving()[actionKey('annexure', row.id)]"
-                            (click)="saveAction('annexure', row, 3)"
-                        ></button>
+                            <tbody>
+                                <tr *ngFor="let row of answer.annexure_rows">
+                                    <td *ngFor="let column of annexureColumns(answer); let ci = index">
+                                        {{ row.values?.[ci] || '-' }}
+                                    </td>
+                                    <td *ngIf="isComplianceReview()">
+                                        {{ row.compliance_response || '-' }}
+                                    </td>
+                                    <td>
+                                        <div class="annexure-evidence-actions">
+                                            <button
+                                                *ngIf="row.evidence"
+                                                pButton
+                                                type="button"
+                                                icon="pi pi-paperclip"
+                                                severity="secondary"
+                                                [title]="isComplianceReview() ? 'View auditor evidence' : 'View evidence'"
+                                                (click)="viewEvidence(row.evidence)"
+                                            ></button>
+                                            <button
+                                                *ngIf="isComplianceReview() && row.compliance_evidence"
+                                                pButton
+                                                type="button"
+                                                icon="pi pi-paperclip"
+                                                severity="secondary"
+                                                title="View manager evidence"
+                                                (click)="viewEvidence(row.compliance_evidence)"
+                                            ></button>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <textarea
+                                            *ngIf="!isComplianceReview()"
+                                            rows="1"
+                                            [(ngModel)]="row.audit_reviewer_comment"
+                                            placeholder="Reviewer comment"
+                                        ></textarea>
+
+                                        <textarea
+                                            *ngIf="isComplianceReview()"
+                                            rows="1"
+                                            [(ngModel)]="row.compliance_reviewer_comment"
+                                            placeholder="Compliance review comment"
+                                        ></textarea>
+                                    </td>
+                                    <td>
+                                        <p-tag
+                                            [value]="statusLabel(reviewStatus(row))"
+                                            [severity]="statusSeverity(reviewStatus(row))"
+                                        ></p-tag>
+                                    </td>
+                                    <td>
+                                        <div class="annexure-row-review-actions">
+                                            <button
+                                                pButton
+                                                type="button"
+                                                icon="pi pi-check"
+                                                severity="success"
+                                                title="Accept annexure row"
+                                                [loading]="actionSaving()[actionKey('annexure', row.id)]"
+                                                (click)="saveAction('annexure', row, 2)"
+                                            ></button>
+                                            <button
+                                                pButton
+                                                type="button"
+                                                icon="pi pi-times"
+                                                severity="danger"
+                                                [title]="isComplianceReview() ? 'Send annexure row for re-compliance' : 'Send annexure row for re-audit'"
+                                                [loading]="actionSaving()[actionKey('annexure', row.id)]"
+                                                (click)="saveAction('annexure', row, 3)"
+                                            ></button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </article>
