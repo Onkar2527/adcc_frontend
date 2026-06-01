@@ -148,13 +148,17 @@
 
           <div
             *ngIf="!checkingSubmission() && submissionPreview() as preview"
-            class="text-600 mt-2"
+            class="submission-counts"
           >
-            Pending points:
-            <strong>{{ preview.pending_count }}</strong>
-            &nbsp;|&nbsp;
-            {{ audit.audit_status_id == 3 ? 'Returned points:' : 'Compliance points:' }}
-            <strong>{{ preview.compliance_count }}</strong>
+            <span>
+              <small>Pending</small>
+              <strong>{{ preview.pending_count }}</strong>
+            </span>
+
+            <span>
+              <small>{{ audit.audit_status_id == 3 ? 'Returned' : 'Compliance' }}</small>
+              <strong>{{ preview.compliance_count }}</strong>
+            </span>
           </div>
         </div>
 
@@ -195,58 +199,90 @@
 
       <div
         *ngIf="!checkingSubmission() && submissionPreview()?.issues?.length"
-        class="pending-list mt-3"
+        class="completion-section mt-3"
       >
-        <button
-          type="button"
-          class="pending-item"
-          *ngFor="let issue of submissionPreview().issues"
-          (click)="openPendingCategory(issue)"
-        >
-          <span class="pending-category">
-            {{ issue.category_name }}
-          </span>
+        <div class="completion-section-title">
+          <div>
+            <strong>Pending Points</strong>
+            <small>Click a row to open only the pending questions.</small>
+          </div>
 
-          <span class="pending-question">
-            {{ issue.question }}
-          </span>
+          <span>{{ submissionPreview().issues.length }}</span>
+        </div>
 
-          <span class="pending-reason">
-            {{ issue.message }}
-            <i class="pi pi-arrow-right"></i>
-          </span>
-        </button>
+        <div class="completion-table-wrap">
+          <table class="completion-table">
+            <thead>
+              <tr>
+                <th>Category</th>
+                <th>Question</th>
+                <th>Pending Reason</th>
+                <th></th>
+              </tr>
+            </thead>
+
+            <tbody>
+              <tr
+                *ngFor="let issue of submissionPreview().issues"
+                (click)="openPendingCategory(issue)"
+              >
+                <td>
+                  <strong>{{ issue.category_name }}</strong>
+                  <small *ngIf="issue.menu_name">{{ issue.menu_name }}</small>
+                </td>
+                <td>{{ issue.question }}</td>
+                <td class="completion-danger">{{ issue.message }}</td>
+                <td class="completion-action">
+                  <i class="pi pi-arrow-right"></i>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
 
       <div
         *ngIf="!checkingSubmission() && submissionPreview()?.compliance_points?.length"
-        class="mt-4"
+        class="completion-section mt-3"
       >
-        <div class="font-bold text-900 mb-2">Compliance Points</div>
-
-        <div class="pending-list compliance-list">
-          <div
-            class="pending-item compliance-item"
-            *ngFor="let point of submissionPreview().compliance_points"
-          >
-            <span class="pending-category">
-              {{ point.category_name }}
-            </span>
-
-            <span class="pending-question">
-              {{ point.question }}
-            </span>
-
-            <span class="compliance-answer">
-              <span>
-                {{ point.answer_given || '-' }}
-              </span>
-
-              <small *ngIf="point.audit_comment">
-                {{ point.audit_comment }}
-              </small>
-            </span>
+        <div class="completion-section-title compliance-title">
+          <div>
+            <strong>Compliance Points</strong>
+            <small>These observations will move forward for compliance action.</small>
           </div>
+
+          <span>{{ submissionPreview().compliance_points.length }}</span>
+        </div>
+
+        <div class="completion-table-wrap">
+          <table class="completion-table compliance-table">
+            <thead>
+              <tr>
+                <th>Category</th>
+                <th>Question</th>
+                <th>Answer</th>
+                <th>Audit Comment</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              <tr *ngFor="let point of submissionPreview().compliance_points">
+                <td>
+                  <strong>{{ point.category_name }}</strong>
+                  <small *ngIf="point.menu_name">{{ point.menu_name }}</small>
+                </td>
+                <td>{{ point.question }}</td>
+                <td>
+                  <span class="compliance-answer-pill">
+                    {{ point.answer_given || '-' }}
+                  </span>
+                </td>
+                <td>
+                  {{ point.audit_comment || '-' }}
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
     </div>
