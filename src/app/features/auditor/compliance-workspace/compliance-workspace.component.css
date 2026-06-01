@@ -318,8 +318,8 @@
 }
 
 .annexure-table {
-    width: 100%;
-    min-width: 62rem;
+    width: max-content;
+    min-width: 100%;
     border-collapse: collapse;
     font-size: .8rem;
 }
@@ -332,6 +332,7 @@
     color: var(--text-color);
     text-align: left;
     vertical-align: middle;
+    white-space: nowrap;
 }
 
 .annexure-table th:last-child,
@@ -353,6 +354,14 @@
     font-weight: 800;
     text-transform: uppercase;
     white-space: nowrap;
+}
+
+.annexure-table td:nth-last-child(3),
+.annexure-table td:nth-last-child(4),
+.reviewer-feedback-cell {
+    min-width: 12rem;
+    max-width: 18rem;
+    white-space: normal;
 }
 
 .annexure-evidence-actions {

@@ -276,6 +276,7 @@
                                     <th *ngFor="let column of annexureColumns(answer); let ci = index">
                                         {{ column.name || column.column_name || ('Column ' + (ci + 1)) }}
                                     </th>
+                                    <th *ngIf="isReCompliance()">Reviewer Feedback</th>
                                     <th>Auditor Evidence</th>
                                     <th>Compliance Evidence</th>
                                     <th>Manager Response</th>
@@ -288,9 +289,10 @@
                                 <tr *ngFor="let row of answer.annexure_rows">
                                     <td *ngFor="let column of annexureColumns(answer); let ci = index">
                                         {{ row.values?.[ci] || '-' }}
-                                        <small *ngIf="ci === 0 && isReCompliance() && row.compliance_reviewer_comment" class="reviewer-feedback">
-                                            Reviewer Feedback: {{ row.compliance_reviewer_comment }}
-                                        </small>
+                                    </td>
+
+                                    <td *ngIf="isReCompliance()" class="reviewer-feedback-cell">
+                                        {{ row.compliance_reviewer_comment || '-' }}
                                     </td>
 
                                     <td>
