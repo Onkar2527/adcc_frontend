@@ -769,6 +769,23 @@ export class AuditDashboardService {
     );
   }
 
+  completeInternalAuditRemainingAccounts(
+    assessmentId: number,
+    categoryId: number,
+    employeeId: number,
+  ) {
+
+    return this.http.post<any>(
+
+      `${this.config.apiUrl}/internal-audit/${assessmentId}/category/${categoryId}/accounts/complete-remaining`,
+
+      {
+        employee_id:
+          employeeId,
+      },
+    );
+  }
+
   getInternalAuditAccountSampling(
     assessmentId: number,
     categoryId: number,

@@ -354,8 +354,16 @@
                                 (click)="removeSampling(account)"></button>
 
                             <button pButton type="button" icon="pi pi-check-circle" label="Mark Account Complete"
-                                [disabled]="account.is_completed || completingAccount()" [loading]="completingAccount()"
+                                [disabled]="account.is_completed || completingAccount() || completingRemainingAccounts()"
+                                [loading]="completingAccount()"
                                 (click)="completeAccount()"></button>
+
+                            <button pButton type="button" icon="pi pi-check-circle"
+                                label="Complete Remaining Accounts"
+                                severity="danger"
+                                [disabled]="completingAccount() || completingRemainingAccounts()"
+                                [loading]="completingRemainingAccounts()"
+                                (click)="completeRemainingAccounts()"></button>
                         </div>
                     </div>
 

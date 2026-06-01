@@ -150,6 +150,9 @@ export class CategoryAssessmentComponent
     completingAccount =
         signal(false);
 
+    completingRemainingAccounts =
+        signal(false);
+
     samplingOpen =
         signal(false);
 
@@ -2354,6 +2357,86 @@ export class CategoryAssessmentComponent
                     this.notification.error(
                         err?.error?.message
                         || 'Unable to complete account assessment.',
+                    );
+                },
+            });
+    }
+
+    completeRemainingAccounts() {
+        const detail =
+            this.categoryDetail();
+
+        if (
+            this.completingRemainingAccounts()
+        ) {
+            return;
+        }
+
+        if (
+            !detail?.overview?.id
+            ||
+            !detail?.category?.id
+            ||
+            !this.isAccountCategory(detail)
+        ) {
+            return;
+        }
+
+        if (
+            !window.confirm(
+                'Mark all remaining sampled accounts in this current period as complete?',
+            )
+        ) {
+            return;
+        }
+
+        this.completingRemainingAccounts.set(
+            true,
+        );
+
+        this.service
+            .completeInternalAuditRemainingAccounts(
+                Number(detail.overview.id),
+                Number(detail.category.id),
+                this.employeeId,
+            )
+            .subscribe({
+                next: (res: any) => {
+                    this.completingRemainingAccounts.set(
+                        false,
+                    );
+
+                    if (
+                        !res?.success
+                    ) {
+                        this.notification.error(
+                            res?.message
+                            || 'Unable to complete remaining accounts.',
+                        );
+                        return;
+                    }
+
+                    this.notification.success(
+                        res?.message
+                        || 'Remaining account assessments marked complete.',
+                    );
+                    this.savedAny.set(
+                        true,
+                    );
+                    this.loadCategory(
+                        Number(detail.overview.id),
+                        Number(detail.category.id),
+                        false,
+                        this.selectedDumpId(),
+                    );
+                },
+                error: (err) => {
+                    this.completingRemainingAccounts.set(
+                        false,
+                    );
+                    this.notification.error(
+                        err?.error?.message
+                        || 'Unable to complete remaining accounts.',
                     );
                 },
             });
