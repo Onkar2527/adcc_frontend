@@ -407,6 +407,12 @@
     font-size: .82rem;
 }
 
+:host ::ng-deep .evidence-actions .p-button {
+    width: 2rem;
+    min-width: 2rem;
+    padding: 0;
+}
+
 .annexure-review {
     border-top: 1px solid var(--surface-border);
     margin-top: 1rem;

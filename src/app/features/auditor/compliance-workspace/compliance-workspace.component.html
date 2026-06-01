@@ -161,65 +161,93 @@
                     </div>
                 </div>
 
-                <button
-                    *ngIf="answer.evidence"
-                    pButton
-                    type="button"
-                    class="evidence-link"
-                    icon="pi pi-paperclip"
-                    label="View Auditor Evidence"
-                    severity="secondary"
-                    (click)="viewEvidence(answer.evidence)"
-                ></button>
+                <table *ngIf="hasAccountDetails(answer)" class="account-detail-table">
+                    <tbody>
+                        <tr>
+                            <th>Scheme</th>
+                            <td>{{ answer.scheme_name || '-' }} <small *ngIf="answer.scheme_code">({{ answer.scheme_code }})</small></td>
+                            <th>Account No.</th>
+                            <td>{{ answer.account_no || '-' }}</td>
+                        </tr>
+                        <tr>
+                            <th>Account Holder</th>
+                            <td>{{ answer.account_holder_name || '-' }}</td>
+                            <th>UCIC</th>
+                            <td>{{ answer.ucic || '-' }}</td>
+                        </tr>
+                        <tr>
+                            <th>Opening Date</th>
+                            <td>{{ answer.account_opening_date ? (answer.account_opening_date | date: 'mediumDate') : '-' }}</td>
+                            <th>Renewal Date</th>
+                            <td>{{ answer.renewal_date ? (answer.renewal_date | date: 'mediumDate') : '-' }}</td>
+                        </tr>
+                        <tr>
+                            <th>Amount</th>
+                            <td colspan="3">{{ answer.account_amount || '-' }}</td>
+                        </tr>
+                    </tbody>
+                </table>
 
                 <div *ngIf="responseRequired(answer)" class="response-panel">
-                    <div class="compliance-evidence">
-                        <span>Compliance Evidence</span>
+                    <div class="response-panel-head">
+                        <label>{{ isReCompliance() ? 'Corrected Compliance Response' : 'Compliance Response' }}</label>
 
-                        <ng-container *ngIf="answer.compliance_evidence as evidence; else answerEvidenceUpload">
+                        <div class="response-tools">
                             <button
+                                *ngIf="answer.evidence"
                                 pButton
                                 type="button"
-                                icon="pi pi-eye"
-                                label="View Evidence"
+                                icon="pi pi-paperclip"
                                 severity="secondary"
-                                (click)="viewComplianceEvidence(evidence)"
+                                title="View auditor evidence"
+                                (click)="viewEvidence(answer.evidence)"
                             ></button>
-                        </ng-container>
 
-                        <ng-template #answerEvidenceUpload>
-                            <input
-                                #answerEvidenceInput
-                                type="file"
-                                accept=".jpg,.jpeg,.png,.pdf,image/jpeg,image/png,application/pdf"
-                                style="display: none"
-                                (change)="uploadEvidence('answer', answer, $event)"
-                            />
+                            <ng-container *ngIf="answer.compliance_evidence as evidence; else answerEvidenceUpload">
+                                <button
+                                    pButton
+                                    type="button"
+                                    icon="pi pi-eye"
+                                    severity="secondary"
+                                    title="View compliance evidence"
+                                    (click)="viewComplianceEvidence(evidence)"
+                                ></button>
+                            </ng-container>
 
-                            <button
-                                pButton
-                                type="button"
-                                icon="pi pi-upload"
-                                label="Upload Evidence"
-                                severity="secondary"
-                                [loading]="uploadingEvidenceKey() === evidenceKey('answer', answer.id)"
-                                (click)="answerEvidenceInput.click()"
-                            ></button>
-                        </ng-template>
+                            <ng-template #answerEvidenceUpload>
+                                <input
+                                    #answerEvidenceInput
+                                    type="file"
+                                    accept=".jpg,.jpeg,.png,.pdf,image/jpeg,image/png,application/pdf"
+                                    style="display: none"
+                                    (change)="uploadEvidence('answer', answer, $event)"
+                                />
+
+                                <button
+                                    pButton
+                                    type="button"
+                                    icon="pi pi-upload"
+                                    severity="secondary"
+                                    title="Upload compliance evidence"
+                                    [loading]="uploadingEvidenceKey() === evidenceKey('answer', answer.id)"
+                                    (click)="answerEvidenceInput.click()"
+                                ></button>
+                            </ng-template>
+
+                            <p-tag
+                                [value]="isSaved(answer) ? 'Saved' : 'Pending'"
+                                [severity]="isSaved(answer) ? 'success' : 'warn'"
+                            ></p-tag>
+                        </div>
                     </div>
 
-                    <label>{{ isReCompliance() ? 'Corrected Compliance Response' : 'Compliance Response' }}</label>
                     <textarea
-                        rows="3"
+                        rows="2"
                         [(ngModel)]="answer.compliance_response"
                         [placeholder]="isReCompliance() ? 'Enter corrected compliance response' : 'Enter compliance response'"
                     ></textarea>
 
                     <div class="response-actions">
-                        <p-tag
-                            [value]="isSaved(answer) ? 'Saved' : 'Pending'"
-                            [severity]="isSaved(answer) ? 'success' : 'warn'"
-                        ></p-tag>
                         <button
                             pButton
                             type="button"
@@ -236,82 +264,118 @@
                 </div>
 
                 <div *ngIf="answer.annexure_rows?.length" class="annexure-section">
-                    <div class="annexure-title">Annexure Rows</div>
+                    <div class="annexure-title">
+                        <span>Annexure Rows</span>
+                        <small>{{ answer.annexure_rows.length }} row(s)</small>
+                    </div>
 
-                    <div *ngFor="let row of answer.annexure_rows" class="annexure-row">
-                        <div class="annexure-values">
-                            {{ row.values?.join(' | ') || '-' }}
-                            <small *ngIf="isReCompliance() && row.compliance_reviewer_comment" class="reviewer-feedback">
-                                Reviewer Feedback: {{ row.compliance_reviewer_comment }}
-                            </small>
-                        </div>
+                    <div class="annexure-table-wrap">
+                        <table class="annexure-table">
+                            <thead>
+                                <tr>
+                                    <th *ngFor="let column of annexureColumns(answer); let ci = index">
+                                        {{ column.name || column.column_name || ('Column ' + (ci + 1)) }}
+                                    </th>
+                                    <th>Auditor Evidence</th>
+                                    <th>Compliance Evidence</th>
+                                    <th>Manager Response</th>
+                                    <th>Status</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
 
-                        <button
-                            *ngIf="row.evidence"
-                            pButton
-                            type="button"
-                            icon="pi pi-paperclip"
-                            severity="secondary"
-                            aria-label="View annexure evidence"
-                            (click)="viewEvidence(row.evidence)"
-                        ></button>
+                            <tbody>
+                                <tr *ngFor="let row of answer.annexure_rows">
+                                    <td *ngFor="let column of annexureColumns(answer); let ci = index">
+                                        {{ row.values?.[ci] || '-' }}
+                                        <small *ngIf="ci === 0 && isReCompliance() && row.compliance_reviewer_comment" class="reviewer-feedback">
+                                            Reviewer Feedback: {{ row.compliance_reviewer_comment }}
+                                        </small>
+                                    </td>
 
-                        <span *ngIf="responseRequired(row)" class="annexure-evidence-actions">
-                            <ng-container *ngIf="row.compliance_evidence as evidence; else rowEvidenceUpload">
-                                <button
-                                    pButton
-                                    type="button"
-                                    icon="pi pi-eye"
-                                    severity="secondary"
-                                    aria-label="View compliance evidence"
-                                    (click)="viewComplianceEvidence(evidence)"
-                                ></button>
-                            </ng-container>
+                                    <td>
+                                        <button
+                                            *ngIf="row.evidence"
+                                            pButton
+                                            type="button"
+                                            icon="pi pi-paperclip"
+                                            severity="secondary"
+                                            title="View auditor evidence"
+                                            (click)="viewEvidence(row.evidence)"
+                                        ></button>
+                                        <span *ngIf="!row.evidence">-</span>
+                                    </td>
 
-                            <ng-template #rowEvidenceUpload>
-                                <input
-                                    #rowEvidenceInput
-                                    type="file"
-                                    accept=".jpg,.jpeg,.png,.pdf,image/jpeg,image/png,application/pdf"
-                                    style="display: none"
-                                    (change)="uploadEvidence('annexure', row, $event)"
-                                />
+                                    <td>
+                                        <ng-container *ngIf="responseRequired(row)">
+                                            <ng-container *ngIf="row.compliance_evidence as evidence; else rowEvidenceUpload">
+                                                <button
+                                                    pButton
+                                                    type="button"
+                                                    icon="pi pi-eye"
+                                                    severity="secondary"
+                                                    title="View compliance evidence"
+                                                    (click)="viewComplianceEvidence(evidence)"
+                                                ></button>
+                                            </ng-container>
 
-                                <button
-                                    pButton
-                                    type="button"
-                                    icon="pi pi-upload"
-                                    severity="secondary"
-                                    aria-label="Upload compliance evidence"
-                                    [loading]="uploadingEvidenceKey() === evidenceKey('annexure', row.id)"
-                                    (click)="rowEvidenceInput.click()"
-                                ></button>
-                            </ng-template>
-                        </span>
+                                            <ng-template #rowEvidenceUpload>
+                                                <input
+                                                    #rowEvidenceInput
+                                                    type="file"
+                                                    accept=".jpg,.jpeg,.png,.pdf,image/jpeg,image/png,application/pdf"
+                                                    style="display: none"
+                                                    (change)="uploadEvidence('annexure', row, $event)"
+                                                />
 
-                        <textarea
-                            *ngIf="responseRequired(row)"
-                            rows="2"
-                            [(ngModel)]="row.compliance_response"
-                            [placeholder]="isReCompliance() ? 'Corrected compliance response for this row' : 'Compliance response for this annexure row'"
-                        ></textarea>
+                                                <button
+                                                    pButton
+                                                    type="button"
+                                                    icon="pi pi-upload"
+                                                    severity="secondary"
+                                                    title="Upload compliance evidence"
+                                                    [loading]="uploadingEvidenceKey() === evidenceKey('annexure', row.id)"
+                                                    (click)="rowEvidenceInput.click()"
+                                                ></button>
+                                            </ng-template>
+                                        </ng-container>
+                                        <span *ngIf="!responseRequired(row)">-</span>
+                                    </td>
 
-                        <p-tag
-                            *ngIf="responseRequired(row)"
-                            [value]="isSaved(row) ? 'Saved' : 'Pending'"
-                            [severity]="isSaved(row) ? 'success' : 'warn'"
-                        ></p-tag>
+                                    <td>
+                                        <textarea
+                                            *ngIf="responseRequired(row)"
+                                            rows="1"
+                                            [(ngModel)]="row.compliance_response"
+                                            [placeholder]="isReCompliance() ? 'Corrected response' : 'Compliance response'"
+                                        ></textarea>
+                                        <span *ngIf="!responseRequired(row)">{{ row.compliance_response || '-' }}</span>
+                                    </td>
 
-                        <button
-                            *ngIf="responseRequired(row)"
-                            pButton
-                            type="button"
-                            icon="pi pi-save"
-                            severity="secondary"
-                            aria-label="Save annexure response"
-                            [loading]="responseSaving()[actionKey('annexure', row.id)]"
-                            (click)="saveResponse('annexure', row)"
-                        ></button>
+                                    <td>
+                                        <p-tag
+                                            *ngIf="responseRequired(row)"
+                                            [value]="isSaved(row) ? 'Saved' : 'Pending'"
+                                            [severity]="isSaved(row) ? 'success' : 'warn'"
+                                        ></p-tag>
+                                        <span *ngIf="!responseRequired(row)">-</span>
+                                    </td>
+
+                                    <td>
+                                        <button
+                                            *ngIf="responseRequired(row)"
+                                            pButton
+                                            type="button"
+                                            icon="pi pi-save"
+                                            severity="secondary"
+                                            title="Save annexure response"
+                                            [loading]="responseSaving()[actionKey('annexure', row.id)]"
+                                            (click)="saveResponse('annexure', row)"
+                                        ></button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </article>

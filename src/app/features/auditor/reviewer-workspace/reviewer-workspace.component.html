@@ -281,8 +281,8 @@
                             type="button"
                             class="evidence-link"
                             icon="pi pi-paperclip"
-                            [label]="isComplianceReview() ? 'Auditor Evidence' : 'Evidence'"
                             severity="secondary"
+                            [title]="isComplianceReview() ? 'View auditor evidence' : 'View evidence'"
                             (click)="viewEvidence(answer.evidence)"
                         ></button>
 
@@ -292,8 +292,8 @@
                             type="button"
                             class="evidence-link"
                             icon="pi pi-paperclip"
-                            label="Manager Evidence"
                             severity="secondary"
+                            title="View manager evidence"
                             (click)="viewEvidence(answer.compliance_evidence)"
                         ></button>
                     </div>

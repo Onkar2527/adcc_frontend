@@ -145,8 +145,8 @@
 }
 
 .observation-row {
-    padding: 1rem;
-    margin-bottom: .75rem;
+    padding: .85rem;
+    margin-bottom: .65rem;
     border-left: .25rem solid var(--red-500);
 }
 
@@ -154,7 +154,7 @@
     display: flex;
     justify-content: space-between;
     gap: .75rem;
-    margin-bottom: .85rem;
+    margin-bottom: .65rem;
 }
 
 .observation-head small {
@@ -163,15 +163,15 @@
 
 .observation-head h4 {
     margin: .35rem 0 0;
-    font-size: 1rem;
+    font-size: .98rem;
     color: var(--red-700);
 }
 
 .observation-body {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: .75rem;
-    margin-bottom: .8rem;
+    gap: .6rem;
+    margin-bottom: .65rem;
 }
 
 .observation-body label,
@@ -185,6 +185,32 @@
 
 .observation-body p {
     margin: 0;
+    line-height: 1.35;
+}
+
+.account-detail-table {
+    width: 100%;
+    margin: .25rem 0 .75rem;
+    border: 1px solid var(--surface-border);
+    border-collapse: collapse;
+    font-size: .82rem;
+}
+
+.account-detail-table th,
+.account-detail-table td {
+    padding: .4rem .5rem;
+    border: 1px solid var(--surface-border);
+    text-align: left;
+    vertical-align: top;
+}
+
+.account-detail-table th {
+    width: 9rem;
+    background: #eef4fb;
+    color: var(--text-color-secondary);
+    font-size: .7rem;
+    font-weight: 800;
+    text-transform: uppercase;
 }
 
 .reviewer-feedback {
@@ -206,33 +232,47 @@
 
 .response-panel {
     display: grid;
-    gap: .55rem;
-    padding: .75rem;
+    gap: .5rem;
+    padding: .65rem;
     background: var(--surface-50);
     border: 1px solid var(--surface-border);
 }
 
-.compliance-evidence {
+.response-panel-head {
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: .75rem;
-    padding-bottom: .6rem;
-    border-bottom: 1px solid var(--surface-border);
 }
 
-.compliance-evidence span {
-    color: var(--text-color-secondary);
-    font-size: .78rem;
-    font-weight: 600;
+.response-panel-head label {
+    margin-bottom: 0;
+}
+
+.response-tools {
+    display: inline-flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: .35rem;
+    flex-wrap: wrap;
+}
+
+:host ::ng-deep .response-tools .p-button {
+    width: 1.9rem;
+    min-width: 1.9rem;
+    height: 1.9rem;
+    padding: 0;
 }
 
 .response-panel textarea,
-.annexure-row textarea {
+.annexure-table textarea {
+    width: 100%;
+    min-width: 11rem;
+    min-height: 2rem;
     resize: vertical;
     border: 1px solid var(--surface-300);
     border-radius: .35rem;
-    padding: .55rem;
+    padding: .4rem .5rem;
     font: inherit;
     color: inherit;
     background: var(--surface-0);
@@ -252,23 +292,79 @@
 }
 
 .annexure-title {
-    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: .75rem;
+    font-size: .84rem;
+    font-weight: 800;
     margin-bottom: .65rem;
+    text-transform: uppercase;
 }
 
-.annexure-row {
-    display: grid;
-    grid-template-columns: minmax(11rem, 1fr) auto auto minmax(16rem, 1.3fr) auto auto;
-    align-items: center;
-    gap: .55rem;
-    padding: .55rem;
-    background: var(--surface-50);
-    margin-bottom: .45rem;
+.annexure-title small {
+    color: var(--text-color-secondary);
+    font-size: .72rem;
+    font-weight: 700;
+    text-transform: none;
+}
+
+.annexure-table-wrap {
+    max-width: 100%;
+    overflow: auto;
+    border: 1px solid var(--surface-border);
+    border-radius: .35rem;
+    background: var(--surface-card);
+}
+
+.annexure-table {
+    width: 100%;
+    min-width: 62rem;
+    border-collapse: collapse;
+    font-size: .8rem;
+}
+
+.annexure-table th,
+.annexure-table td {
+    padding: .42rem .5rem;
+    border-right: 1px solid var(--surface-border);
+    border-bottom: 1px solid var(--surface-border);
+    color: var(--text-color);
+    text-align: left;
+    vertical-align: middle;
+}
+
+.annexure-table th:last-child,
+.annexure-table td:last-child {
+    border-right: 0;
+}
+
+.annexure-table tbody tr:last-child td {
+    border-bottom: 0;
+}
+
+.annexure-table th {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    background: #eef4fb;
+    color: var(--text-color);
+    font-size: .68rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    white-space: nowrap;
 }
 
 .annexure-evidence-actions {
     display: inline-flex;
     align-items: center;
+}
+
+:host ::ng-deep .annexure-table .p-button {
+    width: 1.9rem;
+    min-width: 1.9rem;
+    height: 1.9rem;
+    padding: 0;
 }
 
 .compliance-error {
@@ -286,8 +382,7 @@
 @media (max-width: 950px) {
     .queue-row,
     .compliance-metrics,
-    .observation-body,
-    .annexure-row {
+    .observation-body {
         grid-template-columns: 1fr;
     }
 

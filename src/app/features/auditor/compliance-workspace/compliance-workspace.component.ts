@@ -183,6 +183,61 @@ export class ComplianceWorkspaceComponent implements OnInit {
         );
     }
 
+    hasAccountDetails(
+        answer: any,
+    ) {
+        return Number(answer?.dump_id || 0) > 0
+            &&
+            (
+                answer?.account_no
+                ||
+                answer?.account_holder_name
+                ||
+                answer?.scheme_name
+                ||
+                answer?.scheme_code
+            );
+    }
+
+    annexureColumns(
+        answer: any,
+    ) {
+        const columns =
+            Array.isArray(answer?.annexure_columns)
+                ? answer.annexure_columns
+                : [];
+
+        if (
+            columns.length
+        ) {
+            return columns;
+        }
+
+        const valueCount =
+            Math.max(
+                ...(answer?.annexure_rows || [])
+                    .map(
+                        (row: any) =>
+                            row.values?.length || 0,
+                    ),
+                0,
+            );
+
+        return Array.from(
+            {
+                length:
+                    valueCount,
+            },
+            (
+                _item,
+                index,
+            ) => ({
+                name:
+                    `Column ${index + 1}`,
+            }),
+        );
+    }
+
     hasUnsavedChanges() {
         const detail =
             this.detail();
@@ -599,6 +654,13 @@ export class ComplianceWorkspaceComponent implements OnInit {
             )
             .subscribe({
                 next: (res: any) => {
+                    res.answers =
+                        (res?.answers || [])
+                            .filter(
+                                (answer: any) =>
+                                    Number(answer?.is_compliance || 0) === 1,
+                            );
+
                     for (
                         const answer
                         of res?.answers || []
