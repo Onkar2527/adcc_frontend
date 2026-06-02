@@ -176,9 +176,9 @@ import { ManageAccountsDataService }
 
         @if (previewRows().length > 0) {
 
-          <div
-          class="surface-100 border-left-3 border-red-500 p-3 mt-4 text-sm"
-        >
+          @if (hasValidationErrors()) {
+
+          <div class="surface-100 border-left-3 border-red-500 p-3 mt-4 text-sm">
 
           <div
             class="font-semibold text-red-600 mb-2"
@@ -202,11 +202,23 @@ import { ManageAccountsDataService }
 
         </div>
 
+          } @else {
+
+            <div class="surface-100 border-left-3 border-green-500 p-3 mt-4 text-sm">
+              <div class="font-semibold text-green-700 mb-1">
+                CSV is ready to add
+              </div>
+              <div class="text-700">
+                {{ totalRows() }} rows validated successfully. Click Add Dump to insert the records.
+              </div>
+            </div>
+
+          }
+
           <div class="mt-4">
 
             <div class="text-600 text-sm mb-2">
-              Showing first {{ previewRows().length }} rows for preview.
-              Total validated CSV rows: {{ totalRows() }}.
+              {{ previewCaption() }}
             </div>
 
             <p-table
@@ -346,6 +358,9 @@ export class AdvanceUploadComponent {
   validated =
     signal(false);
 
+  hasValidationErrors =
+    signal(false);
+
   uploadDate =
     signal<Date | null>(
       new Date(),
@@ -401,6 +416,8 @@ export class AdvanceUploadComponent {
     this.validatedRows.set([]);
     this.uploadKey.set('');
     this.validated.set(false);
+    this.hasValidationErrors.set(false);
+    this.errorSummary.set([]);
     this.totalRows.set(0);
   }
 
@@ -410,7 +427,7 @@ export class AdvanceUploadComponent {
       document.createElement('a');
 
     link.href =
-      'assets/csv/advance-sample.csv';
+      'assets/csv/sample_csv_advances.csv';
 
     link.download =
       'advance-sample.csv';
@@ -504,6 +521,10 @@ export class AdvanceUploadComponent {
 
           this.validated.set(
             !res.hasErrors && !!res.uploadKey,
+          );
+
+          this.hasValidationErrors.set(
+            !!res.hasErrors,
           );
 
           this.errorSummary.set(
@@ -628,5 +649,13 @@ export class AdvanceUploadComponent {
   cancel() {
 
     this.ref.close();
+  }
+
+  previewCaption() {
+    if (this.hasValidationErrors()) {
+      return `Showing ${this.previewRows().length} row(s) requiring attention. Total CSV rows: ${this.totalRows()}.`;
+    }
+
+    return `Showing first ${this.previewRows().length} row(s) for preview. Total CSV rows: ${this.totalRows()}.`;
   }
 }
