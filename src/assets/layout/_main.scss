@@ -3,7 +3,8 @@
     flex-direction: column;
     min-height: 100vh;
     justify-content: space-between;
-    padding: 4rem 0.75rem 0 0.75rem; // topbar + compact page gutter
+    --layout-content-gutter: 0.75rem;
+    padding: 4rem var(--layout-content-gutter) 0 var(--layout-content-gutter); // topbar + compact page gutter
     transition: margin-left var(--layout-section-transition-duration);
     background: #eef3f7;
 }
