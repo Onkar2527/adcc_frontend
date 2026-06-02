@@ -227,8 +227,10 @@ export class PeriodwiseQuestionsMasterFormComponent {
             return;
         }
 
-        const [fyStart, fyEnd] =
-            selectedYear.label.split('-').map(Number);
+        const fyStart = Number(selectedYear.label);
+         const fyEnd = fyStart + 1;
+            
+            
 
         const [year, month] =
             value.split('-').map(Number);
