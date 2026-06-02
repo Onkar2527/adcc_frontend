@@ -1696,6 +1696,33 @@ export class ManageAccountsDataService {
     );
   }
 
+  private formatUploadDate(
+    value: any,
+  ) {
+
+    if (!value) {
+      return '';
+    }
+
+    if (value instanceof Date) {
+
+      const year =
+        value.getFullYear();
+
+      const month =
+        String(value.getMonth() + 1)
+          .padStart(2, '0');
+
+      const day =
+        String(value.getDate())
+          .padStart(2, '0');
+
+      return `${year}-${month}-${day}`;
+    }
+
+    return String(value);
+  }
+
   validateDepositCsv(
     file: File,
     payload: any,
@@ -1711,24 +1738,36 @@ export class ManageAccountsDataService {
 
     formData.append(
       'upload_date',
-      payload.upload_date,
+      this.formatUploadDate(payload.upload_date),
     );
 
     formData.append(
       'period_from',
-      payload.period_from,
+      this.formatUploadDate(payload.period_from),
     );
 
     formData.append(
       'period_to',
-      payload.period_to,
+      this.formatUploadDate(payload.period_to),
     );
+
+    const params = {
+      upload_date:
+        this.formatUploadDate(payload.upload_date),
+      period_from:
+        this.formatUploadDate(payload.period_from),
+      period_to:
+        this.formatUploadDate(payload.period_to),
+    };
 
     return this.http.post<any>(
 
       `${this.apiUrl}/validate-upload`,
 
       formData,
+      {
+        params,
+      },
     );
   }
 
@@ -1821,24 +1860,36 @@ export class ManageAccountsDataService {
 
     formData.append(
       'upload_date',
-      payload.upload_date,
+      this.formatUploadDate(payload.upload_date),
     );
 
     formData.append(
       'period_from',
-      payload.period_from,
+      this.formatUploadDate(payload.period_from),
     );
 
     formData.append(
       'period_to',
-      payload.period_to,
+      this.formatUploadDate(payload.period_to),
     );
+
+    const params = {
+      upload_date:
+        this.formatUploadDate(payload.upload_date),
+      period_from:
+        this.formatUploadDate(payload.period_from),
+      period_to:
+        this.formatUploadDate(payload.period_to),
+    };
 
     return this.http.post<any>(
 
       `${this.apiUrl1}/validate-upload`,
 
       formData,
+      {
+        params,
+      },
     );
   }
 
