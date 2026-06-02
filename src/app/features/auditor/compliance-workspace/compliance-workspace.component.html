@@ -125,15 +125,18 @@
             </div>
 
             <article
-                *ngFor="let answer of compliance.answers"
+                *ngFor="let answer of compliance.answers; let answerIndex = index"
                 class="observation-row"
             >
                 <div class="observation-head">
-                    <div>
+                    <div class="observation-title-wrap">
+                        <span class="observation-serial">{{ answerIndex + 1 }}</span>
+                        <div>
                         <small>
                             {{ answer.menu_name }} / {{ answer.category_name }} / {{ answer.header_name }}
                         </small>
                         <h4>{{ answer.question || 'Assessment observation' }}</h4>
+                        </div>
                     </div>
 
                     <p-tag value="Compliance Required" severity="danger"></p-tag>

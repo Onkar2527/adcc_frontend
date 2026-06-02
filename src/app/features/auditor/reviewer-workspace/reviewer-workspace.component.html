@@ -186,16 +186,19 @@
             </div>
 
             <article
-                *ngFor="let answer of review.answers"
+                *ngFor="let answer of review.answers; let answerIndex = index"
                 class="answer-row"
                 [class.compliance-answer]="answer.is_compliance == 1"
             >
                 <div class="answer-head">
-                    <div>
+                    <div class="answer-title-wrap">
+                        <span class="answer-serial">{{ answerIndex + 1 }}</span>
+                        <div>
                         <small>
                             {{ answer.menu_name }} / {{ answer.category_name }} / {{ answer.header_name }}
                         </small>
                         <h4>{{ answer.question || 'Assessment observation' }}</h4>
+                        </div>
                     </div>
 
                     <div class="answer-status-stack">
@@ -271,63 +274,65 @@
                         placeholder="Compliance review comment"
                     ></textarea>
 
-                    <div
-                        *ngIf="answer.evidence || (isComplianceReview() && answer.compliance_evidence)"
-                        class="evidence-actions"
-                    >
+                    <div class="review-buttons">
+                        <div
+                            *ngIf="answer.evidence || (isComplianceReview() && answer.compliance_evidence)"
+                            class="evidence-actions"
+                        >
+                            <button
+                                *ngIf="answer.evidence"
+                                pButton
+                                type="button"
+                                class="evidence-link"
+                                icon="pi pi-paperclip"
+                                severity="secondary"
+                                [title]="isComplianceReview() ? 'View auditor evidence' : 'View evidence'"
+                                (click)="viewEvidence(answer.evidence)"
+                            ></button>
+
+                            <button
+                                *ngIf="isComplianceReview() && answer.compliance_evidence"
+                                pButton
+                                type="button"
+                                class="evidence-link"
+                                icon="pi pi-paperclip"
+                                severity="secondary"
+                                title="View manager evidence"
+                                (click)="viewEvidence(answer.compliance_evidence)"
+                            ></button>
+                        </div>
+
                         <button
-                            *ngIf="answer.evidence"
                             pButton
                             type="button"
-                            class="evidence-link"
-                            icon="pi pi-paperclip"
-                            severity="secondary"
-                            [title]="isComplianceReview() ? 'View auditor evidence' : 'View evidence'"
-                            (click)="viewEvidence(answer.evidence)"
+                            label="Accept"
+                            icon="pi pi-check"
+                            severity="success"
+                            [loading]="actionSaving()[actionKey('answer', answer.id)]"
+                            (click)="saveAction('answer', answer, 2)"
                         ></button>
 
                         <button
-                            *ngIf="isComplianceReview() && answer.compliance_evidence"
                             pButton
                             type="button"
-                            class="evidence-link"
-                            icon="pi pi-paperclip"
-                            severity="secondary"
-                            title="View manager evidence"
-                            (click)="viewEvidence(answer.compliance_evidence)"
+                            [label]="isComplianceReview() ? 'Re-Compliance' : 'Re-Audit'"
+                            icon="pi pi-times"
+                            severity="danger"
+                            [loading]="actionSaving()[actionKey('answer', answer.id)]"
+                            (click)="saveAction('answer', answer, 3)"
+                        ></button>
+
+                        <button
+                            *ngIf="isComplianceReview()"
+                            pButton
+                            type="button"
+                            label="Carry Forward"
+                            icon="pi pi-forward"
+                            severity="info"
+                            [loading]="actionSaving()[actionKey('answer', answer.id)]"
+                            (click)="saveAction('answer', answer, 5)"
                         ></button>
                     </div>
-
-                    <button
-                        pButton
-                        type="button"
-                        label="Accept"
-                        icon="pi pi-check"
-                        severity="success"
-                        [loading]="actionSaving()[actionKey('answer', answer.id)]"
-                        (click)="saveAction('answer', answer, 2)"
-                    ></button>
-
-                    <button
-                        pButton
-                        type="button"
-                        [label]="isComplianceReview() ? 'Re-Compliance' : 'Re-Audit'"
-                        icon="pi pi-times"
-                        severity="danger"
-                        [loading]="actionSaving()[actionKey('answer', answer.id)]"
-                        (click)="saveAction('answer', answer, 3)"
-                    ></button>
-
-                    <button
-                        *ngIf="isComplianceReview()"
-                        pButton
-                        type="button"
-                        label="Carry Forward"
-                        icon="pi pi-forward"
-                        severity="info"
-                        [loading]="actionSaving()[actionKey('answer', answer.id)]"
-                        (click)="saveAction('answer', answer, 5)"
-                    ></button>
                 </div>
 
                 <div *ngIf="answer.annexure_rows?.length" class="annexure-review">
