@@ -326,35 +326,50 @@ export class AppMenu implements OnInit, OnDestroy {
                             ),
                     )
                     .map(
-                        (category: any) => ({
-                            label:
-                                category.name,
-                            meta:
-                                this.categoryProgressText(
-                                    category,
-                                ),
-                            icon:
-                                'pi pi-fw pi-angle-right',
-                            routerLink: [
-                                '/auditor/internal-audit',
-                                assessmentId,
-                            ],
-                            queryParams: {
-                                view: 'category',
-                                categoryId:
-                                    Number(category.id),
-                            },
-                            routerLinkActiveOptions: {
-                                paths:
-                                    'exact',
-                                queryParams:
-                                    'exact',
-                                matrixParams:
-                                    'ignored',
-                                fragment:
-                                    'ignored',
-                            },
-                        }),
+                        (category: any) => {
+                            const isCarryForward =
+                                category?.carry_forward
+                                ||
+                                Number(category?.id) === 0;
+
+                            return {
+                                label:
+                                    category.name,
+                                meta:
+                                    this.categoryProgressText(
+                                        category,
+                                    ),
+                                icon:
+                                    isCarryForward
+                                        ? 'pi pi-fw pi-forward'
+                                        : 'pi pi-fw pi-angle-right',
+                                routerLink: [
+                                    '/auditor/internal-audit',
+                                    assessmentId,
+                                ],
+                                queryParams: isCarryForward
+                                    ? {
+                                        view:
+                                            'carry-forward',
+                                    }
+                                    : {
+                                        view:
+                                            'category',
+                                        categoryId:
+                                            Number(category.id),
+                                    },
+                                routerLinkActiveOptions: {
+                                    paths:
+                                        'exact',
+                                    queryParams:
+                                        'exact',
+                                    matrixParams:
+                                        'ignored',
+                                    fragment:
+                                        'ignored',
+                                },
+                            };
+                        },
                     );
 
             if (

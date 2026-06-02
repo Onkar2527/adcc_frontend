@@ -193,12 +193,18 @@ export class ReviewerWorkspaceComponent implements OnInit {
                 : 'Re-Audit Needed';
         }
 
+        if (
+            Number(status) === 5
+        ) {
+            return 'Carry Forward';
+        }
+
         return 'Pending';
     }
 
     statusSeverity(
         status: number,
-    ): 'success' | 'danger' | 'secondary' {
+    ): 'success' | 'danger' | 'secondary' | 'info' {
         if (
             Number(status) === 2
         ) {
@@ -209,6 +215,12 @@ export class ReviewerWorkspaceComponent implements OnInit {
             Number(status) === 3
         ) {
             return 'danger';
+        }
+
+        if (
+            Number(status) === 5
+        ) {
+            return 'info';
         }
 
         return 'secondary';
@@ -278,7 +290,13 @@ export class ReviewerWorkspaceComponent implements OnInit {
         return this.reviewTargets()
             .filter(
                 (target) =>
-                    ![2, 3].includes(
+                    ![
+                        2,
+                        3,
+                        ...(this.isComplianceReview()
+                            ? [5]
+                            : []),
+                    ].includes(
                         Number(
                             this.reviewStatus(
                                 target.observation,

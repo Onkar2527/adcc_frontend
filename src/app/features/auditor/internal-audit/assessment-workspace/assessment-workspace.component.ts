@@ -89,13 +89,19 @@ export class AssessmentWorkspaceComponent implements OnInit {
         signal<number | null>(null);
 
     selectedView =
-        signal<'summary' | 'category'>('summary');
+        signal<'summary' | 'category' | 'carry-forward'>('summary');
 
     selectedPendingQuestionIds =
         signal<number[]>([]);
 
     selectedDumpId =
         signal(0);
+
+    carryForward =
+        signal<any[]>([]);
+
+    carryForwardLoading =
+        signal(false);
 
     remarks =
         signal<any>(null);
@@ -262,6 +268,13 @@ export class AssessmentWorkspaceComponent implements OnInit {
                         res?.overview || null,
                     );
                     this.ensureSelectedCategory();
+                    if (
+                        this.selectedView() === 'carry-forward'
+                    ) {
+                        this.loadCarryForward(
+                            assessmentId,
+                        );
+                    }
                     this.loading.set(false);
 
                     if (
@@ -584,6 +597,35 @@ export class AssessmentWorkspaceComponent implements OnInit {
         const categoryId =
             Number(category.id);
 
+        if (
+            category?.carry_forward
+            ||
+            categoryId === 0
+        ) {
+            this.router.navigate(
+                [],
+                {
+                    relativeTo:
+                        this.route,
+                    queryParams: {
+                        view:
+                            'carry-forward',
+                        categoryId:
+                            null,
+                        dumpId:
+                            null,
+                        pending:
+                            null,
+                    },
+                    queryParamsHandling:
+                        'merge',
+                    replaceUrl:
+                        false,
+                },
+            );
+            return;
+        }
+
         const pendingQuestionIds =
             pendingIssues
                 .map(
@@ -716,6 +758,49 @@ export class AssessmentWorkspaceComponent implements OnInit {
                     );
                     this.checkingSubmission.set(
                         false,
+                    );
+                },
+            });
+    }
+
+    loadCarryForward(
+        assessmentId?: number,
+    ) {
+        const id =
+            Number(
+                assessmentId
+                || this.overview()?.id
+                || this.route.snapshot.paramMap.get(
+                    'assessmentId',
+                )
+                || 0,
+            );
+
+        if (
+            !id
+        ) {
+            return;
+        }
+
+        this.carryForwardLoading.set(true);
+
+        this.service
+            .getInternalAuditCarryForwardPoints(
+                id,
+                this.employeeId(),
+            )
+            .subscribe({
+                next: (res: any) => {
+                    this.carryForward.set(
+                        res?.points || [],
+                    );
+                    this.carryForwardLoading.set(false);
+                },
+                error: (err) => {
+                    this.carryForwardLoading.set(false);
+                    this.notification.error(
+                        err?.error?.message
+                        || 'Unable to load carry forward points.',
                     );
                 },
             });
@@ -942,6 +1027,8 @@ export class AssessmentWorkspaceComponent implements OnInit {
         const view =
             viewParam === 'category'
                 ? 'category'
+                : viewParam === 'carry-forward'
+                    ? 'carry-forward'
                 : 'summary';
 
         this.selectedView.set(
@@ -961,10 +1048,18 @@ export class AssessmentWorkspaceComponent implements OnInit {
             );
         } else if (
             view === 'summary'
+            ||
+            view === 'carry-forward'
         ) {
             this.selectedCategoryId.set(
                 null,
             );
+        }
+
+        if (
+            view === 'carry-forward'
+        ) {
+            this.loadCarryForward();
         }
 
         this.selectedDumpId.set(

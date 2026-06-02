@@ -317,6 +317,17 @@
                         [loading]="actionSaving()[actionKey('answer', answer.id)]"
                         (click)="saveAction('answer', answer, 3)"
                     ></button>
+
+                    <button
+                        *ngIf="isComplianceReview()"
+                        pButton
+                        type="button"
+                        label="Carry Forward"
+                        icon="pi pi-forward"
+                        severity="info"
+                        [loading]="actionSaving()[actionKey('answer', answer.id)]"
+                        (click)="saveAction('answer', answer, 5)"
+                    ></button>
                 </div>
 
                 <div *ngIf="answer.annexure_rows?.length" class="annexure-review">
@@ -410,6 +421,16 @@
                                                 [title]="isComplianceReview() ? 'Send annexure row for re-compliance' : 'Send annexure row for re-audit'"
                                                 [loading]="actionSaving()[actionKey('annexure', row.id)]"
                                                 (click)="saveAction('annexure', row, 3)"
+                                            ></button>
+                                            <button
+                                                *ngIf="isComplianceReview()"
+                                                pButton
+                                                type="button"
+                                                icon="pi pi-forward"
+                                                severity="info"
+                                                title="Carry forward annexure row"
+                                                [loading]="actionSaving()[actionKey('annexure', row.id)]"
+                                                (click)="saveAction('annexure', row, 5)"
                                             ></button>
                                         </div>
                                     </td>

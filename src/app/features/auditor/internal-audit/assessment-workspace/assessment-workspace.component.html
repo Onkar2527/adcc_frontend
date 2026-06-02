@@ -460,6 +460,54 @@
         left sidebar to answer questions.
       </div>
 
+      <section *ngIf="selectedView() === 'carry-forward'" class="carry-forward-panel">
+        <div class="carry-forward-head">
+          <div>
+            <small>INTERNAL AUDIT</small>
+            <h3>Carry Forward Points</h3>
+          </div>
+          <p-tag [value]="carryForward().length + ' point(s)'" severity="info"></p-tag>
+        </div>
+
+        <div *ngIf="carryForwardLoading()" class="loading-stack">
+          <p-skeleton height="4rem"></p-skeleton>
+          <p-skeleton height="4rem"></p-skeleton>
+        </div>
+
+        <div *ngIf="!carryForwardLoading() && !carryForward().length" class="workspace-empty">
+          No carry-forward points are available for this assessment.
+        </div>
+
+        <div *ngIf="!carryForwardLoading() && carryForward().length" class="carry-forward-table-wrap">
+          <table class="carry-forward-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Old Assessment</th>
+                <th>Path</th>
+                <th>Question</th>
+                <th>Answer</th>
+                <th>Auditor Comment</th>
+                <th>Compliance Response</th>
+                <th>Reviewer Comment</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let point of carryForward(); let i = index">
+                <td>{{ i + 1 }}</td>
+                <td>{{ point.data?.assessment || '-' }}</td>
+                <td>{{ point.data?.path || '-' }}</td>
+                <td>{{ point.data?.question || '-' }}</td>
+                <td>{{ point.data?.answer || '-' }}</td>
+                <td>{{ point.data?.old_audit_comment || '-' }}</td>
+                <td>{{ point.data?.old_audit_compliance || '-' }}</td>
+                <td>{{ point.data?.old_compliance_reviewer_comment || '-' }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
       <div *ngIf="showBackToSummaryButton()" class="workspace-category-back-row">
         <button
           pButton

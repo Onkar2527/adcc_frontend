@@ -123,6 +123,15 @@ export class AuditUnitDashboardComponent implements OnInit {
                                 assessment,
                             }),
                     );
+
+                    if (
+                        year.can_start
+                    ) {
+                        rows.push({
+                            year,
+                            assessment: null,
+                        });
+                    }
                 });
 
             return rows;

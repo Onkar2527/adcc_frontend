@@ -786,6 +786,24 @@ export class AuditDashboardService {
     );
   }
 
+  getInternalAuditCarryForwardPoints(
+    assessmentId: number,
+    employeeId: number,
+  ) {
+
+    return this.http.get<any>(
+
+      `${this.config.apiUrl}/internal-audit/${assessmentId}/carry-forward`,
+
+      {
+        params: {
+          employee_id:
+            employeeId,
+        },
+      },
+    );
+  }
+
   getInternalAuditAccountSampling(
     assessmentId: number,
     categoryId: number,
