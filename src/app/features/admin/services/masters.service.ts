@@ -1733,7 +1733,7 @@ export class ManageAccountsDataService {
   }
 
   addDepositDump(
-    rows: any[],
+    uploadKey: string,
   ) {
 
     return this.http.post<any>(
@@ -1741,7 +1741,7 @@ export class ManageAccountsDataService {
       `${this.apiUrl}/add-dump`,
 
       {
-        rows,
+        uploadKey,
       },
     );
   }
@@ -1843,7 +1843,7 @@ export class ManageAccountsDataService {
   }
 
   addAdvanceDump(
-    rows: any[],
+    uploadKey: string,
   ) {
 
     return this.http.post<any>(
@@ -1851,7 +1851,7 @@ export class ManageAccountsDataService {
       `${this.apiUrl1}/add-dump`,
 
       {
-        rows,
+        uploadKey,
       },
     );
   }

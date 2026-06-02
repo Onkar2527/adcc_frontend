@@ -44,9 +44,20 @@
 
     </div>
 
+    <div class="periodwise-section-nav surface-card border-1 surface-border border-round-xl shadow-1 p-2 mb-4">
+        <div class="flex align-items-center gap-2 flex-wrap">
+            <span class="text-600 text-sm font-semibold px-2">Go to</span>
+
+            <button *ngFor="let section of sectionLinks; trackBy: trackById" pButton type="button"
+                class="p-button-sm p-button-text"
+                [label]="section.label"
+                (click)="scrollToSection(section.id)"></button>
+        </div>
+    </div>
+
     <!-- ADVANCE SCHEMES -->
 
-    <div class="border-round-xl p-4 surface-card shadow-1">
+    <div id="advance-schemes" class="border-round-xl p-4 surface-card shadow-1 periodwise-section">
 
         <div class="flex justify-content-between align-items-center mb-4">
 
@@ -75,7 +86,7 @@
         <div class="grid">
 
             <div *ngFor="
-            let item of selectedSchemes()
+            let item of selectedSchemes() | slice:0:selectedPreviewLimit; trackBy: trackById
           " class="col-12 md:col-6">
 
                 <div class="border-1 surface-border border-round-xl p-3 h-full">
@@ -98,6 +109,10 @@
 
             </div>
 
+        </div>
+
+        <div *ngIf="selectedSchemes().length > selectedPreviewLimit" class="text-600 text-sm mt-3">
+            + {{ selectedSchemes().length - selectedPreviewLimit }} more advance schemes selected
         </div>
 
     </div>
@@ -162,7 +177,7 @@
             <div class="grid">
 
                 <div *ngFor="
-              let item of allSchemes()
+              let item of allSchemes(); trackBy: trackById
             " class="col-12 md:col-6">
 
                     <div class="border-1 surface-border border-round-xl p-3 h-full">
@@ -204,7 +219,7 @@
 
     <!-- DEPOSIT SCHEMES -->
 
-    <div class="border-round-xl p-4 surface-card shadow-1 mt-4">
+    <div id="deposit-schemes" class="border-round-xl p-4 surface-card shadow-1 mt-4 periodwise-section">
 
         <div class="flex justify-content-between align-items-center mb-4">
 
@@ -233,7 +248,7 @@
         <div class="grid">
 
             <div *ngFor="
-            let item of depositSchemes()
+            let item of depositSchemes() | slice:0:selectedPreviewLimit; trackBy: trackById
           " class="col-12 md:col-6">
 
                 <div class="border-1 surface-border border-round-xl p-3 h-full">
@@ -256,6 +271,10 @@
 
             </div>
 
+        </div>
+
+        <div *ngIf="depositSchemes().length > selectedPreviewLimit" class="text-600 text-sm mt-3">
+            + {{ depositSchemes().length - selectedPreviewLimit }} more deposit schemes selected
         </div>
 
     </div>
@@ -321,7 +340,7 @@
             <div class="grid">
 
                 <div *ngFor="
-              let item of allDepositSchemes()
+              let item of allDepositSchemes(); trackBy: trackById
             " class="col-12 md:col-6">
 
                     <div class="border-1 surface-border border-round-xl p-3 h-full">
@@ -362,7 +381,7 @@
     </div>
     <!-- MENUS -->
 
-    <div class="border-round-xl p-4 surface-card shadow-1 mt-4">
+    <div id="menus" class="border-round-xl p-4 surface-card shadow-1 mt-4 periodwise-section">
 
         <div class="flex justify-content-between align-items-center mb-4">
 
@@ -391,7 +410,7 @@
         <div class="grid">
 
             <div *ngFor="
-        let item of selectedMenus()
+        let item of selectedMenus() | slice:0:selectedPreviewLimit; trackBy: trackById
       " class="col-12 md:col-4">
 
                 <div class="border-1 surface-border border-round-xl p-3 h-full">
@@ -406,6 +425,10 @@
 
             </div>
 
+        </div>
+
+        <div *ngIf="selectedMenus().length > selectedPreviewLimit" class="text-600 text-sm mt-3">
+            + {{ selectedMenus().length - selectedPreviewLimit }} more menus selected
         </div>
 
     </div>
@@ -470,7 +493,7 @@
             <div class="grid">
 
                 <div *ngFor="
-          let item of allMenus()
+          let item of allMenus(); trackBy: trackById
         " class="col-12 md:col-4">
 
                     <div class="border-1 surface-border border-round-xl p-3 h-full">
@@ -504,7 +527,7 @@
 
     <!-- CATEGORIES -->
 
-    <div class="border-round-xl p-4 surface-card shadow-1 mt-4">
+    <div id="categories" class="border-round-xl p-4 surface-card shadow-1 mt-4 periodwise-section">
 
         <div class="flex justify-content-between align-items-center mb-4">
 
@@ -533,7 +556,7 @@
         <div class="grid">
 
             <div *ngFor="
-        let item of selectedCategories()
+        let item of selectedCategories() | slice:0:selectedPreviewLimit; trackBy: trackById
       " class="col-12 md:col-4">
 
                 <div class="border-1 surface-border border-round-xl p-3 h-full">
@@ -548,6 +571,10 @@
 
             </div>
 
+        </div>
+
+        <div *ngIf="selectedCategories().length > selectedPreviewLimit" class="text-600 text-sm mt-3">
+            + {{ selectedCategories().length - selectedPreviewLimit }} more categories selected
         </div>
 
     </div>
@@ -616,7 +643,7 @@
             <div class="grid">
 
                 <div *ngFor="
-          let item of allCategories()
+          let item of allCategories(); trackBy: trackById
         " class="col-12 md:col-4">
 
                     <div
@@ -664,7 +691,7 @@
     <!-- ACTIVE QUESTIONS -->
 
 
-    <div class="border-round-xl p-4 surface-card shadow-1 mt-4">
+    <div id="questions" class="border-round-xl p-4 surface-card shadow-1 mt-4 periodwise-section">
 
         <!-- TOP -->
 
@@ -687,15 +714,25 @@
 
             </div>
 
-            <button pButton type="button" label="Update Questions" icon="pi pi-save" class="p-button-primary"
-                (click)="updateQuestionHeaders()"></button>
+            <div class="flex align-items-center gap-2 flex-wrap justify-content-end">
+                <button pButton type="button" label="Select All Questions" icon="pi pi-check-square"
+                    class="p-button-sm p-button-outlined"
+                    (click)="toggleAllQuestions(true)"></button>
+
+                <button pButton type="button" label="Clear Questions" icon="pi pi-times"
+                    class="p-button-sm p-button-outlined p-button-secondary"
+                    (click)="toggleAllQuestions(false)"></button>
+
+                <button pButton type="button" label="Update Questions" icon="pi pi-save" class="p-button-primary"
+                    (click)="updateQuestionHeaders()"></button>
+            </div>
 
         </div>
 
         <!-- MENU LOOP -->
 
         <div *ngFor="
-      let menu of groupedQuestions
+      let menu of groupedQuestions; trackBy: trackById
     " class="mb-6">
 
             <!-- MENU -->
@@ -711,7 +748,8 @@
 
             <div *ngFor="
         let category of menu.categories;
-        let i = index
+        let i = index;
+        trackBy: trackById
       " class="ml-4 mb-5">
 
                 <!-- CATEGORY -->
@@ -727,23 +765,49 @@
                 <!-- HEADER LOOP -->
 
                 <div *ngFor="
-          let header of category.headers
+          let header of category.headers; trackBy: trackById
         " class="ml-4 mb-5">
 
                     <!-- HEADER -->
 
-                    <div class="surface-100 border-round p-3 font-semibold text-lg mb-3">
+                    <div class="surface-100 border-round p-3 mb-3">
 
-                        HEADER :
-                        {{ header.header_name }}
+                        <div class="flex justify-content-between align-items-center gap-3 flex-wrap">
+                            <div>
+                                <div class="font-semibold text-lg">
+                                    HEADER :
+                                    {{ header.header_name }}
+                                </div>
+                                <div class="text-600 text-sm mt-1">
+                                    {{ getHeaderSelectedCount(header) }} / {{ header.questions?.length || 0 }} questions selected
+                                </div>
+                            </div>
+
+                            <div class="flex align-items-center gap-2">
+                                <button pButton type="button" class="p-button-sm p-button-text"
+                                    label="Select All"
+                                    (click)="toggleHeaderQuestions(header, true)"></button>
+
+                                <button pButton type="button" class="p-button-sm p-button-text p-button-secondary"
+                                    label="Clear"
+                                    (click)="toggleHeaderQuestions(header, false)"></button>
+
+                                <button pButton type="button" class="p-button-sm"
+                                    [label]="isHeaderExpanded(header.header_id) ? 'Hide Questions' : 'Show Questions'"
+                                    [icon]="isHeaderExpanded(header.header_id) ? 'pi pi-chevron-up' : 'pi pi-chevron-down'"
+                                    (click)="toggleHeader(header.header_id)"></button>
+                            </div>
+                        </div>
 
                     </div>
 
                     <!-- QUESTIONS -->
 
+                    <div *ngIf="isHeaderExpanded(header.header_id)">
                     <div *ngFor="
             let question of header.questions;
-            let qIndex = index
+            let qIndex = index;
+            trackBy: trackById
           " class="ml-4 mb-3">
 
                         <div class="flex align-items-start border-1 surface-border border-round-lg p-3">
@@ -765,6 +829,7 @@
 
                         </div>
 
+                    </div>
                     </div>
 
                 </div>

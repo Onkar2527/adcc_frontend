@@ -1,4 +1,5 @@
 import {
+  ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
   inject,
@@ -47,6 +48,18 @@ import { ToastModule } from 'primeng/toast';
     ToastModule
   ],
   templateUrl: './periodwise-question-manage-view.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  styles: [`
+    .periodwise-section-nav {
+      position: sticky;
+      top: 0;
+      z-index: 5;
+    }
+
+    .periodwise-section {
+      scroll-margin-top: 4.5rem;
+    }
+  `],
 
 })
 export class PeriodwiseQuestionsMasterViewComponent
@@ -121,6 +134,18 @@ export class PeriodwiseQuestionsMasterViewComponent
   selectedQuestionIds: number[] = [];
 
   selectedHeaderIds: number[] = [];
+
+  selectedPreviewLimit = 12;
+
+  expandedHeaders = new Set<number>();
+
+  sectionLinks = [
+    { id: 'advance-schemes', label: 'Advance Schemes' },
+    { id: 'deposit-schemes', label: 'Deposit Schemes' },
+    { id: 'menus', label: 'Menus' },
+    { id: 'categories', label: 'Categories' },
+    { id: 'questions', label: 'Questions' }
+  ];
 
   ngOnInit() {
 
@@ -331,7 +356,6 @@ export class PeriodwiseQuestionsMasterViewComponent
           this.data.cat_ids =
             ids;
 
-          this.filterQuestionsLocally();
           this.loadQuestionData(
             this.data.id
           );
@@ -486,7 +510,9 @@ export class PeriodwiseQuestionsMasterViewComponent
             ids;
 
           this.loadCategories();
-          this.filterQuestionsLocally();
+          this.loadQuestionData(
+            this.data.id
+          );
 
           this.messageService.add({
 
@@ -926,19 +952,24 @@ export class PeriodwiseQuestionsMasterViewComponent
   groupQuestions(rows: any[]) {
 
     const grouped: any[] = [];
+    const menuMap = new Map<number, any>();
+    const categoryMap = new Map<string, any>();
+    const headerMap = new Map<string, any>();
+    const selectedQuestionIds = new Set(
+      this.data?.question_ids
+        ? this.data.question_ids
+          .split(',')
+          .map((x: any) => Number(x.trim()))
+          .filter((x: number) => Number.isFinite(x))
+        : []
+    );
 
     rows.forEach((row: any) => {
 
       /* ================= MENU ================= */
 
-      let menu = grouped.find(
-
-        (m: any) =>
-
-          m.menu_id ==
-          row.menu_id
-
-      );
+      const menuId = Number(row.menu_id);
+      let menu = menuMap.get(menuId);
 
       if (!menu) {
 
@@ -955,21 +986,15 @@ export class PeriodwiseQuestionsMasterViewComponent
         };
 
         grouped.push(menu);
+        menuMap.set(menuId, menu);
 
       }
 
       /* ================= CATEGORY ================= */
 
-      let category =
-
-        menu.categories.find(
-
-          (c: any) =>
-
-            c.category_id ==
-            row.category_id
-
-        );
+      const categoryId = Number(row.category_id);
+      const categoryKey = `${menuId}:${categoryId}`;
+      let category = categoryMap.get(categoryKey);
 
       if (!category) {
 
@@ -988,21 +1013,15 @@ export class PeriodwiseQuestionsMasterViewComponent
         menu.categories.push(
           category
         );
+        categoryMap.set(categoryKey, category);
 
       }
 
       /* ================= HEADER ================= */
 
-      let header =
-
-        category.headers.find(
-
-          (h: any) =>
-
-            h.header_id ==
-            row.header_id
-
-        );
+      const headerId = Number(row.header_id);
+      const headerKey = `${categoryKey}:${headerId}`;
+      let header = headerMap.get(headerKey);
 
       if (!header) {
 
@@ -1023,26 +1042,13 @@ export class PeriodwiseQuestionsMasterViewComponent
               ? row.questions.map(
                 (q: any) => {
 
-                  const selectedQuestionIds =
-
-                    this.data?.question_ids
-                      ? this.data.question_ids
-                        .split(',')
-                        .map(
-                          (x: any) =>
-                            Number(
-                              x.trim()
-                            )
-                        )
-                      : [];
-
                   return {
 
                     ...q,
 
                     checked:
 
-                      selectedQuestionIds.includes(
+                      selectedQuestionIds.has(
                         Number(
                           q.question_id
                         )
@@ -1059,6 +1065,7 @@ export class PeriodwiseQuestionsMasterViewComponent
         category.headers.push(
           header
         );
+        headerMap.set(headerKey, header);
 
       }
 
@@ -1068,6 +1075,62 @@ export class PeriodwiseQuestionsMasterViewComponent
 
     return grouped;
 
+  }
+
+  toggleHeader(headerId: any) {
+    const id = Number(headerId);
+
+    if (this.expandedHeaders.has(id)) {
+      this.expandedHeaders.delete(id);
+    } else {
+      this.expandedHeaders.add(id);
+    }
+  }
+
+  isHeaderExpanded(headerId: any) {
+    return this.expandedHeaders.has(Number(headerId));
+  }
+
+  getHeaderSelectedCount(header: any) {
+    return Array.isArray(header?.questions)
+      ? header.questions.filter((question: any) => question.checked).length
+      : 0;
+  }
+
+  toggleHeaderQuestions(header: any, checked: boolean) {
+    if (!Array.isArray(header?.questions)) {
+      return;
+    }
+
+    header.questions.forEach((question: any) => {
+      question.checked = checked;
+    });
+
+    this.onQuestionChange();
+  }
+
+  toggleAllQuestions(checked: boolean) {
+    this.groupedQuestions.forEach((menu: any) => {
+      menu.categories?.forEach((category: any) => {
+        category.headers?.forEach((header: any) => {
+          header.questions?.forEach((question: any) => {
+            question.checked = checked;
+          });
+        });
+      });
+    });
+
+    this.onQuestionChange();
+  }
+
+  scrollToSection(sectionId: string) {
+    document
+      .getElementById(sectionId)
+      ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  trackById(index: number, item: any) {
+    return item?.id ?? item?.question_id ?? item?.header_id ?? item?.category_id ?? item?.menu_id ?? index;
   }
 
   onQuestionChange() {

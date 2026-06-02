@@ -204,6 +204,11 @@ import { ManageAccountsDataService }
 
           <div class="mt-4">
 
+            <div class="text-600 text-sm mb-2">
+              Showing first {{ previewRows().length }} rows for preview.
+              Total validated CSV rows: {{ totalRows() }}.
+            </div>
+
             <p-table
               [value]="previewRows()"
               styleClass="p-datatable-sm"
@@ -290,7 +295,8 @@ import { ManageAccountsDataService }
               label="Add Dump"
               icon="pi pi-check"
               severity="success"
-              [disabled]="!validated()"
+              [disabled]="!validated() || uploading()"
+              [loading]="uploading()"
               (click)="addDump()"
             ></button>
 
@@ -328,8 +334,14 @@ export class AdvanceUploadComponent {
   previewRows =
     signal<any[]>([]);
 
+  totalRows =
+    signal(0);
+
   validatedRows =
     signal<any[]>([]);
+
+  uploadKey =
+    signal('');
 
   validated =
     signal(false);
@@ -384,6 +396,12 @@ export class AdvanceUploadComponent {
     this.selectedFileName.set(
       file.name,
     );
+
+    this.previewRows.set([]);
+    this.validatedRows.set([]);
+    this.uploadKey.set('');
+    this.validated.set(false);
+    this.totalRows.set(0);
   }
 
   downloadSample() {
@@ -457,14 +475,21 @@ export class AdvanceUploadComponent {
 
       .subscribe({
 
-        next: (res: { rows: string | any[]; validRows: any; hasErrors: any; errorSummary?: string[]; }) => {
+        next: (res: { rows: string | any[]; validRows: any; hasErrors: any; errorSummary?: string[]; uploadKey?: string; totalRows?: number; validCount?: number; }) => {
 
           this.uploading.set(false);
 
-          this.previewRows.set(
+          const rows =
             Array.isArray(res.rows)
               ? res.rows
-              : [],
+              : [];
+
+          this.totalRows.set(
+            Number(res.totalRows || rows.length),
+          );
+
+          this.previewRows.set(
+            rows.slice(0, 200),
           );
 
           this.validatedRows.set(
@@ -473,8 +498,12 @@ export class AdvanceUploadComponent {
               : [],
           );
 
+          this.uploadKey.set(
+            res.uploadKey || '',
+          );
+
           this.validated.set(
-            !res.hasErrors,
+            !res.hasErrors && !!res.uploadKey,
           );
 
           this.errorSummary.set(
@@ -509,11 +538,11 @@ export class AdvanceUploadComponent {
 
             severity: 'success',
 
-            summary:
-              'Validation Successful',
+              summary:
+                'Validation Successful',
 
-            detail:
-              `${res.rows.length} rows validated`,
+              detail:
+              `${res.validCount || res.totalRows || rows.length} rows validated`,
           });
         },
 
@@ -538,11 +567,21 @@ export class AdvanceUploadComponent {
 
   addDump() {
 
+    if (!this.uploadKey()) {
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Validation Required',
+        detail: 'Please validate the CSV before adding dump',
+      });
+
+      return;
+    }
+
     this.uploading.set(true);
 
     this.service
       .addAdvanceDump(
-        this.validatedRows(),
+        this.uploadKey(),
       )
 
       .subscribe({
