@@ -4,8 +4,8 @@ import { ToastModule } from 'primeng/toast';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { TableComponent, TableColumn } from '../../../shared/components/table/table.component';
 import { FormDrawerService } from '../../../core/services/drawer/form-drawer.service';
-import { AuditSectionService, BorderAreaMasterService, MenuMasterService } from '../services/masters.service';
-import { BorderAreaMasterFormComponent } from './border-area-master-main.component';
+import { AuditSectionService, BroaderAreaMasterService, MenuMasterService } from '../services/masters.service';
+import { BroaderAreaMasterFormComponent } from './broader-area-master-main.component';
 import { MenuMasterFormComponent } from '../menu-master/menu-master-main.component';
 
 
@@ -33,8 +33,8 @@ import { MenuMasterFormComponent } from '../menu-master/menu-master-main.compone
     <p-toast></p-toast>
   `
 })
-export class BorderAreaMasterComponent   implements OnInit {
-  private borderAreaService = inject(BorderAreaMasterService);
+export class BroaderAreaMasterComponent implements OnInit {
+  private broaderAreaService = inject(BroaderAreaMasterService);
   private drawer = inject(FormDrawerService);
   private messageService = inject(MessageService);
   private confirmationService = inject(ConfirmationService);
@@ -60,9 +60,9 @@ export class BorderAreaMasterComponent   implements OnInit {
 
   loadBorderAreas() {
     this.loading.set(true);
-    this.borderAreaService.getBorderAreas().subscribe({
+    this.broaderAreaService.getBroaderAreas().subscribe({
       next: (res) => {
-        this.borderAreas.set(this.getBorderAreaRows (res));
+        this.borderAreas.set(this.getBorderAreaRows(res));
         this.loading.set(false);
       },
       error: () => {
@@ -84,7 +84,7 @@ export class BorderAreaMasterComponent   implements OnInit {
   }
 
   async openForm(borderArea?: any) {
-    const res = await this.drawer.open(BorderAreaMasterFormComponent, {
+    const res = await this.drawer.open(BroaderAreaMasterFormComponent, {
       header: borderArea ? 'Edit Border Area' : 'Create New Border Area',
       data: borderArea,
       width: '620px'
@@ -100,27 +100,27 @@ export class BorderAreaMasterComponent   implements OnInit {
     }
   }
 
- delete(row: any) {
-        this.confirmationService.confirm({
-            message: 'Are you sure you want to delete this border area?',
-            header: 'Confirm Delete',
-            icon: 'pi pi-exclamation-triangle',
-            acceptLabel: 'Yes',
-            rejectLabel: 'No',
+  delete(row: any) {
+    this.confirmationService.confirm({
+      message: 'Are you sure you want to delete this border area?',
+      header: 'Confirm Delete',
+      icon: 'pi pi-exclamation-triangle',
+      acceptLabel: 'Yes',
+      rejectLabel: 'No',
 
-            accept: () => {
-                this.borderAreaService.deleteBorderArea(row.id).subscribe(() => {
-                    this.loadBorderAreas();
-                    this.messageService.add({
-                        severity: 'success',
-                        summary: 'Deleted',
-                        detail: 'Border area deleted successfully'
-                    });
-                });
-            }
+      accept: () => {
+        this.broaderAreaService.deleteBroaderArea(row.id).subscribe(() => {
+          this.loadBorderAreas();
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Deleted',
+            detail: 'Border area deleted successfully'
+          });
         });
-    }
-onAction(event: { name: string; row: any }) {
+      }
+    });
+  }
+  onAction(event: { name: string; row: any }) {
     if (event.name === 'edit') {
       this.openForm(event.row);
       return;
@@ -132,5 +132,5 @@ onAction(event: { name: string; row: any }) {
 
   }
 
- 
+
 }

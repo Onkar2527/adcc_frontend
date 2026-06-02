@@ -14,7 +14,7 @@ import { AuditQuestionSetMasterComponent } from './audit-question-master/audit-q
 import { AuditQuestionSetHeaderMasterComponent } from './audit-question-master/audit-question-set-header-master.component';
 import { AuditQuestionMasterComponent } from './audit-question-master/audit-question-master.component';
 import { AuditCategoryMasterComponent } from './audit-category-master/audit-category-master.component';
-import { BorderAreaMasterComponent } from './border-area-master/border-area-master.component';
+import { BroaderAreaMasterComponent } from './broader-area-master/broader-area-master.component';
 import { ManageAssessmentMasterComponent } from './manage-assement-master/manage-assement-master-main.compoent';
 import { AuditAnnexureMasterComponent } from './audit-annexure-master/audit-annexure-master.component';
 import { AuditAnnexureColumnsComponent } from './audit-annexure-master/audit-annexure-columns-master.component';
@@ -49,7 +49,7 @@ export const ADMIN_ROUTES: Routes = [
     { path: 'question-master/:setId/:headerId', component: AuditQuestionMasterComponent },
     { path: 'question-master/:setId', component: AuditQuestionMasterComponent },
     { path: 'audit-category-master', component: AuditCategoryMasterComponent },
-    { path: 'broader-area-master', component: BorderAreaMasterComponent },
+    { path: 'broader-area-master', component: BroaderAreaMasterComponent },
     { path: 'manage-assessment-master', component: ManageAssessmentMasterComponent },
     { path: 'periodwise-questions-master', component: PeriodwiseQuestionsMasterComponent },
     { path: 'audit-annexure-master', component: AuditAnnexureMasterComponent },

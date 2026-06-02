@@ -1239,7 +1239,7 @@ export class BranchRatingService {
   }
 
 }
-export interface BorderAreaMaster {
+export interface BroaderAreaMaster {
   id: number;
   name: string;
   appetite_percent: string;
@@ -1250,7 +1250,7 @@ export interface BorderAreaMaster {
   average_quantitative_count: string
 }
 
-export interface CreateBorderAreaMasterDto {
+export interface CreateBroaderAreaMasterDto {
   name: string;
   appetite_percent: string;
   occurance_percent: string;
@@ -1260,21 +1260,21 @@ export interface CreateBorderAreaMasterDto {
   average_quantitative_count: string
 }
 
-export interface UpdateBorderAreaMasterDto extends Partial<CreateBorderAreaMasterDto> {
+export interface UpdateBroaderAreaMasterDto extends Partial<CreateBroaderAreaMasterDto> {
   id?: number;
 }
 
 @Injectable({ providedIn: 'root' })
-export class BorderAreaMasterService {
+export class BroaderAreaMasterService {
   private http = inject(HttpClient);
   private config = inject(APP_CONFIG);
-  private apiUrl = `${this.config.apiUrl}/border-area-masters`;
+  private apiUrl = `${this.config.apiUrl}/broader-area-masters`;
 
-  getBorderAreas(): Observable<BorderAreaMaster[]> { return this.http.get<BorderAreaMaster[]>(this.apiUrl); }
-  getBorderArea(id: number): Observable<BorderAreaMaster> { return this.http.get<BorderAreaMaster>(`${this.apiUrl}/${id}`); }
-  createBorderArea(data: CreateBorderAreaMasterDto): Observable<BorderAreaMaster> { return this.http.post<BorderAreaMaster>(this.apiUrl, data); }
-  updateBorderArea(id: number, data: UpdateBorderAreaMasterDto): Observable<BorderAreaMaster> { return this.http.put<BorderAreaMaster>(`${this.apiUrl}/${id}`, data); }
-  deleteBorderArea(id: number): Observable<any> { return this.http.delete(`${this.apiUrl}/${id}`); }
+  getBroaderAreas(): Observable<BroaderAreaMaster[]> { return this.http.get<BroaderAreaMaster[]>(this.apiUrl); }
+  getBroaderArea(id: number): Observable<BroaderAreaMaster> { return this.http.get<BroaderAreaMaster>(`${this.apiUrl}/${id}`); }
+  createBroaderArea(data: CreateBroaderAreaMasterDto): Observable<BroaderAreaMaster> { return this.http.post<BroaderAreaMaster>(this.apiUrl, data); }
+  updateBroaderArea(id: number, data: UpdateBroaderAreaMasterDto): Observable<BroaderAreaMaster> { return this.http.put<BroaderAreaMaster>(`${this.apiUrl}/${id}`, data); }
+  deleteBroaderArea(id: number): Observable<any> { return this.http.delete(`${this.apiUrl}/${id}`); }
 }
 export interface ManageAssessmentMaster {
   id: number;

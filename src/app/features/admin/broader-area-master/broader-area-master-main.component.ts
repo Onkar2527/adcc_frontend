@@ -11,12 +11,12 @@ import {
 
 import {
   AuditSectionService,
-  BorderAreaMasterService,
+  BroaderAreaMasterService,
   MenuMasterService
 } from '../services/masters.service';
 
 @Component({
-  selector: 'app-border-area-master-form',
+  selector: 'app-broader-area-master-form',
   standalone: true,
   imports: [
     CommonModule,
@@ -114,13 +114,13 @@ import {
 </div>
   `
 })
-export class BorderAreaMasterFormComponent {
+export class BroaderAreaMasterFormComponent {
 
   private ref = inject(FormDrawerRef);
-  private borderAreaService = inject(BorderAreaMasterService);
+  private borderAreaService = inject(BroaderAreaMasterService);
   private sectionTypeService = inject(AuditSectionService);
 
-  
+
   name = signal('');
   appetite_percent = signal('');
   occurance_percent = signal('');
@@ -128,7 +128,7 @@ export class BorderAreaMasterFormComponent {
   frequency = signal('');
   average_qualitative_count = signal('');
   average_quantitative_count = signal('');
-  
+
 
   saving = signal(false);
   isEdit = false;
@@ -140,18 +140,18 @@ export class BorderAreaMasterFormComponent {
 
     const data = this.ref.data;
 
-   if (data) {
-  this.isEdit = true;
+    if (data) {
+      this.isEdit = true;
 
-  
-  this.name.set(data.name || '');
-  this.appetite_percent.set(data.appetite_percent || '');
-  this.occurance_percent.set(data.occurance_percent || '');
-  this.magnitude.set(data.magnitude || '');
-  this.frequency.set(data.frequency || '');
-  this.average_qualitative_count.set(data.average_qualitative_count || '');
-  this.average_quantitative_count.set(data.average_quantitative_count || '');
-}
+
+      this.name.set(data.name || '');
+      this.appetite_percent.set(data.appetite_percent || '');
+      this.occurance_percent.set(data.occurance_percent || '');
+      this.magnitude.set(data.magnitude || '');
+      this.frequency.set(data.frequency || '');
+      this.average_qualitative_count.set(data.average_qualitative_count || '');
+      this.average_quantitative_count.set(data.average_quantitative_count || '');
+    }
   }
 
   save() {
@@ -173,8 +173,8 @@ export class BorderAreaMasterFormComponent {
     };
 
     const obs = this.isEdit
-      ? this.borderAreaService.updateBorderArea(this.ref.data.id, payload)
-      : this.borderAreaService.createBorderArea(payload);
+      ? this.borderAreaService.updateBroaderArea(this.ref.data.id, payload)
+      : this.borderAreaService.createBroaderArea(payload);
 
     obs.subscribe({
       next: (res) => {
