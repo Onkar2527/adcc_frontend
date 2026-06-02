@@ -563,7 +563,7 @@ export class PeriodwiseQuestionsMasterViewComponent
           const filteredRows =
             rows.filter(
               (x: any) =>
-                x.scheme_type_id === '1'
+                x.scheme_type_id === 1 || x.scheme_type_id === '1'
             );
 
           const mappedIds =
@@ -715,7 +715,7 @@ export class PeriodwiseQuestionsMasterViewComponent
           const filteredRows =
             rows.filter(
               (x: any) =>
-                x.scheme_type_id === '2'
+                x.scheme_type_id === 2 || x.scheme_type_id === '2'
             );
 
           const mappedIds =
