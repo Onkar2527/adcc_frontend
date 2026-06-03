@@ -84,9 +84,9 @@ import { LayoutService } from '../service/layout.service';
         .layout-menuitem-meta {
             margin-top: .15rem;
             color: var(--text-color-secondary);
-            font-size: .72rem;
+            font-size: .68rem;
             font-weight: 500;
-            line-height: 1.25;
+            line-height: 1.2;
         }
     `]
 })

@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit, inject, effect } from '@angular/core';
+import { ChangeDetectorRef, Component, OnDestroy, OnInit, inject, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { NavigationEnd, Router, RouterModule } from '@angular/router';
 import { MenuItem } from 'primeng/api';
@@ -24,8 +24,11 @@ export class AppMenu implements OnInit, OnDestroy {
     private layoutService = inject(LayoutService);
     private router = inject(Router);
     private auditNavService = inject(InternalAuditNavService);
+    private cdr = inject(ChangeDetectorRef);
 
     private routeSubscription?: Subscription;
+
+    private refreshTimer?: ReturnType<typeof setTimeout>;
 
     private userTypeId = '';
 
@@ -50,7 +53,7 @@ export class AppMenu implements OnInit, OnDestroy {
                 )
                 .subscribe(
                     () =>
-                        this.refreshModel(),
+                        this.queueRefreshModel(),
                 );
     }
     model: MenuItem[] = [];
@@ -206,8 +209,28 @@ export class AppMenu implements OnInit, OnDestroy {
             this.auditNavService.assessmentId();
             this.auditNavService.menus();
             this.auditNavService.overview();
-            this.refreshModel();
+            this.queueRefreshModel();
         });
+    }
+
+    private queueRefreshModel() {
+        if (
+            this.refreshTimer
+        ) {
+            clearTimeout(
+                this.refreshTimer,
+            );
+        }
+
+        this.refreshTimer =
+            setTimeout(
+                () => {
+                    this.refreshTimer =
+                        undefined;
+                    this.refreshModel();
+                    this.cdr.detectChanges();
+                },
+            );
     }
 
     private refreshModel() {
@@ -476,6 +499,14 @@ export class AppMenu implements OnInit, OnDestroy {
 
     ngOnDestroy() {
         this.routeSubscription?.unsubscribe();
+
+        if (
+            this.refreshTimer
+        ) {
+            clearTimeout(
+                this.refreshTimer,
+            );
+        }
     }
 
 

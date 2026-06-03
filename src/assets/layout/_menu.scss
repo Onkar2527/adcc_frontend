@@ -90,6 +90,24 @@
                 font-size: 0.95rem;
             }
 
+            .layout-menuitem-copy {
+                min-width: 0;
+                flex: 1;
+            }
+
+            .layout-menuitem-text {
+                display: block;
+                font-size: 0.86rem;
+                font-weight: 500;
+                line-height: 1.2;
+                letter-spacing: 0;
+            }
+
+            .layout-menuitem-meta {
+                font-size: 0.68rem;
+                line-height: 1.2;
+            }
+
             .layout-submenu-toggler {
                 font-size: 75%;
                 margin-left: auto;
