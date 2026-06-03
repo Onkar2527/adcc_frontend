@@ -3,6 +3,10 @@
   border: 1px solid var(--surface-border, #e9ecef);
   border-radius: 8px;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  min-height: calc(100vh - 5.5rem);
+  display: flex;
+  flex-direction: column;
+  margin: 1rem;
 
   .reports-header {
     display: flex;
@@ -18,7 +22,7 @@
         font-weight: 600;
         color: var(--text-color-secondary, #8e95a5);
         letter-spacing: 0.05em;
-        margin-bottom: 0.25rem;
+
         text-transform: uppercase;
       }
 
@@ -43,12 +47,27 @@
 
   .table-container {
     padding: 0 1.5rem 1.5rem 1.5rem;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+
+    app-table {
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    app-table > div.flex-column {
+      gap: 0.5rem !important;
+      flex-grow: 1;
+    }
 
     /* Remove default shadow/borders of the nested table element so they don't double up */
     .table-container {
       border: none !important;
       box-shadow: none !important;
       padding: 0 !important;
+      flex-grow: 1;
     }
   }
 

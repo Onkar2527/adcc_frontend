@@ -50,6 +50,10 @@ import { ButtonModule } from 'primeng/button';
       border: 1px solid var(--surface-border, #e9ecef);
       border-radius: 8px;
       box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+      min-height: calc(100vh - 5.5rem);
+      margin: 1rem;
+      display: flex;
+      flex-direction: column;
       
 
       .reports-header {
