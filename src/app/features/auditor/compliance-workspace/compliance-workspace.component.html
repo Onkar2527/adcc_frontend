@@ -167,8 +167,14 @@
                 <table *ngIf="hasAccountDetails(answer)" class="account-detail-table">
                     <tbody>
                         <tr>
+                            <th>Branch Name</th>
+                            <td>{{ answer.account_branch_name || '-' }}</td>
+                            <th>Scheme Code</th>
+                            <td>{{ answer.scheme_code || '-' }}</td>
+                        </tr>
+                        <tr>
                             <th>Scheme</th>
-                            <td>{{ answer.scheme_name || '-' }} <small *ngIf="answer.scheme_code">({{ answer.scheme_code }})</small></td>
+                            <td>{{ answer.scheme_name || '-' }}</td>
                             <th>Account No.</th>
                             <td>{{ answer.account_no || '-' }}</td>
                         </tr>
@@ -179,6 +185,12 @@
                             <td>{{ answer.ucic || '-' }}</td>
                         </tr>
                         <tr>
+                            <th>Customer Type</th>
+                            <td>{{ answer.customer_type || '-' }}</td>
+                            <th>Interest Rate</th>
+                            <td>{{ answer.interest_rate || '-' }}</td>
+                        </tr>
+                        <tr>
                             <th>Opening Date</th>
                             <td>{{ answer.account_opening_date ? (answer.account_opening_date | date: 'mediumDate') : '-' }}</td>
                             <th>Renewal Date</th>
@@ -186,7 +198,21 @@
                         </tr>
                         <tr>
                             <th>Amount</th>
-                            <td colspan="3">{{ answer.account_amount || '-' }}</td>
+                            <td>{{ answer.account_amount || '-' }}</td>
+                            <th>Outstanding Balance</th>
+                            <td>{{ answer.outstanding_balance || '-' }}</td>
+                        </tr>
+                        <tr>
+                            <th>Balance As On</th>
+                            <td>{{ answer.balance_date ? (answer.balance_date | date: 'mediumDate') : '-' }}</td>
+                            <th>Due Date</th>
+                            <td>{{ answer.due_date ? (answer.due_date | date: 'mediumDate') : '-' }}</td>
+                        </tr>
+                        <tr>
+                            <th>NPA Status</th>
+                            <td>{{ answer.npa_status || '-' }}</td>
+                            <th>Account Status</th>
+                            <td>{{ answer.account_status || '-' }}</td>
                         </tr>
                     </tbody>
                 </table>
