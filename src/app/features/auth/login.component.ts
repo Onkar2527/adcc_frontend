@@ -8,13 +8,11 @@ import { PasswordModule } from 'primeng/password';
 import { ButtonModule } from 'primeng/button';
 import { AuthService } from '../../core/services/auth/auth.service';
 import { MessageService } from 'primeng/api';
-import { Toast } from "primeng/toast";
+import { Toast } from 'primeng/toast';
 
 @Component({
   selector: 'app-login',
-
   standalone: true,
-
   imports: [
     CommonModule,
     FormsModule,
@@ -23,14 +21,10 @@ import { Toast } from "primeng/toast";
     ButtonModule,
     Toast
   ],
-
   templateUrl: './login.component.html',
-
   styleUrls: ['./login.component.css']
 })
-
 export class LoginComponent {
-
   private authService = inject(AuthService);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
@@ -39,28 +33,35 @@ export class LoginComponent {
   username = '';
   password = '';
   rememberMe = false;
+  selectedRole: 'auditor' | 'reviewer' | 'manager' | undefined;
 
   loading = signal(false);
   error = signal<string | undefined>(undefined);
+
   @HostListener('document:keydown', ['$event'])
-
   handleKeyboardEvent(event: KeyboardEvent) {
-
-    if (
-      event.ctrlKey &&
-      event.key.toLowerCase() === 'k'
-    ) {
-
+    if (event.ctrlKey && event.key.toLowerCase() === 'k') {
       event.preventDefault();
 
       this.username = 'ADMIN';
       this.password = 'Emp@2024';
+      this.selectedRole = undefined;
 
       this.onLogin();
     }
   }
+
   onLogin() {
-    if (!this.username || !this.password) return;
+    if (this.loading()) return;
+
+    if (!this.username || !this.password) {
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Required',
+        detail: 'Please enter employee code and password'
+      });
+      return;
+    }
 
     this.loading.set(true);
     this.error.set(undefined);
@@ -71,43 +72,46 @@ export class LoginComponent {
     }).subscribe({
       next: () => {
         this.loading.set(false);
-        this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Login successful' });
+
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Success',
+          detail: 'Login successful'
+        });
+
         setTimeout(() => {
           const returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/home';
           this.router.navigate([returnUrl]);
         }, 1000);
-
       },
       error: (err) => {
         this.loading.set(false);
-        this.messageService.add({ severity: 'error', summary: 'Error', detail: err?.error?.message || 'Login failed' });
+
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: err?.error?.message || 'Login failed'
+        });
       }
     });
   }
-  setCredentials(type: string) {
+
+  setCredentials(type: 'auditor' | 'reviewer' | 'manager') {
+    if (this.loading()) return;
+
+    this.selectedRole = type;
 
     if (type === 'auditor') {
-
       this.username = '132';
       this.password = 'Emp@2024';
-
-    }
-
-    else if (type === 'reviewer') {
-
+    } else if (type === 'reviewer') {
       this.username = '139';
       this.password = 'Emp@2024';
-
-    }
-
-    else if (type === 'manager') {
-
+    } else if (type === 'manager') {
       this.username = '140';
       this.password = 'Emp@2024';
-
     }
+
     this.onLogin();
   }
-
-
 }
