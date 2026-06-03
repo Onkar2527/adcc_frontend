@@ -9,7 +9,7 @@
     justify-content: space-between;
     align-items: center;
     border-bottom: 1px solid var(--surface-border, #e9ecef);
-    padding: 1.5rem 1.5rem 1rem 1.5rem;
+    padding: 0 1.5rem 1rem 1.5rem;
     margin-bottom: 0.5rem;
 
     .header-left {
@@ -71,7 +71,7 @@
   }
 
   /* Report row style overrides */
-  .p-datatable-tbody > tr:not(.p-rowgroup-header) {
+  .p-datatable-tbody>tr:not(.p-rowgroup-header) {
     &:hover {
       background-color: var(--surface-hover, rgba(59, 130, 246, 0.04)) !important;
     }
@@ -111,7 +111,8 @@
     justify-content: center !important;
     transition: all 0.2s ease !important;
 
-    span, i {
+    span,
+    i {
       font-size: 0.875rem !important;
       color: #ffffff !important;
     }

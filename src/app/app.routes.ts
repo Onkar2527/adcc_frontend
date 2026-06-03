@@ -24,6 +24,7 @@ export const routes: Routes = [
       { path: 'password-policy', redirectTo: '/admin/password-policy-master', pathMatch: 'full' },
       { path: 'auditor', loadChildren: () => import('./features/auditor/auditor.routes').then(mod => mod.AUDITOR_ROUTES) },
       { path: 'reports', loadComponent: () => import('./features/reports/reports.component').then(mod => mod.ReportsComponent) },
+      { path: 'reports/detail', loadComponent: () => import('./features/reports/reports-detail-placeholder.component').then(mod => mod.ReportsDetailPlaceholderComponent) },
     ]
   },
   { 

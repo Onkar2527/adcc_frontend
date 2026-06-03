@@ -89,11 +89,7 @@ export class ReportsComponent {
   }
 
   runReport(report: ReportItem) {
-    this.messageService.add({
-      severity: 'info',
-      summary: 'Report View',
-      detail: `"${report.name}" view will be implemented next.`
-    });
+    this.router.navigate(['/reports/detail'], { queryParams: { name: report.name } });
   }
 
   getCategoryLabel(category: string): string {
