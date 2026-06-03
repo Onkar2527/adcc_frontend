@@ -23,7 +23,7 @@ export const routes: Routes = [
       { path: 'employees', redirectTo: '/admin/employee-master', pathMatch: 'full' },
       { path: 'password-policy', redirectTo: '/admin/password-policy-master', pathMatch: 'full' },
       { path: 'auditor', loadChildren: () => import('./features/auditor/auditor.routes').then(mod => mod.AUDITOR_ROUTES) },
-
+      { path: 'reports', loadComponent: () => import('./features/reports/reports.component').then(mod => mod.ReportsComponent) },
     ]
   },
   { 

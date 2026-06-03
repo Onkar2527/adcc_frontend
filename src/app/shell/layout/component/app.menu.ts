@@ -80,6 +80,11 @@ export class AppMenu implements OnInit, OnDestroy {
             items: [{ label: 'Pending Compliance', icon: 'pi pi-fw pi-clipboard', routerLink: ['/auditor/compliance'] }],
         },
         {
+            label: 'Reports',
+            authority: ['1', '2', '3', '4'],
+            items: [{ label: 'Reports', icon: 'pi pi-fw pi-file', routerLink: ['/reports'] }],
+        },
+        {
             label: 'Masters',
             authority: ['1'],
             items: [
