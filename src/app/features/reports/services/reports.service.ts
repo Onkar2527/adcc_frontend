@@ -2,13 +2,6 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { APP_CONFIG } from '../../../core/services/config/config.token';
 
-export interface AuditStatusReportFilters {
-  audit_unit_id: string;
-  financial_year: string;
-  audit_status: string;
-  comp_status: string;
-}
-
 export interface ReportFilterDefinition {
   key: string;
   label: string;
@@ -56,27 +49,6 @@ export class ReportsService {
   private http = inject(HttpClient);
   private config = inject(APP_CONFIG);
   private apiUrl = `${this.config.apiUrl}/reports`;
-
-  getAuditStatusLookups() {
-    return this.http.get<any>(
-      `${this.apiUrl}/audit-status/lookups`,
-    );
-  }
-
-  getAuditStatusReport(filters: AuditStatusReportFilters) {
-    let params = new HttpParams();
-
-    Object.entries(filters).forEach(([key, value]) => {
-      params = params.set(key, String(value ?? ''));
-    });
-
-    return this.http.get<any>(
-      `${this.apiUrl}/audit-status`,
-      {
-        params,
-      },
-    );
-  }
 
   getReportDefinition(reportSlug: string) {
     return this.http.get<ReportDefinition>(
