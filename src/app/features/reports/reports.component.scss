@@ -6,7 +6,7 @@
   min-height: calc(100vh - 5.5rem);
   display: flex;
   flex-direction: column;
-  margin: 1rem;
+
 
   .reports-header {
     display: flex;
@@ -57,7 +57,7 @@
       flex-direction: column;
     }
 
-    app-table > div.flex-column {
+    app-table>div.flex-column {
       gap: 0.5rem !important;
       flex-grow: 1;
     }
