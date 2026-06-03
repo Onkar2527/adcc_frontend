@@ -89,7 +89,7 @@ export class ReportsComponent {
   }
 
   runReport(report: ReportItem) {
-    this.router.navigateByUrl(report.route);
+    this.router.navigate([report.route], { queryParams: { name: report.name } });
   }
 
   getCategoryLabel(category: string): string {

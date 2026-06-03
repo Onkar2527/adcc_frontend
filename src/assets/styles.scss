@@ -85,9 +85,6 @@ body.sidebar-resizing * {
   width: 44mm;
   height: 12mm;
   background-color: #182433;
-  background-size: auto 10mm;
-  background-repeat: no-repeat;
-  background-position: center 5px;
   position: relative;
 }
 
@@ -220,9 +217,6 @@ body.sidebar-resizing * {
     width: 44mm !important;
     height: 12mm !important;
     background-color: #182433 !important;
-    background-size: auto 10mm !important;
-    background-repeat: no-repeat !important;
-    background-position: center 5px !important;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }

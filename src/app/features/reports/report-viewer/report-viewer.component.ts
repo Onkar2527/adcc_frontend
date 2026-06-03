@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ButtonModule } from 'primeng/button';
 import { TagModule } from 'primeng/tag';
+import { ExportService } from '../../../core/services/export/export.service';
 import {
   ReportColumnDefinition,
   ReportDefinition,
@@ -22,6 +23,7 @@ export class ReportViewerComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private reportsService = inject(ReportsService);
+  private exportService = inject(ExportService);
 
   reportSlug = signal('');
   definition = signal<ReportDefinition | null>(null);
@@ -55,12 +57,19 @@ export class ReportViewerComponent implements OnInit {
         this.filters = {
           ...(definition.defaultFilters || {}),
         };
+        // Programmatically preload logo image to ensure browser caching
+        const logoUrl = definition.brand?.logoUrl || '/assets/images/logos/auditpro-logo.png';
+        const img = new Image();
+        img.src = logoUrl;
+
         this.loading.set(false);
       },
       error: (err) => {
         this.definition.set(null);
         this.error.set(err?.error?.message || 'Report is not available.');
         this.loading.set(false);
+        const name = this.route.snapshot.queryParams['name'] || slug;
+        this.router.navigate(['/reports/detail'], { queryParams: { name } });
       },
     });
   }
@@ -119,7 +128,7 @@ export class ReportViewerComponent implements OnInit {
     setTimeout(() => document.body.classList.remove('printing-report'));
   }
 
-  exportCsv() {
+  exportExcel() {
     const definition = this.definition();
     const rows = this.rows();
 
@@ -127,22 +136,24 @@ export class ReportViewerComponent implements OnInit {
       return;
     }
 
-    const headers = definition.columns.map((column) => column.label);
-    const csvRows = rows.map((row) =>
-      definition.columns.map((column) => this.exportValue(row, column)),
+    const dataToExport = rows.map((row) => {
+      const formattedRow: any = {};
+      definition.columns.forEach((column) => {
+        formattedRow[column.key] = this.exportValue(row, column);
+      });
+      return formattedRow;
+    });
+
+    const exportCols = definition.columns.map((column) => ({
+      field: column.key,
+      header: column.label.toUpperCase(),
+    }));
+
+    this.exportService.exportToExcel(
+      dataToExport,
+      exportCols,
+      definition.fileName || definition.slug
     );
-
-    const csv = [headers, ...csvRows]
-      .map((line) => line.map((cell) => `"${String(cell ?? '-').replace(/"/g, '""')}"`).join(','))
-      .join('\n');
-
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `${definition.fileName || definition.slug}.csv`;
-    link.click();
-    URL.revokeObjectURL(url);
   }
 
   goBack() {

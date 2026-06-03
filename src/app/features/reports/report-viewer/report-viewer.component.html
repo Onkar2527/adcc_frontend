@@ -1,4 +1,11 @@
 <section class="report-viewer">
+  <!-- Eager preload logo to ensure it is cached before printing -->
+  <img
+    [src]="reportLogo()"
+    style="position: absolute; width: 0; height: 0; opacity: 0; pointer-events: none;"
+    alt=""
+  />
+
   <header class="report-titlebar no-print">
     <div>
       <span>{{ definition()?.category || 'Reports' }}</span>
@@ -34,7 +41,7 @@
       <button pButton type="button" icon="pi pi-search" label="Find" [loading]="loading()" (click)="findReport()"></button>
       <button pButton type="button" icon="pi pi-refresh" label="Reset" severity="secondary" outlined (click)="reset()"></button>
       <button pButton type="button" icon="pi pi-print" label="Print" severity="secondary" outlined [disabled]="!rows().length" (click)="print()"></button>
-      <button pButton type="button" icon="pi pi-file-excel" label="CSV" severity="success" outlined [disabled]="!rows().length" (click)="exportCsv()"></button>
+      <button pButton type="button" icon="pi pi-file-excel" label="Excel" severity="success" outlined [disabled]="!rows().length" (click)="exportExcel()"></button>
     </div>
   </div>
 
@@ -52,12 +59,17 @@
   <div class="official-report-sheet" *ngIf="definition() && rows().length">
     <div class="official-report-header print-only">
       <div class="official-report-brand-row">
-        <span
+        <div
           class="official-report-logo"
           data-id="auditproLogo"
-          [style.background-image]="'url(' + reportLogo() + ')'"
           aria-label="AuditPro"
-        ></span>
+        >
+          <img
+            [src]="reportLogo()"
+            alt="Logo"
+            style="height: 10mm; display: block; margin: 1px auto 0;"
+          />
+        </div>
 
         <div class="official-report-bank">
           <p><strong>Report Date:</strong> {{ reportRunDate() }}</p>
