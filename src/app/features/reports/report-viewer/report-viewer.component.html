@@ -1,0 +1,128 @@
+<section class="report-viewer">
+  <header class="report-titlebar no-print">
+    <div>
+      <span>{{ definition()?.category || 'Reports' }}</span>
+      <h1>{{ definition()?.title || 'Report' }}</h1>
+    </div>
+
+    <button
+      pButton
+      type="button"
+      icon="pi pi-arrow-left"
+      label="Reports"
+      severity="secondary"
+      outlined
+      (click)="goBack()"
+    ></button>
+  </header>
+
+  <div class="filter-panel no-print" *ngIf="definition()">
+    <div class="field" *ngFor="let filter of definition()?.filters" [class.field-wide]="filter.key === 'audit_unit_id'">
+      <label>{{ filter.label }}</label>
+
+      <select *ngIf="filter.type === 'select'" [(ngModel)]="filters[filter.key]">
+        <option *ngFor="let option of filter.options || []" [value]="option.value">
+          {{ option.label }}
+        </option>
+      </select>
+
+      <input *ngIf="filter.type === 'date'" type="date" [(ngModel)]="filters[filter.key]" />
+      <input *ngIf="filter.type === 'text'" type="text" [(ngModel)]="filters[filter.key]" />
+    </div>
+
+    <div class="filter-actions">
+      <button pButton type="button" icon="pi pi-search" label="Find" [loading]="loading()" (click)="findReport()"></button>
+      <button pButton type="button" icon="pi pi-refresh" label="Reset" severity="secondary" outlined (click)="reset()"></button>
+      <button pButton type="button" icon="pi pi-print" label="Print" severity="secondary" outlined [disabled]="!rows().length" (click)="print()"></button>
+      <button pButton type="button" icon="pi pi-file-excel" label="CSV" severity="success" outlined [disabled]="!rows().length" (click)="exportCsv()"></button>
+    </div>
+  </div>
+
+  <div *ngIf="error()" class="report-alert no-print">
+    {{ error() }}
+  </div>
+
+  <div *ngIf="definition()?.summaryCards?.length && summary()" class="summary-strip no-print">
+    <div *ngFor="let card of definition()?.summaryCards">
+      <small>{{ card.label }}</small>
+      <strong>{{ summary()?.[card.key] || 0 }}</strong>
+    </div>
+  </div>
+
+  <div class="official-report-sheet" *ngIf="definition() && rows().length">
+    <div class="official-report-header print-only">
+      <div class="official-report-brand-row">
+        <span
+          class="official-report-logo"
+          data-id="auditproLogo"
+          [style.background-image]="'url(' + reportLogo() + ')'"
+          aria-label="AuditPro"
+        ></span>
+
+        <div class="official-report-bank">
+          <p><strong>Report Date:</strong> {{ reportRunDate() }}</p>
+          <p *ngIf="reportBankName()"><strong>Bank:</strong> {{ reportBankName() }}</p>
+        </div>
+      </div>
+
+      <div class="official-report-meta">
+        <p><strong>Report:</strong> {{ definition()?.title }}</p>
+        <p><strong>Report Run Date:</strong> {{ reportRunDate() }}</p>
+      </div>
+    </div>
+
+    <div class="official-report-table-wrap">
+      <table class="official-report-table">
+        <thead>
+          <tr>
+            <th
+              *ngFor="let column of definition()?.columns"
+              [style.width]="column.width || null"
+              [class.text-center]="column.align === 'center'"
+              [class.text-right]="column.align === 'right'"
+            >
+              {{ column.label }}
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let row of rows()">
+            <td
+              *ngFor="let column of definition()?.columns"
+              [class.text-center]="column.align === 'center'"
+              [class.text-right]="column.align === 'right'"
+            >
+              <ng-container [ngSwitch]="column.type">
+                <ng-container *ngSwitchCase="'assessmentPeriod'">
+                  <strong>{{ row.assesment_period_from | date: 'dd MMM yyyy' }}</strong>
+                  to
+                  <strong>{{ row.assesment_period_to | date: 'dd MMM yyyy' }}</strong>
+                  <small>Frequency: {{ row.frequency || '-' }} Months</small>
+                </ng-container>
+
+                <ng-container *ngSwitchCase="'date'">
+                  {{ row[column.key] ? (row[column.key] | date: 'dd MMM yyyy') : '-' }}
+                </ng-container>
+
+                <ng-container *ngSwitchCase="'status'">
+                  <p-tag [value]="row[column.key] || '-'" [severity]="statusSeverity(row, column)"></p-tag>
+                  <small *ngIf="column.expiredKey && row[column.expiredKey]" class="expired-note">
+                    Expired on {{ row[column.dueDateKey || ''] | date: 'dd MMM yyyy' }}
+                  </small>
+                </ng-container>
+
+                <ng-container *ngSwitchDefault>
+                  {{ row[column.key] ?? '-' }}
+                </ng-container>
+              </ng-container>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div *ngIf="searched() && !loading() && !rows().length && !error()" class="empty-state">
+    No records found for selected filters.
+  </div>
+</section>
