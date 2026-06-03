@@ -58,3 +58,213 @@ body.sidebar-resizing {
 body.sidebar-resizing * {
   cursor: ew-resize !important;
 }
+
+.official-report-sheet {
+  background: #ffffff;
+  border: 1px solid #d7e1eb;
+  border-radius: 6px;
+  padding: .8rem;
+}
+
+.official-report-header {
+  margin-bottom: .65rem;
+}
+
+.official-report-brand-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.35rem;
+  padding-bottom: .2rem;
+  border-bottom: 1px solid #d9d9d9;
+}
+
+.official-report-logo {
+  display: inline-block;
+  width: 44mm;
+  height: 12mm;
+  background-color: #182433;
+  background-size: auto 10mm;
+  background-repeat: no-repeat;
+  background-position: center 5px;
+  position: relative;
+}
+
+.official-report-logo::after {
+  content: '';
+  position: absolute;
+  left: 5mm;
+  bottom: -2.4mm;
+  width: 0;
+  height: 0;
+  border-left: 2.4mm solid transparent;
+  border-right: 2.4mm solid transparent;
+  border-top: 2.4mm solid #182433;
+}
+
+.official-report-bank {
+  min-width: 18rem;
+  text-align: right;
+}
+
+.official-report-meta {
+  margin-bottom: 1.35rem;
+}
+
+.official-report-header p {
+  margin: 0;
+  color: #102a43;
+  font-size: .86rem;
+  line-height: 1.35;
+}
+
+.official-report-header strong {
+  font-weight: 800;
+}
+
+.print-only {
+  display: none !important;
+}
+
+.official-report-table-wrap {
+  overflow: auto;
+  border: 1px solid #d7e1eb;
+}
+
+.official-report-table {
+  width: 100%;
+  min-width: 1120px;
+  border-collapse: collapse;
+  font-size: .82rem;
+}
+
+.official-report-table th,
+.official-report-table td {
+  border: 1px solid #d7e1eb;
+  padding: .45rem .55rem;
+  vertical-align: top;
+  text-align: left;
+}
+
+.official-report-table th {
+  background: #eaf1f8;
+  color: #173a59;
+  font-size: .72rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+@media print {
+  @page {
+    size: A4 landscape;
+    margin: 10mm;
+  }
+
+  body.printing-report {
+    background: #ffffff !important;
+  }
+
+  body.printing-report .layout-topbar,
+  body.printing-report .layout-sidebar,
+  body.printing-report .layout-mask,
+  body.printing-report .no-print {
+    display: none !important;
+  }
+
+  body.printing-report .print-only {
+    display: block !important;
+  }
+
+  body.printing-report .layout-main-container,
+  body.printing-report .layout-main,
+  body.printing-report app-layout,
+  body.printing-report router-outlet {
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+    max-width: none !important;
+    background: #ffffff !important;
+  }
+
+  body.printing-report .card,
+  body.printing-report .official-report-sheet {
+    box-shadow: none !important;
+    border-radius: 0 !important;
+  }
+
+  body.printing-report .official-report-sheet {
+    display: block;
+    border: 0 !important;
+    padding: 0 !important;
+    background: #ffffff !important;
+  }
+
+  body.printing-report .official-report-header {
+    margin-bottom: 10px;
+  }
+
+  body.printing-report .official-report-header p {
+    font-size: 9.5px;
+    line-height: 1.35;
+  }
+
+  body.printing-report .official-report-brand-row {
+    margin-bottom: 18px;
+    padding-bottom: 2px;
+    border-bottom: 1px solid #d9d9d9;
+  }
+
+  body.printing-report .official-report-logo {
+    display: inline-block !important;
+    width: 44mm !important;
+    height: 12mm !important;
+    background-color: #182433 !important;
+    background-size: auto 10mm !important;
+    background-repeat: no-repeat !important;
+    background-position: center 5px !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  body.printing-report .official-report-bank {
+    min-width: 220px;
+    text-align: right;
+  }
+
+  body.printing-report .official-report-meta {
+    margin-bottom: 18px;
+  }
+
+  body.printing-report .official-report-table-wrap {
+    overflow: visible !important;
+    border: 0 !important;
+  }
+
+  body.printing-report .official-report-table {
+    min-width: 0 !important;
+    width: 100% !important;
+    font-size: 9px !important;
+  }
+
+  body.printing-report .official-report-table th,
+  body.printing-report .official-report-table td {
+    border: 1px solid #333 !important;
+    padding: 3px 4px !important;
+  }
+
+  body.printing-report .official-report-table th {
+    background: #e6e6e6 !important;
+    color: #000 !important;
+    font-size: 8.5px !important;
+  }
+
+  body.printing-report .official-report-table .p-tag {
+    background: transparent !important;
+    border: 0 !important;
+    color: #000 !important;
+    padding: 0 !important;
+    font-size: inherit !important;
+    font-weight: 700 !important;
+  }
+}
