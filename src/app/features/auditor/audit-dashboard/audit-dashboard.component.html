@@ -1,159 +1,20 @@
-<section class="audit-dashboard-page">
-    <header class="dashboard-header">
-        <div>
-            <p class="dashboard-eyebrow">Internal Audit</p>
-            <h1>Assigned Audit Units</h1>
-        </div>
-
-       
-    </header>
-
-    <section class="dashboard-toolbar" aria-label="Audit unit filters">
-        <div class="filter-field filter-field--search">
-            <label>Search audit unit</label>
-            <span class="search-control">
-                <i class="pi pi-search"></i>
-                <input
-                    pInputText
-                    type="text"
-                    [ngModel]="search()"
-                    (ngModelChange)="search.set($event)"
-                    placeholder="Audit unit name or code"
-                />
-            </span>
-        </div>
-
-        <div class="filter-field">
-            <label>Status</label>
-            <p-select
-                [options]="statusOptions"
-                [ngModel]="selectedStatus()"
-                (ngModelChange)="selectedStatus.set($event)"
-                optionLabel="label"
-                optionValue="value"
-                placeholder="All Status"
-                [showClear]="true"
-                styleClass="dashboard-select"
-            ></p-select>
-        </div>
-    </section>
-
-    <section class="summary-strip">
-        <article>
-            <span>Total</span>
-            <strong>{{ dashboardData().length }}</strong>
-        </article>
-
-        <article>
-            <span>Audit</span>
-            <strong class="text-warn">{{ totalAuditPending() }}</strong>
-        </article>
-
-        <article>
-            <span>Review</span>
-            <strong class="text-info">{{ totalReviewPending() }}</strong>
-        </article>
-
-        <article>
-            <span>Compliance</span>
-            <strong class="text-danger">{{ totalCompliancePending() }}</strong>
-        </article>
-
-        <article>
-            <span>Completed</span>
-            <strong class="text-success">{{ totalCompleted() }}</strong>
-        </article>
-    </section>
-
-    <section class="unit-grid-panel">
-        <div class="table-titlebar">
-            <div>
-                <h2>Assigned Branches</h2>
-            </div>
-
-            <button
-                pButton
-                type="button"
-                icon="pi pi-refresh"
-                label="Refresh"
-                severity="secondary"
-                class="p-button-outlined p-button-secondary"
-                (click)="loadData()"
-            ></button>
-        </div>
-
-        <div *ngIf="!loading() && filteredData().length === 0" class="empty-state">
-            <i class="pi pi-inbox"></i>
-            <strong>No audit units found</strong>
-            <span>Try changing the search or status filter.</span>
-        </div>
-
-        <div *ngIf="loading()" class="unit-grid">
-            <article class="unit-card unit-card--loading" *ngFor="let item of [1,2,3,4,5,6]">
-                <p-skeleton width="68%" height="1.1rem"></p-skeleton>
-                <p-skeleton width="42%" height="0.8rem"></p-skeleton>
-                <p-skeleton width="100%" height="3.6rem"></p-skeleton>
-                <p-skeleton width="7rem" height="2rem"></p-skeleton>
-            </article>
-        </div>
-
-        <div *ngIf="!loading() && filteredData().length > 0" class="unit-grid">
-            <article
-                class="unit-card"
-                tabindex="0"
-                role="button"
-                *ngFor="let item of filteredData()"
-                (click)="openAssessment(item)"
-                (keydown.enter)="openAssessment(item)"
-                (keydown.space)="openAssessment(item)"
-            >
-                <div class="unit-card__top">
-                    <div class="unit-card__title">
-                        <span>Audit Unit</span>
-                        <h3>{{ item.audit_unit_name }}</h3>
-                        <small>{{ item.audit_unit_code }}</small>
-                    </div>
-
-                    <p-tag
-                        [value]="item.latest_status || 'NOT STARTED'"
-                        [severity]="getSeverity(item.latest_status)"
-                    ></p-tag>
-                </div>
-
-                <div class="unit-card__metrics">
-                    <div>
-                        <span>Audit</span>
-                        <strong class="text-warn">{{ item.audit_pending || 0 }}</strong>
-                    </div>
-
-                    <div>
-                        <span>Review</span>
-                        <strong class="text-info">{{ item.review_pending || 0 }}</strong>
-                    </div>
-
-                    <div>
-                        <span>Compliance</span>
-                        <strong class="text-danger">{{ item.compliance_pending || 0 }}</strong>
-                    </div>
-
-                    <div>
-                        <span>Done</span>
-                        <strong class="text-success">{{ item.audit_completed || 0 }}</strong>
-                    </div>
-                </div>
-
-                <div class="unit-card__footer">
-                    <span>
-                        <ng-container *ngIf="item.not_started_count > 0; else readyToOpen">
-                            {{ item.not_started_count }} audit{{ item.not_started_count === 1 ? '' : 's' }} not started
-                        </ng-container>
-
-                        <ng-template #readyToOpen>Ready to open</ng-template>
-                    </span>
-
-                    <i class="pi pi-arrow-right"></i>
-                </div>
-            </article>
-        </div>
-    </section>
-</section>
+<app-audit-unit-dashboard
+  eyebrow="Internal Audit"
+  title="Select Audit Unit"
+  subtitle="Select a branch/unit to continue the audit workflow"
+  panelTitle="Assigned Branches"
+  [units]="filteredData()"
+  [loading]="loading()"
+  [search]="search()"
+  [selectedStatus]="selectedStatus()"
+  [statusOptions]="statusOptions"
+  [totalUnits]="dashboardData().length"
+  [totalAuditPending]="totalAuditPending()"
+  [totalReviewPending]="totalReviewPending()"
+  [totalCompliancePending]="totalCompliancePending()"
+  [totalCompleted]="totalCompleted()"
+  (searchChange)="search.set($event)"
+  (selectedStatusChange)="selectedStatus.set($event)"
+  (refresh)="loadData()"
+  (openUnit)="openAssessment($event)"
+></app-audit-unit-dashboard>

@@ -15,18 +15,7 @@ import { FormsModule } from '@angular/forms';
 import { AuditDashboardService }
     from '../services/auditor-main.service';
 
-import { ButtonModule } from 'primeng/button';
-
-import { TagModule } from 'primeng/tag';
-
-import { InputTextModule }
-    from 'primeng/inputtext';
-
-import { SkeletonModule }
-    from 'primeng/skeleton';
-
-import { SelectModule }
-    from 'primeng/select';
+import { AuditUnitDashboardComponent } from '../../../shared/components/audit-unit-dashboard/audit-unit-dashboard.component';
 
 @Component({
 
@@ -41,15 +30,7 @@ import { SelectModule }
 
         FormsModule,
 
-        ButtonModule,
-
-        TagModule,
-
-        InputTextModule,
-
-        SelectModule,
-
-        SkeletonModule,
+        AuditUnitDashboardComponent
     ],
 
     templateUrl: './audit-dashboard.component.html',
@@ -79,27 +60,22 @@ export class AuditDashboardComponent
         signal<any>(null);
 
     statusOptions = [
-
         {
             label: 'Not Started',
             value: 'NOT STARTED',
         },
-
         {
             label: 'Audit Pending',
             value: 'AUDIT PENDING',
         },
-
         {
             label: 'Review Pending',
             value: 'REVIEW PENDING',
         },
-
         {
             label: 'Compliance Pending',
             value: 'COMPLIANCE PENDING',
         },
-
         {
             label: 'Completed',
             value: 'ASSESMENT COMPLETED',
