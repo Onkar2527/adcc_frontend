@@ -5,11 +5,14 @@ import { APP_CONFIG } from '../../../core/services/config/config.token';
 export interface ReportFilterDefinition {
   key: string;
   label: string;
-  type: 'select' | 'date' | 'text';
+  type: 'select' | 'date' | 'text' | 'checkbox';
   required?: boolean;
+  dependsOn?: string;
+  optionParentKey?: string;
   options?: Array<{
     value: string;
     label: string;
+    [key: string]: any;
   }>;
 }
 
@@ -60,7 +63,12 @@ export class ReportsService {
     let params = new HttpParams();
 
     Object.entries(filters).forEach(([key, value]) => {
-      params = params.set(key, String(value ?? ''));
+      params = params.set(
+        key,
+        Array.isArray(value)
+          ? value.join(',')
+          : String(value ?? ''),
+      );
     });
 
     return this.http.get<any>(

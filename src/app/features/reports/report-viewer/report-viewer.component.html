@@ -23,25 +23,65 @@
     ></button>
   </header>
 
-  <div class="filter-panel no-print" *ngIf="definition()">
-    <div class="field" *ngFor="let filter of definition()?.filters" [class.field-wide]="filter.key === 'audit_unit_id'">
+  <div
+    class="filter-panel no-print"
+    *ngIf="definition()"
+    [class.audit-complete-filters]="definition()?.slug === 'audit-complete-report'"
+  >
+    <div
+      class="field"
+      *ngFor="let filter of definition()?.filters"
+      [class.field-wide]="filter.key === 'audit_unit_id'"
+      [class.field-half]="filter.key === 'reportAuditUnit' || filter.key === 'reportAuditAssesment'"
+      [class.field-checkbox]="filter.type === 'checkbox'"
+      [class.field-checkbox-wide]="filter.key === 'risk_category_arr'"
+      [class.field-checkbox-compact]="filter.key === 'business_risk_arr' || filter.key === 'control_risk_arr'"
+      [class.field-risk-category]="filter.key === 'risk_category_arr'"
+      [class.field-business-category]="filter.key === 'business_risk_arr'"
+      [class.field-control-category]="filter.key === 'control_risk_arr'"
+    >
       <label>{{ filter.label }}</label>
 
-      <select *ngIf="filter.type === 'select'" [(ngModel)]="filters[filter.key]">
-        <option *ngFor="let option of filter.options || []" [value]="option.value">
+      <select
+        *ngIf="filter.type === 'select'"
+        [(ngModel)]="filters[filter.key]"
+        (ngModelChange)="onFilterChange(filter)"
+      >
+        <option *ngFor="let option of filterOptions(filter)" [value]="option.value">
           {{ option.label }}
         </option>
       </select>
 
       <input *ngIf="filter.type === 'date'" type="date" [(ngModel)]="filters[filter.key]" />
       <input *ngIf="filter.type === 'text'" type="text" [(ngModel)]="filters[filter.key]" />
+
+      <div *ngIf="filter.type === 'checkbox'" class="checkbox-filter-grid">
+        <label class="checkbox-filter-option" *ngFor="let option of filter.options || []">
+          <input
+            type="checkbox"
+            [checked]="checkboxSelected(filter.key, option.value)"
+            (change)="toggleCheckboxFilter(filter.key, option.value, $any($event.target).checked)"
+          />
+          <span>{{ option.label }}</span>
+        </label>
+      </div>
     </div>
 
     <div class="filter-actions">
       <button pButton type="button" icon="pi pi-search" label="Find" [loading]="loading()" (click)="findReport()"></button>
       <button pButton type="button" icon="pi pi-refresh" label="Reset" severity="secondary" outlined (click)="reset()"></button>
       <button pButton type="button" icon="pi pi-print" label="Print" severity="secondary" outlined [disabled]="!rows().length" (click)="print()"></button>
-      <button pButton type="button" icon="pi pi-file-excel" label="Excel" severity="success" outlined [disabled]="!rows().length" (click)="exportExcel()"></button>
+      <button
+        *ngIf="canExportExcel()"
+        pButton
+        type="button"
+        icon="pi pi-file-excel"
+        label="Excel"
+        severity="success"
+        outlined
+        [disabled]="!rows().length"
+        (click)="exportExcel()"
+      ></button>
     </div>
   </div>
 
@@ -80,12 +120,18 @@
       <div class="official-report-meta">
         <p><strong>Report:</strong> {{ definition()?.title }}</p>
         <p><strong>Report Run Date:</strong> {{ reportRunDate() }}</p>
+        <p *ngIf="reportAssessmentPeriod()">
+          <strong>Assessment Period:</strong> {{ reportAssessmentPeriod() }}
+        </p>
+        <p *ngIf="reportAuditUnit()">
+          <strong>Audit Unit:</strong> {{ reportAuditUnit() }}
+        </p>
       </div>
     </div>
 
     <div class="official-report-table-wrap">
       <table class="official-report-table">
-        <thead>
+        <thead *ngIf="!hasGroupedRows()">
           <tr>
             <th
               *ngFor="let column of definition()?.columns"
@@ -98,37 +144,118 @@
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let row of rows()">
-            <td
-              *ngFor="let column of definition()?.columns"
-              [class.text-center]="column.align === 'center'"
-              [class.text-right]="column.align === 'right'"
-            >
-              <ng-container [ngSwitch]="column.type">
-                <ng-container *ngSwitchCase="'assessmentPeriod'">
-                  <strong>{{ row.assesment_period_from | date: 'dd MMM yyyy' }}</strong>
-                  to
-                  <strong>{{ row.assesment_period_to | date: 'dd MMM yyyy' }}</strong>
-                  <small>Frequency: {{ row.frequency || '-' }} Months</small>
+          <ng-container *ngFor="let row of rows(); let rowIndex = index">
+            <tr *ngIf="row.__report_group" class="report-group-row" [class]="'report-group-' + row.__group_level">
+              <td [attr.colspan]="definition()?.columns?.length || 1">
+                <ng-container *ngIf="row.__group_level !== 'account'; else accountDetailsBlock">
+                  {{ row.__group_label }}
                 </ng-container>
+                <ng-template #accountDetailsBlock>
+                  <div class="report-account-title">{{ row.__group_label }}</div>
+                  <table class="report-account-table">
+                    <tr *ngFor="let detailRow of row.__account_details?.rows || []">
+                      <td *ngFor="let cell of detailRow">
+                        <strong>{{ cell.label }}:</strong> {{ cell.value }}
+                      </td>
+                    </tr>
+                  </table>
+                </ng-template>
+              </td>
+            </tr>
 
-                <ng-container *ngSwitchCase="'date'">
-                  {{ row[column.key] ? (row[column.key] | date: 'dd MMM yyyy') : '-' }}
-                </ng-container>
+            <tr *ngIf="showInlineHeader(row, rowIndex)" class="report-inline-header-row">
+              <th
+                *ngFor="let column of definition()?.columns"
+                [style.width]="column.width || null"
+                [class.text-center]="column.align === 'center'"
+                [class.text-right]="column.align === 'right'"
+              >
+                {{ column.label }}
+              </th>
+            </tr>
 
-                <ng-container *ngSwitchCase="'status'">
-                  <p-tag [value]="row[column.key] || '-'" [severity]="statusSeverity(row, column)"></p-tag>
-                  <small *ngIf="column.expiredKey && row[column.expiredKey]" class="expired-note">
-                    Expired on {{ row[column.dueDateKey || ''] | date: 'dd MMM yyyy' }}
-                  </small>
-                </ng-container>
+            <tr *ngIf="row.__report_annexure" class="report-annexure-row">
+              <td [attr.colspan]="definition()?.columns?.length || 1">
+                <table class="report-annexure-table">
+                  <thead>
+                    <tr>
+                      <th>{{ row.__annexure_title }}</th>
+                      <th>Business Risk</th>
+                      <th>Control Risk</th>
+                      <th>Risk Type</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr *ngFor="let annexureRow of row.__annexure_rows || []">
+                      <td>{{ annexureRow.description }}</td>
+                      <td>{{ annexureRow.business_risk_label }}</td>
+                      <td>{{ annexureRow.control_risk_label }}</td>
+                      <td>{{ annexureRow.risk_category }}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </td>
+            </tr>
 
-                <ng-container *ngSwitchDefault>
-                  {{ row[column.key] ?? '-' }}
+            <tr *ngIf="row.__report_vouching" class="report-annexure-row">
+              <td [attr.colspan]="definition()?.columns?.length || 1">
+                <table class="report-annexure-table report-vouching-table">
+                  <thead>
+                    <tr>
+                      <th *ngFor="let column of row.__vouching_columns || []">
+                        {{ column.label }}
+                      </th>
+                      <th>Business Risk</th>
+                      <th>Control Risk</th>
+                      <th>Risk Type</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr *ngFor="let vouchingRow of row.__vouching_rows || []">
+                      <td *ngFor="let cell of vouchingRow.cells || []">
+                        {{ cell }}
+                      </td>
+                      <td>{{ vouchingRow.business_risk_label }}</td>
+                      <td>{{ vouchingRow.control_risk_label }}</td>
+                      <td>{{ vouchingRow.risk_category }}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </td>
+            </tr>
+
+            <tr *ngIf="!row.__report_group && !row.__report_annexure && !row.__report_vouching">
+              <td
+                *ngFor="let column of definition()?.columns"
+                [class.text-center]="column.align === 'center'"
+                [class.text-right]="column.align === 'right'"
+              >
+                <ng-container [ngSwitch]="column.type">
+                  <ng-container *ngSwitchCase="'assessmentPeriod'">
+                    <strong>{{ row.assesment_period_from | date: 'dd MMM yyyy' }}</strong>
+                    to
+                    <strong>{{ row.assesment_period_to | date: 'dd MMM yyyy' }}</strong>
+                    <small>Frequency: {{ row.frequency || '-' }} Months</small>
+                  </ng-container>
+
+                  <ng-container *ngSwitchCase="'date'">
+                    {{ row[column.key] ? (row[column.key] | date: 'dd MMM yyyy') : '-' }}
+                  </ng-container>
+
+                  <ng-container *ngSwitchCase="'status'">
+                    <p-tag [value]="row[column.key] || '-'" [severity]="statusSeverity(row, column)"></p-tag>
+                    <small *ngIf="column.expiredKey && row[column.expiredKey]" class="expired-note">
+                      Expired on {{ row[column.dueDateKey || ''] | date: 'dd MMM yyyy' }}
+                    </small>
+                  </ng-container>
+
+                  <ng-container *ngSwitchDefault>
+                    {{ row[column.key] ?? '-' }}
+                  </ng-container>
                 </ng-container>
-              </ng-container>
-            </td>
-          </tr>
+              </td>
+            </tr>
+          </ng-container>
         </tbody>
       </table>
     </div>
