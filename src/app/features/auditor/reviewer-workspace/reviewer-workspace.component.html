@@ -115,15 +115,26 @@
         </p>
       </div>
 
-      <button
-        pButton
-        type="button"
-        [label]="isComplianceReview() ? 'Submit Compliance Review' : 'Submit Review'"
-        icon="pi pi-send"
-        [loading]="submitting()"
-        [disabled]="submitting() || bulkSaving() || pendingReviewCount() > 0"
-        (click)="submitReview()"
-      ></button>
+      <div class="flex gap-2">
+        <button
+          pButton
+          type="button"
+          label="View Executive Summary"
+          icon="pi pi-file-edit"
+          severity="info"
+          (click)="viewExecutiveSummary()"
+        ></button>
+
+        <button
+          pButton
+          type="button"
+          [label]="isComplianceReview() ? 'Submit Compliance Review' : 'Submit Review'"
+          icon="pi pi-send"
+          [loading]="submitting()"
+          [disabled]="submitting() || bulkSaving() || pendingReviewCount() > 0"
+          (click)="submitReview()"
+        ></button>
+      </div>
     </div>
 
     <div *ngIf="loadingDetail()" class="queue-loading">

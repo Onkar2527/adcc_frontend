@@ -262,7 +262,7 @@
     </div>
     <div class="col-12 flex justify-content-center mt-4">
 
-        <button pButton type="button" label="Save Basic Info" icon="pi pi-save" [loading]="loading()" [disabled]="loading()"
+        <button *ngIf="!isReviewMode" pButton type="button" label="Save Basic Info" icon="pi pi-save" [loading]="loading()" [disabled]="loading()"
             (click)="saveExecutiveSummaryBasic()"></button>
 
     </div>
@@ -300,6 +300,14 @@
 
                         <th class="text-right">
                             YTD Increase / Decrease
+                        </th>
+
+                        <th *ngIf="shouldShowReviewColumns" class="text-center">
+                            Review Action
+                        </th>
+
+                        <th *ngIf="shouldShowReviewColumns" class="text-center">
+                            Reviewer Comment
                         </th>
 
                     </tr>
@@ -371,6 +379,14 @@
                             </div>
                             
                             </td>
+
+                        <td *ngIf="shouldShowReviewColumns" class="text-center">
+                            -
+                        </td>
+
+                        <td *ngIf="shouldShowReviewColumns" class="text-center">
+                            -
+                        </td>
                             
                             </tr>
                             
@@ -446,6 +462,27 @@
 
                         </td>
 
+                        <td *ngIf="shouldShowReviewColumns" class="text-center">
+                            <p-select
+                                [options]="reviewActionOptions"
+                                [(ngModel)]="row.review_action"
+                                optionLabel="label"
+                                optionValue="value"
+                                placeholder="Select"
+                                [style]="{ 'min-width': '10rem' }"
+                            ></p-select>
+                        </td>
+
+                        <td *ngIf="shouldShowReviewColumns">
+                            <textarea
+                                pInputText
+                                [(ngModel)]="row.reviewer_comment"
+                                rows="1"
+                                placeholder="Comment"
+                                class="w-full"
+                            ></textarea>
+                        </td>
+
                     </tr>
 
                     <!-- NPA ROW -->
@@ -518,15 +555,40 @@
 
                         </td>
 
+                        <td *ngIf="shouldShowReviewColumns" class="text-center">
+                            <p-select
+                                [options]="reviewActionOptions"
+                                [(ngModel)]="row.review_action"
+                                optionLabel="label"
+                                optionValue="value"
+                                placeholder="Select"
+                                [style]="{ 'min-width': '10rem' }"
+                            ></p-select>
+                        </td>
+
+                        <td *ngIf="shouldShowReviewColumns">
+                            <textarea
+                                pInputText
+                                [(ngModel)]="row.reviewer_comment"
+                                rows="1"
+                                placeholder="Comment"
+                                class="w-full"
+                            ></textarea>
+                        </td>
+
                     </tr>
 
                 </ng-template>
 
             </p-table>
 
-            <div class="flex justify-content-center mt-4">
-                <button pButton type="button" label="Save Accounts" icon="pi pi-save" [loading]="loading()" [disabled]="loading()"
+            <div class="flex justify-content-center mt-4 gap-2">
+                <button *ngIf="!isReviewMode" pButton type="button" label="Save Accounts" icon="pi pi-save" [loading]="loading()" [disabled]="loading()"
                     (click)="saveExecutiveSummaryFinancials()"></button>
+
+                <button *ngIf="shouldShowReviewColumns" pButton type="button" label="Save Review" icon="pi pi-verified"
+                    severity="success" [loading]="loading()" [disabled]="loading()"
+                    (click)="saveExecutiveSummaryReview()"></button>
             </div>
 
         </p-card>

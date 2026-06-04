@@ -9,6 +9,7 @@ import {
     signal,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { forkJoin } from 'rxjs';
 import { ConfirmationService } from 'primeng/api';
 import { ButtonModule } from 'primeng/button';
@@ -40,6 +41,9 @@ export class ReviewerWorkspaceComponent implements OnInit {
 
     private confirmation =
         inject(ConfirmationService);
+
+    private router =
+        inject(Router);
 
     loadingQueue =
         signal(false);
@@ -152,6 +156,22 @@ export class ReviewerWorkspaceComponent implements OnInit {
         this.selected.set(null);
         this.detail.set(null);
         this.loadQueue();
+    }
+
+    viewExecutiveSummary() {
+        const assessmentId =
+            Number(
+                this.selected()?.id || 0,
+            );
+
+        if (!assessmentId) {
+            return;
+        }
+
+        this.router.navigate([
+            '/auditor/internal-audit/executive-summary',
+            assessmentId,
+        ]);
     }
 
     isComplianceReview() {

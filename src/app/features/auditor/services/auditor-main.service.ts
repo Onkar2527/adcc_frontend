@@ -67,6 +67,16 @@ export class AuditDashboardService {
     );
 
   }
+  saveExecutiveSummaryReview(
+    payload: any,
+  ) {
+
+    return this.http.post(
+      `${this.apiUrl}/save-executive-summary-review`,
+      payload,
+    );
+
+  }
   getBranchFinancialPosition(
     branch_id: number,
   ) {

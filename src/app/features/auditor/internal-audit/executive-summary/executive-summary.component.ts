@@ -39,6 +39,8 @@ import { CardModule } from 'primeng/card';
 import { InputTextModule } from 'primeng/inputtext';
 import { MessageService } from 'primeng/api';
 import { TableModule } from 'primeng/table';
+import { SelectModule } from 'primeng/select';
+import { audit_review_action } from '../../../admin/services/required-data';
 
 @Component({
 
@@ -58,7 +60,8 @@ import { TableModule } from 'primeng/table';
         CardModule,
         InputTextModule,
         TableModule,
-        AccordionModule
+        AccordionModule,
+        SelectModule
 
 
     ],
@@ -101,6 +104,22 @@ export class ExecutiveSummaryComponent
 
     loading =
         signal(false);
+
+    // ---------- Review Mode Helpers ----------
+    /** Returns true if the logged-in user is a Reviewer (user_type_id = 4) */
+    get isReviewMode(): boolean {
+        return String(this.user?.user_type_id || '') === '4';
+    }
+
+    /** Show review columns only when reviewer and assessment pending review */
+    get shouldShowReviewColumns(): boolean {
+        return this.isReviewMode && Number(this.summary?.audit_status_id) === 2;
+    }
+
+    /** Dropdown options for review action */
+    reviewActionOptions = audit_review_action;
+
+
 
     ngOnInit(): void {
         this.user =
@@ -587,6 +606,56 @@ export class ExecutiveSummaryComponent
             this.assessmentId,
         ]);
 
+    }
+
+    /** Collect review actions from financial rows and save */
+    saveExecutiveSummaryReview() {
+        const reviews = this.financialPositionData
+            .filter((row: any) => !row.isHeader && row.review_action)
+            .map((row: any) => ({
+                type_id: row.type_id || row.scheme_code,
+                review_action: row.review_action,
+                reviewer_comment: row.reviewer_comment || '',
+            }));
+
+        if (!reviews.length) {
+            this.messageService.add({
+                severity: 'warn',
+                summary: 'Warning',
+                detail: 'Please select a review action for at least one row.',
+            });
+            return;
+        }
+
+        const payload = {
+            assessment_id: this.assessmentId,
+            employee_id: this.user?.id || this.user?.employee_id || this.user?.emp_id,
+            reviews,
+        };
+
+        this.loading.set(true);
+
+        this.service
+            .saveExecutiveSummaryReview(payload)
+            .subscribe({
+                next: () => {
+                    this.loading.set(false);
+                    this.messageService.add({
+                        severity: 'success',
+                        summary: 'Success',
+                        detail: 'Executive summary review saved successfully.',
+                    });
+                    this.getExecutiveSummary();
+                },
+                error: () => {
+                    this.loading.set(false);
+                    this.messageService.add({
+                        severity: 'error',
+                        summary: 'Error',
+                        detail: 'Failed to save executive summary review.',
+                    });
+                },
+            });
     }
 
 }
