@@ -119,66 +119,33 @@ export class ExecutiveSummaryComponent
     financialPositionData: any[] = [];
     branchPositionLines: any[] = [];
 
-    private normalizedPositionName(
-        value: string,
-    ) {
-        const normalized =
-            String(value || '')
-            .replace(/\b(advances|npa)\b/gi, '')
-            .replace(/[^a-z0-9]/gi, '')
-            .replace(/loans$/i, 'loan')
-            .toLowerCase();
-
-        if (normalized.includes('cashcredit')) {
-            return 'cashcreditloan';
-        }
-
-        if (normalized.includes('vehicle')) {
-            return 'vehicleloan';
-        }
-
-        if (normalized.includes('gold')) {
-            return 'goldloan';
-        }
-
-        if (normalized.includes('decreed')) {
-            return 'decreedloan';
-        }
-
-        return normalized;
-    }
-
-    private findBranchPositionLine(
-        group: string,
-        name: string,
-    ) {
-        const normalizedGroup =
-            String(group || '').toUpperCase();
-        const normalizedName =
-            this.normalizedPositionName(name);
-
-        return this.branchPositionLines.find(
-            (line: any) =>
-                String(line.group || '').toUpperCase()
-                === normalizedGroup
-                &&
-                this.normalizedPositionName(line.name)
-                === normalizedName,
-        );
-    }
-
     private savedAmountOrDefault(
-        line: any,
+        savedLine: any,
         defaultValue: any,
     ) {
-        return line
+        return savedLine
             &&
-            line.amount !== ''
+            savedLine.amount !== ''
             &&
-            line.amount !== null
+            savedLine.amount !== null
             &&
-            line.amount !== undefined
-                ? Number(line.amount)
+            savedLine.amount !== undefined
+                ? Number(savedLine.amount)
+                : defaultValue;
+    }
+
+    private savedAccountsOrDefault(
+        savedFreshLine: any,
+        defaultValue: any,
+    ) {
+        return savedFreshLine
+            &&
+            savedFreshLine.accounts !== ''
+            &&
+            savedFreshLine.accounts !== null
+            &&
+            savedFreshLine.accounts !== undefined
+                ? Number(savedFreshLine.accounts)
                 : defaultValue;
     }
 
@@ -238,125 +205,65 @@ export class ExecutiveSummaryComponent
                                     const items =
                                         grouped[type];
 
-                                    const totalMarch =
-                                        items.reduce(
-                                            (
-                                                sum: number,
-                                                x: any,
-                                            ) =>
-                                                sum +
-                                                Number(
-                                                    x.march_position || 0,
-                                                ),
-                                            0,
-                                        );
-
-                                    const totalAmount =
-    items.reduce(
-        (
-            sum: number,
-            x: any,
-        ) =>
-            sum +
-            Math.abs(
-                Number(
-                    x.total_amount || 0,
-                ),
-            ),
-        0,
-    );
-
-                                    const totalAccounts =
-                                        items.reduce(
-                                            (
-                                                sum: number,
-                                                x: any,
-                                            ) =>
-                                                sum +
-                                                Number(
-                                                    x.total_accounts || 0,
-                                                ),
-                                            0,
-                                        );
-
-                                    groupedData.push({
-
-                                        isHeader:
-                                            true,
-
-                                        prefix:
-                                            String.fromCharCode(
-                                                65 + prefixIndex,
-                                            ),
-
-                                        scheme_type:
-                                            type,
-
-                                        total_accounts:
-                                            totalAccounts,
-
-                                        march_position:
-                                            totalMarch,
-
-                                        total_amount:
-                                            totalAmount,
-
-                                    });
+                                    const rowItems: any[] = [];
+                                    let totalAccounts = 0;
+                                    let totalAmount = 0;
+                                    let totalMarch = 0;
 
                                     items.forEach(
                                         (
                                             item: any,
                                             index: number,
                                         ) => {
-                                            const savedLine =
-                                                this.findBranchPositionLine(
-                                                    type,
-                                                    item.scheme_name,
-                                                );
+                                            const savedLine = this.branchPositionLines.find(
+                                                (x: any) => String(x.type_id).trim() === String(item.scheme_code).trim()
+                                            );
+                                            const savedFreshLine = this.summary?.fresh_accounts?.find(
+                                                (x: any) => String(x.type_id).trim() === String(item.scheme_code).trim()
+                                            );
+                                            const categoryMarch = this.summary?.march_positions?.find(
+                                                (x: any) => x.gl_type_id === item.category_id
+                                            );
+                                            const marchPositionValue = categoryMarch ? Number(categoryMarch.march_position || 0) : 0;
 
-                                            groupedData.push({
+                                            const accounts = this.savedAccountsOrDefault(
+                                                savedFreshLine,
+                                                Number(item.total_accounts || 0),
+                                            );
+                                            const amount = this.savedAmountOrDefault(
+                                                savedLine,
+                                                Math.abs(Number(item.total_amount || 0)),
+                                            );
 
-                                                isHeader:
-                                                    false,
+                                            totalAccounts += Number(accounts || 0);
+                                            totalAmount += Number(amount || 0);
+                                            totalMarch += Number(marchPositionValue || 0);
 
-                                                isNpa:
-                                                    false,
-
-                                                index:
-                                                    index + 1,
-
-                                                scheme_name:
-                                                    item.scheme_name,
-
-                                                total_accounts:
-                                                    Number(
-                                                        item.total_accounts || 0,
-                                                    ),
-
-                                                march_position:
-                                                    Number(
-                                                        item.march_position || 0,
-                                                    ),
-
-                                                total_amount:
-                                                    this.savedAmountOrDefault(
-                                                        savedLine,
-                                                        Math.abs(
-                                                            Number(
-                                                                item.total_amount || 0,
-                                                            ),
-                                                        ),
-                                                    ),
-
-                                                type_id:
-                                                    savedLine?.type_id,
-
-
+                                            rowItems.push({
+                                                isHeader: false,
+                                                isNpa: false,
+                                                index: index + 1,
+                                                scheme_code: item.scheme_code,
+                                                category_id: item.category_id,
+                                                scheme_name: item.scheme_name,
+                                                total_accounts: accounts,
+                                                march_position: marchPositionValue,
+                                                total_amount: amount,
+                                                type_id: item.scheme_code,
                                             });
-
                                         },
                                     );
 
+                                    groupedData.push({
+                                        isHeader: true,
+                                        prefix: String.fromCharCode(65 + prefixIndex),
+                                        scheme_type: type,
+                                        total_accounts: totalAccounts,
+                                        march_position: totalMarch,
+                                        total_amount: totalAmount,
+                                    });
+
+                                    groupedData.push(...rowItems);
                                     prefixIndex++;
 
                                 },
@@ -367,82 +274,65 @@ export class ExecutiveSummaryComponent
                         const advanceItems =
                             grouped['ADVANCES'] || [];
 
-                        const totalNpaMarch =
-                            advanceItems.reduce(
-                                (
-                                    sum: number,
-                                    x: any,
-                                ) =>
-                                    sum +
-                                    Number(
-                                        x.march_position || 0,
-                                    ),
-                                0,
-                            );
-
-                        groupedData.push({
-
-                            isHeader: true,
-
-                            prefix: 'C',
-
-                            scheme_type: 'NPA',
-
-                            total_accounts: '-',
-
-                            march_position:
-                                totalNpaMarch,
-
-                            total_amount: 0,
-
-                        });
+                        let totalNpaMarch = 0;
+                        let totalNpaAccounts = 0;
+                        let totalNpaAmount = 0;
+                        const npaRows: any[] = [];
 
                         advanceItems.forEach(
                             (
                                 item: any,
                                 index: number,
                             ) => {
-                                const savedLine =
-                                    this.findBranchPositionLine(
-                                        'NPA',
-                                        item.scheme_name,
-                                    );
+                                const savedLine = this.branchPositionLines.find(
+                                    (x: any) => String(x.type_id).trim() === String(item.scheme_code + '_NPA').trim()
+                                );
+                                const savedFreshLine = this.summary?.fresh_accounts?.find(
+                                    (x: any) => String(x.type_id).trim() === String(item.scheme_code + '_NPA').trim()
+                                );
+                                const categoryMarch = this.summary?.march_positions?.find(
+                                    (x: any) => x.gl_type_id === (item.category_id + 6)
+                                );
+                                const marchPositionValue = categoryMarch ? Number(categoryMarch.march_position || 0) : 0;
 
-                                groupedData.push({
+                                const accountInput = this.savedAccountsOrDefault(
+                                    savedFreshLine,
+                                    '',
+                                );
+                                const amountInput = this.savedAmountOrDefault(
+                                    savedLine,
+                                    '',
+                                );
 
-                                    isHeader:
-                                        false,
+                                totalNpaAccounts += Number(accountInput || 0);
+                                totalNpaAmount += Number(amountInput || 0);
+                                totalNpaMarch += Number(marchPositionValue || 0);
 
-                                    isNpa:
-                                        true,
-
-                                    index:
-                                        index + 1,
-
-                                    scheme_name:
-                                        item.scheme_name,
-
-                                    account_input:
-                                        '',
-
-                                    amount_input:
-                                        this.savedAmountOrDefault(
-                                            savedLine,
-                                            '',
-                                        ),
-
-                                    type_id:
-                                        savedLine?.type_id,
-
-                                    march_position:
-                                        Number(
-                                            item.march_position || 0,
-                                        ),
-
+                                npaRows.push({
+                                    isHeader: false,
+                                    isNpa: true,
+                                    index: index + 1,
+                                    scheme_code: item.scheme_code,
+                                    category_id: item.category_id,
+                                    scheme_name: item.scheme_name,
+                                    account_input: accountInput,
+                                    amount_input: amountInput,
+                                    type_id: item.scheme_code + '_NPA',
+                                    march_position: marchPositionValue,
                                 });
-
                             },
                         );
+
+                        groupedData.push({
+                            isHeader: true,
+                            prefix: 'C',
+                            scheme_type: 'NPA',
+                            total_accounts: totalNpaAccounts,
+                            march_position: totalNpaMarch,
+                            total_amount: totalNpaAmount,
+                        });
+
+                        groupedData.push(...npaRows);
 
                         this.financialPositionData =
                             groupedData;
@@ -521,9 +411,7 @@ export class ExecutiveSummaryComponent
 
     }
 
-
-
-    saveExecutiveSummary() {
+    saveExecutiveSummaryBasic() {
 
         const payload = {
 
@@ -543,12 +431,18 @@ export class ExecutiveSummaryComponent
                 || this.user?.employee_id
                 || this.user?.emp_id,
 
-            audit_report_submitted_date:
-                this.summary_detail.find(
+            audit_report_submitted_date: (() => {
+                const val = this.summary_detail.find(
                     x =>
                         x.label ===
                         '9. Audit Report Submitted Date',
-                )?.value,
+                )?.value;
+                if (!val) return '';
+                if (typeof val === 'string' && val.includes('T')) {
+                    return val.split('T')[0];
+                }
+                return val;
+            })(),
 
             staff_count:
                 this.summary_detail.find(
@@ -564,38 +458,12 @@ export class ExecutiveSummaryComponent
                         '13. Approximate Number of manual Challans per day',
                 )?.value,
 
-            branch_positions:
-                this.branchPositionLines.map(
-                    (line: any) => {
-                        const visibleRow =
-                            this.financialPositionData.find(
-                                (row: any) =>
-                                    !row.isHeader
-                                    &&
-                                    Number(row.type_id) === Number(line.type_id),
-                            );
-
-                        return {
-                            type_id:
-                                line.type_id,
-                            amount:
-                                visibleRow
-                                    ? Number(
-                                        visibleRow.isNpa
-                                            ? visibleRow.amount_input || 0
-                                            : visibleRow.total_amount || 0,
-                                    )
-                                    : Number(line.amount || 0),
-                        };
-                    },
-                ),
-
         };
 
         this.loading.set(true);
 
         this.service
-            .saveExecutiveSummary(payload)
+            .saveExecutiveSummaryBasic(payload)
             .subscribe({
 
                 next: (res: any) => {
@@ -605,7 +473,7 @@ export class ExecutiveSummaryComponent
                     this.messageService.add({
                         severity: 'success',
                         summary: 'Success',
-                        detail: 'Executive summary saved successfully'
+                        detail: 'Basic details saved successfully'
                     });
                     this.getExecutiveSummary();
 
@@ -615,18 +483,101 @@ export class ExecutiveSummaryComponent
 
                     this.loading.set(false);
 
-
-
                     this.messageService.add({
                         severity: 'error',
                         summary: 'Error',
-                        detail: 'Failed to save executive summary'
+                        detail: 'Failed to save basic details'
                     });
 
                 },
 
             });
 
+    }
+
+    saveExecutiveSummaryFinancials() {
+        const branch_positions: any[] = [];
+        const fresh_accounts: any[] = [];
+
+        this.financialPositionData.forEach((row: any) => {
+            if (row.isHeader || !row.scheme_code || String(row.scheme_code).trim() === '') return;
+
+            const schemeCode = String(row.scheme_code).trim();
+
+            if (!row.isNpa) {
+                const amtVal = Number(row.total_amount);
+                const amount = Number.isFinite(amtVal) && amtVal >= 0 ? amtVal : 0;
+
+                const acctVal = Number(row.total_accounts);
+                const accounts = Number.isFinite(acctVal) && acctVal >= 0 ? Math.floor(acctVal) : 0;
+
+                branch_positions.push({
+                    type_id: schemeCode,
+                    amount
+                });
+                fresh_accounts.push({
+                    type_id: schemeCode,
+                    accounts
+                });
+            } else {
+                const amtVal = Number(row.amount_input);
+                const amount = Number.isFinite(amtVal) && amtVal >= 0 ? amtVal : 0;
+
+                const acctVal = Number(row.account_input);
+                const accounts = Number.isFinite(acctVal) && acctVal >= 0 ? Math.floor(acctVal) : 0;
+
+                branch_positions.push({
+                    type_id: schemeCode + '_NPA',
+                    amount
+                });
+                fresh_accounts.push({
+                    type_id: schemeCode + '_NPA',
+                    accounts
+                });
+            }
+        });
+
+        const payload = {
+            assessment_id: this.assessmentId,
+            year_id: this.summary?.year_id,
+            admin_id: this.user?.id || this.user?.employee_id || this.user?.emp_id,
+            employee_id: this.user?.id || this.user?.employee_id || this.user?.emp_id,
+            branch_positions,
+            fresh_accounts
+        };
+
+        this.loading.set(true);
+
+        this.service
+            .saveExecutiveSummaryFinancials(payload)
+            .subscribe({
+
+                next: (res: any) => {
+
+                    this.loading.set(false);
+
+                    this.messageService.add({
+                        severity: 'success',
+                        summary: 'Success',
+                        detail: 'Branch financial details saved successfully'
+                    });
+                    this.getExecutiveSummary();
+
+                },
+
+                error: (err: any) => {
+
+                    this.loading.set(false);
+
+                    this.messageService.add({
+                        severity: 'error',
+                        summary: 'Error',
+                        detail: 'Failed to save branch financial details'
+                    });
+
+                },
+
+            });
     }
 
     backToDashboard() {
