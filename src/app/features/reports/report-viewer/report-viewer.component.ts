@@ -37,6 +37,20 @@ export class ReportViewerComponent implements OnInit {
 
   filters: Record<string, any> = {};
 
+  shouldShowFilter(filter: ReportFilterDefinition): boolean {
+    const slug = this.definition()?.slug;
+    if (slug === 'risk-weightage-report') {
+      const searchType = String(this.filters['selectSearchTypeFilter'] || '3');
+      if (filter.key === 'startDate' || filter.key === 'endDate') {
+        return searchType === '5' || searchType === '6';
+      }
+      if (filter.key === 'reportAuditAssesment') {
+        return searchType === '3' || searchType === '4';
+      }
+    }
+    return true;
+  }
+
   filterOptions(filter: ReportFilterDefinition) {
     const options = filter.options || [];
 
@@ -55,6 +69,16 @@ export class ReportViewerComponent implements OnInit {
   }
 
   onFilterChange(filter: ReportFilterDefinition) {
+    if (this.definition()?.slug === 'risk-weightage-report' && filter.key === 'selectSearchTypeFilter') {
+      const searchType = String(this.filters['selectSearchTypeFilter'] || '3');
+      if (searchType === '3' || searchType === '4') {
+        this.filters['startDate'] = '';
+        this.filters['endDate'] = '';
+      } else {
+        this.filters['reportAuditAssesment'] = '';
+      }
+    }
+
     const childFilters =
       this.definition()?.filters.filter((item) => item.dependsOn === filter.key)
       || [];
@@ -185,7 +209,9 @@ export class ReportViewerComponent implements OnInit {
   }
 
   canExportExcel() {
-    return this.definition()?.slug !== 'audit-complete-report';
+    return !['audit-complete-report', 'audit-observations-report', 'compliance-report', 'compliance-summary-report'].includes(
+      this.definition()?.slug || '',
+    );
   }
 
   exportExcel() {

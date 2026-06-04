@@ -26,46 +26,50 @@
   <div
     class="filter-panel no-print"
     *ngIf="definition()"
-    [class.audit-complete-filters]="definition()?.slug === 'audit-complete-report'"
+    [class.audit-complete-filters]="definition()?.slug === 'audit-complete-report' || definition()?.slug === 'audit-observations-report' || definition()?.slug === 'compliance-report' || definition()?.slug === 'compliance-summary-report'"
   >
-    <div
-      class="field"
-      *ngFor="let filter of definition()?.filters"
-      [class.field-wide]="filter.key === 'audit_unit_id'"
-      [class.field-half]="filter.key === 'reportAuditUnit' || filter.key === 'reportAuditAssesment'"
-      [class.field-checkbox]="filter.type === 'checkbox'"
-      [class.field-checkbox-wide]="filter.key === 'risk_category_arr'"
-      [class.field-checkbox-compact]="filter.key === 'business_risk_arr' || filter.key === 'control_risk_arr'"
-      [class.field-risk-category]="filter.key === 'risk_category_arr'"
-      [class.field-business-category]="filter.key === 'business_risk_arr'"
-      [class.field-control-category]="filter.key === 'control_risk_arr'"
-    >
-      <label>{{ filter.label }}</label>
-
-      <select
-        *ngIf="filter.type === 'select'"
-        [(ngModel)]="filters[filter.key]"
-        (ngModelChange)="onFilterChange(filter)"
+    <ng-container *ngFor="let filter of definition()?.filters">
+      <div
+        class="field"
+        *ngIf="shouldShowFilter(filter)"
+        [class.field-wide]="filter.key === 'audit_unit_id'"
+        [class.field-half]="((filter.key === 'reportAuditUnit' || filter.key === 'reportAuditAssesment') && definition()?.slug !== 'risk-weightage-report') || (filter.key === 'rmv_pending_assesments' && definition()?.slug === 'risk-weightage-report')"
+        [class.field-third]="(filter.key === 'selectSearchTypeFilter' || filter.key === 'reportAuditUnit' || filter.key === 'reportAuditAssesment') && definition()?.slug === 'risk-weightage-report'"
+        [class.field-quarter]="(filter.key === 'startDate' || filter.key === 'endDate') && definition()?.slug === 'risk-weightage-report'"
+        [class.field-checkbox]="filter.type === 'checkbox' && definition()?.slug !== 'risk-weightage-report'"
+        [class.field-checkbox-wide]="filter.key === 'risk_category_arr'"
+        [class.field-checkbox-compact]="filter.key === 'business_risk_arr' || filter.key === 'control_risk_arr'"
+        [class.field-risk-category]="filter.key === 'risk_category_arr'"
+        [class.field-business-category]="filter.key === 'business_risk_arr'"
+        [class.field-control-category]="filter.key === 'control_risk_arr'"
       >
-        <option *ngFor="let option of filterOptions(filter)" [value]="option.value">
-          {{ option.label }}
-        </option>
-      </select>
+        <label>{{ filter.label }}</label>
 
-      <input *ngIf="filter.type === 'date'" type="date" [(ngModel)]="filters[filter.key]" />
-      <input *ngIf="filter.type === 'text'" type="text" [(ngModel)]="filters[filter.key]" />
+        <select
+          *ngIf="filter.type === 'select'"
+          [(ngModel)]="filters[filter.key]"
+          (ngModelChange)="onFilterChange(filter)"
+        >
+          <option *ngFor="let option of filterOptions(filter)" [value]="option.value">
+            {{ option.label }}
+          </option>
+        </select>
 
-      <div *ngIf="filter.type === 'checkbox'" class="checkbox-filter-grid">
-        <label class="checkbox-filter-option" *ngFor="let option of filter.options || []">
-          <input
-            type="checkbox"
-            [checked]="checkboxSelected(filter.key, option.value)"
-            (change)="toggleCheckboxFilter(filter.key, option.value, $any($event.target).checked)"
-          />
-          <span>{{ option.label }}</span>
-        </label>
+        <input *ngIf="filter.type === 'date'" type="date" [(ngModel)]="filters[filter.key]" />
+        <input *ngIf="filter.type === 'text'" type="text" [(ngModel)]="filters[filter.key]" />
+
+        <div *ngIf="filter.type === 'checkbox'" class="checkbox-filter-grid">
+          <label class="checkbox-filter-option" *ngFor="let option of filter.options || []">
+            <input
+              type="checkbox"
+              [checked]="checkboxSelected(filter.key, option.value)"
+              (change)="toggleCheckboxFilter(filter.key, option.value, $any($event.target).checked)"
+            />
+            <span>{{ option.label }}</span>
+          </label>
+        </div>
       </div>
-    </div>
+    </ng-container>
 
     <div class="filter-actions">
       <button pButton type="button" icon="pi pi-search" label="Find" [loading]="loading()" (click)="findReport()"></button>
@@ -180,6 +184,7 @@
                   <thead>
                     <tr>
                       <th>{{ row.__annexure_title }}</th>
+                      <th *ngIf="definition()?.slug === 'compliance-summary-report'">Compliance</th>
                       <th>Business Risk</th>
                       <th>Control Risk</th>
                       <th>Risk Type</th>
@@ -188,6 +193,7 @@
                   <tbody>
                     <tr *ngFor="let annexureRow of row.__annexure_rows || []">
                       <td>{{ annexureRow.description }}</td>
+                      <td *ngIf="definition()?.slug === 'compliance-summary-report'">{{ annexureRow.audit_commpliance }}</td>
                       <td>{{ annexureRow.business_risk_label }}</td>
                       <td>{{ annexureRow.control_risk_label }}</td>
                       <td>{{ annexureRow.risk_category }}</td>
@@ -205,6 +211,7 @@
                       <th *ngFor="let column of row.__vouching_columns || []">
                         {{ column.label }}
                       </th>
+                      <th *ngIf="definition()?.slug === 'compliance-summary-report'">Compliance</th>
                       <th>Business Risk</th>
                       <th>Control Risk</th>
                       <th>Risk Type</th>
@@ -215,6 +222,7 @@
                       <td *ngFor="let cell of vouchingRow.cells || []">
                         {{ cell }}
                       </td>
+                      <td *ngIf="definition()?.slug === 'compliance-summary-report'">{{ vouchingRow.audit_commpliance }}</td>
                       <td>{{ vouchingRow.business_risk_label }}</td>
                       <td>{{ vouchingRow.control_risk_label }}</td>
                       <td>{{ vouchingRow.risk_category }}</td>
