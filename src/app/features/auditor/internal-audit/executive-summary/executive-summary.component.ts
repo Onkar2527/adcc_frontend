@@ -40,7 +40,6 @@ import { InputTextModule } from 'primeng/inputtext';
 import { MessageService } from 'primeng/api';
 import { TableModule } from 'primeng/table';
 import { SelectModule } from 'primeng/select';
-import { audit_review_action } from '../../../admin/services/required-data';
 
 @Component({
 
@@ -99,6 +98,7 @@ export class ExecutiveSummaryComponent
 
     summary: any = null;
     user: any = null;
+    reviewModeFromRoute = false;
 
     summary_detail: any[] = [];
 
@@ -108,22 +108,66 @@ export class ExecutiveSummaryComponent
     // ---------- Review Mode Helpers ----------
     /** Returns true if the logged-in user is a Reviewer (user_type_id = 4) */
     get isReviewMode(): boolean {
-        return String(this.user?.user_type_id || '') === '4';
+        const userType =
+            String(this.user?.user_type_id || this.user?.role_id || '').trim();
+
+        const roleText =
+            String(this.user?.role || this.user?.role_name || this.user?.designation || '').toLowerCase();
+
+        return this.reviewModeFromRoute
+            || ['3', '4'].includes(userType)
+            || roleText.includes('reviewer');
     }
 
-    /** Show review columns only when reviewer and assessment pending review */
+    /** Show review columns whenever this screen is opened in reviewer mode. */
     get shouldShowReviewColumns(): boolean {
-        return this.isReviewMode && Number(this.summary?.audit_status_id) === 2;
+        return this.isReviewMode;
     }
 
-    /** Dropdown options for review action */
-    reviewActionOptions = audit_review_action;
+    get shouldShowReviewerFeedback(): boolean {
+        return !this.isReviewMode
+            && this.financialPositionData.some(
+                (row: any) => !row.isHeader && this.hasExecutiveReviewFeedback(row),
+            );
+    }
 
+    get backButtonLabel(): string {
+        return this.reviewModeFromRoute
+            ? 'Back to Review'
+            : 'Back to Menu';
+    }
 
+    reviewActionOptions = [
+        {
+            label: 'Accept',
+            value: 2,
+        },
+        {
+            label: 'Re-assessment',
+            value: 3,
+        },
+    ];
+
+    applyDefaultExecutiveAccept() {
+        this.financialPositionData
+            .filter((row: any) => !row.isHeader)
+            .forEach((row: any) => {
+                row.review_action = 2;
+            });
+
+        this.messageService.add({
+            severity: 'success',
+            summary: 'Default applied',
+            detail: 'All executive summary rows marked as accepted.',
+        });
+    }
 
     ngOnInit(): void {
         this.user =
             JSON.parse(localStorage.getItem('user') || '{}');
+
+        this.reviewModeFromRoute =
+            this.route.snapshot.queryParamMap.get('mode') === 'reviewer';
 
         this.assessmentId =
             Number(
@@ -166,6 +210,65 @@ export class ExecutiveSummaryComponent
             savedFreshLine.accounts !== undefined
                 ? Number(savedFreshLine.accounts)
                 : defaultValue;
+    }
+
+    private executiveReviewAction(savedLine: any, savedFreshLine: any) {
+        return Number(savedLine?.review_action || savedFreshLine?.review_action || 0) || null;
+    }
+
+    private executiveReviewComment(savedLine: any, savedFreshLine: any) {
+        return savedLine?.reviewer_comment || savedFreshLine?.reviewer_comment || '';
+    }
+
+    hasExecutiveReviewFeedback(row: any): boolean {
+        return !!Number(row?.review_action || 0) || !!String(row?.reviewer_comment || '').trim();
+    }
+
+    executiveReviewStatusLabel(row: any): string {
+        const action = Number(row?.review_action || 0);
+
+        if (action === 2) {
+            return 'Accepted';
+        }
+
+        if (action === 3) {
+            return 'Re-assessment';
+        }
+
+        return 'Pending review';
+    }
+
+    executiveReviewSeverity(row: any): 'success' | 'danger' | 'warn' {
+        const action = Number(row?.review_action || 0);
+
+        if (action === 2) {
+            return 'success';
+        }
+
+        if (action === 3) {
+            return 'danger';
+        }
+
+        return 'warn';
+    }
+
+    isExecutiveReAuditMode(): boolean {
+        const statusText =
+            String(this.summary?.audit_status || '').toLowerCase();
+
+        return !this.isReviewMode
+            && (
+                Number(this.summary?.audit_status_id || 0) === 3
+                || statusText.includes('re audit')
+            );
+    }
+
+    isExecutiveAmountReadOnly(row: any): boolean {
+        return this.isReviewMode
+            || (
+                this.isExecutiveReAuditMode()
+                && Number(row?.review_action || 0) !== 3
+            );
     }
 
     getBranchFinancialPosition() {
@@ -269,6 +372,8 @@ export class ExecutiveSummaryComponent
                                                 march_position: marchPositionValue,
                                                 total_amount: amount,
                                                 type_id: item.scheme_code,
+                                                review_action: this.executiveReviewAction(savedLine, savedFreshLine),
+                                                reviewer_comment: this.executiveReviewComment(savedLine, savedFreshLine),
                                             });
                                         },
                                     );
@@ -338,6 +443,8 @@ export class ExecutiveSummaryComponent
                                     amount_input: amountInput,
                                     type_id: item.scheme_code + '_NPA',
                                     march_position: marchPositionValue,
+                                    review_action: this.executiveReviewAction(savedLine, savedFreshLine),
+                                    reviewer_comment: this.executiveReviewComment(savedLine, savedFreshLine),
                                 });
                             },
                         );
@@ -600,6 +707,14 @@ export class ExecutiveSummaryComponent
     }
 
     backToDashboard() {
+        if (
+            this.reviewModeFromRoute
+        ) {
+            this.router.navigate([
+                '/auditor/reviewer',
+            ]);
+            return;
+        }
 
         this.router.navigate([
             '/auditor/internal-audit',
@@ -610,8 +725,39 @@ export class ExecutiveSummaryComponent
 
     /** Collect review actions from financial rows and save */
     saveExecutiveSummaryReview() {
-        const reviews = this.financialPositionData
-            .filter((row: any) => !row.isHeader && row.review_action)
+        const reviewRows = this.financialPositionData
+            .filter((row: any) => {
+                const typeId =
+                    String(row.type_id || row.scheme_code || '').trim();
+
+                return !row.isHeader && !!typeId;
+            });
+
+        const missingAction = reviewRows
+            .filter((row: any) => ![2, 3].includes(Number(row.review_action || 0)));
+
+        if (missingAction.length) {
+            this.messageService.add({
+                severity: 'warn',
+                summary: 'Review incomplete',
+                detail: 'Please accept or mark re-assessment for all executive summary rows.',
+            });
+            return;
+        }
+
+        const missingComment = reviewRows
+            .filter((row: any) => Number(row.review_action || 0) === 3 && !String(row.reviewer_comment || '').trim());
+
+        if (missingComment.length) {
+            this.messageService.add({
+                severity: 'warn',
+                summary: 'Comment required',
+                detail: 'Reviewer comment is required for re-assessment rows.',
+            });
+            return;
+        }
+
+        const reviews = reviewRows
             .map((row: any) => ({
                 type_id: row.type_id || row.scheme_code,
                 review_action: row.review_action,

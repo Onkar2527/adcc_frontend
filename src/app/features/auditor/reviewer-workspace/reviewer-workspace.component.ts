@@ -171,7 +171,11 @@ export class ReviewerWorkspaceComponent implements OnInit {
         this.router.navigate([
             '/auditor/internal-audit/executive-summary',
             assessmentId,
-        ]);
+        ], {
+            queryParams: {
+                mode: 'reviewer',
+            },
+        });
     }
 
     isComplianceReview() {

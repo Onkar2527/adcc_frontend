@@ -239,6 +239,12 @@ export class AppMenu implements OnInit, OnDestroy {
     }
 
     private refreshModel() {
+        const user =
+            JSON.parse(localStorage.getItem('user') || '{}');
+
+        this.userTypeId =
+            String(user.user_type_id || '');
+
         const filtered =
             this.baseModel.filter((menu: any) =>
                 !menu.authority ||
@@ -248,9 +254,17 @@ export class AppMenu implements OnInit, OnDestroy {
         const currentAssessmentId =
             this.currentAssessmentIdFromRoute();
 
+        const shouldShowAssessmentMenu =
+            this.shouldShowCurrentAssessmentMenu(
+                currentAssessmentId,
+            );
+
         const assessmentMenuKey =
             JSON.stringify({
                 currentAssessmentId,
+                shouldShowAssessmentMenu,
+                url:
+                    this.router.url || '',
                 navAssessmentId:
                     this.auditNavService.assessmentId(),
                 menus:
@@ -270,7 +284,7 @@ export class AppMenu implements OnInit, OnDestroy {
             });
 
         if (
-            currentAssessmentId
+            shouldShowAssessmentMenu
             &&
             currentAssessmentId
             === Number(
@@ -500,6 +514,31 @@ export class AppMenu implements OnInit, OnDestroy {
         return match?.[1]
             ? Number(match[1])
             : 0;
+    }
+
+    private shouldShowCurrentAssessmentMenu(
+        currentAssessmentId: number,
+    ) {
+        if (
+            !currentAssessmentId
+            ||
+            this.userTypeId !== '2'
+        ) {
+            return false;
+        }
+
+        const url =
+            this.router.url || '';
+
+        return !(
+            url.includes(
+                '/auditor/internal-audit/executive-summary/',
+            )
+            &&
+            url.includes(
+                'mode=reviewer',
+            )
+        );
     }
 
     ngOnDestroy() {
