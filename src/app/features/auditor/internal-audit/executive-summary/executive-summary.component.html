@@ -262,8 +262,8 @@
     </div>
     <div class="col-12 flex justify-content-center mt-4">
 
-        <button pButton type="button" label="Save" icon="pi pi-save" [loading]="loading()" [disabled]="loading()"
-            (click)="saveExecutiveSummary()"></button>
+        <button pButton type="button" label="Save Basic Info" icon="pi pi-save" [loading]="loading()" [disabled]="loading()"
+            (click)="saveExecutiveSummaryBasic()"></button>
 
     </div>
 
@@ -377,9 +377,9 @@
                             <!-- NORMAL ROW -->
                             
                             <tr *ngIf="
-                                                    !row.isHeader &&
-                                                    !row.isNpa
-                                                ">
+                                                     !row.isHeader &&
+                                                     !row.isNpa
+                                                 ">
                             
                                 <td class="pl-5">
 
@@ -391,9 +391,12 @@
 
                         <td class="text-center">
 
-                            {{
-                            row.total_accounts
-                            }}
+                            <input pInputText type="number" [(ngModel)]="
+                                        row.total_accounts
+                                    " class="
+                                        w-6rem
+                                        text-center
+                                    " />
 
                         </td>
 
@@ -520,6 +523,11 @@
                 </ng-template>
 
             </p-table>
+
+            <div class="flex justify-content-center mt-4">
+                <button pButton type="button" label="Save Accounts" icon="pi pi-save" [loading]="loading()" [disabled]="loading()"
+                    (click)="saveExecutiveSummaryFinancials()"></button>
+            </div>
 
         </p-card>
 
