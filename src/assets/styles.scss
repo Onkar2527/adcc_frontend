@@ -261,4 +261,27 @@ body.sidebar-resizing * {
     font-size: inherit !important;
     font-weight: 700 !important;
   }
+
+  body.printing-report .risk-wise-report-table {
+    table-layout: fixed !important;
+    min-width: 0 !important;
+    width: 100% !important;
+    font-size: 6px !important;
+  }
+
+  body.printing-report .risk-wise-report-table th,
+  body.printing-report .risk-wise-report-table td {
+    width: auto !important;
+    padding: 1.5px 2px !important;
+    font-size: 6px !important;
+    line-height: 1.15 !important;
+    white-space: normal !important;
+    word-break: break-word !important;
+    overflow-wrap: anywhere !important;
+    vertical-align: middle !important;
+  }
+
+  body.printing-report .risk-wise-report-table th {
+    font-size: 5.8px !important;
+  }
 }

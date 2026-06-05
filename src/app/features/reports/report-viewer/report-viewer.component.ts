@@ -1,10 +1,11 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, effect, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ButtonModule } from 'primeng/button';
 import { TagModule } from 'primeng/tag';
 import { ExportService } from '../../../core/services/export/export.service';
+import { DateRangeFieldComponent } from '../../../shared/components/form/date-range-field/date-range-field.component';
 import {
   ReportColumnDefinition,
   ReportDefinition,
@@ -15,7 +16,7 @@ import {
 @Component({
   selector: 'app-report-viewer',
   standalone: true,
-  imports: [CommonModule, FormsModule, ButtonModule, TagModule],
+  imports: [CommonModule, FormsModule, ButtonModule, TagModule, DateRangeFieldComponent],
   templateUrl: './report-viewer.component.html',
   styleUrl: './report-viewer.component.scss',
 })
@@ -24,6 +25,18 @@ export class ReportViewerComponent implements OnInit {
   private router = inject(Router);
   private reportsService = inject(ReportsService);
   private exportService = inject(ExportService);
+
+  constructor() {
+    effect(() => {
+      if (!this.isRiskWiseAuditUnitsReport()) {
+        return;
+      }
+
+      const range = this.reportDateRange();
+      this.filters['startDate'] = this.dateToFilterValue(range?.[0]);
+      this.filters['endDate'] = this.dateToFilterValue(range?.[1]);
+    });
+  }
 
   reportSlug = signal('');
   definition = signal<ReportDefinition | null>(null);
@@ -34,11 +47,16 @@ export class ReportViewerComponent implements OnInit {
   loading = signal(false);
   searched = signal(false);
   error = signal('');
+  reportDateRange = signal<Date[] | null>(null);
 
   filters: Record<string, any> = {};
 
   shouldShowFilter(filter: ReportFilterDefinition): boolean {
     const slug = this.definition()?.slug;
+    if (slug === 'risk-wise-audit-units-report' && filter.key === 'endDate') {
+      return false;
+    }
+
     if (slug === 'risk-weightage-report') {
       const searchType = String(this.filters['selectSearchTypeFilter'] || '3');
       if (filter.key === 'startDate' || filter.key === 'endDate') {
@@ -69,7 +87,10 @@ export class ReportViewerComponent implements OnInit {
   }
 
   onFilterChange(filter: ReportFilterDefinition) {
-    if (this.definition()?.slug === 'risk-weightage-report' && filter.key === 'selectSearchTypeFilter') {
+    if (
+      this.definition()?.slug === 'risk-weightage-report'
+      && filter.key === 'selectSearchTypeFilter'
+    ) {
       const searchType = String(this.filters['selectSearchTypeFilter'] || '3');
       if (searchType === '3' || searchType === '4') {
         this.filters['startDate'] = '';
@@ -118,6 +139,7 @@ export class ReportViewerComponent implements OnInit {
         this.filters = {
           ...(definition.defaultFilters || {}),
         };
+        this.setReportDateRangeFromFilters();
         definition.filters
           .filter((filter) => filter.type === 'checkbox')
           .forEach((filter) => {
@@ -186,6 +208,7 @@ export class ReportViewerComponent implements OnInit {
     this.filters = {
       ...(definition?.defaultFilters || {}),
     };
+    this.setReportDateRangeFromFilters();
     definition?.filters
       .filter((filter) => filter.type === 'checkbox')
       .forEach((filter) => {
@@ -214,6 +237,52 @@ export class ReportViewerComponent implements OnInit {
     );
   }
 
+  isRiskWiseAuditUnitsReport() {
+    return this.definition()?.slug === 'risk-wise-audit-units-report';
+  }
+
+  riskWiseLeadingColumns() {
+    return this.riskWiseFixedColumns().slice(0, 2);
+  }
+
+  riskWiseTrailingColumns() {
+    return this.riskWiseFixedColumns().slice(2);
+  }
+
+  riskWiseRiskGroups() {
+    const groups = new Map<string, { label: string; columns: ReportColumnDefinition[] }>();
+
+    (this.definition()?.columns || []).forEach((column) => {
+      const match = this.riskWiseColumnMatch(column);
+
+      if (!match) {
+        return;
+      }
+
+      const groupKey = match[1];
+
+      if (!groups.has(groupKey)) {
+        groups.set(groupKey, {
+          label: this.riskWiseGroupLabel(column),
+          columns: [],
+        });
+      }
+
+      groups.get(groupKey)!.columns.push({
+        ...column,
+        label: this.riskWiseChildLabel(column),
+      });
+    });
+
+    return Array.from(groups.values());
+  }
+
+  onReportDateRangeChange() {
+    const range = this.reportDateRange();
+    this.filters['startDate'] = this.dateToFilterValue(range?.[0]);
+    this.filters['endDate'] = this.dateToFilterValue(range?.[1]);
+  }
+
   exportExcel() {
     const definition = this.definition();
     const rows = this.rows();
@@ -234,13 +303,20 @@ export class ReportViewerComponent implements OnInit {
 
     const exportCols = definition.columns.map((column) => ({
       field: column.key,
-      header: column.label.toUpperCase(),
+      header: this.isRiskWiseAuditUnitsReport()
+        ? this.riskWiseExportHeaderLabel(column).toUpperCase()
+        : column.label.toUpperCase(),
+      excelWidth: this.riskWiseExcelColumnWidth(column),
     }));
 
     this.exportService.exportToExcel(
       dataToExport,
       exportCols,
-      definition.fileName || definition.slug
+      definition.fileName || definition.slug,
+      [],
+      this.isRiskWiseAuditUnitsReport()
+        ? this.riskWiseExcelHeader()
+        : undefined,
     );
   }
 
@@ -373,5 +449,142 @@ export class ReportViewerComponent implements OnInit {
 
   formatDate(value: any) {
     return value ? String(value).slice(0, 10) : '-';
+  }
+
+  private riskWiseFixedColumns() {
+    return (this.definition()?.columns || [])
+      .filter((column) => !this.riskWiseColumnMatch(column));
+  }
+
+  private riskWiseColumnMatch(column: ReportColumnDefinition) {
+    return /^risk_(\d+)_(score|branch_percent|all_percent)$/.exec(column.key);
+  }
+
+  private riskWiseGroupLabel(column: ReportColumnDefinition) {
+    return String(column.label || '').split(' - ')[0] || column.label;
+  }
+
+  private riskWiseChildLabel(column: ReportColumnDefinition) {
+    const label =
+      String(column.label || '').split(' - ').slice(1).join(' - ');
+
+    return label || column.label;
+  }
+
+  private riskWiseExportHeaderLabel(column: ReportColumnDefinition) {
+    if (!this.riskWiseColumnMatch(column)) {
+      return column.label;
+    }
+
+    return this.riskWiseChildLabel(column);
+  }
+
+  private riskWiseExcelColumnWidth(column: ReportColumnDefinition) {
+    if (!this.isRiskWiseAuditUnitsReport()) {
+      return undefined;
+    }
+
+    if (column.key === 'audit_unit_code') {
+      return 8;
+    }
+
+    if (column.key === 'audit_unit_name') {
+      return 22;
+    }
+
+    if (column.key === 'total_score' || column.key === 'total_score_all_percent') {
+      return 12;
+    }
+
+    if (column.key === 'branch_rating') {
+      return 14;
+    }
+
+    return this.riskWiseColumnMatch(column) ? 10 : undefined;
+  }
+
+  private riskWiseExcelHeader() {
+    const columns = this.definition()?.columns || [];
+    const headerRows = [
+      new Array(columns.length).fill(''),
+      new Array(columns.length).fill(''),
+    ];
+    const merges: any[] = [];
+    let columnIndex = 0;
+
+    this.riskWiseLeadingColumns().forEach((column) => {
+      headerRows[0][columnIndex] = column.label.toUpperCase();
+      merges.push({
+        s: { r: 0, c: columnIndex },
+        e: { r: 1, c: columnIndex },
+      });
+      columnIndex++;
+    });
+
+    this.riskWiseRiskGroups().forEach((group) => {
+      const startColumnIndex = columnIndex;
+      headerRows[0][startColumnIndex] = group.label.toUpperCase();
+
+      group.columns.forEach((column) => {
+        headerRows[1][columnIndex] = column.label.toUpperCase();
+        columnIndex++;
+      });
+
+      if (columnIndex - startColumnIndex > 1) {
+        merges.push({
+          s: { r: 0, c: startColumnIndex },
+          e: { r: 0, c: columnIndex - 1 },
+        });
+      }
+    });
+
+    this.riskWiseTrailingColumns().forEach((column) => {
+      headerRows[0][columnIndex] = column.label.toUpperCase();
+      merges.push({
+        s: { r: 0, c: columnIndex },
+        e: { r: 1, c: columnIndex },
+      });
+      columnIndex++;
+    });
+
+    return {
+      rows: headerRows,
+      merges,
+    };
+  }
+
+  private setReportDateRangeFromFilters() {
+    if (!this.isRiskWiseAuditUnitsReport()) {
+      this.reportDateRange.set(null);
+      return;
+    }
+
+    const startDate = this.filterDateToDate(this.filters['startDate']);
+    const endDate = this.filterDateToDate(this.filters['endDate']);
+    const range = [startDate, endDate].filter(Boolean) as Date[];
+
+    this.reportDateRange.set(range.length ? range : null);
+  }
+
+  private filterDateToDate(value: any) {
+    if (!value) {
+      return null;
+    }
+
+    const date = value instanceof Date ? value : new Date(String(value));
+
+    return Number.isNaN(date.getTime()) ? null : date;
+  }
+
+  private dateToFilterValue(value: Date | undefined | null) {
+    if (!value) {
+      return '';
+    }
+
+    const yyyy = value.getFullYear();
+    const mm = String(value.getMonth() + 1).padStart(2, '0');
+    const dd = String(value.getDate()).padStart(2, '0');
+
+    return `${yyyy}-${mm}-${dd}`;
   }
 }

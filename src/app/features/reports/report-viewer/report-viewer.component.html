@@ -33,7 +33,7 @@
         class="field"
         *ngIf="shouldShowFilter(filter)"
         [class.field-wide]="filter.key === 'audit_unit_id'"
-        [class.field-half]="((filter.key === 'reportAuditUnit' || filter.key === 'reportAuditAssesment') && definition()?.slug !== 'risk-weightage-report') || (filter.key === 'rmv_pending_assesments' && definition()?.slug === 'risk-weightage-report')"
+        [class.field-half]="((filter.key === 'reportAuditUnit' || filter.key === 'reportAuditAssesment') && definition()?.slug !== 'risk-weightage-report') || (filter.key === 'rmv_pending_assesments' && definition()?.slug === 'risk-weightage-report') || (filter.key === 'startDate' && definition()?.slug === 'risk-wise-audit-units-report')"
         [class.field-third]="(filter.key === 'selectSearchTypeFilter' || filter.key === 'reportAuditUnit' || filter.key === 'reportAuditAssesment') && definition()?.slug === 'risk-weightage-report'"
         [class.field-quarter]="(filter.key === 'startDate' || filter.key === 'endDate') && definition()?.slug === 'risk-weightage-report'"
         [class.field-checkbox]="filter.type === 'checkbox' && definition()?.slug !== 'risk-weightage-report'"
@@ -43,7 +43,7 @@
         [class.field-business-category]="filter.key === 'business_risk_arr'"
         [class.field-control-category]="filter.key === 'control_risk_arr'"
       >
-        <label>{{ filter.label }}</label>
+        <label>{{ isRiskWiseAuditUnitsReport() && filter.key === 'startDate' ? 'Date Range' : filter.label }}</label>
 
         <select
           *ngIf="filter.type === 'select'"
@@ -55,7 +55,18 @@
           </option>
         </select>
 
-        <input *ngIf="filter.type === 'date'" type="date" [(ngModel)]="filters[filter.key]" />
+        <app-date-range-field
+          *ngIf="filter.type === 'date' && isRiskWiseAuditUnitsReport() && filter.key === 'startDate'"
+          [field]="reportDateRange"
+          [defaultToToday]="false"
+          placeholder="Select start and end date"
+        ></app-date-range-field>
+
+        <input
+          *ngIf="filter.type === 'date' && !(isRiskWiseAuditUnitsReport() && filter.key === 'startDate')"
+          type="date"
+          [(ngModel)]="filters[filter.key]"
+        />
         <input *ngIf="filter.type === 'text'" type="text" [(ngModel)]="filters[filter.key]" />
 
         <div *ngIf="filter.type === 'checkbox'" class="checkbox-filter-grid">
@@ -100,7 +111,11 @@
     </div>
   </div>
 
-  <div class="official-report-sheet" *ngIf="definition() && rows().length">
+  <div
+    class="official-report-sheet"
+    [class.risk-wise-report-sheet]="isRiskWiseAuditUnitsReport()"
+    *ngIf="definition() && rows().length"
+  >
     <div class="official-report-header print-only">
       <div class="official-report-brand-row">
         <div
@@ -134,7 +149,53 @@
     </div>
 
     <div class="official-report-table-wrap">
-      <table class="official-report-table">
+      <table
+        class="official-report-table"
+        [class.risk-wise-report-table]="isRiskWiseAuditUnitsReport()"
+      >
+        <thead *ngIf="isRiskWiseAuditUnitsReport(); else defaultReportHeader">
+          <tr>
+            <th
+              *ngFor="let column of riskWiseLeadingColumns()"
+              [attr.rowspan]="2"
+              [style.width]="column.width || null"
+              [class.text-center]="column.align === 'center'"
+              [class.text-right]="column.align === 'right'"
+            >
+              {{ column.label }}
+            </th>
+            <th
+              *ngFor="let group of riskWiseRiskGroups()"
+              [attr.colspan]="group.columns.length"
+              class="text-center risk-wise-risk-heading"
+            >
+              {{ group.label }}
+            </th>
+            <th
+              *ngFor="let column of riskWiseTrailingColumns()"
+              [attr.rowspan]="2"
+              [style.width]="column.width || null"
+              [class.text-center]="column.align === 'center'"
+              [class.text-right]="column.align === 'right'"
+            >
+              {{ column.label }}
+            </th>
+          </tr>
+          <tr>
+            <ng-container *ngFor="let group of riskWiseRiskGroups()">
+              <th
+                *ngFor="let column of group.columns"
+                [style.width]="column.width || null"
+                [class.text-center]="column.align === 'center'"
+                [class.text-right]="column.align === 'right'"
+              >
+                {{ column.label }}
+              </th>
+            </ng-container>
+          </tr>
+        </thead>
+
+        <ng-template #defaultReportHeader>
         <thead *ngIf="!hasGroupedRows()">
           <tr>
             <th
@@ -147,6 +208,7 @@
             </th>
           </tr>
         </thead>
+        </ng-template>
         <tbody>
           <ng-container *ngFor="let row of rows(); let rowIndex = index">
             <tr *ngIf="row.__report_group" class="report-group-row" [class]="'report-group-' + row.__group_level">
