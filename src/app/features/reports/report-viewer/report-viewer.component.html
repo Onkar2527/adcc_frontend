@@ -134,7 +134,7 @@
     </div>
 
     <div class="official-report-table-wrap">
-      <table class="official-report-table">
+      <table class="official-report-table" *ngIf="!isExecutiveSummary()">
         <thead *ngIf="!hasGroupedRows() && definition()?.slug !== 'broader-areawise-scoring-report'">
           <tr>
             <th
@@ -317,6 +317,287 @@
               </td>
             </tr>
           </ng-container>
+        </tbody>
+      </table>
+
+      <!-- Executive Summary Audit & Compliance Custom Layout Table -->
+      <table class="official-report-table executive-summary-table" *ngIf="isExecutiveSummary()">
+        <thead>
+          <tr class="report-group-row report-group-header">
+            <th colspan="6" class="text-center" style="font-weight: bold; font-size: 1.1em; background-color: #f4f6f9;">
+              Current Financial Year : <span class="text-primary">{{ exeReportData()?.assessment?.financial_year }}</span>
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- SECTION 1: BASIC DETAILS -->
+          <tr class="report-group-row report-group-category">
+            <td colspan="6" style="font-weight: bold; background-color: #e9ecef; text-align: center;">
+              1. BASIC DETAILS
+            </td>
+          </tr>
+          <tr>
+            <td class="text-center" style="font-weight: bold; width: 5%;">1</td>
+            <td colspan="3" style="width: 55%;">Branch Name</td>
+            <td colspan="2" style="width: 40%;"><strong>{{ exeReportData()?.assessment?.branch_name }}</strong></td>
+          </tr>
+          <tr>
+            <td class="text-center" style="font-weight: bold;">2</td>
+            <td colspan="3">Inspection Period</td>
+            <td colspan="2"><strong>{{ exeReportData()?.assessment?.frequency || 0 }}</strong> Months</td>
+          </tr>
+          <tr>
+            <td class="text-center" style="font-weight: bold;">3</td>
+            <td colspan="3">Name of Branch Manager</td>
+            <td colspan="2"><strong>{{ exeReportData()?.assessment?.branch_manager_name || '-' }}</strong></td>
+          </tr>
+          <tr>
+            <td class="text-center" style="font-weight: bold;">4</td>
+            <td colspan="3">Name of Assistant Branch Manager</td>
+            <td colspan="2"><strong>{{ exeReportData()?.assessment?.branch_assistant_manager || '-' }}</strong></td>
+          </tr>
+          <tr>
+            <td class="text-center" style="font-weight: bold;">5</td>
+            <td colspan="3">Inspection Conducted by</td>
+            <td colspan="2"><strong>{{ exeReportData()?.assessment?.auditor_name || '-' }}</strong></td>
+          </tr>
+          <tr>
+            <td class="text-center" style="font-weight: bold;">6</td>
+            <td colspan="3">Inspection Start Date</td>
+            <td colspan="2"><strong>{{ formatDate(exeReportData()?.assessment?.audit_start_date) }}</strong></td>
+          </tr>
+          <tr>
+            <td class="text-center" style="font-weight: bold;">7</td>
+            <td colspan="3">Inspection End Date</td>
+            <td colspan="2"><strong>{{ formatDate(exeReportData()?.assessment?.audit_end_date) }}</strong></td>
+          </tr>
+          <tr>
+            <td class="text-center" style="font-weight: bold;">8</td>
+            <td colspan="3">Number of Days taken for Inspection</td>
+            <td colspan="2">
+              <strong>
+                {{ exeReportData()?.assessment?.audit_duration_days !== null && exeReportData()?.assessment?.audit_duration_days !== undefined ? exeReportData()?.assessment?.audit_duration_days + ' Days' : 'Audit Not Completed' }}
+              </strong>
+            </td>
+          </tr>
+          <tr>
+            <td class="text-center" style="font-weight: bold;">9</td>
+            <td colspan="3">Audit Report Submitted Date</td>
+            <td colspan="2"><strong>{{ formatDate(exeReportData()?.assessment?.report_submitted_date) }}</strong></td>
+          </tr>
+          <tr>
+            <td class="text-center" style="font-weight: bold;">10</td>
+            <td colspan="3">Compliance to be done before date</td>
+            <td colspan="2"><strong>{{ formatDate(exeReportData()?.assessment?.compliance_due_date) }}</strong></td>
+          </tr>
+          <tr>
+            <td class="text-center" style="font-weight: bold;">11</td>
+            <td colspan="3">Compliance done date</td>
+            <td colspan="2"><strong>{{ formatDate(exeReportData()?.assessment?.compliance_end_date) }}</strong></td>
+          </tr>
+          <tr>
+            <td class="text-center" style="font-weight: bold;">12</td>
+            <td colspan="3">Number of Staff including Contractual / Daily wages staff</td>
+            <td colspan="2"><strong>{{ exeReportData()?.assessment?.staff_count || 0 }}</strong></td>
+          </tr>
+          <tr>
+            <td class="text-center" style="font-weight: bold;">13</td>
+            <td colspan="3">Approximate Number of manual Challans per day</td>
+            <td colspan="2"><strong>{{ exeReportData()?.assessment?.manual_challans_per_day || 0 }}</strong></td>
+          </tr>
+          <tr>
+            <td class="text-center" style="font-weight: bold;">14</td>
+            <td colspan="3">CD Ratio</td>
+            <td colspan="2"><strong>{{ getCdRatio() | number: '1.2-2' }}%</strong></td>
+          </tr>
+          <tr>
+            <td class="text-center" style="font-weight: bold;">15</td>
+            <td colspan="3">Per Employee Business (In Lakhs)</td>
+            <td colspan="2"><strong>{{ getPerEmployeeBusiness() | number: '1.2-2' }}</strong></td>
+          </tr>
+          <tr>
+            <td class="text-center" style="font-weight: bold;">16</td>
+            <td colspan="3">Annual Incremental Deposit Target (IN LAKHS)</td>
+            <td colspan="2"><strong>{{ exeReportData()?.assessment?.deposit_target || 0 | number: '1.2-2' }}</strong></td>
+          </tr>
+          <tr>
+            <td class="text-center" style="font-weight: bold;">17</td>
+            <td colspan="3">Annual Incremental Advances Target (IN LAKHS)</td>
+            <td colspan="2"><strong>{{ exeReportData()?.assessment?.advances_target || 0 | number: '1.2-2' }}</strong></td>
+          </tr>
+          <tr>
+            <td class="text-center" style="font-weight: bold;">18</td>
+            <td colspan="3">Annual Differential NPA Target (IN LAKHS)</td>
+            <td colspan="2"><strong>{{ exeReportData()?.assessment?.npa_target || 0 | number: '1.2-2' }}</strong></td>
+          </tr>
+
+          <!-- SECTION 2: BRANCH FINANCIAL POSITION -->
+          <tr class="report-group-row report-group-category">
+            <td colspan="6" style="font-weight: bold; background-color: #e9ecef; text-align: center;">
+              2. BRANCH FINANCIAL POSITION
+            </td>
+          </tr>
+          <tr style="font-weight: bold; background-color: #f8f9fa;">
+            <th class="text-center" style="width: 5%;">Sr. No.</th>
+            <th style="width: 15%;">Particulars</th>
+            <th class="text-center" style="width: 20%;">Last March Position (In Lakhs)</th>
+            <th class="text-center" style="width: 20%;">Position as on: {{ formatDate(exeReportData()?.assessment?.assesment_period_to) }}</th>
+            <th class="text-center" style="width: 20%;" [attr.colspan]="definition()?.slug === 'executive-summary-compliance-report' ? 1 : 2">
+              YTD Increase / Decrease (In Lakhs)
+            </th>
+            <th class="text-center" style="width: 20%;" *ngIf="definition()?.slug === 'executive-summary-compliance-report'">
+              Compliance Comment
+            </th>
+          </tr>
+
+          <!-- Deposits Sub-Section -->
+          <tr style="background-color: #f1f3f5; font-weight: bold;">
+            <td class="text-center text-primary">A</td>
+            <td class="text-primary">DEPOSITS</td>
+            <td class="text-center text-primary">{{ getCategoryMarchTotal('DEPOSITS') | number: '1.2-2' }}</td>
+            <td class="text-center text-primary">{{ getCategoryCurrentTotal('DEPOSITS', false) | number: '1.2-2' }}</td>
+            <td class="text-center text-primary" [attr.colspan]="definition()?.slug === 'executive-summary-compliance-report' ? 1 : 2">
+              {{ getCategoryYtdTotal('DEPOSITS') | number: '1.2-2' }}
+            </td>
+            <td *ngIf="definition()?.slug === 'executive-summary-compliance-report'"></td>
+          </tr>
+          <tr *ngFor="let scheme of getSchemesByType('DEPOSITS'); let idx = index">
+            <td class="text-center">{{ idx + 1 }}</td>
+            <td>{{ scheme.scheme_name }}</td>
+            <td class="text-center">{{ getMarchValue(scheme) | number: '1.2-2' }}</td>
+            <td class="text-center">{{ getCurrentValue(scheme, false) | number: '1.2-2' }}</td>
+            <td class="text-center" [attr.colspan]="definition()?.slug === 'executive-summary-compliance-report' ? 1 : 2">
+              {{ getYtdValue(scheme) | number: '1.2-2' }}
+            </td>
+            <td *ngIf="definition()?.slug === 'executive-summary-compliance-report'">
+              {{ getComplianceComment(scheme, false) || '-' }}
+            </td>
+          </tr>
+
+          <!-- Advances Sub-Section -->
+          <tr style="background-color: #f1f3f5; font-weight: bold;">
+            <td class="text-center text-primary">B</td>
+            <td class="text-primary">ADVANCES</td>
+            <td class="text-center text-primary">{{ getCategoryMarchTotal('ADVANCES') | number: '1.2-2' }}</td>
+            <td class="text-center text-primary">{{ getCategoryCurrentTotal('ADVANCES', false) | number: '1.2-2' }}</td>
+            <td class="text-center text-primary" [attr.colspan]="definition()?.slug === 'executive-summary-compliance-report' ? 1 : 2">
+              {{ getCategoryYtdTotal('ADVANCES') | number: '1.2-2' }}
+            </td>
+            <td *ngIf="definition()?.slug === 'executive-summary-compliance-report'"></td>
+          </tr>
+          <tr *ngFor="let scheme of getSchemesByType('ADVANCES'); let idx = index">
+            <td class="text-center">{{ idx + 1 }}</td>
+            <td>{{ scheme.scheme_name }}</td>
+            <td class="text-center">{{ getMarchValue(scheme) | number: '1.2-2' }}</td>
+            <td class="text-center">{{ getCurrentValue(scheme, false) | number: '1.2-2' }}</td>
+            <td class="text-center" [attr.colspan]="definition()?.slug === 'executive-summary-compliance-report' ? 1 : 2">
+              {{ getYtdValue(scheme) | number: '1.2-2' }}
+            </td>
+            <td *ngIf="definition()?.slug === 'executive-summary-compliance-report'">
+              {{ getComplianceComment(scheme, false) || '-' }}
+            </td>
+          </tr>
+
+          <!-- NPA Sub-Section -->
+          <tr style="background-color: #f1f3f5; font-weight: bold;">
+            <td class="text-center text-primary">C</td>
+            <td class="text-primary">NPA</td>
+            <td class="text-center text-primary">{{ getCategoryMarchTotal('NPA') | number: '1.2-2' }}</td>
+            <td class="text-center text-primary">{{ getCategoryCurrentTotal('NPA', false) | number: '1.2-2' }}</td>
+            <td class="text-center text-primary" [attr.colspan]="definition()?.slug === 'executive-summary-compliance-report' ? 1 : 2">
+              {{ getCategoryYtdTotal('NPA') | number: '1.2-2' }}
+            </td>
+            <td *ngIf="definition()?.slug === 'executive-summary-compliance-report'"></td>
+          </tr>
+          <tr *ngFor="let scheme of getSchemesByType('NPA'); let idx = index">
+            <td class="text-center">{{ idx + 1 }}</td>
+            <td>{{ scheme.scheme_name }}</td>
+            <td class="text-center">{{ getMarchValue(scheme) | number: '1.2-2' }}</td>
+            <td class="text-center">{{ getCurrentValue(scheme, false) | number: '1.2-2' }}</td>
+            <td class="text-center" [attr.colspan]="definition()?.slug === 'executive-summary-compliance-report' ? 1 : 2">
+              {{ getYtdValue(scheme) | number: '1.2-2' }}
+            </td>
+            <td *ngIf="definition()?.slug === 'executive-summary-compliance-report'">
+              {{ getComplianceComment(scheme, false) || '-' }}
+            </td>
+          </tr>
+
+          <!-- SECTION 3: NUMBER OF NEW (FRESH) ACCOUNTS -->
+          <tr class="report-group-row report-group-category">
+            <td colspan="6" style="font-weight: bold; background-color: #e9ecef; text-align: center;">
+              3. NUMBER OF NEW (FRESH) ACCOUNTS
+            </td>
+          </tr>
+          <tr style="font-weight: bold; background-color: #f8f9fa;">
+            <th class="text-center" style="width: 10%;">Sr. No.</th>
+            <th style="width: 30%;">Particulars</th>
+            <th class="text-center" [attr.colspan]="definition()?.slug === 'executive-summary-compliance-report' ? 3 : 4">
+              Position as on: {{ formatDate(exeReportData()?.assessment?.assesment_period_to) }}
+            </th>
+            <th class="text-center" style="width: 20%;" *ngIf="definition()?.slug === 'executive-summary-compliance-report'">
+              Compliance Comment
+            </th>
+          </tr>
+
+          <!-- Fresh Deposits -->
+          <tr style="background-color: #f1f3f5; font-weight: bold;">
+            <td class="text-center text-primary">A</td>
+            <td class="text-primary">DEPOSITS</td>
+            <td class="text-center text-primary" [attr.colspan]="definition()?.slug === 'executive-summary-compliance-report' ? 3 : 4">
+              {{ getCategoryCurrentTotal('DEPOSITS', true) | number }}
+            </td>
+            <td *ngIf="definition()?.slug === 'executive-summary-compliance-report'"></td>
+          </tr>
+          <tr *ngFor="let scheme of getSchemesByType('DEPOSITS'); let idx = index">
+            <td class="text-center">{{ idx + 1 }}</td>
+            <td>{{ scheme.scheme_name }}</td>
+            <td class="text-center" [attr.colspan]="definition()?.slug === 'executive-summary-compliance-report' ? 3 : 4">
+              {{ getCurrentValue(scheme, true) | number }}
+            </td>
+            <td *ngIf="definition()?.slug === 'executive-summary-compliance-report'">
+              {{ getComplianceComment(scheme, true) || '-' }}
+            </td>
+          </tr>
+
+          <!-- Fresh Advances -->
+          <tr style="background-color: #f1f3f5; font-weight: bold;">
+            <td class="text-center text-primary">B</td>
+            <td class="text-primary">ADVANCES</td>
+            <td class="text-center text-primary" [attr.colspan]="definition()?.slug === 'executive-summary-compliance-report' ? 3 : 4">
+              {{ getCategoryCurrentTotal('ADVANCES', true) | number }}
+            </td>
+            <td *ngIf="definition()?.slug === 'executive-summary-compliance-report'"></td>
+          </tr>
+          <tr *ngFor="let scheme of getSchemesByType('ADVANCES'); let idx = index">
+            <td class="text-center">{{ idx + 1 }}</td>
+            <td>{{ scheme.scheme_name }}</td>
+            <td class="text-center" [attr.colspan]="definition()?.slug === 'executive-summary-compliance-report' ? 3 : 4">
+              {{ getCurrentValue(scheme, true) | number }}
+            </td>
+            <td *ngIf="definition()?.slug === 'executive-summary-compliance-report'">
+              {{ getComplianceComment(scheme, true) || '-' }}
+            </td>
+          </tr>
+
+          <!-- Fresh NPA -->
+          <tr style="background-color: #f1f3f5; font-weight: bold;">
+            <td class="text-center text-primary">C</td>
+            <td class="text-primary">NPA</td>
+            <td class="text-center text-primary" [attr.colspan]="definition()?.slug === 'executive-summary-compliance-report' ? 3 : 4">
+              {{ getCategoryCurrentTotal('NPA', true) | number }}
+            </td>
+            <td *ngIf="definition()?.slug === 'executive-summary-compliance-report'"></td>
+          </tr>
+          <tr *ngFor="let scheme of getSchemesByType('NPA'); let idx = index">
+            <td class="text-center">{{ idx + 1 }}</td>
+            <td>{{ scheme.scheme_name }}</td>
+            <td class="text-center" [attr.colspan]="definition()?.slug === 'executive-summary-compliance-report' ? 3 : 4">
+              {{ getCurrentValue(scheme, true) | number }}
+            </td>
+            <td *ngIf="definition()?.slug === 'executive-summary-compliance-report'">
+              {{ getComplianceComment(scheme, true) || '-' }}
+            </td>
+          </tr>
         </tbody>
       </table>
     </div>

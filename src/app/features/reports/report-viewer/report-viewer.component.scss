@@ -378,3 +378,22 @@
   font-size: .68rem !important;
   max-width: 25px;
 }
+
+.executive-summary-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+  
+  tr {
+    td, th {
+      padding: 0.5rem 0.75rem;
+      border: 1px solid #d7e1eb;
+      font-size: 0.85rem;
+      vertical-align: middle;
+    }
+  }
+
+  .text-primary {
+    color: #1f5f93 !important;
+  }
+}
