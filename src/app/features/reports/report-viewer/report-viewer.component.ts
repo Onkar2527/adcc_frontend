@@ -63,6 +63,8 @@ export class ReportViewerComponent implements OnInit {
   }
 
   shouldShowFilter(filter: ReportFilterDefinition): boolean {
+    const slug = this.definition()?.slug;
+
     if (slug === 'risk-wise-audit-units-report' && filter.key === 'endDate') {
       return false;
     }
