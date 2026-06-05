@@ -134,6 +134,21 @@
   min-height: 1.25rem;
 }
 
+:host ::ng-deep .field app-date-range-field {
+  display: block;
+  width: 100%;
+
+  .date-range-field,
+  .date-range-picker,
+  .p-datepicker {
+    width: 100%;
+  }
+
+  .date-range-input {
+    width: 100%;
+  }
+}
+
 .filter-actions {
   grid-column: 1 / -1;
   display: flex;
@@ -337,6 +352,26 @@
   color: #000;
   font-weight: 800;
   text-align: left;
+}
+
+.risk-wise-report-table {
+  min-width: 1800px;
+
+  th,
+  td {
+    text-align: center;
+    vertical-align: middle;
+  }
+
+  th:nth-child(2),
+  td:nth-child(2) {
+    text-align: left;
+  }
+}
+
+.risk-wise-risk-heading {
+  font-size: .78rem !important;
+  background: #f4f8fc !important;
 }
 
 .text-center {

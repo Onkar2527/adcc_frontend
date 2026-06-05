@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DatePickerModule } from 'primeng/datepicker';
 import { ButtonModule } from 'primeng/button';
+import { TooltipModule } from 'primeng/tooltip';
 
 /**
  * Reusable date range picker field component with signal-based binding
@@ -20,7 +21,7 @@ import { ButtonModule } from 'primeng/button';
 @Component({
   selector: 'app-date-range-field',
   standalone: true,
-  imports: [CommonModule, FormsModule, DatePickerModule, ButtonModule],
+  imports: [CommonModule, FormsModule, DatePickerModule, ButtonModule, TooltipModule],
   template: `
     <div class="date-range-field">
       <p-datepicker

@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import * as XLSX from 'xlsx';
+import * as XLSX from 'xlsx-js-style';
 
 @Injectable({
   providedIn: 'root'
@@ -12,8 +12,15 @@ export class ExportService {
    * @param columns Array of column definitions { field: string, header: string }
    * @param fileName Name of the file (without extension)
    * @param reportHeaders Optional array of strings to show as merged rows on top
+   * @param columnHeader Optional custom column header rows with relative merge ranges
    */
-  exportToExcel(data: any[], columns: { field: string, header: string }[], fileName: string, reportHeaders: string[] = []) {
+  exportToExcel(
+    data: any[],
+    columns: { field: string, header: string }[],
+    fileName: string,
+    reportHeaders: string[] = [],
+    columnHeader?: { rows: any[][]; merges?: XLSX.Range[] },
+  ) {
     if (!data || data.length === 0) {
       console.warn('No data to export');
       return;
@@ -37,9 +44,34 @@ export class ExportService {
     });
 
     // 2. Add Column Headers
-    worksheetData.push(columns.map(col => col.header));
-    const headerRowIdx = currentRowIndex;
-    currentRowIndex++;
+    let columnHeaderRowIndexes: number[] = [];
+
+    if (columnHeader?.rows?.length) {
+      const headerStartRowIndex = currentRowIndex;
+
+      columnHeader.rows.forEach((row) => {
+        worksheetData.push(row);
+        columnHeaderRowIndexes.push(currentRowIndex);
+        currentRowIndex++;
+      });
+
+      (columnHeader.merges || []).forEach((merge) => {
+        merges.push({
+          s: {
+            r: headerStartRowIndex + merge.s.r,
+            c: merge.s.c,
+          },
+          e: {
+            r: headerStartRowIndex + merge.e.r,
+            c: merge.e.c,
+          },
+        });
+      });
+    } else {
+      worksheetData.push(columns.map(col => col.header));
+      columnHeaderRowIndexes.push(currentRowIndex);
+      currentRowIndex++;
+    }
 
     // 3. Add Data Rows (with special handling for group headers)
     data.forEach((row) => {
@@ -65,8 +97,35 @@ export class ExportService {
       worksheet['!merges'] = merges;
     }
 
+    columnHeaderRowIndexes.forEach((rowIndex) => {
+      for (let colIndex = 0; colIndex < columns.length; colIndex++) {
+        const cellRef = XLSX.utils.encode_cell({ r: rowIndex, c: colIndex });
+        const cell = worksheet[cellRef];
+
+        if (!cell) {
+          continue;
+        }
+
+        cell.s = {
+          ...(cell.s || {}),
+          font: {
+            ...(cell.s?.font || {}),
+            bold: true,
+          },
+          alignment: {
+            ...(cell.s?.alignment || {}),
+            horizontal: 'center',
+            vertical: 'center',
+            wrapText: true,
+          },
+        };
+      }
+    });
+
     // Basic styling/formatting hints for xlsx library (AOA to Sheet doesn't do much style, but we can set widths)
-    const colWidths = columns.map(c => ({ wch: Math.max(c.header.length, 12) }));
+    const colWidths = columns.map((c) => ({
+      wch: (c as any).excelWidth || Math.min(Math.max(c.header.length, 12), 22),
+    }));
     worksheet['!cols'] = colWidths;
 
     // Center alignment for report headers (this is tricky with utilities, but we can try)
