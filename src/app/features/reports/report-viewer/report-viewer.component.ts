@@ -37,9 +37,13 @@ export class ReportViewerComponent implements OnInit {
 
   filters: Record<string, any> = {};
 
-  shouldShowFilter(filter: ReportFilterDefinition): boolean {
+  isAdvancedLayout(): boolean {
     const slug = this.definition()?.slug;
-    if (slug === 'risk-weightage-report') {
+    return slug === 'risk-weightage-report' || slug === 'broader-areawise-scoring-report';
+  }
+
+  shouldShowFilter(filter: ReportFilterDefinition): boolean {
+    if (this.isAdvancedLayout()) {
       const searchType = String(this.filters['selectSearchTypeFilter'] || '3');
       if (filter.key === 'startDate' || filter.key === 'endDate') {
         return searchType === '5' || searchType === '6';
@@ -69,7 +73,7 @@ export class ReportViewerComponent implements OnInit {
   }
 
   onFilterChange(filter: ReportFilterDefinition) {
-    if (this.definition()?.slug === 'risk-weightage-report' && filter.key === 'selectSearchTypeFilter') {
+    if (this.isAdvancedLayout() && filter.key === 'selectSearchTypeFilter') {
       const searchType = String(this.filters['selectSearchTypeFilter'] || '3');
       if (searchType === '3' || searchType === '4') {
         this.filters['startDate'] = '';
@@ -220,6 +224,17 @@ export class ReportViewerComponent implements OnInit {
 
     if (!definition || !rows.length) {
       return;
+    }
+
+    if (definition.slug === 'broader-areawise-scoring-report') {
+      const tableElement = document.querySelector('.official-report-table');
+      if (tableElement) {
+        this.exportService.exportTableToExcel(
+          tableElement,
+          definition.fileName || definition.slug
+        );
+        return;
+      }
     }
 
     const dataToExport = rows

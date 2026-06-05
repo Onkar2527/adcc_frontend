@@ -33,10 +33,10 @@
         class="field"
         *ngIf="shouldShowFilter(filter)"
         [class.field-wide]="filter.key === 'audit_unit_id'"
-        [class.field-half]="((filter.key === 'reportAuditUnit' || filter.key === 'reportAuditAssesment') && definition()?.slug !== 'risk-weightage-report') || (filter.key === 'rmv_pending_assesments' && definition()?.slug === 'risk-weightage-report')"
-        [class.field-third]="(filter.key === 'selectSearchTypeFilter' || filter.key === 'reportAuditUnit' || filter.key === 'reportAuditAssesment') && definition()?.slug === 'risk-weightage-report'"
-        [class.field-quarter]="(filter.key === 'startDate' || filter.key === 'endDate') && definition()?.slug === 'risk-weightage-report'"
-        [class.field-checkbox]="filter.type === 'checkbox' && definition()?.slug !== 'risk-weightage-report'"
+        [class.field-half]="((filter.key === 'reportAuditUnit' || filter.key === 'reportAuditAssesment') && !isAdvancedLayout()) || (filter.key === 'rmv_pending_assesments' && isAdvancedLayout())"
+        [class.field-third]="(filter.key === 'selectSearchTypeFilter' || filter.key === 'reportAuditUnit' || filter.key === 'reportAuditAssesment') && isAdvancedLayout()"
+        [class.field-quarter]="(filter.key === 'startDate' || filter.key === 'endDate') && isAdvancedLayout()"
+        [class.field-checkbox]="filter.type === 'checkbox' && !isAdvancedLayout()"
         [class.field-checkbox-wide]="filter.key === 'risk_category_arr'"
         [class.field-checkbox-compact]="filter.key === 'business_risk_arr' || filter.key === 'control_risk_arr'"
         [class.field-risk-category]="filter.key === 'risk_category_arr'"
@@ -135,7 +135,7 @@
 
     <div class="official-report-table-wrap">
       <table class="official-report-table">
-        <thead *ngIf="!hasGroupedRows()">
+        <thead *ngIf="!hasGroupedRows() && definition()?.slug !== 'broader-areawise-scoring-report'">
           <tr>
             <th
               *ngFor="let column of definition()?.columns"
@@ -145,6 +145,59 @@
             >
               {{ column.label }}
             </th>
+          </tr>
+        </thead>
+
+        <thead *ngIf="definition()?.slug === 'broader-areawise-scoring-report'" class="broader-report-thead">
+          <tr>
+            <th class="vrt-header text-center" rowspan="3">Audit Unit Code</th>
+            <th class="vrt-header" rowspan="3">Branch</th>
+            <th class="vrt-header" rowspan="3">Risk Type</th>
+            <th class="vrt-header" rowspan="3">Category</th>
+            <th rowspan="3" style="vertical-align: middle; min-width: 180px;">Broader Area of Audit Non-Compliance</th>
+            <th colspan="6" class="text-center">Business Risk-High</th>
+            <th colspan="6" class="text-center">Business Risk-Medium</th>
+            <th colspan="6" class="text-center">Business Risk-Low</th>
+            <th colspan="11" class="text-center">TOTAL SCORE</th>
+          </tr>
+          <tr>
+            <th colspan="3" class="text-center">Qualitative Score</th>
+            <th colspan="3" class="text-center">Quantitative Score</th>
+            <th colspan="3" class="text-center">Qualitative Score</th>
+            <th colspan="3" class="text-center">Quantitative Score</th>
+            <th colspan="3" class="text-center">Qualitative Score</th>
+            <th colspan="3" class="text-center">Quantitative Score</th>
+            <th class="vrt-header text-center" rowspan="2">Qualitative Score</th>
+            <th class="vrt-header text-center" rowspan="2">Quantitative Score</th>
+            <th class="vrt-header text-center" rowspan="2">Total Score Before Averaging</th>
+            <th class="vrt-header text-center" rowspan="2">No. Of Accounts Non-Compliant</th>
+            <th class="vrt-header text-center" rowspan="2">No Of Accounts Checked</th>
+            <th class="vrt-header text-center" rowspan="2">Averaged Quantitative Score</th>
+            <th class="vrt-header text-center" rowspan="2">Total Averaged Score</th>
+            <th class="vrt-header text-center" rowspan="2">Number of Audits Conducted</th>
+            <th class="vrt-header text-center" rowspan="2">Averaged Total Score Per Audit</th>
+            <th class="vrt-header text-center" rowspan="2">Risk Weight</th>
+            <th class="vrt-header text-center" rowspan="2">Weighted Score</th>
+          </tr>
+          <tr>
+            <th class="vrt-header text-center">High</th>
+            <th class="vrt-header text-center">Medium</th>
+            <th class="vrt-header text-center">Low</th>
+            <th class="vrt-header text-center">High</th>
+            <th class="vrt-header text-center">Medium</th>
+            <th class="vrt-header text-center">Low</th>
+            <th class="vrt-header text-center">High</th>
+            <th class="vrt-header text-center">Medium</th>
+            <th class="vrt-header text-center">Low</th>
+            <th class="vrt-header text-center">High</th>
+            <th class="vrt-header text-center">Medium</th>
+            <th class="vrt-header text-center">Low</th>
+            <th class="vrt-header text-center">High</th>
+            <th class="vrt-header text-center">Medium</th>
+            <th class="vrt-header text-center">Low</th>
+            <th class="vrt-header text-center">High</th>
+            <th class="vrt-header text-center">Medium</th>
+            <th class="vrt-header text-center">Low</th>
           </tr>
         </thead>
         <tbody>

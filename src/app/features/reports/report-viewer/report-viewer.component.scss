@@ -368,3 +368,13 @@
     grid-column: span 1;
   }
 }
+
+.vrt-header {
+  writing-mode: vertical-lr;
+  text-align: center;
+  white-space: nowrap;
+  vertical-align: middle;
+  padding: .65rem .35rem !important;
+  font-size: .68rem !important;
+  max-width: 25px;
+}
