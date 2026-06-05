@@ -54,7 +54,19 @@ export class ReportViewerComponent implements OnInit {
 
   isAdvancedLayout(): boolean {
     const slug = this.definition()?.slug;
-    return slug === 'risk-weightage-report' || slug === 'broader-areawise-scoring-report';
+    return slug === 'risk-weightage-report'
+      || slug === 'broader-areawise-scoring-report'
+      || slug === 'pending-compliance-detail-report';
+  }
+
+  showsNestedComplianceColumn(): boolean {
+    const slug = this.definition()?.slug;
+    return slug === 'compliance-summary-report'
+      || slug === 'pending-compliance-detail-report';
+  }
+
+  showsNestedReviewerCommentColumn(): boolean {
+    return this.definition()?.slug === 'pending-compliance-detail-report';
   }
 
   isExecutiveSummary(): boolean {

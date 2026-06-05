@@ -244,21 +244,25 @@
                   <thead>
                     <tr>
                       <th>{{ row.__annexure_title }}</th>
-                      <th *ngIf="definition()?.slug === 'compliance-summary-report'">Compliance</th>
+                      <th *ngIf="showsNestedComplianceColumn()">Compliance</th>
                       <th>Business Risk</th>
                       <th>Control Risk</th>
                       <th>Risk Type</th>
+                      <th *ngIf="showsNestedReviewerCommentColumn()">Reviewer Comment</th>
                     </tr>
                   </thead>
                   <tbody>
                     <tr *ngFor="let annexureRow of row.__annexure_rows || []">
                       <td>{{ annexureRow.description }}</td>
-                      <td *ngIf="definition()?.slug === 'compliance-summary-report'">
+                      <td *ngIf="showsNestedComplianceColumn()">
                         {{ annexureRow.audit_commpliance }}
                       </td>
                       <td>{{ annexureRow.business_risk_label }}</td>
                       <td>{{ annexureRow.control_risk_label }}</td>
                       <td>{{ annexureRow.risk_category }}</td>
+                      <td *ngIf="showsNestedReviewerCommentColumn()">
+                        {{ annexureRow.compliance_reviewer_comment }}
+                      </td>
                     </tr>
                   </tbody>
                 </table>
@@ -273,10 +277,11 @@
                       <th *ngFor="let column of row.__vouching_columns || []">
                         {{ column.label }}
                       </th>
-                      <th *ngIf="definition()?.slug === 'compliance-summary-report'">Compliance</th>
+                      <th *ngIf="showsNestedComplianceColumn()">Compliance</th>
                       <th>Business Risk</th>
                       <th>Control Risk</th>
                       <th>Risk Type</th>
+                      <th *ngIf="showsNestedReviewerCommentColumn()">Reviewer Comment</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -284,12 +289,15 @@
                       <td *ngFor="let cell of vouchingRow.cells || []">
                         {{ cell }}
                       </td>
-                      <td *ngIf="definition()?.slug === 'compliance-summary-report'">
+                      <td *ngIf="showsNestedComplianceColumn()">
                         {{ vouchingRow.audit_commpliance }}
                       </td>
                       <td>{{ vouchingRow.business_risk_label }}</td>
                       <td>{{ vouchingRow.control_risk_label }}</td>
                       <td>{{ vouchingRow.risk_category }}</td>
+                      <td *ngIf="showsNestedReviewerCommentColumn()">
+                        {{ vouchingRow.compliance_reviewer_comment }}
+                      </td>
                     </tr>
                   </tbody>
                 </table>
