@@ -2,7 +2,7 @@
   <!-- Eager preload logo to ensure it is cached before printing -->
   <img
     [src]="reportLogo()"
-    style="position: absolute; width: 0; height: 0; opacity: 0; pointer-events: none;"
+    style="position: absolute; width: 0; height: 0; opacity: 0; pointer-events: none"
     alt=""
   />
 
@@ -26,24 +26,48 @@
   <div
     class="filter-panel no-print"
     *ngIf="definition()"
-    [class.audit-complete-filters]="definition()?.slug === 'audit-complete-report' || definition()?.slug === 'audit-observations-report' || definition()?.slug === 'compliance-report' || definition()?.slug === 'compliance-summary-report'"
+    [class.audit-complete-filters]="
+      definition()?.slug === 'audit-complete-report' ||
+      definition()?.slug === 'audit-observations-report' ||
+      definition()?.slug === 'compliance-report' ||
+      definition()?.slug === 'compliance-summary-report'
+    "
   >
     <ng-container *ngFor="let filter of definition()?.filters">
       <div
         class="field"
         *ngIf="shouldShowFilter(filter)"
         [class.field-wide]="filter.key === 'audit_unit_id'"
-        [class.field-half]="((filter.key === 'reportAuditUnit' || filter.key === 'reportAuditAssesment') && definition()?.slug !== 'risk-weightage-report') || (filter.key === 'rmv_pending_assesments' && definition()?.slug === 'risk-weightage-report') || (filter.key === 'startDate' && definition()?.slug === 'risk-wise-audit-units-report')"
-        [class.field-third]="(filter.key === 'selectSearchTypeFilter' || filter.key === 'reportAuditUnit' || filter.key === 'reportAuditAssesment') && definition()?.slug === 'risk-weightage-report'"
-        [class.field-quarter]="(filter.key === 'startDate' || filter.key === 'endDate') && definition()?.slug === 'risk-weightage-report'"
-        [class.field-checkbox]="filter.type === 'checkbox' && definition()?.slug !== 'risk-weightage-report'"
+        [class.field-half]="
+          ((filter.key === 'reportAuditUnit' || filter.key === 'reportAuditAssesment') &&
+            definition()?.slug !== 'risk-weightage-report') ||
+          (filter.key === 'rmv_pending_assesments' &&
+            definition()?.slug === 'risk-weightage-report')
+        "
+        [class.field-third]="
+          (filter.key === 'selectSearchTypeFilter' ||
+            filter.key === 'reportAuditUnit' ||
+            filter.key === 'reportAuditAssesment') &&
+          definition()?.slug === 'risk-weightage-report'
+        "
+        [class.field-quarter]="
+          (filter.key === 'startDate' || filter.key === 'endDate') &&
+          definition()?.slug === 'risk-weightage-report'
+        "
+        [class.field-checkbox]="
+          filter.type === 'checkbox' && definition()?.slug !== 'risk-weightage-report'
+        "
         [class.field-checkbox-wide]="filter.key === 'risk_category_arr'"
-        [class.field-checkbox-compact]="filter.key === 'business_risk_arr' || filter.key === 'control_risk_arr'"
+        [class.field-checkbox-compact]="
+          filter.key === 'business_risk_arr' || filter.key === 'control_risk_arr'
+        "
         [class.field-risk-category]="filter.key === 'risk_category_arr'"
         [class.field-business-category]="filter.key === 'business_risk_arr'"
         [class.field-control-category]="filter.key === 'control_risk_arr'"
       >
-        <label>{{ isRiskWiseAuditUnitsReport() && filter.key === 'startDate' ? 'Date Range' : filter.label }}</label>
+        <label>{{
+          isRiskWiseAuditUnitsReport() && filter.key === 'startDate' ? 'Date Range' : filter.label
+        }}</label>
 
         <select
           *ngIf="filter.type === 'select'"
@@ -56,14 +80,18 @@
         </select>
 
         <app-date-range-field
-          *ngIf="filter.type === 'date' && isRiskWiseAuditUnitsReport() && filter.key === 'startDate'"
+          *ngIf="
+            filter.type === 'date' && isRiskWiseAuditUnitsReport() && filter.key === 'startDate'
+          "
           [field]="reportDateRange"
           [defaultToToday]="false"
           placeholder="Select start and end date"
         ></app-date-range-field>
 
         <input
-          *ngIf="filter.type === 'date' && !(isRiskWiseAuditUnitsReport() && filter.key === 'startDate')"
+          *ngIf="
+            filter.type === 'date' && !(isRiskWiseAuditUnitsReport() && filter.key === 'startDate')
+          "
           type="date"
           [(ngModel)]="filters[filter.key]"
         />
@@ -83,9 +111,33 @@
     </ng-container>
 
     <div class="filter-actions">
-      <button pButton type="button" icon="pi pi-search" label="Find" [loading]="loading()" (click)="findReport()"></button>
-      <button pButton type="button" icon="pi pi-refresh" label="Reset" severity="secondary" outlined (click)="reset()"></button>
-      <button pButton type="button" icon="pi pi-print" label="Print" severity="secondary" outlined [disabled]="!rows().length" (click)="print()"></button>
+      <button
+        pButton
+        type="button"
+        icon="pi pi-search"
+        label="Find"
+        [loading]="loading()"
+        (click)="findReport()"
+      ></button>
+      <button
+        pButton
+        type="button"
+        icon="pi pi-refresh"
+        label="Reset"
+        severity="secondary"
+        outlined
+        (click)="reset()"
+      ></button>
+      <button
+        pButton
+        type="button"
+        icon="pi pi-print"
+        label="Print"
+        severity="secondary"
+        outlined
+        [disabled]="!rows().length"
+        (click)="print()"
+      ></button>
       <button
         *ngIf="canExportExcel()"
         pButton
@@ -118,15 +170,11 @@
   >
     <div class="official-report-header print-only">
       <div class="official-report-brand-row">
-        <div
-          class="official-report-logo"
-          data-id="auditproLogo"
-          aria-label="AuditPro"
-        >
+        <div class="official-report-logo" data-id="auditproLogo" aria-label="AuditPro">
           <img
             [src]="reportLogo()"
             alt="Logo"
-            style="height: 10mm; display: block; margin: 1px auto 0;"
+            style="height: 10mm; display: block; margin: 1px auto 0"
           />
         </div>
 
@@ -142,9 +190,7 @@
         <p *ngIf="reportAssessmentPeriod()">
           <strong>Assessment Period:</strong> {{ reportAssessmentPeriod() }}
         </p>
-        <p *ngIf="reportAuditUnit()">
-          <strong>Audit Unit:</strong> {{ reportAuditUnit() }}
-        </p>
+        <p *ngIf="reportAuditUnit()"><strong>Audit Unit:</strong> {{ reportAuditUnit() }}</p>
       </div>
     </div>
 
@@ -196,22 +242,86 @@
         </thead>
 
         <ng-template #defaultReportHeader>
-        <thead *ngIf="!hasGroupedRows()">
+          <thead
+            *ngIf="!hasGroupedRows() && definition()?.slug !== 'broader-areawise-scoring-report'"
+          >
+            <tr>
+              <th
+                *ngFor="let column of definition()?.columns"
+                [style.width]="column.width || null"
+                [class.text-center]="column.align === 'center'"
+                [class.text-right]="column.align === 'right'"
+              >
+                {{ column.label }}
+              </th>
+            </tr>
+          </thead>
+        </ng-template>
+
+        <thead
+          *ngIf="definition()?.slug === 'broader-areawise-scoring-report'"
+          class="broader-report-thead"
+        >
           <tr>
-            <th
-              *ngFor="let column of definition()?.columns"
-              [style.width]="column.width || null"
-              [class.text-center]="column.align === 'center'"
-              [class.text-right]="column.align === 'right'"
-            >
-              {{ column.label }}
+            <th class="vrt-header text-center" rowspan="3">Audit Unit Code</th>
+            <th class="vrt-header" rowspan="3">Branch</th>
+            <th class="vrt-header" rowspan="3">Risk Type</th>
+            <th class="vrt-header" rowspan="3">Category</th>
+            <th rowspan="3" style="vertical-align: middle; min-width: 180px">
+              Broader Area of Audit Non-Compliance
             </th>
+            <th colspan="6" class="text-center">Business Risk-High</th>
+            <th colspan="6" class="text-center">Business Risk-Medium</th>
+            <th colspan="6" class="text-center">Business Risk-Low</th>
+            <th colspan="11" class="text-center">TOTAL SCORE</th>
+          </tr>
+          <tr>
+            <th colspan="3" class="text-center">Qualitative Score</th>
+            <th colspan="3" class="text-center">Quantitative Score</th>
+            <th colspan="3" class="text-center">Qualitative Score</th>
+            <th colspan="3" class="text-center">Quantitative Score</th>
+            <th colspan="3" class="text-center">Qualitative Score</th>
+            <th colspan="3" class="text-center">Quantitative Score</th>
+            <th class="vrt-header text-center" rowspan="2">Qualitative Score</th>
+            <th class="vrt-header text-center" rowspan="2">Quantitative Score</th>
+            <th class="vrt-header text-center" rowspan="2">Total Score Before Averaging</th>
+            <th class="vrt-header text-center" rowspan="2">No. Of Accounts Non-Compliant</th>
+            <th class="vrt-header text-center" rowspan="2">No Of Accounts Checked</th>
+            <th class="vrt-header text-center" rowspan="2">Averaged Quantitative Score</th>
+            <th class="vrt-header text-center" rowspan="2">Total Averaged Score</th>
+            <th class="vrt-header text-center" rowspan="2">Number of Audits Conducted</th>
+            <th class="vrt-header text-center" rowspan="2">Averaged Total Score Per Audit</th>
+            <th class="vrt-header text-center" rowspan="2">Risk Weight</th>
+            <th class="vrt-header text-center" rowspan="2">Weighted Score</th>
+          </tr>
+          <tr>
+            <th class="vrt-header text-center">High</th>
+            <th class="vrt-header text-center">Medium</th>
+            <th class="vrt-header text-center">Low</th>
+            <th class="vrt-header text-center">High</th>
+            <th class="vrt-header text-center">Medium</th>
+            <th class="vrt-header text-center">Low</th>
+            <th class="vrt-header text-center">High</th>
+            <th class="vrt-header text-center">Medium</th>
+            <th class="vrt-header text-center">Low</th>
+            <th class="vrt-header text-center">High</th>
+            <th class="vrt-header text-center">Medium</th>
+            <th class="vrt-header text-center">Low</th>
+            <th class="vrt-header text-center">High</th>
+            <th class="vrt-header text-center">Medium</th>
+            <th class="vrt-header text-center">Low</th>
+            <th class="vrt-header text-center">High</th>
+            <th class="vrt-header text-center">Medium</th>
+            <th class="vrt-header text-center">Low</th>
           </tr>
         </thead>
-        </ng-template>
         <tbody>
           <ng-container *ngFor="let row of rows(); let rowIndex = index">
-            <tr *ngIf="row.__report_group" class="report-group-row" [class]="'report-group-' + row.__group_level">
+            <tr
+              *ngIf="row.__report_group"
+              class="report-group-row"
+              [class]="'report-group-' + row.__group_level"
+            >
               <td [attr.colspan]="definition()?.columns?.length || 1">
                 <ng-container *ngIf="row.__group_level !== 'account'; else accountDetailsBlock">
                   {{ row.__group_label }}
@@ -255,7 +365,9 @@
                   <tbody>
                     <tr *ngFor="let annexureRow of row.__annexure_rows || []">
                       <td>{{ annexureRow.description }}</td>
-                      <td *ngIf="definition()?.slug === 'compliance-summary-report'">{{ annexureRow.audit_commpliance }}</td>
+                      <td *ngIf="definition()?.slug === 'compliance-summary-report'">
+                        {{ annexureRow.audit_commpliance }}
+                      </td>
                       <td>{{ annexureRow.business_risk_label }}</td>
                       <td>{{ annexureRow.control_risk_label }}</td>
                       <td>{{ annexureRow.risk_category }}</td>
@@ -284,7 +396,9 @@
                       <td *ngFor="let cell of vouchingRow.cells || []">
                         {{ cell }}
                       </td>
-                      <td *ngIf="definition()?.slug === 'compliance-summary-report'">{{ vouchingRow.audit_commpliance }}</td>
+                      <td *ngIf="definition()?.slug === 'compliance-summary-report'">
+                        {{ vouchingRow.audit_commpliance }}
+                      </td>
                       <td>{{ vouchingRow.business_risk_label }}</td>
                       <td>{{ vouchingRow.control_risk_label }}</td>
                       <td>{{ vouchingRow.risk_category }}</td>
@@ -313,7 +427,10 @@
                   </ng-container>
 
                   <ng-container *ngSwitchCase="'status'">
-                    <p-tag [value]="row[column.key] || '-'" [severity]="statusSeverity(row, column)"></p-tag>
+                    <p-tag
+                      [value]="row[column.key] || '-'"
+                      [severity]="statusSeverity(row, column)"
+                    ></p-tag>
                     <small *ngIf="column.expiredKey && row[column.expiredKey]" class="expired-note">
                       Expired on {{ row[column.dueDateKey || ''] | date: 'dd MMM yyyy' }}
                     </small>

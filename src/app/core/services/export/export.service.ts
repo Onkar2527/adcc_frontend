@@ -140,6 +140,18 @@ export class ExportService {
   }
 
   /**
+   * Export an HTML Table element directly to Excel, preserving spans and headers.
+   * @param tableElement DOM table element
+   * @param fileName File name for download
+   */
+  exportTableToExcel(tableElement: any, fileName: string) {
+    const worksheet = XLSX.utils.table_to_sheet(tableElement, { raw: true });
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Report');
+    XLSX.writeFile(workbook, `${fileName}_${new Date().toLocaleDateString('en-GB').replace(/\//g, '-')}.xlsx`);
+  }
+
+  /**
    * Export data to CSV and trigger download
    * @param data Array of objects to export
    * @param columns Array of column definitions { field: string, header: string }

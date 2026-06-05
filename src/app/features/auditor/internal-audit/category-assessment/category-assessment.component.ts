@@ -6,6 +6,8 @@ import {
     ChangeDetectorRef,
     Component,
     Input,
+    Output,
+    EventEmitter,
     OnInit,
     OnChanges,
     Optional,
@@ -143,6 +145,14 @@ export class CategoryAssessmentComponent
 
     savedAny =
         signal(false);
+
+    @Output()
+    saved = new EventEmitter<void>();
+
+    markSaved() {
+        this.savedAny.set(true);
+        this.saved.emit();
+    }
 
     selectedDumpId =
         signal(0);
@@ -1362,9 +1372,7 @@ export class CategoryAssessmentComponent
                         || 'Answers saved successfully',
                     );
 
-                    this.savedAny.set(
-                        true,
-                    );
+                    this.markSaved();
 
                     this.loadCategory(
                         Number(detail.overview.id),
@@ -1617,7 +1625,7 @@ export class CategoryAssessmentComponent
                     this.notification.success(
                         res.message || 'Annexure row saved successfully',
                     );
-                    this.savedAny.set(true);
+                    this.markSaved();
 
                     if (
                         res?.row?.id
@@ -1782,7 +1790,7 @@ export class CategoryAssessmentComponent
                     this.notification.success(
                         res?.message || 'Annexure row deleted successfully',
                     );
-                    this.savedAny.set(true);
+                    this.markSaved();
                     question.annexure_rows =
                         (question.annexure_rows || [])
                             .filter(
@@ -1969,7 +1977,7 @@ export class CategoryAssessmentComponent
                     this.notification.success(
                         res.message || 'Annexure CSV uploaded successfully.',
                     );
-                    this.savedAny.set(true);
+                    this.markSaved();
                     this.loadCategory(
                         Number(detail.overview.id),
                         Number(detail.category.id),
@@ -2173,6 +2181,7 @@ export class CategoryAssessmentComponent
                         res?.message
                         || 'Sampled accounts applied successfully.',
                     );
+                    this.markSaved();
                     this.loadSampling();
                     this.loadCategory(
                         Number(detail.overview.id),
@@ -2223,6 +2232,7 @@ export class CategoryAssessmentComponent
                         res?.message
                         || 'Sampled account removed successfully.',
                     );
+                    this.markSaved();
                     this.selectedDumpId.set(0);
                     this.loadCategory(
                         Number(detail.overview.id),
@@ -2340,9 +2350,7 @@ export class CategoryAssessmentComponent
                         res?.message
                         || 'Account assessment marked complete.',
                     );
-                    this.savedAny.set(
-                        true,
-                    );
+                    this.markSaved();
                     this.loadCategory(
                         Number(detail.overview.id),
                         Number(detail.category.id),
@@ -2420,9 +2428,7 @@ export class CategoryAssessmentComponent
                         res?.message
                         || 'Remaining account assessments marked complete.',
                     );
-                    this.savedAny.set(
-                        true,
-                    );
+                    this.markSaved();
                     this.loadCategory(
                         Number(detail.overview.id),
                         Number(detail.category.id),
@@ -2671,7 +2677,7 @@ export class CategoryAssessmentComponent
                     this.notification.success(
                         res.message || 'Evidence uploaded successfully.',
                     );
-                    this.savedAny.set(true);
+                    this.markSaved();
                     this.loadCategory(
                         Number(detail.overview.id),
                         Number(detail.category.id),
@@ -2777,7 +2783,7 @@ export class CategoryAssessmentComponent
                     this.notification.success(
                         res.message || 'Evidence removed successfully.',
                     );
-                    this.savedAny.set(true);
+                    this.markSaved();
                     this.loadCategory(
                         Number(detail.overview.id),
                         Number(detail.category.id),

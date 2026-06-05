@@ -526,6 +526,7 @@
         [pendingQuestionIdsInput]="selectedPendingQuestionIds()"
         [dumpIdInput]="selectedDumpId()"
         [workspaceMode]="true"
+        (saved)="loadMenu(audit.id)"
       ></app-category-assessment>
     </div>
   </ng-container>

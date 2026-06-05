@@ -51,13 +51,17 @@ export class ReportViewerComponent implements OnInit {
 
   filters: Record<string, any> = {};
 
-  shouldShowFilter(filter: ReportFilterDefinition): boolean {
+  isAdvancedLayout(): boolean {
     const slug = this.definition()?.slug;
+    return slug === 'risk-weightage-report' || slug === 'broader-areawise-scoring-report';
+  }
+
+  shouldShowFilter(filter: ReportFilterDefinition): boolean {
     if (slug === 'risk-wise-audit-units-report' && filter.key === 'endDate') {
       return false;
     }
 
-    if (slug === 'risk-weightage-report') {
+    if (this.isAdvancedLayout()) {
       const searchType = String(this.filters['selectSearchTypeFilter'] || '3');
       if (filter.key === 'startDate' || filter.key === 'endDate') {
         return searchType === '5' || searchType === '6';
@@ -88,7 +92,7 @@ export class ReportViewerComponent implements OnInit {
 
   onFilterChange(filter: ReportFilterDefinition) {
     if (
-      this.definition()?.slug === 'risk-weightage-report'
+      this.isAdvancedLayout()
       && filter.key === 'selectSearchTypeFilter'
     ) {
       const searchType = String(this.filters['selectSearchTypeFilter'] || '3');
@@ -289,6 +293,17 @@ export class ReportViewerComponent implements OnInit {
 
     if (!definition || !rows.length) {
       return;
+    }
+
+    if (definition.slug === 'broader-areawise-scoring-report') {
+      const tableElement = document.querySelector('.official-report-table');
+      if (tableElement) {
+        this.exportService.exportTableToExcel(
+          tableElement,
+          definition.fileName || definition.slug
+        );
+        return;
+      }
     }
 
     const dataToExport = rows

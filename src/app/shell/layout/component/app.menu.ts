@@ -263,8 +263,6 @@ export class AppMenu implements OnInit, OnDestroy {
             JSON.stringify({
                 currentAssessmentId,
                 shouldShowAssessmentMenu,
-                url:
-                    this.router.url || '',
                 navAssessmentId:
                     this.auditNavService.assessmentId(),
                 menus:
@@ -277,7 +275,7 @@ export class AppMenu implements OnInit, OnDestroy {
                                     (menu?.categories || [])
                                         .map(
                                             (category: any) =>
-                                                `${category?.id}:${category?.name}`,
+                                                `${category?.id}:${category?.name}:${category?.carry_forward}:${category?.account_based}:${category?.completed_account_count}:${category?.account_count}:${category?.answered_count}:${category?.question_count}`,
                                         ),
                             }),
                         ),
