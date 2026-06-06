@@ -81,7 +81,7 @@ export class AppMenu implements OnInit, OnDestroy {
         },
         {
             label: 'Reports',
-            authority: ['2', '3', '4'],
+            authority: ['1', '2', '3', '4'],
             items: [{ label: 'Reports', icon: 'pi pi-fw pi-file', routerLink: ['/reports'] }],
         },
         {
@@ -240,6 +240,14 @@ export class AppMenu implements OnInit, OnDestroy {
     }
 
     private refreshModel() {
+        const url = this.router.url || '';
+        const isInternalAuditRoute = url.includes('/auditor/internal-audit');
+        const isReportsRoute = url.includes('/reports');
+
+        if (!isInternalAuditRoute && !isReportsRoute) {
+            this.auditNavService.clear();
+        }
+
         const user =
             JSON.parse(localStorage.getItem('user') || '{}');
 
@@ -252,8 +260,11 @@ export class AppMenu implements OnInit, OnDestroy {
                 menu.authority.includes(this.userTypeId)
             );
 
-        const currentAssessmentId =
+        let currentAssessmentId =
             this.currentAssessmentIdFromRoute();
+        if (!currentAssessmentId && isReportsRoute) {
+            currentAssessmentId = Number(this.auditNavService.assessmentId() || 0);
+        }
 
         const shouldShowAssessmentMenu =
             this.shouldShowCurrentAssessmentMenu(

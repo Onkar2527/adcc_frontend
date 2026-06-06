@@ -8,7 +8,7 @@
     </div>
   </div>
   <div class="table-container">
-    <app-table [columns]="columns" [data]="reports" [showAddButton]="false" [showRefreshButton]="false" [showToolbar]="true" [showSerialNumber]="false" [paginator]="false" [globalFilterFields]="['name']" rowGroupMode="subheader" groupRowsBy="category" [bodyTemplate]="rowTemplate" scrollHeight="calc(100vh - 200px)">
+    <app-table [columns]="columns" [data]="filteredReports" [showAddButton]="false" [showRefreshButton]="false" [showToolbar]="true" [showSerialNumber]="false" [paginator]="false" [globalFilterFields]="['name']" rowGroupMode="subheader" groupRowsBy="category" [bodyTemplate]="rowTemplate" scrollHeight="calc(100vh - 200px)">
       <ng-template #groupHeader let-rowData>
         <tr class="p-rowgroup-header">
           <td style="text-align: center; font-weight: bold; width: 4.5rem">#</td>

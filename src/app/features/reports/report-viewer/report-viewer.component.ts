@@ -12,6 +12,7 @@ import {
   ReportFilterDefinition,
   ReportsService,
 } from '../services/reports.service';
+import { InternalAuditNavService } from '../../auditor/services/internal-audit-nav.service';
 
 @Component({
   selector: 'app-report-viewer',
@@ -25,6 +26,49 @@ export class ReportViewerComponent implements OnInit {
   private router = inject(Router);
   private reportsService = inject(ReportsService);
   private exportService = inject(ExportService);
+  private auditNavService = inject(InternalAuditNavService);
+
+  applyBranchFilterRestrictions(definition: ReportDefinition) {
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    const userTypeId = String(user.user_type_id || '');
+    const auditUnitAuthority = String(user.audit_unit_authority || '');
+
+    const activeOverview = this.auditNavService.overview();
+    const activeUnitId = activeOverview ? Number(activeOverview.audit_unit_id || 0) : 0;
+
+    const branchFilters = definition.filters.filter(
+      (f) => f.key === 'audit_unit_id' || f.key === 'reportAuditUnit'
+    );
+
+    for (const filter of branchFilters) {
+      const originalOptions = filter.options || [];
+      let filteredOptions = [...originalOptions];
+
+      if (activeUnitId) {
+        filteredOptions = originalOptions.filter(
+          (opt) => String(opt.value) === String(activeUnitId)
+        );
+      } else if (userTypeId === '2' || userTypeId === '4') {
+        const assignedIds = auditUnitAuthority
+          .split(',')
+          .map((s) => s.trim())
+          .filter(Boolean);
+
+        filteredOptions = originalOptions.filter(
+          (opt) => assignedIds.includes(String(opt.value))
+        );
+      }
+
+      filter.options = filteredOptions;
+
+      const currentValue = String(this.filters[filter.key] || '');
+      const isValid = filteredOptions.some((opt) => String(opt.value) === currentValue);
+
+      if (!isValid && filteredOptions.length > 0) {
+        this.filters[filter.key] = filteredOptions[0].value;
+      }
+    }
+  }
 
   constructor() {
     effect(() => {
@@ -168,6 +212,7 @@ export class ReportViewerComponent implements OnInit {
         this.filters = {
           ...(definition.defaultFilters || {}),
         };
+        this.applyBranchFilterRestrictions(definition);
         this.setReportDateRangeFromFilters();
         definition.filters
           .filter((filter) => filter.type === 'checkbox')
@@ -241,6 +286,9 @@ export class ReportViewerComponent implements OnInit {
     this.filters = {
       ...(definition?.defaultFilters || {}),
     };
+    if (definition) {
+      this.applyBranchFilterRestrictions(definition);
+    }
     this.setReportDateRangeFromFilters();
     definition?.filters
       .filter((filter) => filter.type === 'checkbox')
