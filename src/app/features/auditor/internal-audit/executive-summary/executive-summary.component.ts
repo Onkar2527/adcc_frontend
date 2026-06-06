@@ -271,6 +271,10 @@ export class ExecutiveSummaryComponent
             );
     }
 
+    isExecutiveAccountsReadOnly(row: any): boolean {
+        return !row?.isNpa || this.isExecutiveAmountReadOnly(row);
+    }
+
     getBranchFinancialPosition() {
 
         this.loading.set(true);

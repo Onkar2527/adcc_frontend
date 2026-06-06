@@ -358,7 +358,7 @@
                 pInputText
                 type="number"
                 [(ngModel)]="row.account_input"
-                [disabled]="true"
+                [disabled]="isExecutiveAccountsReadOnly(row)"
                 class="w-6rem"
               />
             </td>

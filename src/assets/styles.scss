@@ -3,6 +3,7 @@
 @use './layout/layout.scss';
 @use 'primeicons/primeicons.css';
 @import 'primeflex/primeflex.css';
+
 /* Inter Font - Local (Static) */
 @font-face {
   font-family: 'Inter';
@@ -154,8 +155,8 @@ body.sidebar-resizing * {
 
 @media print {
   @page {
-    size: A4 landscape;
-    margin: 10mm;
+    size: A4 portrait;
+    margin: 5mm;
   }
 
   body.printing-report {
