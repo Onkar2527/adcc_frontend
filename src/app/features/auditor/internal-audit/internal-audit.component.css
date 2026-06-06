@@ -1340,7 +1340,14 @@ textarea.answer-control1 {
 }
 
 .account-list-panel {
-    flex: 0 0 min(21rem, 100%);
+    flex: 0 0 min(19.5rem, 100%);
+}
+
+.selected-account-layout {
+    display: grid;
+    grid-template-columns: minmax(17rem, 19.5rem) minmax(0, 1fr);
+    gap: 1rem;
+    align-items: start;
 }
 
 .account-select-panel {
@@ -1420,16 +1427,18 @@ textarea.answer-control1 {
 }
 
 .account-detail-table th {
-    width: 10.5rem;
-    background: var(--surface-100);
-    color: var(--text-color);
-    font-size: .72rem;
+    width: 9.5rem;
+    background: #f1f5f9;
+    color: #2f4357;
+    font-size: .68rem;
     font-weight: 800;
     text-transform: uppercase;
 }
 
 .account-detail-table td {
     background: var(--surface-0);
+    color: #182f45;
+    font-weight: 500;
 }
 
 .account-total {
@@ -1444,7 +1453,7 @@ textarea.answer-control1 {
 .account-items {
     display: flex;
     flex-direction: column;
-    gap: .5rem;
+    gap: .35rem;
     max-height: 21rem;
     overflow: auto;
 }
@@ -1452,10 +1461,10 @@ textarea.answer-control1 {
 .account-item {
     display: flex;
     flex-direction: column;
-    gap: .25rem;
-    padding: .7rem .8rem;
-    border: 1px solid var(--surface-200);
-    border-radius: .5rem;
+    gap: .18rem;
+    padding: .55rem .65rem;
+    border: 1px solid transparent;
+    border-radius: .35rem;
     background: var(--surface-0);
     color: inherit;
     text-align: left;
@@ -1497,10 +1506,103 @@ textarea.answer-control1 {
 .account-detail {
     flex: 1;
     min-width: 0;
-    padding: 1rem;
+    padding: .85rem;
     border: 1px solid var(--surface-200);
-    border-radius: .5rem;
-    background: var(--surface-50);
+    border-radius: .4rem;
+    background: #ffffff;
+}
+
+.selected-account-detail {
+    display: flex;
+    flex-direction: column;
+    gap: .75rem;
+}
+
+.selected-account-head {
+    display: grid;
+    grid-template-columns: minmax(14rem, 1fr) auto;
+    gap: .75rem;
+    align-items: start;
+    padding-bottom: .65rem;
+    border-bottom: 1px solid var(--surface-200);
+}
+
+.selected-account-title {
+    min-width: 0;
+}
+
+.selected-account-eyebrow {
+    color: #52677a !important;
+    font-size: .68rem !important;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+
+.selected-account-number {
+    color: #182f45;
+    font-size: 1.1rem;
+    font-weight: 800;
+    line-height: 1.15;
+}
+
+.selected-account-subtitle {
+    margin-top: .25rem;
+    color: #52677a;
+    font-size: .88rem;
+    line-height: 1.3;
+}
+
+.selected-account-actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: .4rem;
+    max-width: 35rem;
+}
+
+:host ::ng-deep .selected-account-actions .p-button {
+    min-height: 2rem;
+    padding: .42rem .65rem;
+    font-size: .82rem;
+}
+
+.selected-account-detail .account-detail-table {
+    table-layout: fixed;
+    border: 1px solid #d8e2ec;
+    border-radius: .35rem;
+    overflow: hidden;
+}
+
+.selected-account-detail .account-detail-table th,
+.selected-account-detail .account-detail-table td {
+    padding: .48rem .6rem;
+    border-color: #d8e2ec;
+    vertical-align: middle;
+}
+
+.selected-account-detail .account-detail-table th:nth-child(1),
+.selected-account-detail .account-detail-table th:nth-child(3) {
+    width: 8.8rem;
+}
+
+.selected-account-detail .account-detail-table td:nth-child(2),
+.selected-account-detail .account-detail-table td:nth-child(4) {
+    width: calc((100% - 17.6rem) / 2);
+}
+
+.selected-account-completion-actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: .5rem;
+    padding-top: .65rem;
+    border-top: 1px solid var(--surface-200);
+}
+
+:host ::ng-deep .selected-account-completion-actions .p-button {
+    min-height: 2.05rem;
+    padding: .45rem .75rem;
+    font-size: .84rem;
 }
 
 .account-prompt {
@@ -1888,6 +1990,15 @@ textarea.answer-control1 {
 @media (max-width: 768px) {
     .workspace-shell {
         grid-template-columns: 1fr;
+    }
+
+    .selected-account-layout,
+    .selected-account-head {
+        grid-template-columns: 1fr;
+    }
+
+    .selected-account-actions {
+        justify-content: flex-start;
     }
 
     .workspace-sidebar {

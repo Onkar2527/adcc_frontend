@@ -283,7 +283,7 @@
                 </div>
             </div>
 
-            <div *ngIf="detail.selected_account" class="flex flex-column lg:flex-row gap-4">
+            <div *ngIf="detail.selected_account" class="selected-account-layout">
                 <aside class="account-list-panel">
                     <div class="flex align-items-center justify-content-between gap-2 mb-3">
                         <div class="font-bold text-900">
@@ -319,16 +319,16 @@
                     </div>
                 </aside>
 
-                <div class="account-detail" *ngIf="detail.selected_account as account">
-                    <div class="flex flex-column md:flex-row md:align-items-start md:justify-content-between gap-3 mb-3">
-                        <div>
-                            <div class="text-sm text-600 mb-1">
+                <div class="account-detail selected-account-detail" *ngIf="detail.selected_account as account">
+                    <div class="selected-account-head">
+                        <div class="selected-account-title">
+                            <div class="text-sm text-600 mb-1 selected-account-eyebrow">
                                 Selected Account
                             </div>
-                            <div class="text-lg font-bold text-900">
+                            <div class="selected-account-number">
                                 {{ account.account_no }}
                             </div>
-                            <div class="text-600 mt-1">
+                            <div class="selected-account-subtitle">
                                 {{ account.scheme_name || account.scheme_code || '-' }}
                                 <span *ngIf="account.account_holder_name">
                                     | {{ account.account_holder_name }}
@@ -336,7 +336,7 @@
                             </div>
                         </div>
 
-                        <div class="flex gap-2 flex-wrap">
+                        <div class="selected-account-actions">
                             <button
                                 pButton
                                 type="button"
@@ -352,18 +352,6 @@
                             <button *ngIf="canManageSampling(detail) && !account.is_completed" pButton type="button"
                                 icon="pi pi-times" label="Remove Sample" severity="secondary"
                                 (click)="removeSampling(account)"></button>
-
-                            <button pButton type="button" icon="pi pi-check-circle" label="Mark Account Complete"
-                                [disabled]="account.is_completed || completingAccount() || completingRemainingAccounts()"
-                                [loading]="completingAccount()"
-                                (click)="completeAccount()"></button>
-
-                            <button pButton type="button" icon="pi pi-check-circle"
-                                label="Complete Remaining Accounts"
-                                severity="danger"
-                                [disabled]="completingAccount() || completingRemainingAccounts()"
-                                [loading]="completingRemainingAccounts()"
-                                (click)="completeRemainingAccounts()"></button>
                         </div>
                     </div>
 
@@ -400,6 +388,20 @@
                             </tr>
                         </tbody>
                     </table>
+
+                    <div class="selected-account-completion-actions">
+                        <button pButton type="button" icon="pi pi-check-circle" label="Mark Account Complete"
+                            [disabled]="account.is_completed || completingAccount() || completingRemainingAccounts()"
+                            [loading]="completingAccount()"
+                            (click)="completeAccount()"></button>
+
+                        <button pButton type="button" icon="pi pi-check-circle"
+                            label="Complete Remaining Accounts"
+                            severity="danger"
+                            [disabled]="completingAccount() || completingRemainingAccounts()"
+                            [loading]="completingRemainingAccounts()"
+                            (click)="completeRemainingAccounts()"></button>
+                    </div>
                 </div>
             </div>
         </div>
