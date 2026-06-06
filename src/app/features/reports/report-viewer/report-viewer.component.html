@@ -147,7 +147,7 @@
         </thead>
 
         <ng-template #defaultReportHeader>
-          <thead *ngIf="!hasGroupedRows() && definition()?.slug !== 'broader-areawise-scoring-report'">
+          <thead *ngIf="!hasGroupedRows() && definition()?.slug !== 'broader-areawise-scoring-report' && definition()?.slug !== 'questionwsie-broader-areawise-report'">
             <tr>
               <th *ngFor="let column of definition()?.columns" [style.width]="column.width || null"
                 [class.text-center]="column.align === 'center'" [class.text-right]="column.align === 'right'">
@@ -157,7 +157,7 @@
           </thead>
         </ng-template>
 
-        <thead *ngIf="definition()?.slug === 'broader-areawise-scoring-report'" class="broader-report-thead">
+        <thead *ngIf="definition()?.slug === 'broader-areawise-scoring-report' || definition()?.slug === 'questionwsie-broader-areawise-report'" class="broader-report-thead">
           <tr>
             <th class="vrt-header text-center" rowspan="3">Audit Unit Code</th>
             <th class="vrt-header" rowspan="3">Branch</th>

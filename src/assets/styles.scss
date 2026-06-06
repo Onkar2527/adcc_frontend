@@ -134,13 +134,13 @@ body.sidebar-resizing * {
   width: 100%;
   min-width: 1120px;
   border-collapse: collapse;
-  font-size: .82rem;
+  font-size: .88rem;
 }
 
 .official-report-table th,
 .official-report-table td {
   border: 1px solid #d7e1eb;
-  padding: .45rem .55rem;
+  padding: .55rem .65rem;
   vertical-align: top;
   text-align: left;
 }
@@ -148,7 +148,7 @@ body.sidebar-resizing * {
 .official-report-table th {
   background: #eaf1f8;
   color: #173a59;
-  font-size: .72rem;
+  font-size: .80rem;
   font-weight: 900;
   text-transform: uppercase;
 }
@@ -157,6 +157,15 @@ body.sidebar-resizing * {
   @page {
     size: A4 portrait;
     margin: 5mm;
+  }
+
+  @page landscape-page {
+    size: A4 landscape;
+    margin: 5mm;
+  }
+
+  body.print-landscape {
+    page: landscape-page;
   }
 
   body.printing-report {
@@ -203,7 +212,7 @@ body.sidebar-resizing * {
   }
 
   body.printing-report .official-report-header p {
-    font-size: 9.5px;
+    font-size: 12px;
     line-height: 1.35;
   }
 
@@ -239,19 +248,19 @@ body.sidebar-resizing * {
   body.printing-report .official-report-table {
     min-width: 0 !important;
     width: 100% !important;
-    font-size: 9px !important;
+    font-size: 12px !important;
   }
 
   body.printing-report .official-report-table th,
   body.printing-report .official-report-table td {
     border: 1px solid #333 !important;
-    padding: 3px 4px !important;
+    padding: 4px 5px !important;
   }
 
   body.printing-report .official-report-table th {
     background: #e6e6e6 !important;
     color: #000 !important;
-    font-size: 8.5px !important;
+    font-size: 12px !important;
   }
 
   body.printing-report .official-report-table .p-tag {
@@ -267,15 +276,15 @@ body.sidebar-resizing * {
     table-layout: fixed !important;
     min-width: 0 !important;
     width: 100% !important;
-    font-size: 6px !important;
+    font-size: 10px !important;
   }
 
   body.printing-report .risk-wise-report-table th,
   body.printing-report .risk-wise-report-table td {
     width: auto !important;
-    padding: 1.5px 2px !important;
-    font-size: 6px !important;
-    line-height: 1.15 !important;
+    padding: 3px 4px !important;
+    font-size: 10px !important;
+    line-height: 1.25 !important;
     white-space: normal !important;
     word-break: break-word !important;
     overflow-wrap: anywhere !important;
@@ -283,6 +292,13 @@ body.sidebar-resizing * {
   }
 
   body.printing-report .risk-wise-report-table th {
-    font-size: 5.8px !important;
+    font-size: 10px !important;
+  }
+
+  body.printing-report .report-account-table td,
+  body.printing-report .report-annexure-table th,
+  body.printing-report .report-annexure-table td {
+    font-size: 11px !important;
+    padding: 3px 4px !important;
   }
 }
