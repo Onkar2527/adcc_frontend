@@ -1,5 +1,5 @@
 <div class="review-page">
-  <header class="review-header">
+  <header *ngIf="selected()" class="review-header">
     <div>
       <h2>Reviewer Workspace</h2>
       <p>Review audit observations and completed compliance responses.</p>
@@ -21,80 +21,33 @@
     {{ error() }}
   </div>
 
-  <section *ngIf="!selected()" class="queue-panel">
-    <div class="section-title">
-      <div>
-        <strong>Pending Reviews</strong>
-        <small>Assigned assessments waiting for reviewer action.</small>
-      </div>
-      <p-tag [value]="assessments().length + ' pending'" severity="contrast"></p-tag>
-    </div>
-
-    <div class="queue-summary">
-      <div>
-        <span>Assessments</span>
-        <strong>{{ assessments().length }}</strong>
-      </div>
-      <div>
-        <span>Total Questions</span>
-        <strong>{{ totalQueuePoints() }}</strong>
-      </div>
-      <div>
-        <span>Compliance Marked</span>
-        <strong class="red">{{ totalQueueCompliancePoints() }}</strong>
-      </div>
-    </div>
-
-    <div *ngIf="loadingQueue()" class="queue-loading">
-      <p-skeleton height="4.5rem"></p-skeleton>
-      <p-skeleton height="4.5rem"></p-skeleton>
-    </div>
-
-    <div *ngIf="!loadingQueue() && !assessments().length" class="empty-state">
-      No assessment is pending for review.
-    </div>
-
-    <div *ngIf="!loadingQueue() && assessments().length" class="queue-table-wrap">
-      <table class="queue-table">
-        <thead>
-          <tr>
-            <th>Audit Unit</th>
-            <th>Assessment Period</th>
-            <th>Review Stage</th>
-            <th>Questions</th>
-            <th>Compliance</th>
-            <th></th>
-          </tr>
-        </thead>
-
-        <tbody>
-          <tr *ngFor="let assessment of assessments()" (click)="openAssessment(assessment)">
-            <td>
-              <strong>{{ assessment.audit_unit_name }}</strong>
-              <small>{{ assessment.audit_unit_code }} | F.Y. {{ assessment.year }}</small>
-            </td>
-            <td>
-              {{ assessment.assesment_period_from | date: 'mediumDate' }}
-              -
-              {{ assessment.assesment_period_to | date: 'mediumDate' }}
-            </td>
-            <td>
-              <p-tag [value]="assessment.review_stage" severity="secondary"></p-tag>
-            </td>
-            <td>
-              <strong>{{ assessment.total_points }}</strong>
-            </td>
-            <td>
-              <strong class="red">{{ assessment.compliance_points }}</strong>
-            </td>
-            <td class="queue-action">
-              <i class="pi pi-arrow-right"></i>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  </section>
+  <app-audit-unit-dashboard
+    *ngIf="!selected()"
+    eyebrow="Review"
+    title="Reviewer Workspace"
+    subtitle="Select an assigned audit unit to review audit observations or compliance responses"
+    panelTitle="Pending Reviews"
+    emptyTitle="No assessment is pending for review"
+    emptyMessage="Assigned reviews will appear here once an auditor or manager submits them."
+    refreshLabel="Refresh"
+    [units]="dashboardUnits()"
+    [loading]="loadingQueue()"
+    [search]="search()"
+    [selectedStatus]="selectedStatus()"
+    [statusOptions]="statusOptions"
+    [totalUnits]="assessments().length"
+    [totalAuditPending]="0"
+    [totalReviewPending]="totalReviewPending()"
+    [totalCompliancePending]="totalCompliancePending()"
+    [totalCompleted]="0"
+    [summaryItems]="reviewerSummaryItems()"
+    [cardMetrics]="reviewerCardMetrics"
+    [cardMetaItems]="reviewerCardMetaItems"
+    (searchChange)="search.set($event)"
+    (selectedStatusChange)="selectedStatus.set($event)"
+    (refresh)="loadQueue()"
+    (openUnit)="openAssessment($event)"
+  ></app-audit-unit-dashboard>
 
   <section *ngIf="selected()" class="review-detail">
     <div class="detail-toolbar">
@@ -207,14 +160,106 @@
         Review the Manager response for each compliance-required point.
       </div>
 
+      <ng-container *ngFor="let group of reviewAnswerGroups()">
+        <div *ngIf="group.isAccountGroup" class="account-question-group">
+          <div class="account-question-group__head">
+            <div>
+              <span>Account Details</span>
+              <strong>
+                {{ group.account.account_no || '-' }} -
+                {{ group.account.account_holder_name || '-' }}
+              </strong>
+            </div>
+            <small>{{ group.answers.length }} question(s)</small>
+          </div>
+
+          <table class="review-account-table">
+            <tbody>
+              <tr>
+                <th>Branch Name</th>
+                <td>{{ group.account.account_branch_name || '-' }}</td>
+                <th>Scheme Code</th>
+                <td>{{ group.account.scheme_code || '-' }}</td>
+              </tr>
+              <tr>
+                <th>Scheme Name</th>
+                <td>{{ group.account.scheme_name || '-' }}</td>
+                <th>A/C Number</th>
+                <td>{{ group.account.account_no || '-' }}</td>
+              </tr>
+              <tr>
+                <th>A/C Holder</th>
+                <td>{{ group.account.account_holder_name || '-' }}</td>
+                <th>UCIC</th>
+                <td>{{ group.account.ucic || '-' }}</td>
+              </tr>
+              <tr>
+                <th>Customer Type</th>
+                <td>{{ group.account.customer_type || '-' }}</td>
+                <th>Interest Rate</th>
+                <td>{{ group.account.interest_rate || '-' }}</td>
+              </tr>
+              <tr>
+                <th>Open Date</th>
+                <td>
+                  {{
+                    group.account.account_opening_date
+                      ? (group.account.account_opening_date | date: 'dd/MM/yyyy')
+                      : '-'
+                  }}
+                </td>
+                <th>Renewal Date</th>
+                <td>
+                  {{
+                    group.account.renewal_date
+                      ? (group.account.renewal_date | date: 'dd/MM/yyyy')
+                      : '-'
+                  }}
+                </td>
+              </tr>
+              <tr>
+                <th>Amount</th>
+                <td>{{ (group.account.account_amount || 0) | number: '1.2-2' }}</td>
+                <th>Outstanding Balance</th>
+                <td>{{ (group.account.outstanding_balance || 0) | number: '1.2-2' }}</td>
+              </tr>
+              <tr>
+                <th>Balance As On</th>
+                <td>
+                  {{
+                    group.account.balance_date
+                      ? (group.account.balance_date | date: 'dd/MM/yyyy')
+                      : '-'
+                  }}
+                </td>
+                <th>Due Date</th>
+                <td>
+                  {{
+                    group.account.due_date
+                      ? (group.account.due_date | date: 'dd/MM/yyyy')
+                      : '-'
+                  }}
+                </td>
+              </tr>
+              <tr>
+                <th>NPA Status</th>
+                <td>{{ group.account.npa_status || '-' }}</td>
+                <th>Account Status</th>
+                <td>{{ group.account.account_status || '-' }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
       <article
-        *ngFor="let answer of review.answers; let answerIndex = index"
+        *ngFor="let answer of group.answers"
         class="answer-row"
         [class.compliance-answer]="answer.is_compliance == 1"
+        [class.answer-row--account]="group.isAccountGroup"
       >
         <div class="answer-head">
           <div class="answer-title-wrap">
-            <span class="answer-serial">{{ answerIndex + 1 }}</span>
+            <span class="answer-serial">{{ answer._displayIndex }}</span>
             <div>
               <small>
                 {{ answer.menu_name }} / {{ answer.category_name }} / {{ answer.header_name }}
@@ -237,7 +282,7 @@
           </div>
         </div>
 
-        <table *ngIf="hasAccountDetails(answer)" class="review-account-table">
+        <table *ngIf="hasAccountDetails(answer) && !group.isAccountGroup" class="review-account-table">
           <tbody>
             <tr>
               <th>Branch Name</th>
@@ -521,6 +566,7 @@
           </div>
         </div>
       </article>
+      </ng-container>
     </ng-container>
   </section>
 </div>

@@ -43,6 +43,23 @@ export class AuditUnitDashboardComponent {
     @Input() totalCompliancePending = 0;
     @Input() totalCompleted = 0;
 
+    @Input() summaryItems: Array<{
+        label: string;
+        value: number | string;
+        className?: string;
+    }> | null = null;
+
+    @Input() cardMetrics: Array<{
+        label: string;
+        key: string;
+        className?: string;
+    }> | null = null;
+
+    @Input() cardMetaItems: Array<{
+        label: string;
+        key: string;
+    }> | null = null;
+
     @Input() panelTitle = 'Assigned Branches';
     @Input() emptyTitle = 'No audit units found';
     @Input() emptyMessage = 'Try changing the search or status filter.';
@@ -52,6 +69,72 @@ export class AuditUnitDashboardComponent {
     @Output() selectedStatusChange = new EventEmitter<any>();
     @Output() refresh = new EventEmitter<void>();
     @Output() openUnit = new EventEmitter<any>();
+
+    defaultSummaryItems() {
+        return [
+            {
+                label: 'Total Units',
+                value: this.totalUnits,
+            },
+            {
+                label: 'Audit Pending',
+                value: this.totalAuditPending,
+                className: 'text-warn',
+            },
+            {
+                label: 'Review Pending',
+                value: this.totalReviewPending,
+                className: 'text-info',
+            },
+            {
+                label: 'Compliance Pending',
+                value: this.totalCompliancePending,
+                className: 'text-danger',
+            },
+            {
+                label: 'Completed',
+                value: this.totalCompleted,
+                className: 'text-success',
+            },
+        ];
+    }
+
+    summaryMetrics() {
+        return this.summaryItems?.length
+            ? this.summaryItems
+            : this.defaultSummaryItems();
+    }
+
+    defaultCardMetrics() {
+        return [
+            {
+                label: 'Audit',
+                key: 'audit_pending',
+                className: 'text-warn',
+            },
+            {
+                label: 'Review',
+                key: 'review_pending',
+                className: 'text-info',
+            },
+            {
+                label: 'Compliance',
+                key: 'compliance_pending',
+                className: 'text-danger',
+            },
+            {
+                label: 'Done',
+                key: 'audit_completed',
+                className: 'text-success',
+            },
+        ];
+    }
+
+    unitCardMetrics() {
+        return this.cardMetrics?.length
+            ? this.cardMetrics
+            : this.defaultCardMetrics();
+    }
 
     getSeverity(status: string | null | undefined) {
         if (!status) {

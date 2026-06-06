@@ -43,29 +43,9 @@
   </section>
 
   <section class="summary-strip">
-    <article>
-      <span>Total Units</span>
-      <strong>{{ totalUnits }}</strong>
-    </article>
-
-    <article>
-      <span>Audit Pending</span>
-      <strong class="text-warn">{{ totalAuditPending }}</strong>
-    </article>
-
-    <article>
-      <span>Review Pending</span>
-      <strong class="text-info">{{ totalReviewPending }}</strong>
-    </article>
-
-    <article>
-      <span>Compliance Pending</span>
-      <strong class="text-danger">{{ totalCompliancePending }}</strong>
-    </article>
-
-    <article>
-      <span>Completed</span>
-      <strong class="text-success">{{ totalCompleted }}</strong>
+    <article *ngFor="let metric of summaryMetrics()">
+      <span>{{ metric.label }}</span>
+      <strong [ngClass]="metric.className || ''">{{ metric.value }}</strong>
     </article>
   </section>
 
@@ -106,6 +86,7 @@
     <div *ngIf="!loading && units.length > 0" class="unit-grid">
       <article
         class="unit-card"
+        [class.unit-card--compact]="unitCardMetrics().length < 4"
         tabindex="0"
         role="button"
         *ngFor="let item of units"
@@ -118,6 +99,12 @@
             <span>Audit Unit</span>
             <h3>{{ item.audit_unit_name }}</h3>
             <small>Code: {{ item.audit_unit_code }}</small>
+
+            <div class="unit-card__meta" *ngIf="cardMetaItems?.length">
+              <small *ngFor="let meta of cardMetaItems">
+                <strong>{{ meta.label }}:</strong> {{ item[meta.key] || '-' }}
+              </small>
+            </div>
           </div>
 
           <p-tag
@@ -126,25 +113,10 @@
           ></p-tag>
         </div>
 
-        <div class="unit-card__metrics">
-          <div>
-            <span>Audit</span>
-            <strong class="text-warn">{{ item.audit_pending || 0 }}</strong>
-          </div>
-
-          <div>
-            <span>Review</span>
-            <strong class="text-info">{{ item.review_pending || 0 }}</strong>
-          </div>
-
-          <div>
-            <span>Compliance</span>
-            <strong class="text-danger">{{ item.compliance_pending || 0 }}</strong>
-          </div>
-
-          <div>
-            <span>Done</span>
-            <strong class="text-success">{{ item.audit_completed || 0 }}</strong>
+        <div class="unit-card__metrics" [class.unit-card__metrics--compact]="unitCardMetrics().length < 4">
+          <div *ngFor="let metric of unitCardMetrics()">
+            <span>{{ metric.label }}</span>
+            <strong [ngClass]="metric.className || ''">{{ item[metric.key] || 0 }}</strong>
           </div>
         </div>
 

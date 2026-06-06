@@ -124,13 +124,81 @@
                 {{ hasUnsavedChanges() ? 'Save edited compliance responses before submitting.' : preview.message }}
             </div>
 
+            <ng-container *ngFor="let group of complianceAnswerGroups()">
+                <div *ngIf="group.isAccountGroup" class="account-question-group">
+                    <div class="account-question-group__head">
+                        <div>
+                            <span>Account Details</span>
+                            <strong>
+                                {{ group.account.account_no || '-' }} -
+                                {{ group.account.account_holder_name || '-' }}
+                            </strong>
+                        </div>
+                        <small>{{ group.answers.length }} question(s)</small>
+                    </div>
+
+                    <table class="account-detail-table">
+                        <tbody>
+                            <tr>
+                                <th>Branch Name</th>
+                                <td>{{ group.account.account_branch_name || '-' }}</td>
+                                <th>Scheme Code</th>
+                                <td>{{ group.account.scheme_code || '-' }}</td>
+                            </tr>
+                            <tr>
+                                <th>Scheme</th>
+                                <td>{{ group.account.scheme_name || '-' }}</td>
+                                <th>Account No.</th>
+                                <td>{{ group.account.account_no || '-' }}</td>
+                            </tr>
+                            <tr>
+                                <th>Account Holder</th>
+                                <td>{{ group.account.account_holder_name || '-' }}</td>
+                                <th>UCIC</th>
+                                <td>{{ group.account.ucic || '-' }}</td>
+                            </tr>
+                            <tr>
+                                <th>Customer Type</th>
+                                <td>{{ group.account.customer_type || '-' }}</td>
+                                <th>Interest Rate</th>
+                                <td>{{ group.account.interest_rate || '-' }}</td>
+                            </tr>
+                            <tr>
+                                <th>Opening Date</th>
+                                <td>{{ group.account.account_opening_date ? (group.account.account_opening_date | date: 'mediumDate') : '-' }}</td>
+                                <th>Renewal Date</th>
+                                <td>{{ group.account.renewal_date ? (group.account.renewal_date | date: 'mediumDate') : '-' }}</td>
+                            </tr>
+                            <tr>
+                                <th>Amount</th>
+                                <td>{{ group.account.account_amount || '-' }}</td>
+                                <th>Outstanding Balance</th>
+                                <td>{{ group.account.outstanding_balance || '-' }}</td>
+                            </tr>
+                            <tr>
+                                <th>Balance As On</th>
+                                <td>{{ group.account.balance_date ? (group.account.balance_date | date: 'mediumDate') : '-' }}</td>
+                                <th>Due Date</th>
+                                <td>{{ group.account.due_date ? (group.account.due_date | date: 'mediumDate') : '-' }}</td>
+                            </tr>
+                            <tr>
+                                <th>NPA Status</th>
+                                <td>{{ group.account.npa_status || '-' }}</td>
+                                <th>Account Status</th>
+                                <td>{{ group.account.account_status || '-' }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
             <article
-                *ngFor="let answer of compliance.answers; let answerIndex = index"
+                *ngFor="let answer of group.answers"
                 class="observation-row"
+                [class.observation-row--account]="group.isAccountGroup"
             >
                 <div class="observation-head">
                     <div class="observation-title-wrap">
-                        <span class="observation-serial">{{ answerIndex + 1 }}</span>
+                        <span class="observation-serial">{{ answer._displayIndex }}</span>
                         <div>
                         <small>
                             {{ answer.menu_name }} / {{ answer.category_name }} / {{ answer.header_name }}
@@ -164,7 +232,7 @@
                     </div>
                 </div>
 
-                <table *ngIf="hasAccountDetails(answer)" class="account-detail-table">
+                <table *ngIf="hasAccountDetails(answer) && !group.isAccountGroup" class="account-detail-table">
                     <tbody>
                         <tr>
                             <th>Branch Name</th>
@@ -410,6 +478,7 @@
                     </div>
                 </div>
             </article>
+            </ng-container>
         </ng-container>
     </section>
 </div>

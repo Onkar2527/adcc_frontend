@@ -5,6 +5,7 @@ import {
 import {
     Component,
     OnInit,
+    computed,
     inject,
     signal,
 } from '@angular/core';
@@ -72,6 +73,12 @@ export class ComplianceWorkspaceComponent implements OnInit {
 
     error =
         signal('');
+
+    complianceAnswerGroups = computed(() =>
+        this.groupComplianceAnswers(
+            this.detail()?.answers || [],
+        ),
+    );
 
     ngOnInit() {
         this.loadQueue();
@@ -197,6 +204,62 @@ export class ComplianceWorkspaceComponent implements OnInit {
                 ||
                 answer?.scheme_code
             );
+    }
+
+    private groupComplianceAnswers(
+        answers: any[] = [],
+    ) {
+        const groups: any[] = [];
+        const accountGroupMap =
+            new Map<string, any>();
+        let displayIndex = 0;
+
+        for (const answer of answers || []) {
+            const row =
+                answer;
+
+            row._displayIndex =
+                ++displayIndex;
+
+            if (!this.hasAccountDetails(row)) {
+                groups.push({
+                    isAccountGroup:
+                        false,
+                    account:
+                        null,
+                    answers:
+                        [row],
+                });
+                continue;
+            }
+
+            const key =
+                [
+                    row.category_id,
+                    row.dump_id,
+                    row.account_no || '',
+                ].join(':');
+
+            let group =
+                accountGroupMap.get(key);
+
+            if (!group) {
+                group = {
+                    isAccountGroup:
+                        true,
+                    account:
+                        row,
+                    answers:
+                        [],
+                };
+                accountGroupMap.set(key, group);
+                groups.push(group);
+            }
+
+            group.answers.push(row);
+        }
+
+        return groups;
     }
 
     annexureColumns(

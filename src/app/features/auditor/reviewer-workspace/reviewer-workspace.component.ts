@@ -5,6 +5,7 @@ import {
 import {
     Component,
     OnInit,
+    computed,
     inject,
     signal,
 } from '@angular/core';
@@ -17,6 +18,7 @@ import { SkeletonModule } from 'primeng/skeleton';
 import { TagModule } from 'primeng/tag';
 import { NotificationService } from '../../../core/services/notification/notification.service';
 import { AuditDashboardService } from '../services/auditor-main.service';
+import { AuditUnitDashboardComponent } from '../../../shared/components/audit-unit-dashboard/audit-unit-dashboard.component';
 
 @Component({
     selector: 'app-reviewer-workspace',
@@ -28,6 +30,7 @@ import { AuditDashboardService } from '../services/auditor-main.service';
         ButtonModule,
         SkeletonModule,
         TagModule,
+        AuditUnitDashboardComponent,
     ],
     templateUrl: './reviewer-workspace.component.html',
     styleUrl: './reviewer-workspace.component.css',
@@ -63,6 +66,23 @@ export class ReviewerWorkspaceComponent implements OnInit {
     assessments =
         signal<any[]>([]);
 
+    search =
+        signal('');
+
+    selectedStatus =
+        signal<any>(null);
+
+    statusOptions = [
+        {
+            label: 'Audit Review',
+            value: 'Audit Review',
+        },
+        {
+            label: 'Compliance Review',
+            value: 'Compliance Review',
+        },
+    ];
+
     selected =
         signal<any>(null);
 
@@ -71,6 +91,125 @@ export class ReviewerWorkspaceComponent implements OnInit {
 
     error =
         signal('');
+
+    dashboardUnits = computed(() => {
+        let rows =
+            this.assessments()
+                .map((assessment: any) => {
+                    const isCompliance =
+                        Number(assessment.audit_status_id || 0) === 5;
+
+                    return {
+                        ...assessment,
+                        audit_unit_id:
+                            assessment.audit_unit_id,
+                        audit_unit_name:
+                            assessment.audit_unit_name,
+                        audit_unit_code:
+                            assessment.audit_unit_code,
+                        latest_status:
+                            isCompliance ? 'Compliance Review' : 'Audit Review',
+                        assessment_period_label:
+                            `${this.formatDate(assessment.assesment_period_from)} - ${this.formatDate(assessment.assesment_period_to)}`,
+                        audit_pending:
+                            isCompliance ? 0 : Number(assessment.total_points || 0),
+                        review_pending:
+                            Number(assessment.total_points || 0),
+                        compliance_pending:
+                            Number(assessment.compliance_points || 0),
+                        audit_completed:
+                            0,
+                        not_started_count:
+                            0,
+                    };
+                });
+
+        const search =
+            this.search()
+                .trim()
+                .toLowerCase();
+
+        if (search) {
+            rows = rows.filter((item: any) =>
+                String(item.audit_unit_name || '')
+                    .toLowerCase()
+                    .includes(search)
+                ||
+                String(item.audit_unit_code || '')
+                    .toLowerCase()
+                    .includes(search),
+            );
+        }
+
+        if (this.selectedStatus()) {
+            rows = rows.filter((item: any) =>
+                String(item.latest_status || '') === String(this.selectedStatus()),
+            );
+        }
+
+        return rows;
+    });
+
+    totalReviewPending = computed(() =>
+        this.assessments()
+            .reduce(
+                (sum, item: any) =>
+                    sum + Number(item.total_points || 0),
+                0,
+            ),
+    );
+
+    totalCompliancePending = computed(() =>
+        this.assessments()
+            .reduce(
+                (sum, item: any) =>
+                    sum + Number(item.compliance_points || 0),
+                0,
+            ),
+    );
+
+    reviewerSummaryItems = computed(() => [
+        {
+            label: 'Total Assessments',
+            value: this.assessments().length,
+        },
+        {
+            label: 'Total Questions',
+            value: this.totalReviewPending(),
+            className: 'text-info',
+        },
+        {
+            label: 'Compliance Marked',
+            value: this.totalCompliancePending(),
+            className: 'text-danger',
+        },
+    ]);
+
+    reviewerCardMetrics = [
+        {
+            label: 'Total Questions',
+            key: 'review_pending',
+            className: 'text-info',
+        },
+        {
+            label: 'Compliance',
+            key: 'compliance_pending',
+            className: 'text-danger',
+        },
+    ];
+
+    reviewerCardMetaItems = [
+        {
+            label: 'Assessment Period',
+            key: 'assessment_period_label',
+        },
+    ];
+
+    reviewAnswerGroups = computed(() =>
+        this.groupReviewAnswers(
+            this.detail()?.answers || [],
+        ),
+    );
 
     ngOnInit() {
         this.loadQueue();
@@ -175,6 +314,25 @@ export class ReviewerWorkspaceComponent implements OnInit {
             queryParams: {
                 mode: 'reviewer',
             },
+        });
+    }
+
+    formatDate(value: any) {
+        if (!value) {
+            return '-';
+        }
+
+        const date =
+            new Date(value);
+
+        if (Number.isNaN(date.getTime())) {
+            return String(value);
+        }
+
+        return date.toLocaleDateString('en-IN', {
+            day: '2-digit',
+            month: 'short',
+            year: 'numeric',
         });
     }
 
@@ -345,6 +503,62 @@ export class ReviewerWorkspaceComponent implements OnInit {
                 ||
                 answer?.scheme_code
             );
+    }
+
+    private groupReviewAnswers(
+        answers: any[] = [],
+    ) {
+        const groups: any[] = [];
+        const accountGroupMap =
+            new Map<string, any>();
+        let displayIndex = 0;
+
+        for (const answer of answers || []) {
+            const row =
+                answer;
+
+            row._displayIndex =
+                ++displayIndex;
+
+            if (!this.hasAccountDetails(row)) {
+                groups.push({
+                    isAccountGroup:
+                        false,
+                    account:
+                        null,
+                    answers:
+                        [row],
+                });
+                continue;
+            }
+
+            const key =
+                [
+                    row.category_id,
+                    row.dump_id,
+                    row.account_no || '',
+                ].join(':');
+
+            let group =
+                accountGroupMap.get(key);
+
+            if (!group) {
+                group = {
+                    isAccountGroup:
+                        true,
+                    account:
+                        row,
+                    answers:
+                        [],
+                };
+                accountGroupMap.set(key, group);
+                groups.push(group);
+            }
+
+            group.answers.push(row);
+        }
+
+        return groups;
     }
 
     annexureColumns(
