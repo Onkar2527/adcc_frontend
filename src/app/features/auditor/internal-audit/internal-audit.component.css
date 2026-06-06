@@ -1912,3 +1912,98 @@ textarea.answer-control1 {
         margin-left: 0;
     }
 }
+
+/* Accordion Custom Styling to align with software color scheme */
+:host ::ng-deep .p-accordion {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    --p-accordion-header-background: #eaf1f8;
+    --p-accordion-header-hover-background: #dbe7f3;
+    --p-accordion-header-active-background: #eaf1f8;
+    --p-accordion-header-color: #173a59;
+    --p-accordion-header-hover-color: #1f5f93;
+    --p-accordion-header-active-color: #173a59;
+    --p-accordion-content-background: #ffffff;
+    --p-accordion-content-border-color: #d8e2ec;
+    --p-accordion-panel-border-color: #d8e2ec;
+}
+
+:host ::ng-deep .p-accordion-panel {
+    border: 1px solid #d8e2ec !important;
+    border-radius: 6px !important;
+    background: #ffffff !important;
+    overflow: hidden !important;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease !important;
+}
+
+:host ::ng-deep .p-accordion-panel:hover {
+    border-color: #a4bcca !important;
+}
+
+:host ::ng-deep .p-accordion-header {
+    background: #eaf1f8 !important;
+    color: #173a59 !important;
+    border: none !important;
+    border-bottom: 1px solid #d8e2ec !important;
+    padding: 0.75rem 1rem !important;
+    font-weight: 700 !important;
+    transition: background-color 0.15s ease, color 0.15s ease !important;
+}
+
+:host ::ng-deep .p-accordion-header:hover {
+    background: #dbe7f3 !important;
+    color: #1f5f93 !important;
+}
+
+:host ::ng-deep .p-accordion-header .question-header-title {
+    color: #173a59 !important;
+    font-size: 0.95rem !important;
+    font-weight: 700 !important;
+    margin: 0 !important;
+}
+
+:host ::ng-deep .p-accordion-header:hover .question-header-title {
+    color: #1f5f93 !important;
+}
+
+:host ::ng-deep .p-accordion-header svg,
+:host ::ng-deep .p-accordion-header i,
+:host ::ng-deep .p-accordion-header-toggle-icon {
+    color: #1f5f93 !important;
+}
+
+:host ::ng-deep .p-accordion-content {
+    background: #ffffff !important;
+    padding: 1rem !important;
+    border: none !important;
+}
+
+/* Badge count styling for accordion and subset headers */
+:host ::ng-deep .badge-answered,
+.badge-answered {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.18rem 0.45rem;
+    border-radius: 0.25rem;
+    background: #eaf8ee !important;
+    color: #2f7d46 !important;
+    font-size: 0.72rem !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.02em !important;
+}
+
+:host ::ng-deep .badge-remaining,
+.badge-remaining {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.18rem 0.45rem;
+    border-radius: 0.25rem;
+    background: #fdf5ea !important;
+    color: #b7791f !important;
+    font-size: 0.72rem !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.02em !important;
+}

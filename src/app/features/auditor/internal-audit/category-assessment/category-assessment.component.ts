@@ -44,6 +44,7 @@ import {
     AuditDashboardService,
 } from '../../services/auditor-main.service';
 import { TableModule } from 'primeng/table';
+import { AccordionModule } from 'primeng/accordion';
 
 @Component({
     selector: 'app-category-assessment',
@@ -56,8 +57,7 @@ import { TableModule } from 'primeng/table';
         ButtonModule,
         SkeletonModule,
         TableModule,
-
-
+        AccordionModule,
     ],
 
     templateUrl:
@@ -1116,6 +1116,19 @@ export class CategoryAssessmentComponent
         }
 
         return appliedCount;
+    }
+
+    getAnsweredCount(header: any): number {
+        if (!header?.questions?.length) {
+            return 0;
+        }
+        let count = 0;
+        for (const q of header.questions) {
+            if (q.answer_value !== null && q.answer_value !== undefined && String(q.answer_value).trim() !== '') {
+                count++;
+            }
+        }
+        return count;
     }
 
     canApplyDefaults() {

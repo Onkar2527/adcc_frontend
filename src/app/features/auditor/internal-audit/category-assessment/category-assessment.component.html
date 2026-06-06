@@ -416,23 +416,29 @@
                 {{ set.name }}
             </div>
 
-            <section class="question-header" *ngFor="let header of set.headers">
-
-                <div class="flex flex-column md:flex-row md:align-items-center md:justify-content-between gap-3 mb-3">
-
-                    <div class="question-header-title m-0">
-                        {{ header.name }}
-                    </div>
-
-                    <div class="header-answer-actions">
-                        @if (canApplyDefaults()) {
-                        <button pButton type="button" icon="pi pi-check-square" label="Apply Defaults"
-                            severity="secondary" class="p-button-sm" [disabled]="savingHeader() === header.id"
-                            (click)="selectDefaultAnswers(header)"></button>
-                        }
-                    </div>
-
-                </div>
+            <p-accordion [multiple]="true" [value]="['0']">
+                <p-accordion-panel *ngFor="let header of set.headers; let i = index" [value]="i.toString()">
+                    <p-accordion-header>
+                        <div class="flex flex-column md:flex-row md:align-items-center md:justify-content-between gap-3 w-full pr-3" (click)="$event.stopPropagation()">
+                            <div class="question-header-title m-0">
+                                {{ header.name }}
+                            </div>
+                            <div class="header-answer-actions flex align-items-center gap-2">
+                                <span class="badge-answered">
+                                    Answered: {{ getAnsweredCount(header) }} / {{ header.questions?.length || 0 }}
+                                </span>
+                                <span class="badge-remaining">
+                                    Remaining: {{ (header.questions?.length || 0) - getAnsweredCount(header) }}
+                                </span>
+                                @if (canApplyDefaults()) {
+                                <button pButton type="button" icon="pi pi-check-square" label="Apply Defaults"
+                                    severity="secondary" class="p-button-sm" [disabled]="savingHeader() === header.id"
+                                    (click)="selectDefaultAnswers(header)"></button>
+                                }
+                            </div>
+                        </div>
+                    </p-accordion-header>
+                    <p-accordion-content>
 
                 <ng-container *ngFor="let question of header.questions; let i = index">
 
@@ -849,7 +855,13 @@
                                     {{ subsetHeader.name }}
                                 </div>
 
-                                <div class="header-answer-actions">
+                                <div class="header-answer-actions flex align-items-center gap-2">
+                                    <span class="badge-answered">
+                                        Answered: {{ getAnsweredCount(subsetHeader) }} / {{ subsetHeader.questions?.length || 0 }}
+                                    </span>
+                                    <span class="badge-remaining">
+                                        Remaining: {{ (subsetHeader.questions?.length || 0) - getAnsweredCount(subsetHeader) }}
+                                    </span>
                                     @if (canApplyDefaults()) {
                                     <button pButton type="button" icon="pi pi-check-square" label="Apply Defaults"
                                         severity="secondary" class="p-button-sm"
@@ -1252,12 +1264,14 @@
 
                 </ng-container>
 
-                <div class="header-save-row">
-                    <button pButton type="button" icon="pi pi-save" label="Save Header Answers" class="p-button-sm"
-                        [loading]="savingHeader() === header.id" (click)="saveHeader(header)"></button>
-                </div>
+                    <div class="header-save-row">
+                        <button pButton type="button" icon="pi pi-save" label="Save Header Answers" class="p-button-sm"
+                            [loading]="savingHeader() === header.id" (click)="saveHeader(header)"></button>
+                    </div>
 
-            </section>
+                    </p-accordion-content>
+                </p-accordion-panel>
+            </p-accordion>
 
         </div>
 
