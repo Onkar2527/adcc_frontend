@@ -22,7 +22,8 @@
       <div class="field" *ngIf="shouldShowFilter(filter)" [class.field-wide]="filter.key === 'audit_unit_id'"
         [class.field-half]="
           ((filter.key === 'reportAuditUnit' || filter.key === 'reportAuditAssesment') &&
-            definition()?.slug !== 'risk-weightage-report') ||
+            definition()?.slug !== 'risk-weightage-report' &&
+            definition()?.slug !== 'performance-risk-weightage-report') ||
           (filter.key === 'rmv_pending_assesments' &&
             definition()?.slug === 'risk-weightage-report')
         " [class.field-third]="
@@ -147,7 +148,41 @@
         </thead>
 
         <ng-template #defaultReportHeader>
-          <thead *ngIf="!hasGroupedRows() && definition()?.slug !== 'broader-areawise-scoring-report'">
+          <thead *ngIf="isPerformanceRiskWeightageReport(); else plainReportHeader">
+            <tr>
+              <td colspan="6">
+                <strong>Branch:</strong> {{ reportAuditUnit() || '-' }}
+              </td>
+              <td colspan="6">
+                <strong>Number of Audits Conducted:</strong>
+                {{ summary()?.['auditsConducted'] || 0 }}
+              </td>
+            </tr>
+            <tr>
+              <td colspan="6">
+                <strong>Number of Accounts (Deposits):</strong>
+                {{ reportMeta()?.['totalDeposits'] || 0 }}
+              </td>
+              <td colspan="6">
+                <strong>Number of Accounts (Advances):</strong>
+                {{ reportMeta()?.['totalAdvances'] || 0 }}
+              </td>
+            </tr>
+            <tr>
+              <td colspan="6">
+                <strong>Number of Accounts - Sampled (Deposits):</strong>
+                {{ summary()?.['totalDepositsSampling'] || 0 }}
+              </td>
+              <td colspan="6">
+                <strong>Number of Accounts - Sampled (Advances):</strong>
+                {{ summary()?.['totalAdvancesSampling'] || 0 }}
+              </td>
+            </tr>
+            <tr>
+              <td colspan="12">
+                <strong>Assessment Period:</strong> {{ reportAssessmentPeriod() || '-' }}
+              </td>
+            </tr>
             <tr>
               <th *ngFor="let column of definition()?.columns" [style.width]="column.width || null"
                 [class.text-center]="column.align === 'center'" [class.text-right]="column.align === 'right'">
@@ -155,6 +190,17 @@
               </th>
             </tr>
           </thead>
+
+          <ng-template #plainReportHeader>
+            <thead *ngIf="!hasGroupedRows() && definition()?.slug !== 'broader-areawise-scoring-report'">
+              <tr>
+                <th *ngFor="let column of definition()?.columns" [style.width]="column.width || null"
+                  [class.text-center]="column.align === 'center'" [class.text-right]="column.align === 'right'">
+                  {{ column.label }}
+                </th>
+              </tr>
+            </thead>
+          </ng-template>
         </ng-template>
 
         <thead *ngIf="definition()?.slug === 'broader-areawise-scoring-report'" class="broader-report-thead">

@@ -43,6 +43,7 @@ export class ReportViewerComponent implements OnInit {
   rows = signal<any[]>([]);
   summary = signal<Record<string, any> | null>(null);
   reportHeader = signal<Record<string, any> | null>(null);
+  reportMeta = signal<Record<string, any> | null>(null);
   exeReportData = signal<any>(null);
   generatedAt = signal<string | null>(null);
   loading = signal(false);
@@ -55,6 +56,7 @@ export class ReportViewerComponent implements OnInit {
   isAdvancedLayout(): boolean {
     const slug = this.definition()?.slug;
     return slug === 'risk-weightage-report'
+      || slug === 'performance-risk-weightage-report'
       || slug === 'broader-areawise-scoring-report'
       || slug === 'pending-compliance-detail-report';
   }
@@ -155,6 +157,7 @@ export class ReportViewerComponent implements OnInit {
     this.rows.set([]);
     this.summary.set(null);
     this.reportHeader.set(null);
+    this.reportMeta.set(null);
     this.exeReportData.set(null);
     this.searched.set(false);
 
@@ -215,6 +218,7 @@ export class ReportViewerComponent implements OnInit {
         this.rows.set(res?.rows || []);
         this.summary.set(res?.summary || null);
         this.reportHeader.set(res?.header || null);
+        this.reportMeta.set(res?.meta || null);
         this.exeReportData.set(res?.exeData || null);
         this.generatedAt.set(res?.generatedAt || new Date().toISOString());
         this.loading.set(false);
@@ -223,6 +227,7 @@ export class ReportViewerComponent implements OnInit {
         this.rows.set([]);
         this.summary.set(null);
         this.reportHeader.set(null);
+        this.reportMeta.set(null);
         this.exeReportData.set(null);
         this.error.set(err?.error?.message || 'Unable to generate report.');
         this.loading.set(false);
@@ -247,6 +252,7 @@ export class ReportViewerComponent implements OnInit {
     this.rows.set([]);
     this.summary.set(null);
     this.reportHeader.set(null);
+    this.reportMeta.set(null);
     this.exeReportData.set(null);
     this.generatedAt.set(null);
     this.searched.set(false);
@@ -267,6 +273,10 @@ export class ReportViewerComponent implements OnInit {
 
   isRiskWiseAuditUnitsReport() {
     return this.definition()?.slug === 'risk-wise-audit-units-report';
+  }
+
+  isPerformanceRiskWeightageReport() {
+    return this.definition()?.slug === 'performance-risk-weightage-report';
   }
 
   riskWiseLeadingColumns() {
