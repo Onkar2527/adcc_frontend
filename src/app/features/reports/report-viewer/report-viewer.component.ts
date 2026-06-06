@@ -43,6 +43,7 @@ export class ReportViewerComponent implements OnInit {
   rows = signal<any[]>([]);
   summary = signal<Record<string, any> | null>(null);
   reportHeader = signal<Record<string, any> | null>(null);
+  exeReportData = signal<any>(null);
   generatedAt = signal<string | null>(null);
   loading = signal(false);
   searched = signal(false);
@@ -53,7 +54,24 @@ export class ReportViewerComponent implements OnInit {
 
   isAdvancedLayout(): boolean {
     const slug = this.definition()?.slug;
-    return slug === 'risk-weightage-report' || slug === 'broader-areawise-scoring-report';
+    return slug === 'risk-weightage-report'
+      || slug === 'broader-areawise-scoring-report'
+      || slug === 'pending-compliance-detail-report';
+  }
+
+  showsNestedComplianceColumn(): boolean {
+    const slug = this.definition()?.slug;
+    return slug === 'compliance-summary-report'
+      || slug === 'pending-compliance-detail-report';
+  }
+
+  showsNestedReviewerCommentColumn(): boolean {
+    return this.definition()?.slug === 'pending-compliance-detail-report';
+  }
+
+  isExecutiveSummary(): boolean {
+    const slug = this.definition()?.slug;
+    return slug === 'executive-summary-audit-report' || slug === 'executive-summary-compliance-report';
   }
 
   shouldShowFilter(filter: ReportFilterDefinition): boolean {
@@ -137,6 +155,7 @@ export class ReportViewerComponent implements OnInit {
     this.rows.set([]);
     this.summary.set(null);
     this.reportHeader.set(null);
+    this.exeReportData.set(null);
     this.searched.set(false);
 
     this.reportsService.getReportDefinition(slug).subscribe({
@@ -196,6 +215,7 @@ export class ReportViewerComponent implements OnInit {
         this.rows.set(res?.rows || []);
         this.summary.set(res?.summary || null);
         this.reportHeader.set(res?.header || null);
+        this.exeReportData.set(res?.exeData || null);
         this.generatedAt.set(res?.generatedAt || new Date().toISOString());
         this.loading.set(false);
       },
@@ -203,6 +223,7 @@ export class ReportViewerComponent implements OnInit {
         this.rows.set([]);
         this.summary.set(null);
         this.reportHeader.set(null);
+        this.exeReportData.set(null);
         this.error.set(err?.error?.message || 'Unable to generate report.');
         this.loading.set(false);
       },
@@ -226,6 +247,7 @@ export class ReportViewerComponent implements OnInit {
     this.rows.set([]);
     this.summary.set(null);
     this.reportHeader.set(null);
+    this.exeReportData.set(null);
     this.generatedAt.set(null);
     this.searched.set(false);
     this.error.set('');
@@ -297,7 +319,11 @@ export class ReportViewerComponent implements OnInit {
       return;
     }
 
-    if (definition.slug === 'broader-areawise-scoring-report') {
+    if (
+      definition.slug === 'broader-areawise-scoring-report' ||
+      definition.slug === 'executive-summary-audit-report' ||
+      definition.slug === 'executive-summary-compliance-report'
+    ) {
       const tableElement = document.querySelector('.official-report-table');
       if (tableElement) {
         this.exportService.exportTableToExcel(
@@ -466,6 +492,171 @@ export class ReportViewerComponent implements OnInit {
 
   formatDate(value: any) {
     return value ? String(value).slice(0, 10) : '-';
+  }
+
+  isLegacyData(): boolean {
+    const data = this.exeReportData();
+    if (!data) return false;
+    const hasLegacyBp = data.branchPositions?.some((r: any) => String(r.type_id).trim().length <= 2);
+    const hasLegacyFa = data.freshAccounts?.some((r: any) => String(r.type_id).trim().length <= 2);
+    return !!(hasLegacyBp || hasLegacyFa);
+  }
+
+  getSchemesByType(type: string): any[] {
+    const data = this.exeReportData();
+    if (!data || !data.schemes) return [];
+
+    if (type === 'NPA') {
+      const advances = data.schemes.filter((s: any) => s.scheme_type === 'ADVANCES');
+      return advances.map((s: any) => ({
+        ...s,
+        scheme_type: 'NPA',
+        scheme_code: s.scheme_code + '_NPA',
+        category_id: s.category_id + 6,
+      }));
+    }
+
+    return data.schemes.filter((s: any) => s.scheme_type === type);
+  }
+
+  getMarchValue(scheme: any): number {
+    const data = this.exeReportData();
+    if (!data || !data.marchPositions) return 0;
+    const row = data.marchPositions.find((r: any) => Number(r.gl_type_id) === Number(scheme.category_id));
+    return Number(row?.march_position || 0);
+  }
+
+  getLegacyTypeIds(categoryId: number, isFresh: boolean): string[] {
+    if (!isFresh) {
+      return [String(categoryId)];
+    } else {
+      if (categoryId === 1) return ['1'];
+      if (categoryId === 2) return ['2', '3'];
+      if (categoryId >= 3 && categoryId <= 5) return [String(categoryId + 1)];
+      if (categoryId === 6) return ['7', '8'];
+      if (categoryId === 7) return ['9', '10'];
+      if (categoryId === 8) return [];
+      if (categoryId >= 9 && categoryId <= 14) return [String(categoryId + 2)];
+      return [];
+    }
+  }
+
+  isFirstSchemeOfCategory(scheme: any): boolean {
+    const schemes = this.getSchemesByType(scheme.scheme_type);
+    const first = schemes.find((s: any) => Number(s.category_id) === Number(scheme.category_id));
+    return first && String(first.scheme_code).trim() === String(scheme.scheme_code).trim();
+  }
+
+  getCurrentValue(scheme: any, isFresh: boolean): number {
+    const data = this.exeReportData();
+    if (!data) return 0;
+
+    // 1. Try matching scheme code directly
+    if (isFresh) {
+      if (data.freshAccounts) {
+        const row = data.freshAccounts.find((r: any) => String(r.type_id).trim() === String(scheme.scheme_code).trim());
+        if (row) return Number(row.accounts || 0);
+      }
+    } else {
+      if (data.branchPositions) {
+        const row = data.branchPositions.find((r: any) => String(r.type_id).trim() === String(scheme.scheme_code).trim());
+        if (row) return Number(row.amount || 0);
+      }
+    }
+
+    // 2. Fallback to legacy categories if this is the first scheme in the category
+    if (this.isLegacyData() && this.isFirstSchemeOfCategory(scheme)) {
+      const typeIds = this.getLegacyTypeIds(Number(scheme.category_id), isFresh);
+      if (isFresh) {
+        if (!data.freshAccounts) return 0;
+        let sum = 0;
+        for (const typeId of typeIds) {
+          const row = data.freshAccounts.find((r: any) => String(r.type_id).trim() === String(typeId).trim());
+          sum += Number(row?.accounts || 0);
+        }
+        return sum;
+      } else {
+        if (!data.branchPositions) return 0;
+        for (const typeId of typeIds) {
+          const row = data.branchPositions.find((r: any) => String(r.type_id).trim() === String(typeId).trim());
+          if (row) return Number(row.amount || 0);
+        }
+      }
+    }
+
+    return 0;
+  }
+
+  getYtdValue(scheme: any): number {
+    return this.getCurrentValue(scheme, false) - this.getMarchValue(scheme);
+  }
+
+  getComplianceComment(scheme: any, isFresh: boolean): string {
+    const data = this.exeReportData();
+    if (!data) return '';
+
+    // 1. Try matching scheme code directly
+    if (isFresh) {
+      if (data.freshAccounts) {
+        const row = data.freshAccounts.find((r: any) => String(r.type_id).trim() === String(scheme.scheme_code).trim());
+        if (row) return row.audit_commpliance || '';
+      }
+    } else {
+      if (data.branchPositions) {
+        const row = data.branchPositions.find((r: any) => String(r.type_id).trim() === String(scheme.scheme_code).trim());
+        if (row) return row.audit_commpliance || '';
+      }
+    }
+
+    // 2. Fallback to legacy categories if this is the first scheme in the category
+    if (this.isLegacyData() && this.isFirstSchemeOfCategory(scheme)) {
+      const typeIds = this.getLegacyTypeIds(Number(scheme.category_id), isFresh);
+      if (isFresh) {
+        if (!data.freshAccounts) return '';
+        for (const typeId of typeIds) {
+          const row = data.freshAccounts.find((r: any) => String(r.type_id).trim() === String(typeId).trim());
+          if (row?.audit_commpliance) return row.audit_commpliance;
+        }
+      } else {
+        if (!data.branchPositions) return '';
+        for (const typeId of typeIds) {
+          const row = data.branchPositions.find((r: any) => String(r.type_id).trim() === String(typeId).trim());
+          if (row?.audit_commpliance) return row.audit_commpliance;
+        }
+      }
+    }
+
+    return '';
+  }
+
+  getCategoryMarchTotal(type: string): number {
+    const schemes = this.getSchemesByType(type);
+    return schemes.reduce((sum, scheme) => sum + this.getMarchValue(scheme), 0);
+  }
+
+  getCategoryCurrentTotal(type: string, isFresh: boolean): number {
+    const schemes = this.getSchemesByType(type);
+    return schemes.reduce((sum, scheme) => sum + this.getCurrentValue(scheme, isFresh), 0);
+  }
+
+  getCategoryYtdTotal(type: string): number {
+    const schemes = this.getSchemesByType(type);
+    return schemes.reduce((sum, scheme) => sum + this.getYtdValue(scheme), 0);
+  }
+
+  getCdRatio(): number {
+    const depositsCurrent = this.getCategoryCurrentTotal('DEPOSITS', false);
+    const advancesCurrent = this.getCategoryCurrentTotal('ADVANCES', false);
+    if (depositsCurrent === 0) return 0;
+    return (advancesCurrent / depositsCurrent) * 100;
+  }
+
+  getPerEmployeeBusiness(): number {
+    const depositsCurrent = this.getCategoryCurrentTotal('DEPOSITS', false);
+    const advancesCurrent = this.getCategoryCurrentTotal('ADVANCES', false);
+    const staffCount = Number(this.exeReportData()?.assessment?.staff_count || 0);
+    if (staffCount === 0) return 0;
+    return (advancesCurrent + depositsCurrent) / staffCount;
   }
 
   private riskWiseFixedColumns() {

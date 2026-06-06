@@ -179,6 +179,35 @@ export class ExecutiveSummaryComponent
         this.getExecutiveSummary();
 
     }
+    legacyCategories: any = {
+        DEPOSITS: [
+            { scheme_code: 'legacy_casa', scheme_name: 'CASA Deposit', category_id: 1, position_type_id: '1', fresh_type_ids: ['1'] },
+            { scheme_code: 'legacy_term', scheme_name: 'Term Deposit', category_id: 2, position_type_id: '2', fresh_type_ids: ['2', '3'] },
+        ],
+        ADVANCES: [
+            { scheme_code: 'legacy_clean', scheme_name: 'Clean Loan', category_id: 3, position_type_id: '3', fresh_type_ids: ['4'] },
+            { scheme_code: 'legacy_vehicle', scheme_name: 'Vehicle Loan', category_id: 4, position_type_id: '4', fresh_type_ids: ['5'] },
+            { scheme_code: 'legacy_gold', scheme_name: 'Gold Loan', category_id: 5, position_type_id: '5', fresh_type_ids: ['6'] },
+            { scheme_code: 'legacy_other_term', scheme_name: 'Other Term Loan', category_id: 6, position_type_id: '6', fresh_type_ids: ['7', '8'] },
+            { scheme_code: 'legacy_cc', scheme_name: 'Cash Credit Loan', category_id: 7, position_type_id: '7', fresh_type_ids: ['9', '10'] },
+            { scheme_code: 'legacy_decreed', scheme_name: 'Decreed Loan', category_id: 8, position_type_id: '8', fresh_type_ids: [] },
+        ],
+        NPA: [
+            { scheme_code: 'legacy_clean_npa', scheme_name: 'Clean Loan', category_id: 9, position_type_id: '9', fresh_type_ids: ['11'] },
+            { scheme_code: 'legacy_vehicle_npa', scheme_name: 'Vehicle Loan', category_id: 10, position_type_id: '10', fresh_type_ids: ['12'] },
+            { scheme_code: 'legacy_gold_npa', scheme_name: 'Gold Loan', category_id: 11, position_type_id: '11', fresh_type_ids: ['13'] },
+            { scheme_code: 'legacy_other_term_npa', scheme_name: 'Other Term Loan', category_id: 12, position_type_id: '12', fresh_type_ids: ['14'] },
+            { scheme_code: 'legacy_cc_npa', scheme_name: 'Cash Credit Loan', category_id: 13, position_type_id: '13', fresh_type_ids: ['15'] },
+            { scheme_code: 'legacy_decreed_npa', scheme_name: 'Decreed Loan', category_id: 14, position_type_id: '14', fresh_type_ids: ['16'] },
+        ]
+    };
+
+    isLegacyData(): boolean {
+        const hasLegacyBp = this.branchPositionLines?.some((r: any) => String(r.type_id).trim().length <= 2);
+        const hasLegacyFa = this.summary?.fresh_accounts?.some((r: any) => String(r.type_id).trim().length <= 2);
+        return !!(hasLegacyBp || hasLegacyFa);
+    }
+
     financialPositionData: any[] = [];
     branchPositionLines: any[] = [];
 
@@ -278,6 +307,92 @@ export class ExecutiveSummaryComponent
     getBranchFinancialPosition() {
 
         this.loading.set(true);
+
+        if (this.isLegacyData()) {
+            setTimeout(() => {
+                const groupedData: any[] = [];
+                let prefixIndex = 0;
+                const keys = ['DEPOSITS', 'ADVANCES', 'NPA'];
+                keys.forEach((type) => {
+                    const items = this.legacyCategories[type];
+                    const rowItems: any[] = [];
+                    let totalAccounts = 0;
+                    let totalAmount = 0;
+                    let totalMarch = 0;
+
+                    items.forEach((item: any, index: number) => {
+                        const savedLine = this.branchPositionLines.find(
+                            (x: any) => String(x.type_id).trim() === String(item.position_type_id).trim()
+                        );
+                        
+                        let accounts = 0;
+                        let savedFreshLine: any = null;
+                        if (item.fresh_type_ids.length > 0) {
+                            for (const typeId of item.fresh_type_ids) {
+                                const fl = this.summary?.fresh_accounts?.find(
+                                    (x: any) => String(x.type_id).trim() === String(typeId).trim()
+                                );
+                                if (fl) {
+                                    accounts += Number(fl.accounts || 0);
+                                    if (!savedFreshLine || fl.review_action) {
+                                        savedFreshLine = fl;
+                                    }
+                                }
+                            }
+                        }
+
+                        const categoryMarch = this.summary?.march_positions?.find(
+                            (x: any) => x.gl_type_id === item.category_id
+                        );
+                        const marchPositionValue = categoryMarch ? Number(categoryMarch.march_position || 0) : 0;
+
+                        const amount = this.savedAmountOrDefault(
+                            savedLine,
+                            0,
+                        );
+
+                        totalAccounts += accounts;
+                        totalAmount += amount;
+                        totalMarch += marchPositionValue;
+
+                        rowItems.push({
+                            isHeader: false,
+                            isNpa: type === 'NPA',
+                            index: index + 1,
+                            scheme_code: item.scheme_code,
+                            category_id: item.category_id,
+                            scheme_name: item.scheme_name,
+                            total_accounts: accounts,
+                            account_input: accounts,
+                            march_position: marchPositionValue,
+                            total_amount: amount,
+                            amount_input: amount,
+                            type_id: item.scheme_code,
+                            position_type_id: item.position_type_id,
+                            fresh_type_ids: item.fresh_type_ids,
+                            review_action: this.executiveReviewAction(savedLine, savedFreshLine),
+                            reviewer_comment: this.executiveReviewComment(savedLine, savedFreshLine),
+                        });
+                    });
+
+                    groupedData.push({
+                        isHeader: true,
+                        prefix: String.fromCharCode(65 + prefixIndex),
+                        scheme_type: type,
+                        total_accounts: totalAccounts,
+                        march_position: totalMarch,
+                        total_amount: totalAmount,
+                    });
+                    groupedData.push(...rowItems);
+                    prefixIndex++;
+                });
+
+                this.financialPositionData = groupedData;
+                this.cdr.detectChanges();
+                this.loading.set(false);
+            });
+            return;
+        }
 
         this.service
             .getBranchFinancialPosition(
@@ -630,40 +745,76 @@ export class ExecutiveSummaryComponent
         const fresh_accounts: any[] = [];
 
         this.financialPositionData.forEach((row: any) => {
-            if (row.isHeader || !row.scheme_code || String(row.scheme_code).trim() === '') return;
+            if (row.isHeader || (!row.scheme_code && !row.position_type_id)) return;
 
-            const schemeCode = String(row.scheme_code).trim();
+            if (this.isLegacyData()) {
+                if (!row.isNpa) {
+                    const amtVal = Number(row.total_amount);
+                    const amount = Number.isFinite(amtVal) && amtVal >= 0 ? amtVal : 0;
+                    branch_positions.push({
+                        type_id: row.position_type_id,
+                        amount
+                    });
 
-            if (!row.isNpa) {
-                const amtVal = Number(row.total_amount);
-                const amount = Number.isFinite(amtVal) && amtVal >= 0 ? amtVal : 0;
+                    const acctVal = Number(row.total_accounts);
+                    const accounts = Number.isFinite(acctVal) && acctVal >= 0 ? Math.floor(acctVal) : 0;
+                    if (row.fresh_type_ids && row.fresh_type_ids.length > 0) {
+                        fresh_accounts.push({
+                            type_id: row.fresh_type_ids[0],
+                            accounts
+                        });
+                    }
+                } else {
+                    const amtVal = Number(row.amount_input);
+                    const amount = Number.isFinite(amtVal) && amtVal >= 0 ? amtVal : 0;
+                    branch_positions.push({
+                        type_id: row.position_type_id,
+                        amount
+                    });
 
-                const acctVal = Number(row.total_accounts);
-                const accounts = Number.isFinite(acctVal) && acctVal >= 0 ? Math.floor(acctVal) : 0;
-
-                branch_positions.push({
-                    type_id: schemeCode,
-                    amount
-                });
-                fresh_accounts.push({
-                    type_id: schemeCode,
-                    accounts
-                });
+                    const acctVal = Number(row.account_input);
+                    const accounts = Number.isFinite(acctVal) && acctVal >= 0 ? Math.floor(acctVal) : 0;
+                    if (row.fresh_type_ids && row.fresh_type_ids.length > 0) {
+                        fresh_accounts.push({
+                            type_id: row.fresh_type_ids[0],
+                            accounts
+                        });
+                    }
+                }
             } else {
-                const amtVal = Number(row.amount_input);
-                const amount = Number.isFinite(amtVal) && amtVal >= 0 ? amtVal : 0;
+                const schemeCode = String(row.scheme_code).trim();
 
-                const acctVal = Number(row.account_input);
-                const accounts = Number.isFinite(acctVal) && acctVal >= 0 ? Math.floor(acctVal) : 0;
+                if (!row.isNpa) {
+                    const amtVal = Number(row.total_amount);
+                    const amount = Number.isFinite(amtVal) && amtVal >= 0 ? amtVal : 0;
 
-                branch_positions.push({
-                    type_id: schemeCode + '_NPA',
-                    amount
-                });
-                fresh_accounts.push({
-                    type_id: schemeCode + '_NPA',
-                    accounts
-                });
+                    const acctVal = Number(row.total_accounts);
+                    const accounts = Number.isFinite(acctVal) && acctVal >= 0 ? Math.floor(acctVal) : 0;
+
+                    branch_positions.push({
+                        type_id: schemeCode,
+                        amount
+                    });
+                    fresh_accounts.push({
+                        type_id: schemeCode,
+                        accounts
+                    });
+                } else {
+                    const amtVal = Number(row.amount_input);
+                    const amount = Number.isFinite(amtVal) && amtVal >= 0 ? amtVal : 0;
+
+                    const acctVal = Number(row.account_input);
+                    const accounts = Number.isFinite(acctVal) && acctVal >= 0 ? Math.floor(acctVal) : 0;
+
+                    branch_positions.push({
+                        type_id: schemeCode + '_NPA',
+                        amount
+                    });
+                    fresh_accounts.push({
+                        type_id: schemeCode + '_NPA',
+                        accounts
+                    });
+                }
             }
         });
 
