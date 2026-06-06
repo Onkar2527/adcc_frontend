@@ -58,6 +58,7 @@ export class ReportViewerComponent implements OnInit {
     return slug === 'risk-weightage-report'
       || slug === 'performance-risk-weightage-report'
       || slug === 'broader-areawise-scoring-report'
+      || slug === 'questionwsie-broader-areawise-report'
       || slug === 'pending-compliance-detail-report';
   }
 
@@ -260,9 +261,18 @@ export class ReportViewerComponent implements OnInit {
   }
 
   print() {
+    const isLandscape = this.definition()?.page === 'A4L';
+    if (isLandscape) {
+      document.body.classList.add('print-landscape');
+    }
     document.body.classList.add('printing-report');
     window.print();
-    setTimeout(() => document.body.classList.remove('printing-report'));
+    setTimeout(() => {
+      document.body.classList.remove('printing-report');
+      if (isLandscape) {
+        document.body.classList.remove('print-landscape');
+      }
+    });
   }
 
   canExportExcel() {
@@ -331,6 +341,7 @@ export class ReportViewerComponent implements OnInit {
 
     if (
       definition.slug === 'broader-areawise-scoring-report' ||
+      definition.slug === 'questionwsie-broader-areawise-report' ||
       definition.slug === 'executive-summary-audit-report' ||
       definition.slug === 'executive-summary-compliance-report'
     ) {
