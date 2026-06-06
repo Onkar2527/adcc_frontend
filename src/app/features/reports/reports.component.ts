@@ -1,4 +1,4 @@
-import { Component, inject, ViewEncapsulation } from '@angular/core';
+import { Component, inject, ViewEncapsulation, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { MessageService } from 'primeng/api';
@@ -22,7 +22,7 @@ interface ReportItem {
   styleUrls: ['./reports.component.scss'],
   encapsulation: ViewEncapsulation.None
 })
-export class ReportsComponent {
+export class ReportsComponent implements OnInit {
   private router = inject(Router);
   private messageService = inject(MessageService);
 
@@ -85,7 +85,25 @@ export class ReportsComponent {
   ];
 
   goBack() {
-    this.router.navigate(['/auditor/audit-dashboard']);
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    const userTypeId = String(user.user_type_id || '');
+    switch (userTypeId) {
+      case '1':
+        this.router.navigate(['/home']);
+        break;
+      case '2':
+        this.router.navigate(['/auditor/audit-dashboard']);
+        break;
+      case '3':
+        this.router.navigate(['/auditor/compliance']);
+        break;
+      case '4':
+        this.router.navigate(['/auditor/reviewer']);
+        break;
+      default:
+        this.router.navigate(['/home']);
+        break;
+    }
   }
 
   runReport(report: ReportItem) {
@@ -103,5 +121,28 @@ export class ReportsComponent {
       default:
         return category;
     }
+  }
+
+  filteredReports: ReportItem[] = [];
+
+  ngOnInit() {
+    this.initFilteredReports();
+  }
+
+  initFilteredReports() {
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    const userTypeId = String(user.user_type_id || '');
+
+    let rawList = [...this.reports];
+    if (userTypeId !== '1') {
+      // Filter out master reports for non-admin users
+      rawList = rawList.filter((r) => r.category !== '1_master');
+    }
+
+    // Re-assign sequential SR. NO.
+    this.filteredReports = rawList.map((r, index) => ({
+      ...r,
+      srNo: index + 1,
+    }));
   }
 }

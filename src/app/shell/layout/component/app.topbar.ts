@@ -101,10 +101,24 @@ interface SearchItem {
         <p-button icon="pi pi-bell" pTooltip="Notification"
                   tooltipPosition="bottom" styleClass="hide-on-small"
                   severity="secondary" (click)="logout()"></p-button>
-                  
-        <p-button icon="pi pi-user" pTooltip="User Profile"
-                  tooltipPosition="bottom" styleClass="hide-on-small"
-                  severity="secondary" (click)="logout()"></p-button>
+        <div class="topbar-profile flex align-items-center gap-3 hide-on-small" 
+             (click)="logout()" 
+             tooltipPosition="bottom"
+             style="padding: 0.35rem 0.75rem; margin-right: 0.5rem; border-radius: 8px; cursor: pointer; transition: all 0.2s ease-in-out; background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.08);"
+             onmouseover="this.style.background='rgba(255, 255, 255, 0.08)'; this.style.borderColor='rgba(255, 255, 255, 0.16)';"
+             onmouseout="this.style.background='rgba(255, 255, 255, 0.04)'; this.style.borderColor='rgba(255, 255, 255, 0.08)';">
+            <div class="profile-avatar flex align-items-center justify-content-center" 
+                 style="width: 2.25rem; height: 2.25rem; border-radius: 50%; background: linear-gradient(135deg, #eaf1f8, #cbe0f2); color: #173a59; font-weight: 700; font-size: 0.95rem; border: 2px solid rgba(255, 255, 255, 0.4); box-shadow: 0 4px 6px rgba(0, 0, 0, 0.08); transition: transform 0.2s;"
+                 onmouseover="this.style.transform='scale(1.05)';"
+                 onmouseout="this.style.transform='scale(1)';"
+                 (click)="$event.stopPropagation()">
+                {{ getAvatarInitial() }}
+            </div>
+            <div class="flex flex-column text-left" style="line-height: 1.25;">
+                <span class="profile-name" style="font-weight: 600; font-size: 0.85rem; color: #ffffff; letter-spacing: 0.02em;">{{ userName }}</span>
+                <span class="profile-role" style="font-size: 0.68rem; font-weight: 500; text-transform: uppercase; letter-spacing: 0.06em; color: rgba(255, 255, 255, 0.65);" *ngIf="userDesignation">{{ userDesignation }}</span>
+            </div>
+        </div>
 
         <div class="window-controls">
             <p-button icon="pi pi-power-off" pTooltip="Logout"
@@ -288,6 +302,9 @@ export class AppTopbar implements OnInit, OnDestroy {
     @ViewChild('searchInput') searchInput!: AutoComplete;
     private searchSubscription?: Subscription;
 
+    userName = 'User';
+    userDesignation = '';
+
     // Role and Language Data
     languages = [
         { label: 'English', value: 'en' }
@@ -306,6 +323,10 @@ export class AppTopbar implements OnInit, OnDestroy {
 
 
     ngOnInit() {
+        const user = JSON.parse(localStorage.getItem('user') || '{}');
+        this.userName = user.name || 'User';
+        this.userDesignation = this.getUserRoleName(user.user_type_id);
+
         // Subscribe to search focus requests
         this.searchSubscription = this.searchService.searchFocus$.subscribe(() => {
             if (this.searchInput) {
@@ -384,5 +405,27 @@ export class AppTopbar implements OnInit, OnDestroy {
 
     logout() {
         this.router.navigate(['/login']);
+    }
+
+    getAvatarInitial(): string {
+        return (this.userName || 'User').charAt(0).toUpperCase();
+    }
+
+    getUserRoleName(userTypeId: any): string {
+        const typeId = Number(userTypeId);
+        switch (typeId) {
+            case 1:
+                return 'Admin';
+            case 2:
+                return 'Auditor';
+            case 3:
+                return 'Employee';
+            case 4:
+                return 'Reviewer';
+            case 5:
+                return 'Top Level Management';
+            default:
+                return '';
+        }
     }
 }

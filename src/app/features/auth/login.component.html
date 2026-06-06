@@ -2,19 +2,28 @@
 
 <div class="login-page">
   <!-- Fixed Banner -->
-  <div class="top-banner"></div>
+  <div class="top-banner">
+    <div class="glow-node node-1"></div>
+    <div class="glow-node node-2"></div>
+    <div class="glow-node node-3"></div>
+  </div>
+
+  <!-- Background Floating Shapes in White Space -->
+  <div class="bg-shape shape-1"></div>
+  <div class="bg-shape shape-2"></div>
+  <div class="bg-shape shape-3"></div>
 
   <!-- Scrollable Content -->
   <div class="content-section">
     <!-- Brand -->
-    <div class="brand-section">
+    <div class="brand-section animate-item">
       <h1>AuditPro</h1>
       <p>RISK BASED INTERNAL AUDIT</p>
     </div>
 
     <!-- Login -->
     <div class="login-wrapper">
-      <div class="login-card">
+      <div class="login-card animate-item delay-1">
         <h2>Login to Your Account</h2>
 
         <div class="company-name">Kredpool Co-Op Bank Ltd., Sangli</div>
@@ -25,7 +34,7 @@
 
         <form #loginForm="ngForm" (ngSubmit)="onLogin()" autocomplete="off">
           <!-- Username -->
-          <div class="input-group">
+          <div class="input-group animate-item delay-2">
             <label for="username">Employee Code</label>
 
             <input
@@ -42,7 +51,7 @@
           </div>
 
           <!-- Password -->
-          <div class="input-group">
+          <div class="input-group animate-item delay-3">
             <label for="password">Password</label>
 
             <p-password
@@ -67,11 +76,11 @@
             [label]="loading() ? 'Logging in...' : 'Login'"
             [loading]="loading()"
             [disabled]="loading() || !username || !password"
-            class="login-btn"
+            class="login-btn animate-item delay-4"
           ></button>
 
           <!-- Roles -->
-          <div class="user-types">
+          <div class="user-types animate-item delay-5">
             <button
               type="button"
               class="user-btn"

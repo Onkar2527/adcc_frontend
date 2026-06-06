@@ -51,6 +51,18 @@ export class LoginComponent {
     }
   }
 
+  @HostListener('document:mousemove', ['$event'])
+  handleMouseMove(event: MouseEvent) {
+    const page = document.querySelector('.login-page') as HTMLElement;
+    if (page) {
+      const rect = page.getBoundingClientRect();
+      const x = event.clientX - rect.left;
+      const y = event.clientY - rect.top;
+      page.style.setProperty('--mouse-x', `${x}px`);
+      page.style.setProperty('--mouse-y', `${y}px`);
+    }
+  }
+
   onLogin() {
     if (this.loading()) return;
 
