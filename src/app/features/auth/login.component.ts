@@ -70,7 +70,7 @@ export class LoginComponent {
       username: this.username,
       password: this.password
     }).subscribe({
-      next: () => {
+      next: (res: any) => {
         this.loading.set(false);
 
         this.messageService.add({
@@ -80,9 +80,15 @@ export class LoginComponent {
         });
 
         setTimeout(() => {
-          const returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/home';
-          this.router.navigate([returnUrl]);
-        }, 1000);
+          const returnUrl = this.route.snapshot.queryParams['returnUrl'];
+
+          if (returnUrl) {
+            this.router.navigate([returnUrl]);
+            return;
+          }
+
+          this.router.navigate([this.getDashboardRoute()]);
+        }, 700);
       },
       error: (err) => {
         this.loading.set(false);
@@ -94,6 +100,27 @@ export class LoginComponent {
         });
       }
     });
+  }
+
+  private getDashboardRoute(): string {
+    const userData = localStorage.getItem('user') || '{}';
+    const user = JSON.parse(userData);
+
+    const userTypeId = Number(user.user_type_id || 0);
+
+    switch (userTypeId) {
+      case 2:
+        return '/auditor/audit-dashboard';
+
+      case 3:
+        return '/auditor/compliance';
+
+      case 4:
+        return '/auditor/reviewer';
+
+      default:
+        return '/home';
+    }
   }
 
   setCredentials(type: 'auditor' | 'reviewer' | 'manager') {
