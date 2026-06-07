@@ -3,7 +3,6 @@ import { Router, RouterOutlet } from '@angular/router';
 import { updatePreset } from '@primeuix/themes';
 import { APP_CONFIG } from './core/services/config/config.token';
 import { KeyboardShortcutService } from './core/services/keyboard-shortcut';
-import { v4 as gen_uuidv4 } from 'uuid';
 import { SearchService } from './core/services/search.service';
 
 @Component({
@@ -20,7 +19,6 @@ export class App implements OnInit {
 
   ngOnInit(): void {
     console.log(this.config);
-    console.log("UUID4: ", gen_uuidv4());
 
     // Initialize theme with indigo primary color (#3F51B5)
     const indigoPalette = {

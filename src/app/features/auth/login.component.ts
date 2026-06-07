@@ -72,6 +72,8 @@ export class LoginComponent {
     }).subscribe({
       next: (res: any) => {
         this.loading.set(false);
+        console.log('Login response:', res);
+        console.log('User from localStorage:', localStorage.getItem('user'));
 
         this.messageService.add({
           severity: 'success',
@@ -96,7 +98,7 @@ export class LoginComponent {
         this.messageService.add({
           severity: 'error',
           summary: 'Error',
-          detail: err?.error?.message || 'Login failed'
+          detail: 'Invalid employee code or password. Please check your details and try again.'
         });
       }
     });
