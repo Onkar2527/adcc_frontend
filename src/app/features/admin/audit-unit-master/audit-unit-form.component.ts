@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MessageService } from 'primeng/api';
 import { FormDrawerRef } from '../../../core/services/drawer/form-drawer.ref';
@@ -42,6 +42,7 @@ import { AuditSectionService, AuditUnitService, CreateAuditUnitDto, EmployeeServ
             optionLabel="label"
             optionValue="value"
             [required]="true"
+            [error]="sectionTypeError()"
           ></app-select-field>
         </div>
 
@@ -52,6 +53,7 @@ import { AuditSectionService, AuditUnitService, CreateAuditUnitDto, EmployeeServ
             [field]="auditUnitCode"
             placeholder="Enter unit code"
             [required]="true"
+            [error]="auditUnitCodeError()"
           ></app-text-field>
         </div>
 
@@ -67,6 +69,7 @@ import { AuditSectionService, AuditUnitService, CreateAuditUnitDto, EmployeeServ
             [field]="name"
             placeholder="Enter unit name"
             [required]="true"
+            [error]="nameError()"
           ></app-text-field>
         </div>
 
@@ -84,6 +87,7 @@ import { AuditSectionService, AuditUnitService, CreateAuditUnitDto, EmployeeServ
             optionLabel="label"
             optionValue="value"
             [required]="true"
+            [error]="branchHeadError()"
           ></app-select-field>
         </div>
 
@@ -95,6 +99,7 @@ import { AuditSectionService, AuditUnitService, CreateAuditUnitDto, EmployeeServ
             [options]="employees()"
             optionLabel="label"
             optionValue="value"
+            [error]="branchSubheadError()"
           ></app-select-field>
         </div>
 
@@ -109,6 +114,7 @@ import { AuditSectionService, AuditUnitService, CreateAuditUnitDto, EmployeeServ
             label="Last Audit Date"
             [field]="lastAuditDate"
             [required]="true"
+            [error]="lastAuditDateError()"
           ></app-date-field>
         </div>
 
@@ -121,6 +127,10 @@ import { AuditSectionService, AuditUnitService, CreateAuditUnitDto, EmployeeServ
             optionLabel="label"
             optionValue="value"
             [required]="true"
+            [error]="frequencyError()"
+            [filter]="false"
+            [virtualScroll]="false"
+            scrollHeight="180px"
           ></app-select-field>
         </div>
 
@@ -145,6 +155,7 @@ import { AuditSectionService, AuditUnitService, CreateAuditUnitDto, EmployeeServ
 
       <app-form-actions
         [loading]="saving()"
+        [saveDisabled]="false"
         (save)="save()"
         (cancel)="cancel()"
       ></app-form-actions>
@@ -183,6 +194,48 @@ export class AuditUnitFormComponent {
     { label: '12 Months', value: 12 }
   ];
 
+  sectionTypeError = computed(() =>
+    this.sectionTypeId()
+      ? ''
+      : 'Audit section is required',
+  );
+
+  auditUnitCodeError = computed(() =>
+    this.auditUnitCode().trim()
+      ? ''
+      : 'Audit unit code is required',
+  );
+
+  nameError = computed(() =>
+    this.name().trim()
+      ? ''
+      : 'Audit unit name is required',
+  );
+
+  branchHeadError = computed(() =>
+    this.branchHeadId()
+      ? ''
+      : 'Head of audit unit is required',
+  );
+
+  branchSubheadError = computed(() =>
+    this.branchSubheadId() && this.branchHeadId() === this.branchSubheadId()
+      ? 'Head and assistant cannot be the same'
+      : '',
+  );
+
+  lastAuditDateError = computed(() =>
+    this.lastAuditDate()
+      ? ''
+      : 'Last audit date is required',
+  );
+
+  frequencyError = computed(() =>
+    this.frequency()
+      ? ''
+      : 'Audit frequency is required',
+  );
+
   constructor() {
     this.loadSections();
     this.loadEmployees();
@@ -193,7 +246,11 @@ export class AuditUnitFormComponent {
       this.name.set(data.name ?? '');
       this.branchHeadId.set(data.branch_head_id ?? null);
       this.branchSubheadId.set(data.branch_subhead_id ?? null);
-      this.frequency.set(data.frequency ?? null);
+      this.frequency.set(
+        data.frequency !== null && data.frequency !== undefined
+          ? Number(data.frequency)
+          : null
+      );
       this.lastAuditDate.set(
         data.last_audit_date ? new Date(data.last_audit_date) : null
       );
@@ -257,29 +314,45 @@ export class AuditUnitFormComponent {
       : null;
     const lastAuditDateValue = this.lastAuditDate();
     const last_audit_date = lastAuditDateValue
-      ? lastAuditDateValue.toISOString().split('T')[0]
+      ? this.formatDateForApi(lastAuditDateValue)
       : null;
     const is_active = this.isActive() ? 1 : 0;
 
-    if (!section_type_id || !audit_unit_code || !name || !branch_head_id || !last_audit_date || !frequency) {
-      this.messageService.add({ severity: 'warn', summary: 'Validation', detail: 'Please fill required fields' });
+    if (
+      this.sectionTypeError()
+      || this.auditUnitCodeError()
+      || this.nameError()
+      || this.branchHeadError()
+      || this.branchSubheadError()
+      || this.lastAuditDateError()
+      || this.frequencyError()
+    ) {
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Validation Failed',
+        detail: this.firstValidationError(),
+      });
       return;
     }
 
-    if (branch_subhead_id && branch_head_id === branch_subhead_id) {
-      this.messageService.add({ severity: 'warn', summary: 'Validation', detail: 'Head and assistant cannot be the same' });
-      return;
-    }
+    const validSectionTypeId =
+      Number(section_type_id);
+    const validBranchHeadId =
+      Number(branch_head_id);
+    const validFrequency =
+      Number(frequency);
+    const validLastAuditDate =
+      String(last_audit_date);
 
     this.saving.set(true);
     const payload: CreateAuditUnitDto = {
-      section_type_id,
+      section_type_id: validSectionTypeId,
       audit_unit_code,
       name,
-      branch_head_id,
+      branch_head_id: validBranchHeadId,
       branch_subhead_id: branch_subhead_id ?? null,
-      last_audit_date,
-      frequency,
+      last_audit_date: validLastAuditDate,
+      frequency: validFrequency,
       is_active,
     };
 
@@ -292,10 +365,34 @@ export class AuditUnitFormComponent {
         this.saving.set(false);
         this.ref.close({ saved: true, data: res });
       },
-      error: () => {
+      error: (err) => {
         this.saving.set(false);
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: err?.error?.message || 'Unable to save audit unit details',
+        });
       }
     });
+  }
+
+  private firstValidationError() {
+    return [
+      this.sectionTypeError(),
+      this.auditUnitCodeError(),
+      this.nameError(),
+      this.branchHeadError(),
+      this.branchSubheadError(),
+      this.lastAuditDateError(),
+      this.frequencyError(),
+    ].find(Boolean) || 'Please correct the highlighted fields';
+  }
+
+  private formatDateForApi(date: Date): string {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
   }
 
   cancel() {

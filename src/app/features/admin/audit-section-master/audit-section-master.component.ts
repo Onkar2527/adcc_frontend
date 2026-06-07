@@ -22,6 +22,7 @@ import { AuditSectionFormComponent } from './audit-section-form.component';
         [columns]="columns"
         [data]="auditSections()"
         [loading]="loading()"
+        [globalFilterFields]="globalFilterFields"
         [actionDisplayMode]="'buttons'"
         (onAdd)="openForm()"
         (onActionClick)="onAction($event)"
@@ -38,6 +39,7 @@ export class AuditSectionMasterComponent implements OnInit {
 
   auditSections = signal<any[]>([]);
   loading = signal(false);
+  globalFilterFields = ['name'];
 
   columns: TableColumn[] = [
     { field: '_edit', header: '', type: 'action', actionIcon: 'pi pi-pencil', actionName: 'edit', width: '50px', align: 'center', tooltip: 'Edit' },

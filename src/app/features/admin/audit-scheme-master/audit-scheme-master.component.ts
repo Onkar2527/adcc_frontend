@@ -29,6 +29,7 @@ import { AuditSchemeFormComponent } from './audit-scheme-form.component';
         ToastModule,
         ConfirmDialogModule,
     ],
+    providers: [MessageService, ConfirmationService],
     template: `
   <div class="card">
 

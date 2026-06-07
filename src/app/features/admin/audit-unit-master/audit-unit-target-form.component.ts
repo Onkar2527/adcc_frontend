@@ -41,6 +41,9 @@ import { AuditSectionService, AuditUnitService, CreateAuditUnitDto, EmployeeServ
             [options]="years()"
             optionLabel="label"
             optionValue="value"
+            [filter]="false"
+            [virtualScroll]="false"
+            scrollHeight="180px"
           ></app-select-field>
         </div>
 
