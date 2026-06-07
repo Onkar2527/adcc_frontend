@@ -109,6 +109,9 @@ export class LoginComponent {
     const userTypeId = Number(user.user_type_id || 0);
 
     switch (userTypeId) {
+      case 1:
+        return '/admin';
+
       case 2:
         return '/auditor/audit-dashboard';
 

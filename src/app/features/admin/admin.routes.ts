@@ -30,9 +30,11 @@ import { BranchRatingListComponent } from './risk-masters/branch-rating/branch-r
 import { PeriodwiseQuestionsMasterComponent } from './periodwise-questions-master/periodwise-questions-master';
 import { DepositAccountsComponent } from './manage-accounts/deposit-accounts/deposit-accounts.component';
 import { AdvanceAccountsComponent } from './manage-accounts/advance-accounts/advance-accounts.component';
+import { AdminDashboardPlaceholderComponent } from './admin-dashboard-placeholder.component';
 
 
 export const ADMIN_ROUTES: Routes = [
+    { path: '', component: AdminDashboardPlaceholderComponent },
     { path: 'branch-master', component: BranchMasterComponent },
     { path: 'role-master', component: RoleMasterComponent },
     { path: 'user-master', component: UserMasterComponent },
