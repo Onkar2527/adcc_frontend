@@ -31,6 +31,7 @@ import {
 } from '../services/masters.service';
 import { MessageService } from 'primeng/api';
 import { ToastModule } from 'primeng/toast';
+import { NotificationService } from '../../../core/services/notification/notification.service';
 
 @Component({
   selector: 'app-periodwise-questions-master-view',
@@ -47,6 +48,7 @@ import { ToastModule } from 'primeng/toast';
     ScrollPanelModule,
     ToastModule
   ],
+  providers: [MessageService, NotificationService],
   templateUrl: './periodwise-question-manage-view.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   styles: [`
@@ -82,8 +84,8 @@ export class PeriodwiseQuestionsMasterViewComponent
 
   private messageService =
     inject(MessageService);
-   private cdr =
-  inject(ChangeDetectorRef);
+  private cdr =
+    inject(ChangeDetectorRef);
   data = this.ref.data;
 
   showUpdateSection =
@@ -900,54 +902,54 @@ export class PeriodwiseQuestionsMasterViewComponent
     this.onQuestionChange();
 
   }
-  loadQuestionData(id:number) {
+  loadQuestionData(id: number) {
 
-  this.periodwiseQuestionsService
-    .getQuestionData(id)
-    .subscribe({
+    this.periodwiseQuestionsService
+      .getQuestionData(id)
+      .subscribe({
 
-      next: (result:any) => {
+        next: (result: any) => {
 
-        const rows =
+          const rows =
 
-          Array.isArray(result?.rows)
-            ? result.rows
-            : [];
+            Array.isArray(result?.rows)
+              ? result.rows
+              : [];
 
-        this.groupedQuestions =
+          this.groupedQuestions =
 
-          this.groupQuestions(
-            rows
-          );
+            this.groupQuestions(
+              rows
+            );
 
-        this.totalQuestions =
+          this.totalQuestions =
 
-          rows.reduce(
+            rows.reduce(
 
-            (sum:any, row:any) =>
+              (sum: any, row: any) =>
 
-              sum +
-              (
-                row.questions?.length || 0
-              ),
+                sum +
+                (
+                  row.questions?.length || 0
+                ),
 
-            0
+              0
 
-          );
+            );
 
-        this.onQuestionChange();
+          this.onQuestionChange();
 
-        this.cdr.detectChanges();
+          this.cdr.detectChanges();
 
-      },
+        },
 
-      error: (err:any) => {
+        error: (err: any) => {
 
-      }
+        }
 
-    });
+      });
 
-}
+  }
 
   groupQuestions(rows: any[]) {
 

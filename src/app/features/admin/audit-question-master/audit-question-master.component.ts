@@ -32,6 +32,7 @@ import { AuditQuestionRiskMappingComponent } from './audit-question-risk-mapping
         ToastModule,
         ConfirmDialogModule, ButtonModule, CommonModule
     ],
+    providers: [MessageService, ConfirmationService],
     template: `
   <div class="card border-round-xl shadow-1">
 

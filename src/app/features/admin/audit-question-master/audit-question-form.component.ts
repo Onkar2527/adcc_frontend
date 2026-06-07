@@ -56,6 +56,7 @@ import { FormsModule } from '@angular/forms';
             optionLabel="label"
             optionValue="value"
             [required]="true"
+            [virtualScroll]="false"
           ></app-select-field>
         </div>
       </div>
@@ -86,6 +87,7 @@ import { FormsModule } from '@angular/forms';
             optionLabel="label"
             optionValue="value"
             [required]="true"
+            [virtualScroll]="false"
           ></app-select-field>
         </div>
 
@@ -203,6 +205,7 @@ import { FormsModule } from '@angular/forms';
             [options]="controlRiskCategories()"
             optionLabel="label"
             optionValue="value"
+            [virtualScroll]="false"
           ></app-select-field>
         </div>
 
@@ -228,6 +231,7 @@ import { FormsModule } from '@angular/forms';
             [options]="residualRisks()"
             optionLabel="label"
             optionValue="value"
+            [virtualScroll]="false"
           ></app-select-field>
         </div>
 

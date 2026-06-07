@@ -112,6 +112,7 @@ import { ButtonModule } from 'primeng/button';
               optionLabel="label"
               optionValue="value"
               [required]="true"
+              [virtualScroll]="false"
             ></app-select-field>
           </div>
 
@@ -124,6 +125,7 @@ import { ButtonModule } from 'primeng/button';
               optionLabel="label"
               optionValue="value"
               [required]="true"
+              [virtualScroll]="false"
             ></app-select-field>
           </div>
 
@@ -138,6 +140,8 @@ import { ButtonModule } from 'primeng/button';
             label="Add Mapping"
             icon="pi pi-plus"
             class="p-button-sm"
+            [loading]="saving()"
+            [disabled]="saving()"
             (click)="addMapping()">
           </button>
 
@@ -150,8 +154,10 @@ import { ButtonModule } from 'primeng/button';
 
         <app-table
           [columns]="columns"
+          [globalFilterFields]="globalFilterFields"
           [data]="mappings()"
           [loading]="loading()"
+          [showAddButton]="false"
           [actionDisplayMode]="'buttons'"
           (onActionClick)="onAction($event)"
         ></app-table>
@@ -223,6 +229,8 @@ export class AuditQuestionRiskMappingComponent {
             value: 'NO RISK',
         },
     ];
+
+    globalFilterFields = ['risk_type']
 
     columns: TableColumn[] = [
         {
@@ -303,6 +311,10 @@ export class AuditQuestionRiskMappingComponent {
     }
 
     addMapping() {
+        if (this.saving()) {
+            return;
+        }
+
         const payload: CreateQuestionRiskMappingDto =
         {
             question_id:
@@ -355,12 +367,15 @@ export class AuditQuestionRiskMappingComponent {
             return;
         }
 
+        this.saving.set(true);
+
         this.service
             .createRiskMapping(
                 payload,
             )
             .subscribe({
                 next: () => {
+                    this.saving.set(false);
                     this.messageService.add({
                         severity: 'success',
                         summary: 'Success',
@@ -379,6 +394,15 @@ export class AuditQuestionRiskMappingComponent {
                     );
 
                     this.load();
+                },
+                error: () => {
+                    this.saving.set(false);
+                    this.messageService.add({
+                        severity: 'error',
+                        summary: 'Error',
+                        detail:
+                            'Unable to add risk mapping',
+                    });
                 },
             });
     }
