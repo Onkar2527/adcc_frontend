@@ -20,6 +20,7 @@ import { DateFieldComponent } from './date-field/date-field.component';
 import { ChipsFieldComponent } from './chips-field/chips-field.component';
 import { FormActionsComponent } from './form-actions/form-actions.component';
 import { AutocompleteFieldComponent } from './autocomplete-field/autocomplete-field.component';
+import { PasswordFieldComponent } from './password-field/password-field.component';
 
 // Export components
 export { TextFieldComponent } from './text-field/text-field.component';
@@ -31,6 +32,7 @@ export { CheckboxFieldComponent } from './checkbox-field/checkbox-field.componen
 export { DateFieldComponent } from './date-field/date-field.component';
 export { ChipsFieldComponent } from './chips-field/chips-field.component';
 export { AutocompleteFieldComponent } from './autocomplete-field/autocomplete-field.component';
+export { PasswordFieldComponent } from './password-field/password-field.component';
 export { FormActionsComponent } from './form-actions/form-actions.component';
 
 /**
@@ -46,5 +48,6 @@ export const FORM_COMPONENTS = [
   DateFieldComponent,
   ChipsFieldComponent,
   AutocompleteFieldComponent,
+  PasswordFieldComponent,
   FormActionsComponent
 ] as const;

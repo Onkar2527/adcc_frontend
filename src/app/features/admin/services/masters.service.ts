@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { APP_CONFIG } from '../../../core/services/config/config.token';
 
 @Injectable({ providedIn: 'root' })
@@ -175,9 +176,31 @@ export interface AuditUnit {
 export class UnitsService {
   private http = inject(HttpClient);
   private config = inject(APP_CONFIG);
-  private apiUrl = `${this.config.apiUrl}/units`;
+  private apiUrl = `${this.config.apiUrl}/audit-units`;
 
-  getUnits(): Observable<AuditUnit[]> { return this.http.get<AuditUnit[]>(this.apiUrl); }
+  getUnits(): Observable<AuditUnit[]> {
+    return this.http.get<any>(this.apiUrl).pipe(
+      map((response: any) => {
+        const rows = Array.isArray(response)
+          ? response
+          : Array.isArray(response?.data)
+            ? response.data
+            : Array.isArray(response?.rows)
+              ? response.rows
+              : [];
+
+        return rows
+          .filter((unit: any) => Number(unit?.is_active ?? 1) === 1)
+          .map((unit: any) => ({
+            id: Number(unit.id),
+            name: unit.audit_unit_code
+              ? `${unit.name} (${unit.audit_unit_code})`
+              : unit.name,
+            audit_unit_code: unit.audit_unit_code || '',
+          }));
+      }),
+    );
+  }
 }
 
 export interface PasswordPolicy {

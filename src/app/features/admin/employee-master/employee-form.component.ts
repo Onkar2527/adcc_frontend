@@ -1,12 +1,12 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { PasswordModule } from 'primeng/password';
 import { FormDrawerRef } from '../../../core/services/drawer/form-drawer.ref';
 import {
   CheckboxFieldComponent,
   FormActionsComponent,
   MultiSelectFieldComponent,
+  PasswordFieldComponent,
   SelectFieldComponent,
   TextFieldComponent
 } from '../../../shared/components/form';
@@ -20,6 +20,7 @@ import {
   UpdateEmployeeDto
 } from '../services/masters.service';
 import { MessageService } from 'primeng/api';
+import { ValidationService } from '../../../core/services/validation/validation.service';
 
 @Component({
   selector: 'app-employee-form',
@@ -27,10 +28,10 @@ import { MessageService } from 'primeng/api';
   imports: [
     CommonModule,
     FormsModule,
-    PasswordModule,
     TextFieldComponent,
     SelectFieldComponent,
     MultiSelectFieldComponent,
+    PasswordFieldComponent,
     CheckboxFieldComponent,
     FormActionsComponent
   ],
@@ -47,6 +48,7 @@ import { MessageService } from 'primeng/api';
           label="Employee Code"
           [field]="empCode"
           [required]="true"
+          [error]="empCodeError()"
         ></app-text-field>
       </div>
 
@@ -55,6 +57,7 @@ import { MessageService } from 'primeng/api';
           label="Full Name"
           [field]="name"
           [required]="true"
+          [error]="nameError()"
         ></app-text-field>
       </div>
     </div>
@@ -66,6 +69,7 @@ import { MessageService } from 'primeng/api';
           label="Email"
           [field]="email"
           [required]="true"
+          [error]="emailError()"
         ></app-text-field>
       </div>
 
@@ -74,6 +78,9 @@ import { MessageService } from 'primeng/api';
           label="Mobile"
           [field]="mobile"
           [required]="true"
+          [maxlength]="10"
+          [keyfilter]="'int'"
+          [error]="mobileError()"
         ></app-text-field>
       </div>
     </div>
@@ -97,6 +104,7 @@ import { MessageService } from 'primeng/api';
           [required]="true"
           [virtualScroll]="false"
           scrollHeight="90px"
+          [error]="genderError()"
         ></app-select-field>
       </div>
     </div>
@@ -111,35 +119,20 @@ import { MessageService } from 'primeng/api';
           optionLabel="label"
           optionValue="value"
           [required]="true"
+          [error]="userTypeError()"
         ></app-select-field>
       </div>
 
       <div class="col-12 md:col-6">
-        <label class="font-medium mb-2 block">
-          Password
-          @if (!isEdit) {
-            <span class="text-red-500">*</span>
-          }
-        </label>
-
-
-        <p-password
-                  [ngModel]="password()"
-                (ngModelChange)="onPasswordChange($event)"
-                  [toggleMask]="true"
-                  [feedback]="!isEdit"
-                  placeholder="Enter password"
-                  styleClass="w-full"
-                  inputStyleClass="w-full"
-                  [style]="{ width: '100%' }"
-                ></p-password>
-
-        <small
-          *ngIf="passwordError()"
-          class="text-red-500 block mt-2"
-        >
-          {{ passwordError() }}
-        </small>
+        <app-password-field
+          label="Password"
+          [field]="password"
+          [required]="!isEdit"
+          [feedback]="!isEdit"
+          [error]="passwordError()"
+          [helperText]="passwordHelperText()"
+          (onChange)="onPasswordChange($event)"
+        ></app-password-field>
       </div>
     </div>
 
@@ -154,6 +147,8 @@ import { MessageService } from 'primeng/api';
             optionLabel="name"
             optionValue="id"
             display="chip"
+            [required]="showAuditUnits()"
+            [error]="unitIdsError()"
           ></app-multi-select-field>
         </div>
 
@@ -182,7 +177,7 @@ import { MessageService } from 'primeng/api';
     <div class="flex justify-content-end gap-2 pt-4 mt-4 border-top-1 border-gray-200">
       <app-form-actions
         [loading]="saving()"
-        [saveDisabled]="!isValid()"
+        [saveDisabled]="false"
         (save)="save()"
         (cancel)="cancel()"
       ></app-form-actions>
@@ -199,6 +194,7 @@ export class EmployeeFormComponent {
   private unitsService = inject(UnitsService);
   private messageService = inject(MessageService);
   private policyService = inject(PasswordPolicyService);
+  private validationService = inject(ValidationService);
   empCode = signal('');
   name = signal('');
   email = signal('');
@@ -236,14 +232,64 @@ export class EmployeeFormComponent {
     return userTypeId === 2 || userTypeId === 4;
   });
 
-  isValid = computed(() => {
+  empCodeError = computed(() =>
+    this.empCode().trim()
+      ? ''
+      : 'Employee code is required',
+  );
 
-    return !!this.empCode().trim()
-      && !!this.name().trim()
-      && !!this.email().trim()
-      && !!this.mobile().trim()
-      && !!this.gender()
-      && !!this.userTypeId()
+  nameError = computed(() =>
+    this.name().trim()
+      ? ''
+      : 'Full name is required',
+  );
+
+  emailError = computed(() =>
+    this.validationService.getEmailError(
+      this.email(),
+      true,
+    ),
+  );
+
+  mobileError = computed(() =>
+    this.validationService.getMobileError(
+      this.mobile(),
+      true,
+    ),
+  );
+
+  genderError = computed(() =>
+    this.gender()
+      ? ''
+      : 'Gender is required',
+  );
+
+  userTypeError = computed(() =>
+    this.userTypeId()
+      ? ''
+      : 'Employee type is required',
+  );
+
+  unitIdsError = computed(() =>
+    this.showAuditUnits() && !this.unitIds().length
+      ? 'Select at least one authorized audit unit'
+      : '',
+  );
+
+  passwordHelperText = computed(() =>
+    this.passwordError()
+      ? ''
+      : `Minimum ${this.minLength() || 0} characters with ${this.uppercaseCnt() || 0} uppercase, ${this.lowercaseCnt() || 0} lowercase, ${this.numCnt() || 0} number and ${this.symbolCnt() || 0} special character.`,
+  );
+
+  isValid = computed(() => {
+    return !this.empCodeError()
+      && !this.nameError()
+      && !this.emailError()
+      && !this.mobileError()
+      && !this.genderError()
+      && !this.userTypeError()
+      && !this.unitIdsError()
       && (
         this.isEdit
         || !!this.password().trim()
@@ -276,6 +322,11 @@ export class EmployeeFormComponent {
   save() {
 
     if (!this.isValid()) {
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Validation Failed',
+        detail: this.firstValidationError(),
+      });
       return;
     }
 
@@ -347,8 +398,14 @@ export class EmployeeFormComponent {
         this.ref.close(res);
       },
 
-      error: () =>
-        this.saving.set(false)
+      error: (err) => {
+        this.saving.set(false);
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: err?.error?.message || 'Unable to save employee details',
+        });
+      }
     });
   }
 
@@ -484,8 +541,31 @@ export class EmployeeFormComponent {
 
   private loadUnits() {
     this.unitsService.getUnits().subscribe({
-      next: (units) => this.units.set(units)
+      next: (units) => this.units.set(units),
+      error: () => {
+        this.units.set([]);
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: 'Unable to load authorized audit units',
+        });
+      }
     });
+  }
+
+  private firstValidationError() {
+    return [
+      this.empCodeError(),
+      this.nameError(),
+      this.emailError(),
+      this.mobileError(),
+      this.genderError(),
+      this.userTypeError(),
+      this.unitIdsError(),
+      (!this.isEdit && !this.password().trim())
+        ? 'Password is required'
+        : '',
+    ].find(Boolean) || 'Please correct the highlighted fields';
   }
 
   private parseUnitIds(authority?: string): number[] {
