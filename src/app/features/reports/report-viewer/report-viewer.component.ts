@@ -123,6 +123,10 @@ export class ReportViewerComponent implements OnInit {
     return slug === 'executive-summary-audit-report' || slug === 'executive-summary-compliance-report';
   }
 
+  isAuditCommitteeBoardReport1(): boolean {
+    return this.definition()?.slug === 'audit-committee-board-report-1';
+  }
+
   shouldShowFilter(filter: ReportFilterDefinition): boolean {
     const slug = this.definition()?.slug;
 
