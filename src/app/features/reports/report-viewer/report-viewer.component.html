@@ -33,12 +33,14 @@
             filter.key === 'reportAuditAssesment') &&
           (definition()?.slug === 'risk-weightage-report' ||
             definition()?.slug === 'performance-risk-weightage-report' ||
-            definition()?.slug === 'performance-risk-weightage-report-category-wise')
+            definition()?.slug === 'performance-risk-weightage-report-category-wise' ||
+            definition()?.slug === 'rbia-performance-risk-weightage-report-all-units')
         " [class.field-quarter]="
           (filter.key === 'startDate' || filter.key === 'endDate') &&
           (definition()?.slug === 'risk-weightage-report' ||
             definition()?.slug === 'performance-risk-weightage-report' ||
-            definition()?.slug === 'performance-risk-weightage-report-category-wise')
+            definition()?.slug === 'performance-risk-weightage-report-category-wise' ||
+            definition()?.slug === 'rbia-performance-risk-weightage-report-all-units')
         " [class.field-checkbox]="
           filter.type === 'checkbox' && definition()?.slug !== 'risk-weightage-report'
         " [class.field-checkbox-wide]="filter.key === 'risk_category_arr'" [class.field-checkbox-compact]="
@@ -100,7 +102,7 @@
     </div>
   </div>
 
-  <div class="official-report-sheet" [class.risk-wise-report-sheet]="isRiskWiseAuditUnitsReport()"
+  <div class="official-report-sheet" [class.risk-wise-report-sheet]="isRiskWiseReport()"
     *ngIf="definition() && rows().length">
     <div class="official-report-header print-only">
       <div class="official-report-brand-row">
@@ -164,10 +166,10 @@
         </tbody>
       </table>
 
-      <table class="official-report-table" *ngIf="!isExecutiveSummary()"
-        [class.risk-wise-report-table]="isRiskWiseAuditUnitsReport()"
+      <table class="official-report-table" *ngIf="!isExecutiveSummary() && !isInternalAssessmentReport()"
+        [class.risk-wise-report-table]="isRiskWiseReport()"
         [class.performance-risk-report-table]="isPerformanceRiskWeightageReport()">
-        <thead *ngIf="isRiskWiseAuditUnitsReport(); else defaultReportHeader">
+        <thead *ngIf="isRiskWiseReport(); else defaultReportHeader">
           <tr>
             <th *ngFor="let column of riskWiseLeadingColumns()" [attr.rowspan]="2" [style.width]="column.width || null"
               [class.text-center]="column.align === 'center'" [class.text-right]="column.align === 'right'">
@@ -391,6 +393,61 @@
                 </ng-container>
               </td>
             </tr>
+          </ng-container>
+        </tbody>
+      </table>
+
+      <!-- Internal Audit & Compliance Report Custom Cross-Tab Table -->
+      <table class="official-report-table internal-assessment-table" *ngIf="isInternalAssessmentReport()">
+        <thead>
+          <tr class="bg-light-gray" style="background-color: #f4f6f9;">
+            <th style="width: 4%" class="text-center">Sr. No.</th>
+            <th style="width: 15%">Audit Unit</th>
+            <th style="width: 10%">Audit Details</th>
+            <th *ngFor="let month of getInternalAssessmentMonths()" style="width: 5.9%" class="text-center">
+              {{ month.label }}
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <ng-container *ngFor="let unit of rows(); let idx = index">
+            <ng-container *ngIf="getInternalAssessmentRowCells(unit) as cells">
+              <!-- Row 1: Audit Dt. -->
+              <tr>
+                <td class="text-center" style="width: 4%; vertical-align: middle;" rowspan="3">{{ idx + 1 }}</td>
+                <td style="width: 15%; vertical-align: middle; font-weight: 500;" rowspan="3">{{ unit.combined_name }}</td>
+                <td style="width: 10%; font-weight: 500;">Audit Dt.</td>
+                <td *ngFor="let cell of cells.row1" 
+                    [attr.colspan]="cell.colspan" 
+                    [style.width]="(cell.colspan * 5.9) + '%'" 
+                    class="text-center"
+                    [class.empty-cell]="cell.empty">
+                  {{ cell.label || '' }}
+                </td>
+              </tr>
+              <!-- Row 2: Report Send Dt. -->
+              <tr>
+                <td style="width: 10%; font-weight: 500;">Report Send Dt.</td>
+                <td *ngFor="let cell of cells.row2" 
+                    [attr.colspan]="cell.colspan" 
+                    [style.width]="(cell.colspan * 5.9) + '%'" 
+                    class="text-center"
+                    [class.empty-cell]="cell.empty">
+                  {{ cell.label || '' }}
+                </td>
+              </tr>
+              <!-- Row 3: Compl. Recv. Dt. -->
+              <tr>
+                <td style="width: 10%; font-weight: 500;">Compl. Recv. Dt.</td>
+                <td *ngFor="let cell of cells.row3" 
+                    [attr.colspan]="cell.colspan" 
+                    [style.width]="(cell.colspan * 5.9) + '%'" 
+                    class="text-center"
+                    [class.empty-cell]="cell.empty">
+                  {{ cell.label || '' }}
+                </td>
+              </tr>
+            </ng-container>
           </ng-container>
         </tbody>
       </table>

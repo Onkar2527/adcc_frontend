@@ -104,7 +104,8 @@ export class ReportViewerComponent implements OnInit {
       || slug === 'performance-risk-weightage-report-category-wise'
       || slug === 'broader-areawise-scoring-report'
       || slug === 'questionwsie-broader-areawise-report'
-      || slug === 'pending-compliance-detail-report';
+      || slug === 'pending-compliance-detail-report'
+      || slug === 'rbia-performance-risk-weightage-report-all-units';
   }
 
   showsNestedComplianceColumn(): boolean {
@@ -127,6 +128,10 @@ export class ReportViewerComponent implements OnInit {
 
     if (slug === 'risk-wise-audit-units-report' && filter.key === 'endDate') {
       return false;
+    }
+
+    if (slug === 'rbia-performance-risk-weightage-report-all-units') {
+      return true;
     }
 
     if (this.isAdvancedLayout()) {
@@ -330,8 +335,123 @@ export class ReportViewerComponent implements OnInit {
     );
   }
 
+  isInternalAssessmentReport(): boolean {
+    return this.definition()?.slug === 'internal-assesment-report';
+  }
+
+  getInternalAssessmentMonths(): { label: string; monthVal: number; yearVal: number }[] {
+    const header = this.reportHeader();
+    if (!header || !header['financialYear']) return [];
+    
+    const yearStr = String(header['financialYear']);
+    const match = yearStr.match(/\d{4}/);
+    if (!match) return [];
+    const startYear = Number(match[0]);
+    
+    const months: { label: string; monthVal: number; yearVal: number }[] = [];
+    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    
+    let m = 4; // April
+    let y = startYear;
+    
+    while (true) {
+      months.push({
+        label: `${monthNames[m - 1]} - ${String(y).slice(-2)}`,
+        monthVal: m,
+        yearVal: y,
+      });
+      m++;
+      if (m > 12) {
+        m = 1;
+        y++;
+      }
+      if (m === 4) break;
+    }
+    
+    return months;
+  }
+
+  getInternalAssessmentRowCells(unit: any): { row1: any[]; row2: any[]; row3: any[] } {
+    const months = this.getInternalAssessmentMonths();
+    if (!months.length) return { row1: [], row2: [], row3: [] };
+
+    const row1: any[] = [];
+    const row2: any[] = [];
+    const row3: any[] = [];
+
+    // Clone/extract asses_data as an array of assessments
+    const tempAssesData = Object.values(unit.asses_data || {}) as any[];
+
+    let i = 0; // index in months array
+    while (i < months.length) {
+      const cMonthObj = months[i];
+      let matched = false;
+
+      for (let aIdx = 0; aIdx < tempAssesData.length; aIdx++) {
+        const asses = tempAssesData[aIdx];
+        const startDateStr = asses.assesment_period_from; // e.g. "2026-04-01"
+        if (startDateStr) {
+          const startDate = new Date(startDateStr);
+          const mVal = startDate.getMonth() + 1; // 1-12
+          if (mVal === cMonthObj.monthVal) {
+            const frequency = Number(asses.frequency || 1);
+            const colspan = frequency > 1 ? frequency : 1;
+
+            row1.push({
+              label: this.formatDmyDate(asses.audit_start_date),
+              colspan,
+              empty: false,
+            });
+            row2.push({
+              label: this.formatDmyDate(asses.audit_review_date),
+              colspan,
+              empty: false,
+            });
+            row3.push({
+              label: this.formatDmyDate(asses.compliance_start_date),
+              colspan,
+              empty: false,
+            });
+
+            matched = true;
+            i += colspan;
+            // remove from tempAssesData
+            tempAssesData.splice(aIdx, 1);
+            break;
+          }
+        }
+      }
+
+      if (!matched) {
+        row1.push({ label: '', colspan: 1, empty: true });
+        row2.push({ label: '', colspan: 1, empty: true });
+        row3.push({ label: '', colspan: 1, empty: true });
+        i++;
+      }
+    }
+
+    return { row1, row2, row3 };
+  }
+
+  formatDmyDate(value: any) {
+    if (!value) return '';
+    const dateObj = new Date(value);
+    if (isNaN(dateObj.getTime())) return '';
+    const day = String(dateObj.getDate()).padStart(2, '0');
+    const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+    const year = dateObj.getFullYear();
+    return `${day}-${month}-${year}`;
+  }
+
+
   isRiskWiseAuditUnitsReport() {
     return this.definition()?.slug === 'risk-wise-audit-units-report';
+  }
+
+  isRiskWiseReport() {
+    const slug = this.definition()?.slug;
+    return slug === 'risk-wise-audit-units-report'
+      || slug === 'rbia-performance-risk-weightage-report-all-units';
   }
 
   isPerformanceRiskWeightageReport() {
@@ -341,11 +461,13 @@ export class ReportViewerComponent implements OnInit {
   }
 
   riskWiseLeadingColumns() {
-    return this.riskWiseFixedColumns().slice(0, 2);
+    const sliceIndex = this.definition()?.slug === 'rbia-performance-risk-weightage-report-all-units' ? 3 : 2;
+    return this.riskWiseFixedColumns().slice(0, sliceIndex);
   }
 
   riskWiseTrailingColumns() {
-    return this.riskWiseFixedColumns().slice(2);
+    const sliceIndex = this.definition()?.slug === 'rbia-performance-risk-weightage-report-all-units' ? 3 : 2;
+    return this.riskWiseFixedColumns().slice(sliceIndex);
   }
 
   riskWiseRiskGroups() {
@@ -391,6 +513,7 @@ export class ReportViewerComponent implements OnInit {
     }
 
     if (
+      definition.slug === 'internal-assesment-report' ||
       definition.slug === 'broader-areawise-scoring-report' ||
       definition.slug === 'questionwsie-broader-areawise-report' ||
       definition.slug === 'executive-summary-audit-report' ||
@@ -418,7 +541,7 @@ export class ReportViewerComponent implements OnInit {
 
     const exportCols = definition.columns.map((column) => ({
       field: column.key,
-      header: this.isRiskWiseAuditUnitsReport()
+      header: this.isRiskWiseReport()
         ? this.riskWiseExportHeaderLabel(column).toUpperCase()
         : column.label.toUpperCase(),
       excelWidth: this.riskWiseExcelColumnWidth(column),
@@ -429,7 +552,7 @@ export class ReportViewerComponent implements OnInit {
       exportCols,
       definition.fileName || definition.slug,
       [],
-      this.isRiskWiseAuditUnitsReport()
+      this.isRiskWiseReport()
         ? this.riskWiseExcelHeader()
         : undefined,
     );
@@ -737,7 +860,7 @@ export class ReportViewerComponent implements OnInit {
   }
 
   private riskWiseColumnMatch(column: ReportColumnDefinition) {
-    return /^risk_(\d+)_(score|branch_percent|all_percent)$/.exec(column.key);
+    return /^risk_(\d+)_(score|branch_percent|all_percent|highest_score|obtained_score|percent|rating)$/.exec(column.key);
   }
 
   private riskWiseGroupLabel(column: ReportColumnDefinition) {
@@ -760,7 +883,7 @@ export class ReportViewerComponent implements OnInit {
   }
 
   private riskWiseExcelColumnWidth(column: ReportColumnDefinition) {
-    if (!this.isRiskWiseAuditUnitsReport()) {
+    if (!this.isRiskWiseReport()) {
       return undefined;
     }
 
