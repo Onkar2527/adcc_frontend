@@ -101,6 +101,7 @@ export class ReportViewerComponent implements OnInit {
     const slug = this.definition()?.slug;
     return slug === 'risk-weightage-report'
       || slug === 'performance-risk-weightage-report'
+      || slug === 'performance-risk-weightage-report-category-wise'
       || slug === 'broader-areawise-scoring-report'
       || slug === 'questionwsie-broader-areawise-report'
       || slug === 'pending-compliance-detail-report';
@@ -334,7 +335,9 @@ export class ReportViewerComponent implements OnInit {
   }
 
   isPerformanceRiskWeightageReport() {
-    return this.definition()?.slug === 'performance-risk-weightage-report';
+    const slug = this.definition()?.slug;
+    return slug === 'performance-risk-weightage-report'
+      || slug === 'performance-risk-weightage-report-category-wise';
   }
 
   riskWiseLeadingColumns() {

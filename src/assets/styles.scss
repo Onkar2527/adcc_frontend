@@ -263,6 +263,10 @@ body.sidebar-resizing * {
     font-size: 12px !important;
   }
 
+  body.printing-report .performance-risk-report-table thead {
+    display: table-row-group !important;
+  }
+
   body.printing-report .official-report-table .p-tag {
     background: transparent !important;
     border: 0 !important;

@@ -374,6 +374,14 @@
   background: #f4f8fc !important;
 }
 
+.performance-report-summary-table {
+  margin-bottom: 0;
+}
+
+.performance-report-summary-table + .official-report-table {
+  margin-top: 0;
+}
+
 .text-center {
   text-align: center !important;
 }

@@ -23,17 +23,22 @@
         [class.field-half]="
           ((filter.key === 'reportAuditUnit' || filter.key === 'reportAuditAssesment') &&
             definition()?.slug !== 'risk-weightage-report' &&
-            definition()?.slug !== 'performance-risk-weightage-report') ||
+            definition()?.slug !== 'performance-risk-weightage-report' &&
+            definition()?.slug !== 'performance-risk-weightage-report-category-wise') ||
           (filter.key === 'rmv_pending_assesments' &&
             definition()?.slug === 'risk-weightage-report')
         " [class.field-third]="
           (filter.key === 'selectSearchTypeFilter' ||
             filter.key === 'reportAuditUnit' ||
             filter.key === 'reportAuditAssesment') &&
-          definition()?.slug === 'risk-weightage-report'
+          (definition()?.slug === 'risk-weightage-report' ||
+            definition()?.slug === 'performance-risk-weightage-report' ||
+            definition()?.slug === 'performance-risk-weightage-report-category-wise')
         " [class.field-quarter]="
           (filter.key === 'startDate' || filter.key === 'endDate') &&
-          definition()?.slug === 'risk-weightage-report'
+          (definition()?.slug === 'risk-weightage-report' ||
+            definition()?.slug === 'performance-risk-weightage-report' ||
+            definition()?.slug === 'performance-risk-weightage-report-category-wise')
         " [class.field-checkbox]="
           filter.type === 'checkbox' && definition()?.slug !== 'risk-weightage-report'
         " [class.field-checkbox-wide]="filter.key === 'risk_category_arr'" [class.field-checkbox-compact]="
@@ -120,8 +125,48 @@
     </div>
 
     <div class="official-report-table-wrap">
+      <table class="official-report-table performance-report-summary-table" *ngIf="isPerformanceRiskWeightageReport()">
+        <tbody>
+          <tr>
+            <td colspan="6">
+              <strong>Branch:</strong> {{ reportAuditUnit() || '-' }}
+            </td>
+            <td colspan="6">
+              <strong>Number of Audits Conducted:</strong>
+              {{ summary()?.['auditsConducted'] || 0 }}
+            </td>
+          </tr>
+          <tr>
+            <td colspan="6">
+              <strong>Number of Accounts (Deposits):</strong>
+              {{ reportMeta()?.['totalDeposits'] || 0 }}
+            </td>
+            <td colspan="6">
+              <strong>Number of Accounts (Advances):</strong>
+              {{ reportMeta()?.['totalAdvances'] || 0 }}
+            </td>
+          </tr>
+          <tr>
+            <td colspan="6">
+              <strong>Number of Accounts - Sampled (Deposits):</strong>
+              {{ summary()?.['totalDepositsSampling'] || 0 }}
+            </td>
+            <td colspan="6">
+              <strong>Number of Accounts - Sampled (Advances):</strong>
+              {{ summary()?.['totalAdvancesSampling'] || 0 }}
+            </td>
+          </tr>
+          <tr>
+            <td colspan="12">
+              <strong>Assessment Period:</strong> {{ reportAssessmentPeriod() || '-' }}
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
       <table class="official-report-table" *ngIf="!isExecutiveSummary()"
-        [class.risk-wise-report-table]="isRiskWiseAuditUnitsReport()">
+        [class.risk-wise-report-table]="isRiskWiseAuditUnitsReport()"
+        [class.performance-risk-report-table]="isPerformanceRiskWeightageReport()">
         <thead *ngIf="isRiskWiseAuditUnitsReport(); else defaultReportHeader">
           <tr>
             <th *ngFor="let column of riskWiseLeadingColumns()" [attr.rowspan]="2" [style.width]="column.width || null"
@@ -148,48 +193,16 @@
         </thead>
 
         <ng-template #defaultReportHeader>
-          <thead *ngIf="isPerformanceRiskWeightageReport(); else plainReportHeader">
-            <tr>
-              <td colspan="6">
-                <strong>Branch:</strong> {{ reportAuditUnit() || '-' }}
-              </td>
-              <td colspan="6">
-                <strong>Number of Audits Conducted:</strong>
-                {{ summary()?.['auditsConducted'] || 0 }}
-              </td>
-            </tr>
-            <tr>
-              <td colspan="6">
-                <strong>Number of Accounts (Deposits):</strong>
-                {{ reportMeta()?.['totalDeposits'] || 0 }}
-              </td>
-              <td colspan="6">
-                <strong>Number of Accounts (Advances):</strong>
-                {{ reportMeta()?.['totalAdvances'] || 0 }}
-              </td>
-            </tr>
-            <tr>
-              <td colspan="6">
-                <strong>Number of Accounts - Sampled (Deposits):</strong>
-                {{ summary()?.['totalDepositsSampling'] || 0 }}
-              </td>
-              <td colspan="6">
-                <strong>Number of Accounts - Sampled (Advances):</strong>
-                {{ summary()?.['totalAdvancesSampling'] || 0 }}
-              </td>
-            </tr>
-            <tr>
-              <td colspan="12">
-                <strong>Assessment Period:</strong> {{ reportAssessmentPeriod() || '-' }}
-              </td>
-            </tr>
+          <ng-container *ngIf="isPerformanceRiskWeightageReport(); else plainReportHeader">
+            <thead>
             <tr>
               <th *ngFor="let column of definition()?.columns" [style.width]="column.width || null"
                 [class.text-center]="column.align === 'center'" [class.text-right]="column.align === 'right'">
                 {{ column.label }}
               </th>
             </tr>
-          </thead>
+            </thead>
+          </ng-container>
 
           <ng-template #plainReportHeader>
             <thead *ngIf="!hasGroupedRows() && definition()?.slug !== 'broader-areawise-scoring-report' && definition()?.slug !== 'questionwsie-broader-areawise-report'">
