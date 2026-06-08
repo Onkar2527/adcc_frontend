@@ -242,9 +242,11 @@ export class AppMenu implements OnInit, OnDestroy {
     private refreshModel() {
         const url = this.router.url || '';
         const isInternalAuditRoute = url.includes('/auditor/internal-audit');
+        const isReviewerRoute = url.includes('/auditor/reviewer');
+        const isComplianceRoute = url.includes('/auditor/compliance');
         const isReportsRoute = url.includes('/reports');
 
-        if (!isInternalAuditRoute && !isReportsRoute) {
+        if (!isInternalAuditRoute && !isReviewerRoute && !isComplianceRoute && !isReportsRoute) {
             this.auditNavService.clear();
         }
 

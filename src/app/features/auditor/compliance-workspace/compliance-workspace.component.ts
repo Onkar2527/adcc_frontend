@@ -16,6 +16,7 @@ import { SkeletonModule } from 'primeng/skeleton';
 import { TagModule } from 'primeng/tag';
 import { NotificationService } from '../../../core/services/notification/notification.service';
 import { AuditDashboardService } from '../services/auditor-main.service';
+import { InternalAuditNavService } from '../services/internal-audit-nav.service';
 
 @Component({
     selector: 'app-compliance-workspace',
@@ -34,6 +35,9 @@ import { AuditDashboardService } from '../services/auditor-main.service';
 export class ComplianceWorkspaceComponent implements OnInit {
     private service =
         inject(AuditDashboardService);
+
+    private navService =
+        inject(InternalAuditNavService);
 
     private notification =
         inject(NotificationService);
@@ -140,6 +144,7 @@ export class ComplianceWorkspaceComponent implements OnInit {
         this.selected.set(null);
         this.detail.set(null);
         this.submissionPreview.set(null);
+        this.navService.clear();
         this.loadQueue();
     }
 
@@ -747,6 +752,11 @@ export class ComplianceWorkspaceComponent implements OnInit {
                     }
 
                     this.detail.set(res);
+                    this.navService.setAssessmentMenus(
+                        assessmentId,
+                        [],
+                        res?.overview || null,
+                    );
                     this.loadingDetail.set(false);
                 },
                 error: (err) => {

@@ -19,6 +19,7 @@ import { TagModule } from 'primeng/tag';
 import { NotificationService } from '../../../core/services/notification/notification.service';
 import { AuditDashboardService } from '../services/auditor-main.service';
 import { AuditUnitDashboardComponent } from '../../../shared/components/audit-unit-dashboard/audit-unit-dashboard.component';
+import { InternalAuditNavService } from '../services/internal-audit-nav.service';
 
 @Component({
     selector: 'app-reviewer-workspace',
@@ -38,6 +39,9 @@ import { AuditUnitDashboardComponent } from '../../../shared/components/audit-un
 export class ReviewerWorkspaceComponent implements OnInit {
     private service =
         inject(AuditDashboardService);
+
+    private navService =
+        inject(InternalAuditNavService);
 
     private notification =
         inject(NotificationService);
@@ -279,6 +283,11 @@ export class ReviewerWorkspaceComponent implements OnInit {
             .subscribe({
                 next: (res: any) => {
                     this.detail.set(res);
+                    this.navService.setAssessmentMenus(
+                        Number(assessment.id),
+                        [],
+                        res?.overview || null,
+                    );
                     this.loadingDetail.set(false);
                 },
                 error: (err) => {
@@ -294,6 +303,7 @@ export class ReviewerWorkspaceComponent implements OnInit {
     closeAssessment() {
         this.selected.set(null);
         this.detail.set(null);
+        this.navService.clear();
         this.loadQueue();
     }
 
@@ -917,6 +927,11 @@ export class ReviewerWorkspaceComponent implements OnInit {
             .subscribe({
                 next: (res: any) => {
                     this.detail.set(res);
+                    this.navService.setAssessmentMenus(
+                        assessmentId,
+                        [],
+                        res?.overview || null,
+                    );
                     this.clearActionSaving(key);
                 },
                 error: () => {

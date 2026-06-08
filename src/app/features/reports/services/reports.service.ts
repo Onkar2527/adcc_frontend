@@ -71,6 +71,13 @@ export class ReportsService {
       );
     });
 
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    if (user) {
+      params = params.set('user_type_id', String(user.user_type_id || ''));
+      params = params.set('audit_unit_authority', String(user.audit_unit_authority || ''));
+      params = params.set('employee_id', String(user.id || user.employee_id || user.emp_id || ''));
+    }
+
     return this.http.get<any>(
       `${this.apiUrl}/${reportSlug}/data`,
       {

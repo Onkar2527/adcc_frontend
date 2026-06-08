@@ -48,23 +48,38 @@ export class ReportViewerComponent implements OnInit {
         filteredOptions = originalOptions.filter(
           (opt) => String(opt.value) === String(activeUnitId)
         );
-      } else if (userTypeId === '2' || userTypeId === '4') {
+      } else if (userTypeId === '2' || userTypeId === '4' || userTypeId === '3') {
         const assignedIds = auditUnitAuthority
           .split(',')
           .map((s) => s.trim())
           .filter(Boolean);
 
-        filteredOptions = originalOptions.filter(
-          (opt) => assignedIds.includes(String(opt.value))
-        );
+        if (assignedIds.length > 0) {
+          filteredOptions = originalOptions.filter(
+            (opt) => assignedIds.includes(String(opt.value))
+          );
+        } else if (userTypeId === '2' || userTypeId === '4') {
+          filteredOptions = [];
+        }
       }
 
       filter.options = filteredOptions;
 
       const currentValue = String(this.filters[filter.key] || '');
-      const isValid = filteredOptions.some((opt) => String(opt.value) === currentValue);
+      let selectedValue = currentValue;
 
-      if (!isValid && filteredOptions.length > 0) {
+      if (activeUnitId) {
+        const hasActiveUnit = filteredOptions.some((opt) => String(opt.value) === String(activeUnitId));
+        if (hasActiveUnit) {
+          selectedValue = String(activeUnitId);
+        }
+      }
+
+      const isValid = filteredOptions.some((opt) => String(opt.value) === selectedValue);
+
+      if (isValid) {
+        this.filters[filter.key] = selectedValue;
+      } else if (filteredOptions.length > 0) {
         this.filters[filter.key] = filteredOptions[0].value;
       }
     }
