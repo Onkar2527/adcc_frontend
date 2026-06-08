@@ -63,6 +63,8 @@ import {
             optionValue="value"
 
             [required]="true"
+
+            [virtualScroll]="false"
           ></app-select-field>
 
           <app-number-field

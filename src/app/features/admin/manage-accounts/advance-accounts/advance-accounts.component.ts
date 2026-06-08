@@ -122,6 +122,7 @@ import { AdvanceUploadDumpsComponent } from './advance-upload-dumps.component';
               optionValue="value"
               [filter]="true"
               filterBy="label"
+              [virtualScroll]="false"
             ></app-select-field>
 
           </div>

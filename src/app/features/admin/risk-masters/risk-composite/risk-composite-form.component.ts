@@ -59,6 +59,8 @@ import {
             optionValue="value"
 
             [required]="true"
+
+            [virtualScroll]="false"
           ></app-select-field>
 
           <app-select-field
@@ -73,6 +75,8 @@ import {
             optionValue="value"
 
             [required]="true"
+
+            [virtualScroll]="false"
           ></app-select-field>
 
           <app-text-field
