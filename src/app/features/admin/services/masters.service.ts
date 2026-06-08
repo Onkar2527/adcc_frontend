@@ -1563,6 +1563,8 @@ export interface CreateDepositAccountDto {
 
   maturity_amount: string;
 
+  upload_date: string;
+
   upload_period_from: string;
 
   upload_period_to: string;
@@ -1624,6 +1626,8 @@ export interface CreateAdvanceAccountDto {
   // maturity_date?: string;
 
   // maturity_amount: string;
+
+  upload_date: string;
 
   upload_period_from: string;
 

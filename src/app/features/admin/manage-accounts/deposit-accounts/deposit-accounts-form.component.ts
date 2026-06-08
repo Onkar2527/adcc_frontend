@@ -1,5 +1,6 @@
 import {
     Component,
+    computed,
     inject,
     signal,
 } from '@angular/core';
@@ -71,7 +72,10 @@ import {
 
               optionValue="id"
 
+              filterBy="name"
+
               [required]="true"
+              [error]="branchError()"
             ></app-select-field>
 
           </div>
@@ -89,7 +93,10 @@ import {
 
               optionValue="id"
 
+              filterBy="name,scheme_code"
+
               [required]="true"
+              [error]="schemeError()"
             ></app-select-field>
 
           </div>
@@ -106,6 +113,7 @@ import {
               [field]="accountNo"
 
               [required]="true"
+              [error]="accountNoError()"
             ></app-text-field>
 
           </div>
@@ -118,6 +126,7 @@ import {
               [field]="ucic"
 
               [required]="true"
+              [error]="ucicError()"
             ></app-text-field>
 
           </div>
@@ -130,6 +139,7 @@ import {
               [field]="customerType"
 
               [required]="true"
+              [error]="customerTypeError()"
             ></app-text-field>
 
           </div>
@@ -144,6 +154,7 @@ import {
             [field]="accountHolderName"
 
             [required]="true"
+            [error]="accountHolderNameError()"
           ></app-text-field>
 
         </div>
@@ -166,6 +177,7 @@ import {
               [field]="interestRate"
 
               [required]="true"
+              [error]="interestRateError()"
             ></app-text-field>
 
           </div>
@@ -178,6 +190,7 @@ import {
               [field]="principalAmount"
 
               [required]="true"
+              [error]="principalAmountError()"
             ></app-text-field>
 
           </div>
@@ -190,6 +203,7 @@ import {
               [field]="balance"
 
               [required]="true"
+              [error]="balanceError()"
             ></app-text-field>
 
           </div>
@@ -206,6 +220,7 @@ import {
               [field]="maturityAmount"
 
               [required]="true"
+              [error]="maturityAmountError()"
             ></app-text-field>
 
           </div>
@@ -218,6 +233,7 @@ import {
                 [field]="accountStatus"
 
                 [required]="true"
+                [error]="accountStatusError()"
             ></app-text-field>
 
             </div>
@@ -240,6 +256,8 @@ import {
               label="Opening Date"
 
               [field]="accountOpeningDate"
+              [required]="true"
+              [error]="accountOpeningDateError()"
             ></app-date-field>
 
           </div>
@@ -250,6 +268,8 @@ import {
               label="Balance Date"
 
               [field]="balanceDate"
+              [required]="true"
+              [error]="balanceDateError()"
             ></app-date-field>
 
           </div>
@@ -260,6 +280,8 @@ import {
               label="Maturity Date"
 
               [field]="maturityDate"
+              [required]="true"
+              [error]="maturityDateError()"
             ></app-date-field>
 
           </div>
@@ -278,11 +300,24 @@ import {
 
           </div>
 
-          <div class="col-12 md:col-4">
+<div class="col-12 md:col-4">
+
+  <app-date-field
+    label="Upload Date"
+    [field]="uploadDate"
+    [required]="true"
+    [error]="uploadDateError()"
+  ></app-date-field>
+
+</div>
+
+<div class="col-12 md:col-4">
 
   <app-date-field
     label="Upload Period From"
     [field]="uploadPeriodFrom"
+    [required]="true"
+    [error]="uploadPeriodFromError()"
   ></app-date-field>
 
 </div>
@@ -292,6 +327,8 @@ import {
   <app-date-field
     label="Upload Period To"
     [field]="uploadPeriodTo"
+    [required]="true"
+    [error]="uploadPeriodToError()"
   ></app-date-field>
 
 </div>
@@ -306,6 +343,7 @@ import {
 
           <app-form-actions
             [loading]="saving()"
+            [saveDisabled]="false"
 
             (save)="save()"
 
@@ -341,6 +379,9 @@ export class DepositAccountFormComponent {
     branches = signal<any[]>([]);
 
     schemes = signal<any[]>([]);
+
+    uploadDate =
+        signal<Date | null>(new Date());
 
     uploadPeriodFrom =
         signal<Date | null>(
@@ -406,6 +447,82 @@ export class DepositAccountFormComponent {
     closeDate =
         signal<Date | null>(null);
     row: any = null;
+
+    branchError = computed(() =>
+        this.branchId() ? '' : 'Branch is required',
+    );
+
+    schemeError = computed(() =>
+        this.schemeId() ? '' : 'Scheme is required',
+    );
+
+    accountNoError = computed(() =>
+        this.accountNo().trim() ? '' : 'Account number is required',
+    );
+
+    accountHolderNameError = computed(() =>
+        this.accountHolderName().trim() ? '' : 'Account holder name is required',
+    );
+
+    ucicError = computed(() =>
+        this.ucic().trim() ? '' : 'UCIC is required',
+    );
+
+    customerTypeError = computed(() =>
+        this.customerType().trim() ? '' : 'Customer type is required',
+    );
+
+    interestRateError = computed(() =>
+        this.amountError(this.interestRate(), 'Interest rate'),
+    );
+
+    principalAmountError = computed(() =>
+        this.amountError(this.principalAmount(), 'Principal amount'),
+    );
+
+    balanceError = computed(() =>
+        this.amountError(this.balance(), 'Balance'),
+    );
+
+    maturityAmountError = computed(() =>
+        this.amountError(this.maturityAmount(), 'Maturity amount'),
+    );
+
+    accountStatusError = computed(() =>
+        this.accountStatus().trim() ? '' : 'Account status is required',
+    );
+
+    accountOpeningDateError = computed(() =>
+        this.accountOpeningDate() ? '' : 'Opening date is required',
+    );
+
+    balanceDateError = computed(() =>
+        this.balanceDate() ? '' : 'Balance date is required',
+    );
+
+    maturityDateError = computed(() =>
+        this.maturityDate() ? '' : 'Maturity date is required',
+    );
+
+    uploadDateError = computed(() =>
+        this.uploadDate() ? '' : 'Upload date is required',
+    );
+
+    uploadPeriodFromError = computed(() =>
+        this.uploadPeriodFrom() ? '' : 'Upload period from date is required',
+    );
+
+    uploadPeriodToError = computed(() => {
+        if (!this.uploadPeriodTo()) {
+            return 'Upload period to date is required';
+        }
+
+        if (this.uploadPeriodFrom() && this.uploadPeriodTo()! < this.uploadPeriodFrom()!) {
+            return 'Upload period to date cannot be before from date';
+        }
+
+        return '';
+    });
 
     constructor() {
 
@@ -535,7 +652,7 @@ export class DepositAccountFormComponent {
 
         this.accountOpeningDate.set(
             this.row.account_opening_date
-                ? new Date(
+                ? this.parseDate(
                     this.row.account_opening_date,
                 )
                 : null,
@@ -543,7 +660,7 @@ export class DepositAccountFormComponent {
 
         this.balanceDate.set(
             this.row.balance_date
-                ? new Date(
+                ? this.parseDate(
                     this.row.balance_date,
                 )
                 : null,
@@ -551,7 +668,7 @@ export class DepositAccountFormComponent {
 
         this.maturityDate.set(
             this.row.maturity_date
-                ? new Date(
+                ? this.parseDate(
                     this.row.maturity_date,
                 )
                 : null,
@@ -559,60 +676,107 @@ export class DepositAccountFormComponent {
 
         this.closeDate.set(
             this.row.close_date
-                ? new Date(
+                ? this.parseDate(
                     this.row.close_date,
                 )
                 : null,
+        );
+
+        this.uploadDate.set(
+            this.row.upload_date
+                ? this.parseDate(
+                    this.row.upload_date,
+                )
+                : new Date(),
+        );
+
+        this.uploadPeriodFrom.set(
+            this.row.upload_period_from
+                ? this.parseDate(
+                    this.row.upload_period_from,
+                )
+                : this.uploadPeriodFrom(),
+        );
+
+        this.uploadPeriodTo.set(
+            this.row.upload_period_to
+                ? this.parseDate(
+                    this.row.upload_period_to,
+                )
+                : this.uploadPeriodTo(),
         );
     }
 
     validate() {
 
         if (
-            !this.branchId()
-
-            || !this.schemeId()
-
-            || !this.accountNo()
-                .trim()
-
-            || !this.accountHolderName()
-                .trim()
-
-            || !this.ucic()
-                .trim()
-
-            || !this.customerType()
-                .trim()
-
-            || !this.interestRate()
-                .trim()
-
-            || !this.principalAmount()
-                .trim()
-
-            || !this.balance()
-                .trim()
-
-            || !this.maturityAmount()
-                .trim()
-
-            || !this.accountStatus()
+            this.branchError()
+            || this.schemeError()
+            || this.accountNoError()
+            || this.accountHolderNameError()
+            || this.ucicError()
+            || this.customerTypeError()
+            || this.interestRateError()
+            || this.principalAmountError()
+            || this.balanceError()
+            || this.maturityAmountError()
+            || this.accountStatusError()
+            || this.accountOpeningDateError()
+            || this.balanceDateError()
+            || this.maturityDateError()
+            || this.uploadDateError()
+            || this.uploadPeriodFromError()
+            || this.uploadPeriodToError()
         ) {
 
             this.messageService.add({
                 severity: 'warn',
 
-                summary: 'Validation',
+                summary: 'Validation Failed',
 
-                detail:
-                    'Please fill all required fields',
+                detail: this.firstValidationError(),
             });
 
             return false;
         }
 
         return true;
+    }
+
+    private amountError(value: string, label: string) {
+        const trimmedValue = value.trim();
+
+        if (!trimmedValue) {
+            return `${label} is required`;
+        }
+
+        if (Number.isNaN(Number(trimmedValue))) {
+            return `${label} must be a valid number`;
+        }
+
+        return '';
+    }
+
+    private firstValidationError() {
+        return [
+            this.branchError(),
+            this.schemeError(),
+            this.accountNoError(),
+            this.accountHolderNameError(),
+            this.ucicError(),
+            this.customerTypeError(),
+            this.interestRateError(),
+            this.principalAmountError(),
+            this.balanceError(),
+            this.maturityAmountError(),
+            this.accountStatusError(),
+            this.accountOpeningDateError(),
+            this.balanceDateError(),
+            this.maturityDateError(),
+            this.uploadDateError(),
+            this.uploadPeriodFromError(),
+            this.uploadPeriodToError(),
+        ].find(Boolean) || 'Please correct the highlighted fields';
     }
 
     private formatDate(
@@ -637,6 +801,49 @@ export class DepositAccountFormComponent {
             ).padStart(2, '0');
 
         return `${year}-${month}-${day}`;
+    }
+
+    private parseDate(value: string): Date | null {
+        if (value.includes('T')) {
+            const parsed =
+                new Date(value);
+
+            return Number.isNaN(parsed.getTime())
+                ? null
+                : parsed;
+        }
+
+        const datePart =
+            value.split(' ')[0];
+
+        const match =
+            datePart.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+
+        if (match) {
+            return new Date(
+                Number(match[1]),
+                Number(match[2]) - 1,
+                Number(match[3]),
+            );
+        }
+
+        const displayMatch =
+            datePart.match(/^(\d{2})-(\d{2})-(\d{4})$/);
+
+        if (displayMatch) {
+            return new Date(
+                Number(displayMatch[3]),
+                Number(displayMatch[2]) - 1,
+                Number(displayMatch[1]),
+            );
+        }
+
+        const parsed =
+            new Date(value);
+
+        return Number.isNaN(parsed.getTime())
+            ? null
+            : parsed;
     }
 
     save() {
@@ -707,6 +914,11 @@ export class DepositAccountFormComponent {
                 this.formatDate(
                     this.closeDate(),
                 ),
+
+            upload_date:
+                this.formatDate(
+                    this.uploadDate(),
+                )!,
 
             upload_period_from:
                 this.formatDate(

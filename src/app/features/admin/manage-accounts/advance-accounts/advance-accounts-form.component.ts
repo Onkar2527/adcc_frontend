@@ -1,5 +1,6 @@
 import {
     Component,
+    computed,
     inject,
     signal,
 } from '@angular/core';
@@ -71,7 +72,10 @@ import {
 
               optionValue="id"
 
+              filterBy="name"
+
               [required]="true"
+              [error]="branchError()"
             ></app-select-field>
 
           </div>
@@ -89,7 +93,10 @@ import {
 
               optionValue="id"
 
+              filterBy="name,scheme_code"
+
               [required]="true"
+              [error]="schemeError()"
             ></app-select-field>
 
           </div>
@@ -106,6 +113,7 @@ import {
               [field]="accountNo"
 
               [required]="true"
+              [error]="accountNoError()"
             ></app-text-field>
 
           </div>
@@ -118,6 +126,7 @@ import {
               [field]="ucic"
 
               [required]="true"
+              [error]="ucicError()"
             ></app-text-field>
 
           </div>
@@ -130,6 +139,7 @@ import {
               [field]="customerType"
 
               [required]="true"
+              [error]="customerTypeError()"
             ></app-text-field>
 
           </div>
@@ -144,6 +154,7 @@ import {
             [field]="accountHolderName"
 
             [required]="true"
+            [error]="accountHolderNameError()"
           ></app-text-field>
 
         </div>
@@ -162,6 +173,7 @@ import {
       label="Interest Rate"
       [field]="interestRate"
       [required]="true"
+      [error]="interestRateError()"
     ></app-text-field>
 
   </div>
@@ -172,6 +184,7 @@ import {
       label="Outstanding Balance"
       [field]="outstandingBalance"
       [required]="true"
+      [error]="outstandingBalanceError()"
     ></app-text-field>
 
   </div>
@@ -182,6 +195,7 @@ import {
       label="Sanction Amount"
       [field]="sanctionAmount"
       [required]="true"
+      [error]="sanctionAmountError()"
     ></app-text-field>
 
   </div>
@@ -196,6 +210,7 @@ import {
       label="Account Status"
       [field]="accountStatus"
       [required]="true"
+      [error]="accountStatusError()"
     ></app-text-field>
 
   </div>
@@ -206,6 +221,7 @@ import {
       label="NPA Status"
       [field]="npaStatus"
       [required]="true"
+      [error]="npaStatusError()"
     ></app-text-field>
 
   </div>
@@ -225,6 +241,8 @@ import {
     <app-date-field
       label="Opening Date"
       [field]="accountOpeningDate"
+      [required]="true"
+      [error]="accountOpeningDateError()"
     ></app-date-field>
 
   </div>
@@ -234,6 +252,8 @@ import {
     <app-date-field
       label="Balance Date"
       [field]="balanceDate"
+      [required]="true"
+      [error]="balanceDateError()"
     ></app-date-field>
 
   </div>
@@ -243,6 +263,8 @@ import {
     <app-date-field
       label="Renewal Date"
       [field]="renewalDate"
+      [required]="true"
+      [error]="renewalDateError()"
     ></app-date-field>
 
   </div>
@@ -256,6 +278,19 @@ import {
     <app-date-field
       label="Due Date"
       [field]="dueDate"
+      [required]="true"
+      [error]="dueDateError()"
+    ></app-date-field>
+
+  </div>
+
+  <div class="col-12 md:col-4">
+
+    <app-date-field
+      label="Upload Date"
+      [field]="uploadDate"
+      [required]="true"
+      [error]="uploadDateError()"
     ></app-date-field>
 
   </div>
@@ -265,6 +300,8 @@ import {
     <app-date-field
       label="Upload Period From"
       [field]="uploadPeriodFrom"
+      [required]="true"
+      [error]="uploadPeriodFromError()"
     ></app-date-field>
 
   </div>
@@ -274,6 +311,8 @@ import {
     <app-date-field
       label="Upload Period To"
       [field]="uploadPeriodTo"
+      [required]="true"
+      [error]="uploadPeriodToError()"
     ></app-date-field>
 
   </div>
@@ -288,6 +327,7 @@ import {
 
           <app-form-actions
             [loading]="saving()"
+            [saveDisabled]="false"
 
             (save)="save()"
 
@@ -323,6 +363,9 @@ export class AdvanceAccountFormComponent {
     branches = signal<any[]>([]);
 
     schemes = signal<any[]>([]);
+
+    uploadDate =
+        signal<Date | null>(new Date());
 
     uploadPeriodFrom =
         signal<Date | null>(
@@ -403,6 +446,86 @@ export class AdvanceAccountFormComponent {
         signal<Date | null>(null);
 
     row: any = null;
+
+    branchError = computed(() =>
+        this.branchId() ? '' : 'Branch is required',
+    );
+
+    schemeError = computed(() =>
+        this.schemeId() ? '' : 'Scheme is required',
+    );
+
+    accountNoError = computed(() =>
+        this.accountNo().trim() ? '' : 'Account number is required',
+    );
+
+    accountHolderNameError = computed(() =>
+        this.accountHolderName().trim() ? '' : 'Account holder name is required',
+    );
+
+    ucicError = computed(() =>
+        this.ucic().trim() ? '' : 'UCIC is required',
+    );
+
+    customerTypeError = computed(() =>
+        this.customerType().trim() ? '' : 'Customer type is required',
+    );
+
+    interestRateError = computed(() =>
+        this.amountError(this.interestRate(), 'Interest rate'),
+    );
+
+    outstandingBalanceError = computed(() =>
+        this.amountError(this.outstandingBalance(), 'Outstanding balance'),
+    );
+
+    sanctionAmountError = computed(() =>
+        this.amountError(this.sanctionAmount(), 'Sanction amount'),
+    );
+
+    accountStatusError = computed(() =>
+        this.accountStatus().trim() ? '' : 'Account status is required',
+    );
+
+    npaStatusError = computed(() =>
+        this.npaStatus().trim() ? '' : 'NPA status is required',
+    );
+
+    accountOpeningDateError = computed(() =>
+        this.accountOpeningDate() ? '' : 'Opening date is required',
+    );
+
+    balanceDateError = computed(() =>
+        this.balanceDate() ? '' : 'Balance date is required',
+    );
+
+    renewalDateError = computed(() =>
+        this.renewalDate() ? '' : 'Renewal date is required',
+    );
+
+    dueDateError = computed(() =>
+        this.dueDate() ? '' : 'Due date is required',
+    );
+
+    uploadDateError = computed(() =>
+        this.uploadDate() ? '' : 'Upload date is required',
+    );
+
+    uploadPeriodFromError = computed(() =>
+        this.uploadPeriodFrom() ? '' : 'Upload period from date is required',
+    );
+
+    uploadPeriodToError = computed(() => {
+        if (!this.uploadPeriodTo()) {
+            return 'Upload period to date is required';
+        }
+
+        if (this.uploadPeriodFrom() && this.uploadPeriodTo()! < this.uploadPeriodFrom()!) {
+            return 'Upload period to date cannot be before from date';
+        }
+
+        return '';
+    });
 
     constructor() {
 
@@ -578,6 +701,30 @@ export class AdvanceAccountFormComponent {
                 : null,
         );
 
+        this.uploadDate.set(
+            this.row.upload_date
+                ? new Date(
+                    this.row.upload_date,
+                )
+                : new Date(),
+        );
+
+        this.uploadPeriodFrom.set(
+            this.row.upload_period_from
+                ? new Date(
+                    this.row.upload_period_from,
+                )
+                : this.uploadPeriodFrom(),
+        );
+
+        this.uploadPeriodTo.set(
+            this.row.upload_period_to
+                ? new Date(
+                    this.row.upload_period_to,
+                )
+                : this.uploadPeriodTo(),
+        );
+
         // this.maturityDate.set(
         //     this.row.maturity_date
         //         ? new Date(
@@ -598,58 +745,75 @@ export class AdvanceAccountFormComponent {
     validate() {
 
         if (
-            !this.branchId()
-
-            || !this.schemeId()
-
-            || !this.accountNo()
-                .trim()
-
-            || !this.accountHolderName()
-                .trim()
-
-            || !this.ucic()
-                .trim()
-
-            || !this.customerType()
-                .trim()
-
-            || !this.interestRate()
-                .trim()
-
-            // || !this.principalAmount()
-            //     .trim()
-
-            || !this.sanctionAmount()
-                .trim()
-
-            // || !this.balance()
-            //     .trim()
-
-            || !this.outstandingBalance()
-                .trim()
-
-            // || !this.maturityAmount()
-            //     .trim()
-
-            || !this.accountStatus()
-
-            || !this.npaStatus()
+            this.branchError()
+            || this.schemeError()
+            || this.accountNoError()
+            || this.accountHolderNameError()
+            || this.ucicError()
+            || this.customerTypeError()
+            || this.interestRateError()
+            || this.outstandingBalanceError()
+            || this.sanctionAmountError()
+            || this.accountStatusError()
+            || this.npaStatusError()
+            || this.accountOpeningDateError()
+            || this.balanceDateError()
+            || this.renewalDateError()
+            || this.dueDateError()
+            || this.uploadDateError()
+            || this.uploadPeriodFromError()
+            || this.uploadPeriodToError()
         ) {
 
             this.messageService.add({
                 severity: 'warn',
 
-                summary: 'Validation',
+                summary: 'Validation Failed',
 
-                detail:
-                    'Please fill all required fields',
+                detail: this.firstValidationError(),
             });
 
             return false;
         }
 
         return true;
+    }
+
+    private amountError(value: string, label: string) {
+        const trimmedValue = value.trim();
+
+        if (!trimmedValue) {
+            return `${label} is required`;
+        }
+
+        if (Number.isNaN(Number(trimmedValue))) {
+            return `${label} must be a valid number`;
+        }
+
+        return '';
+    }
+
+    private firstValidationError() {
+        return [
+            this.branchError(),
+            this.schemeError(),
+            this.accountNoError(),
+            this.accountHolderNameError(),
+            this.ucicError(),
+            this.customerTypeError(),
+            this.interestRateError(),
+            this.outstandingBalanceError(),
+            this.sanctionAmountError(),
+            this.accountStatusError(),
+            this.npaStatusError(),
+            this.accountOpeningDateError(),
+            this.balanceDateError(),
+            this.renewalDateError(),
+            this.dueDateError(),
+            this.uploadDateError(),
+            this.uploadPeriodFromError(),
+            this.uploadPeriodToError(),
+        ].find(Boolean) || 'Please correct the highlighted fields';
     }
 
     private formatDate(
@@ -763,6 +927,11 @@ export class AdvanceAccountFormComponent {
             //     this.formatDate(
             //         this.closeDate(),
             //     ),
+
+            upload_date:
+                this.formatDate(
+                    this.uploadDate(),
+                )!,
 
             upload_period_from:
                 this.formatDate(
