@@ -86,6 +86,16 @@
   grid-column: span 3;
 }
 
+.board-report-filters {
+  .board-top-filter {
+    grid-column: span 6;
+  }
+
+  .board-month-filter {
+    grid-column: span 3;
+  }
+}
+
 .field-checkbox {
   grid-column: span 4;
 }

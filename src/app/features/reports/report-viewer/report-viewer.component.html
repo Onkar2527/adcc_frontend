@@ -17,9 +17,19 @@
       definition()?.slug === 'audit-observations-report' ||
       definition()?.slug === 'compliance-report' ||
       definition()?.slug === 'compliance-summary-report'
-    ">
+    " [class.board-report-filters]="isAuditCommitteeBoardReport1()">
     <ng-container *ngFor="let filter of definition()?.filters">
       <div class="field" *ngIf="shouldShowFilter(filter)" [class.field-wide]="filter.key === 'audit_unit_id'"
+        [class.board-top-filter]="
+          isAuditCommitteeBoardReport1() &&
+          (filter.key === 'audit_unit_id' || filter.key === 'trend')
+        " [class.board-month-filter]="
+          isAuditCommitteeBoardReport1() &&
+          (filter.key === 'startMonth' ||
+            filter.key === 'endMonth' ||
+            filter.key === 'startMonth2' ||
+            filter.key === 'endMonth2')
+        "
         [class.field-half]="
           ((filter.key === 'reportAuditUnit' || filter.key === 'reportAuditAssesment') &&
             definition()?.slug !== 'risk-weightage-report' &&
