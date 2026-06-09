@@ -135,7 +135,7 @@
     padding: 0.35rem 0.8rem;
     border: 1px solid var(--surface-border);
     border-radius: 2rem;
-    background: var(--surface-50);
+    background: var(--surface-card);
     color: var(--text-color);
     font-size: .84rem;
     font-weight: 700;
@@ -164,82 +164,97 @@
     transition: all 0.2s ease;
 }
 
+/* Active State - Default (All) */
 .review-filter-chip.active {
-    border-color: var(--primary-color);
-    background: var(--primary-50);
-    color: var(--primary-color);
-    box-shadow: 0 0 0 1px var(--primary-color);
+    border-color: var(--primary-color) !important;
+    background: var(--primary-color) !important;
+    color: #ffffff !important;
 }
 .review-filter-chip.active span {
-    background: var(--primary-color);
-    color: var(--primary-color-text);
+    background: #ffffff !important;
+    color: var(--primary-color) !important;
 }
 
+/* Pending Chip active state - Blue theme */
+.review-filter-chip:nth-child(2).active {
+    border-color: #2563eb !important;
+    background: #2563eb !important;
+    color: #ffffff !important;
+}
+.review-filter-chip:nth-child(2).active span {
+    background: #ffffff !important;
+    color: #2563eb !important;
+}
+
+/* Danger (High Risk) active state - Red theme */
 .review-filter-chip.danger.active {
-    border-color: var(--red-500);
-    background: var(--red-50);
-    color: var(--red-700);
-    box-shadow: 0 0 0 1px var(--red-500);
+    border-color: #ef4444 !important;
+    background: #ef4444 !important;
+    color: #ffffff !important;
 }
 .review-filter-chip.danger.active span {
-    background: var(--red-600);
+    background: #ffffff !important;
+    color: #ef4444 !important;
+}
+
+/* Success (Accepted) active state - Green theme */
+.review-filter-chip.success.active {
+    border-color: #22c55e !important;
+    background: #22c55e !important;
+    color: #ffffff !important;
+}
+.review-filter-chip.success.active span {
+    background: #ffffff !important;
+    color: #22c55e !important;
+}
+
+/* Warning (Re-compliance) chip styling */
+.review-filter-chip.warning {
+    border-color: rgba(249, 115, 22, 0.3);
+    background: rgba(249, 115, 22, 0.05);
+    color: #ea580c;
+}
+.review-filter-chip.warning span {
+    background: #ea580c;
     color: #ffffff;
 }
 
-.review-filter-chip.warning {
-    border-color: var(--orange-200);
-    background: var(--surface-0);
-}
-.review-filter-chip.warning span {
-    background: var(--orange-100);
-    color: var(--orange-800);
-}
+/* Warning (Re-compliance) active state - Orange theme */
 .review-filter-chip.warning.active {
-    border-color: var(--orange-500);
-    background: var(--orange-50);
-    color: var(--orange-800);
-    box-shadow: 0 0 0 1px var(--orange-500);
+    border-color: #f97316 !important;
+    background: #f97316 !important;
+    color: #ffffff !important;
 }
 .review-filter-chip.warning.active span {
-    background: var(--orange-600);
-    color: #ffffff;
+    background: #ffffff !important;
+    color: #f97316 !important;
 }
 
 /* Attract user attention when Re-Compliance count is > 0 */
 .review-filter-chip.warning.warning-has-count {
-    border-color: var(--orange-400);
-    background: var(--orange-50);
-    box-shadow: 0 0 8px rgba(249, 115, 22, 0.2);
+    border-color: #f97316;
+    background: rgba(249, 115, 22, 0.12);
+    box-shadow: 0 0 8px rgba(249, 115, 22, 0.25);
     animation: re-compliance-glow 2.5s infinite ease-in-out;
 }
 .review-filter-chip.warning.warning-has-count span {
-    background: var(--orange-500);
+    background: #f97316;
     color: #ffffff;
 }
 .review-filter-chip.warning.warning-has-count.active {
-    box-shadow: 0 0 0 2px var(--orange-500);
+    box-shadow: 0 0 0 2px #f97316;
+    animation: none; /* stop pulse when active */
 }
 
 @keyframes re-compliance-glow {
     0%, 100% {
-        box-shadow: 0 0 6px rgba(249, 115, 22, 0.2);
+        box-shadow: 0 0 6px rgba(249, 115, 22, 0.25);
         transform: scale(1);
     }
     50% {
-        box-shadow: 0 0 12px rgba(249, 115, 22, 0.45);
-        transform: scale(1.02);
+        box-shadow: 0 0 14px rgba(249, 115, 22, 0.5);
+        transform: scale(1.03);
     }
-}
-
-.review-filter-chip.success.active {
-    border-color: var(--green-500);
-    background: var(--green-50);
-    color: var(--green-700);
-    box-shadow: 0 0 0 1px var(--green-500);
-}
-.review-filter-chip.success.active span {
-    background: var(--green-600);
-    color: #ffffff;
 }
 
 .bulk-review-actions strong {
