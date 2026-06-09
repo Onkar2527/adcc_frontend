@@ -79,6 +79,16 @@
         ></button>
 
         <button
+          *ngIf="canUseRemarks(detail()?.overview)"
+          pButton
+          type="button"
+          [label]="remarks()?.unread_count ? 'Remarks (' + remarks().unread_count + ')' : 'Remarks'"
+          [icon]="remarks()?.unread_count ? 'pi pi-bell' : 'pi pi-comments'"
+          [severity]="remarks()?.unread_count ? 'danger' : 'secondary'"
+          (click)="toggleRemarksPanel()"
+        ></button>
+
+        <button
           pButton
           type="button"
           [label]="isComplianceReview() ? 'Submit Compliance Review' : 'Submit Review'"
@@ -96,6 +106,179 @@
     </div>
 
     <ng-container *ngIf="!loadingDetail() && detail() as review">
+      <section
+        *ngIf="canUseRemarks(review.overview) && showRemarksPanel()"
+        class="remark-panel surface-card border-round-xl shadow-1 p-4 mb-4"
+      >
+        <div
+          class="flex flex-column md:flex-row md:align-items-center md:justify-content-between gap-3 mb-3"
+        >
+          <div class="flex align-items-center gap-2">
+            <h3 class="text-xl font-bold text-900 m-0">Assessment Remarks</h3>
+
+            <span *ngIf="remarks()?.unread_count" class="remark-count">
+              {{ remarks().unread_count }} new
+            </span>
+          </div>
+
+          <div class="remark-tabs" role="tablist">
+            <button
+              type="button"
+              [class.active]="remarkTab() === 'add'"
+              (click)="remarkTab.set('add')"
+            >
+              <i class="pi pi-plus"></i>
+              Add Remark
+            </button>
+
+            <button
+              type="button"
+              [class.active]="remarkTab() === 'current'"
+              (click)="remarkTab.set('current')"
+            >
+              <i class="pi pi-send"></i>
+              Your Remarks
+            </button>
+
+            <button
+              type="button"
+              [class.active]="remarkTab() === 'other'"
+              (click)="remarkTab.set('other')"
+            >
+              <i class="pi pi-inbox"></i>
+              For You
+            </button>
+          </div>
+        </div>
+
+        <div *ngIf="remarksLoading()" class="remark-loading">Loading remarks...</div>
+
+        <form
+          *ngIf="!remarksLoading() && remarkTab() === 'add'"
+          class="remark-form"
+          (ngSubmit)="saveRemark()"
+        >
+          <div class="remark-fields">
+            <label>
+              <span>Remark For</span>
+              <p-select
+                [options]="remarks()?.remark_types || []"
+                optionLabel="name"
+                optionValue="id"
+                placeholder="Select recipient"
+                name="remarkNotiType"
+                [(ngModel)]="remarkNotiType"
+                styleClass="w-full"
+              ></p-select>
+            </label>
+
+            <label>
+              <span>Subject</span>
+              <input
+                pInputText
+                class="w-full"
+                name="remarkSubject"
+                type="text"
+                [(ngModel)]="remarkSubject"
+                placeholder="Remark subject"
+              />
+            </label>
+          </div>
+
+          <label class="remark-message">
+            <span>Message</span>
+            <textarea
+              pTextarea
+              [autoResize]="true"
+              class="w-full"
+              name="remarkMessage"
+              rows="4"
+              [(ngModel)]="remarkMessage"
+              placeholder="Write remark here"
+            ></textarea>
+          </label>
+
+          <button
+            pButton
+            type="submit"
+            icon="pi pi-send"
+            label="Save Remark"
+            [loading]="savingRemark()"
+          ></button>
+        </form>
+
+        <div *ngIf="!remarksLoading() && remarkTab() === 'current'" class="remark-list">
+          <div *ngIf="!remarks()?.current?.length" class="remark-empty">No remarks found.</div>
+
+          <article *ngFor="let remark of remarks()?.current || []" class="remark-item">
+            <button type="button" class="remark-heading" (click)="toggleRemark(remark)">
+              <span class="remark-type">{{ remark.noti_type_label }}</span>
+              <strong>{{ remark.subject }}</strong>
+              <small>
+                {{ remark.created_at | date: 'medium' }}
+              </small>
+              <i
+                class="pi"
+                [class.pi-chevron-down]="!isRemarkExpanded(remark.id)"
+                [class.pi-chevron-up]="isRemarkExpanded(remark.id)"
+              ></i>
+            </button>
+
+            <div *ngIf="isRemarkExpanded(remark.id)" class="remark-body">
+              <p>{{ remark.message }}</p>
+
+              <button
+                *ngIf="remark.can_delete"
+                pButton
+                type="button"
+                icon="pi pi-trash"
+                label="Remove Remark"
+                severity="danger"
+                size="small"
+                (click)="removeRemark(remark)"
+              ></button>
+
+              <span *ngIf="!remark.can_delete && remark.has_been_read" class="remark-read-note">
+                Read by recipient. This remark cannot be removed.
+              </span>
+            </div>
+          </article>
+        </div>
+
+        <div *ngIf="!remarksLoading() && remarkTab() === 'other'" class="remark-list">
+          <div *ngIf="!remarks()?.other?.length" class="remark-empty">No remarks found.</div>
+
+          <article
+            *ngFor="let remark of remarks()?.other || []"
+            class="remark-item"
+            [class.remark-unread]="remark.is_unread"
+          >
+            <button type="button" class="remark-heading" (click)="toggleRemark(remark, true)">
+              <span class="remark-type">
+                {{ remark.noti_type_label }}
+                <em *ngIf="remark.is_unread">New</em>
+              </span>
+              <strong>{{ remark.subject }}</strong>
+              <small>
+                {{ remark.author_name || 'Employee' }}
+                <ng-container *ngIf="remark.author_code"> ({{ remark.author_code }}) </ng-container>
+                &nbsp;|&nbsp;
+                {{ remark.created_at | date: 'medium' }}
+              </small>
+              <i
+                class="pi"
+                [class.pi-chevron-down]="!isRemarkExpanded(remark.id)"
+                [class.pi-chevron-up]="isRemarkExpanded(remark.id)"
+              ></i>
+            </button>
+
+            <div *ngIf="isRemarkExpanded(remark.id)" class="remark-body">
+              <p>{{ remark.message }}</p>
+            </div>
+          </article>
+        </div>
+      </section>
+
       <div class="review-metrics">
         <div>
           <span>Total</span><strong>{{ review.counts.total }}</strong>
@@ -366,12 +549,12 @@
           </div>
 
           <div>
-            <label>Auditor Comment</label>
+            <label>Auditor Note / Remark</label>
             <p>{{ answer.audit_comment || '-' }}</p>
           </div>
 
           <div *ngIf="isComplianceReview()">
-            <label>Manager Compliance Response</label>
+            <label>Manager Remark</label>
             <p>{{ answer.compliance_response || '-' }}</p>
           </div>
         </div>
@@ -476,7 +659,7 @@
                   <th *ngFor="let column of annexureColumns(answer); let ci = index">
                     {{ column.name || column.column_name || 'Column ' + (ci + 1) }}
                   </th>
-                  <th *ngIf="isComplianceReview()">Manager Response</th>
+                  <th *ngIf="isComplianceReview()">Manager Remark</th>
                   <th>Evidence</th>
                   <th>Reviewer Comment</th>
                   <th>Status</th>
