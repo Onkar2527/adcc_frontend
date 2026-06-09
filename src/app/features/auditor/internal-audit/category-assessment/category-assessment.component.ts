@@ -125,6 +125,12 @@ export class CategoryAssessmentComponent
     savingHeader =
         signal<number | null>(null);
 
+    savingAllHeaders =
+        signal(false);
+
+    openedHeaders =
+        signal<Record<string, string[]>>({});
+
     savingAnnexureQuestion =
         signal<number | null>(null);
 
@@ -193,6 +199,8 @@ export class CategoryAssessmentComponent
     private activeLoadKey = '';
 
     private categoryLoadRequest = 0;
+
+    private readonly defaultOpenedHeaders = ['0'];
 
     @Input()
     assessmentIdInput:
@@ -1075,6 +1083,95 @@ export class CategoryAssessmentComponent
         );
     }
 
+    visibleQuestionSets(
+        detail: any,
+    ) {
+        if (
+            this.isAccountCategory(detail)
+            &&
+            !detail?.selected_account
+        ) {
+            return [];
+        }
+
+        return detail?.sets || [];
+    }
+
+    private visibleHeaders(
+        detail: any = this.categoryDetail(),
+    ) {
+        return this.visibleQuestionSets(
+            detail,
+        )
+            .flatMap(
+                (set: any) =>
+                    set.headers || [],
+            );
+    }
+
+    selectDefaultAnswersForCategory() {
+        if (
+            !this.canApplyDefaults()
+        ) {
+            this.notification.error(
+                'Default answers can be applied only during active audit entry.',
+            );
+
+            return;
+        }
+
+        const headers =
+            this.visibleHeaders();
+
+        if (
+            !headers.length
+        ) {
+            this.notification.error(
+                'No questions are available for default answers.',
+            );
+
+            return;
+        }
+
+        const questions =
+            headers.flatMap(
+                (header: any) =>
+                    header.questions || [],
+            );
+
+        const appliedCount =
+            this.applyDefaultAnswersToQuestions(
+                questions,
+            );
+
+        const pendingTextHeaders =
+            this.openHeadersWithPendingTextAnswers();
+
+        if (
+            !appliedCount
+        ) {
+            this.notification.error(
+                'No default answers are configured for these headers.',
+            );
+
+            return;
+        }
+
+        if (
+            pendingTextHeaders
+        ) {
+            this.notification.info(
+                `${appliedCount} default answer${appliedCount === 1 ? '' : 's'} applied. Text answers still need audit input.`,
+            );
+
+            return;
+        }
+
+        this.notification.success(
+            `${appliedCount} default answer${appliedCount === 1 ? '' : 's'} applied. Please review and save.`,
+        );
+    }
+
     private applyDefaultAnswersToQuestions(
         questions: any[],
     ) {
@@ -1291,6 +1388,35 @@ export class CategoryAssessmentComponent
         return questions;
     }
 
+    private buildAnswersForHeader(
+        header: any,
+    ) {
+        return this.collectHeaderQuestionsForSave(
+            header,
+        )
+            .map(
+                (question: any) => ({
+                    question_id:
+                        question.id,
+
+                    header_id:
+                        question.header_id || header.id,
+
+                    answer_given:
+                        question.answer_value || '',
+
+                    audit_comment:
+                        question.audit_comment || '',
+
+                    is_compliance:
+                        question.is_compliance === true,
+
+                    audit_compulsary_ev_upload:
+                        question.audit_compulsary_ev_upload === true,
+                }),
+            );
+    }
+
     saveHeader(
         header: any,
     ) {
@@ -1312,32 +1438,34 @@ export class CategoryAssessmentComponent
             return;
         }
 
-        const questionsToSave =
-            this.collectHeaderQuestionsForSave(
-                header,
+        const requiredTextErrors =
+            this.validateRequiredTextAnswers(
+                [header],
             );
 
+        if (
+            Object.keys(
+                requiredTextErrors,
+            ).length
+        ) {
+            this.answerErrors.set(
+                requiredTextErrors,
+            );
+
+            this.openHeadersWithAnswerErrors(
+                requiredTextErrors,
+            );
+
+            this.notification.error(
+                'Please complete the remaining manual answers before saving this header.',
+            );
+
+            return;
+        }
+
         const answers =
-            questionsToSave.map(
-                (question: any) => ({
-                    question_id:
-                        question.id,
-
-                    header_id:
-                        question.header_id || header.id,
-
-                    answer_given:
-                        question.answer_value || '',
-
-                    audit_comment:
-                        question.audit_comment || '',
-
-                    is_compliance:
-                        question.is_compliance === true,
-
-                    audit_compulsary_ev_upload:
-                        question.audit_compulsary_ev_upload === true,
-                }),
+            this.buildAnswersForHeader(
+                header,
             );
 
         this.savingHeader.set(
@@ -1406,6 +1534,340 @@ export class CategoryAssessmentComponent
                     );
                 },
             });
+    }
+
+    saveAllHeaders() {
+        const detail =
+            this.categoryDetail();
+
+        const headers =
+            this.visibleHeaders(
+                detail,
+            );
+
+        if (
+            !detail?.overview?.id
+            ||
+            !detail?.category?.id
+            ||
+            !headers.length
+        ) {
+            this.notification.error(
+                'No answers are available to save.',
+            );
+
+            return;
+        }
+
+        const requiredTextErrors =
+            this.validateRequiredTextAnswers(
+                headers,
+            );
+
+        if (
+            Object.keys(
+                requiredTextErrors,
+            ).length
+        ) {
+            this.answerErrors.set(
+                requiredTextErrors,
+            );
+
+            this.openHeadersWithAnswerErrors(
+                requiredTextErrors,
+            );
+
+            this.notification.error(
+                'Please complete the remaining manual answers before saving all headers.',
+            );
+
+            return;
+        }
+
+        const answers =
+            headers.flatMap(
+                (header: any) =>
+                    this.buildAnswersForHeader(
+                        header,
+                    ),
+            );
+
+        if (
+            !answers.length
+        ) {
+            this.notification.error(
+                'No answers are available to save.',
+            );
+
+            return;
+        }
+
+        this.savingAllHeaders.set(
+            true,
+        );
+
+        this.answerErrors.set(
+            {},
+        );
+
+        this.service
+            .saveInternalAuditCategoryAnswers(
+                Number(detail.overview.id),
+                Number(detail.category.id),
+                this.employeeId,
+                answers,
+                this.selectedDumpId(),
+            )
+            .subscribe({
+                next: (res: any) => {
+                    this.savingAllHeaders.set(
+                        false,
+                    );
+
+                    if (
+                        !res?.success
+                    ) {
+                        this.answerErrors.set(
+                            res?.errors || {},
+                        );
+
+                        this.openHeadersWithAnswerErrors(
+                            res?.errors || {},
+                        );
+
+                        this.notification.error(
+                            res?.message
+                            || 'Please correct highlighted answers.',
+                        );
+
+                        return;
+                    }
+
+                    this.notification.success(
+                        res.message
+                        || 'All header answers saved successfully',
+                    );
+
+                    this.markSaved();
+
+                    this.loadCategory(
+                        Number(detail.overview.id),
+                        Number(detail.category.id),
+                        false,
+                    );
+                },
+
+                error: (err) => {
+                    this.savingAllHeaders.set(
+                        false,
+                    );
+
+                    this.notification.error(
+                        err?.error?.message
+                        || 'Unable to save answers.',
+                    );
+                },
+            });
+    }
+
+    private questionNeedsTextAnswer(
+        question: any,
+    ) {
+        return this.isTextAnswer(
+            question,
+        )
+            &&
+            !String(
+                question?.answer_value || '',
+            ).trim();
+    }
+
+    private headerHasPendingTextAnswer(
+        header: any,
+    ) {
+        return this.collectHeaderQuestionsForSave(
+            header,
+        )
+            .some(
+                (question: any) =>
+                    this.questionNeedsTextAnswer(
+                        question,
+                    ),
+            );
+    }
+
+    private headerHasAnswerError(
+        header: any,
+        errors: Record<string, string>,
+    ) {
+        return this.collectHeaderQuestionsForSave(
+            header,
+        )
+            .some(
+                (question: any) =>
+                    Boolean(
+                        errors?.[question.id],
+                    ),
+            );
+    }
+
+    private validateRequiredTextAnswers(
+        headers: any[],
+    ) {
+        const errors: Record<string, string> = {};
+
+        for (
+            const header
+            of headers || []
+        ) {
+            for (
+                const question
+                of this.collectHeaderQuestionsForSave(
+                    header,
+                )
+            ) {
+                if (
+                    this.questionNeedsTextAnswer(
+                        question,
+                    )
+                ) {
+                    errors[question.id] =
+                        'Manual answer is required before saving this header.';
+                }
+            }
+        }
+
+        return errors;
+    }
+
+    accordionKey(
+        set: any,
+        setIndex: number,
+    ) {
+        return String(
+            set?.id
+            || set?.name
+            || setIndex,
+        );
+    }
+
+    openedHeaderValues(
+        set: any,
+        setIndex: number,
+    ) {
+        const key =
+            this.accordionKey(
+                set,
+                setIndex,
+            );
+
+        return this.openedHeaders()[key] || this.defaultOpenedHeaders;
+    }
+
+    setOpenedHeaderValues(
+        set: any,
+        setIndex: number,
+        value: any,
+    ) {
+        const key =
+            this.accordionKey(
+                set,
+                setIndex,
+            );
+
+        const values =
+            Array.isArray(
+                value,
+            )
+                ? value
+                : [value];
+
+        this.openedHeaders.update(
+            (current) => ({
+                ...current,
+                [key]:
+                    values.map(
+                        (item) =>
+                            String(item),
+                    ),
+            }),
+        );
+    }
+
+    private openHeadersByPredicate(
+        predicate: (header: any) => boolean,
+    ) {
+        const detail =
+            this.categoryDetail();
+
+        const nextOpenState: Record<string, string[]> = {};
+        let openedCount = 0;
+
+        this.visibleQuestionSets(
+            detail,
+        )
+            .forEach(
+                (set: any, setIndex: number) => {
+                    const values =
+                        (set.headers || [])
+                            .map(
+                                (header: any, headerIndex: number) =>
+                                    predicate(header)
+                                        ? String(headerIndex)
+                                        : '',
+                            )
+                            .filter(Boolean);
+
+                    if (
+                        values.length
+                    ) {
+                        nextOpenState[
+                            this.accordionKey(
+                                set,
+                                setIndex,
+                            )
+                        ] =
+                            values;
+
+                        openedCount +=
+                            values.length;
+                    }
+                },
+            );
+
+        if (
+            openedCount
+        ) {
+            this.openedHeaders.update(
+                (current) => ({
+                    ...current,
+                    ...nextOpenState,
+                }),
+            );
+        }
+
+        return openedCount;
+    }
+
+    private openHeadersWithPendingTextAnswers() {
+        return this.openHeadersByPredicate(
+            (header: any) =>
+                this.headerHasPendingTextAnswer(
+                    header,
+                ),
+        );
+    }
+
+    private openHeadersWithAnswerErrors(
+        errors: Record<string, string>,
+    ) {
+        return this.openHeadersByPredicate(
+            (header: any) =>
+                this.headerHasAnswerError(
+                    header,
+                    errors,
+                ),
+        );
     }
 
     isTextAnswer(
