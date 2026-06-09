@@ -834,6 +834,25 @@ export class AuditDashboardService {
     );
   }
 
+  saveInternalAuditCarryForwardComment(
+    assessmentId: number,
+    annexureId: number,
+    employeeId: number,
+    comment: string,
+  ) {
+
+    return this.http.post<any>(
+
+      `${this.config.apiUrl}/internal-audit/${assessmentId}/carry-forward/${annexureId}/comment`,
+
+      {
+        employee_id:
+          employeeId,
+        comment,
+      },
+    );
+  }
+
   getInternalAuditAccountSampling(
     assessmentId: number,
     categoryId: number,

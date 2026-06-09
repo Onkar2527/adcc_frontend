@@ -103,6 +103,9 @@ export class AssessmentWorkspaceComponent implements OnInit {
     carryForwardLoading =
         signal(false);
 
+    savingCarryForwardId =
+        signal<number | null>(null);
+
     remarks =
         signal<any>(null);
 
@@ -806,6 +809,94 @@ export class AssessmentWorkspaceComponent implements OnInit {
             });
     }
 
+    saveCarryForwardComment(
+        point: any,
+    ) {
+        const assessmentId =
+            Number(
+                this.overview()?.id
+                || this.route.snapshot.paramMap.get(
+                    'assessmentId',
+                )
+                || 0,
+            );
+
+        const annexureId =
+            Number(point?.id || 0);
+
+        if (
+            !assessmentId
+            ||
+            !annexureId
+        ) {
+            this.notification.error(
+                'Unable to identify carry-forward point.',
+            );
+            return;
+        }
+
+        if (
+            this.savingCarryForwardId()
+        ) {
+            return;
+        }
+
+        this.savingCarryForwardId.set(
+            annexureId,
+        );
+
+        this.service
+            .saveInternalAuditCarryForwardComment(
+                assessmentId,
+                annexureId,
+                this.employeeId(),
+                point.audit_comment || '',
+            )
+            .subscribe({
+                next: (res: any) => {
+                    this.savingCarryForwardId.set(
+                        null,
+                    );
+                    const saved =
+                        res?.point || {};
+
+                    this.carryForward.update(
+                        (points) =>
+                            points.map(
+                                (item) =>
+                                    Number(item.id) === annexureId
+                                        ? {
+                                            ...item,
+                                            audit_comment:
+                                                saved.audit_comment
+                                                ?? point.audit_comment
+                                                ?? '',
+                                            audit_status_id:
+                                                Number(saved.audit_status_id || 1),
+                                        }
+                                        : item,
+                            ),
+                    );
+                    this.notification.success(
+                        res?.message
+                        || 'Carry-forward comment saved successfully.',
+                    );
+                    this.loadMenu(
+                        assessmentId,
+                    );
+                },
+                error: (err) => {
+                    this.savingCarryForwardId.set(
+                        null,
+                    );
+                    this.notification.error(
+                        err?.error?.message
+                        || 'Unable to save carry-forward comment.',
+                    );
+                },
+            });
+    }
+
     submitForReview() {
 
         const assessment =
@@ -900,6 +991,34 @@ export class AssessmentWorkspaceComponent implements OnInit {
             issue?.type === 'executive_summary'
         ) {
             this.openExecutiveSummary();
+            return;
+        }
+
+        if (
+            issue?.type === 'carry_forward'
+        ) {
+            this.selectedView.set(
+                'carry-forward',
+            );
+            this.selectedCategoryId.set(
+                null,
+            );
+            this.router.navigate(
+                [],
+                {
+                    relativeTo:
+                        this.route,
+                    queryParams: {
+                        view:
+                            'carry-forward',
+                        categoryId:
+                            null,
+                    },
+                    queryParamsHandling:
+                        'merge',
+                },
+            );
+            this.loadCarryForward();
             return;
         }
 

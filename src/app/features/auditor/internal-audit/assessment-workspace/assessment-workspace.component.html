@@ -487,9 +487,12 @@
                 <th>Path</th>
                 <th>Question</th>
                 <th>Answer</th>
-                <th>Auditor Comment</th>
+                <th>Previous Audit Comment</th>
                 <th>Compliance Response</th>
                 <th>Reviewer Comment</th>
+                <th>Current Audit Comment</th>
+                <th>Status</th>
+                <th>Action</th>
               </tr>
             </thead>
             <tbody>
@@ -502,6 +505,32 @@
                 <td>{{ point.data?.old_audit_comment || '-' }}</td>
                 <td>{{ point.data?.old_audit_compliance || '-' }}</td>
                 <td>{{ point.data?.old_compliance_reviewer_comment || '-' }}</td>
+                <td class="carry-forward-comment-cell">
+                  <textarea
+                    class="carry-forward-comment"
+                    rows="2"
+                    placeholder="Audit comment"
+                    [(ngModel)]="point.audit_comment"
+                  ></textarea>
+                </td>
+                <td>
+                  <p-tag
+                    [value]="point.audit_comment?.trim() ? 'Saved' : 'Pending'"
+                    [severity]="point.audit_comment?.trim() ? 'success' : 'warn'"
+                  ></p-tag>
+                </td>
+                <td>
+                  <button
+                    pButton
+                    type="button"
+                    icon="pi pi-save"
+                    label="Save"
+                    size="small"
+                    [loading]="savingCarryForwardId() === point.id"
+                    [disabled]="!!savingCarryForwardId() && savingCarryForwardId() !== point.id"
+                    (click)="saveCarryForwardComment(point)"
+                  ></button>
+                </td>
               </tr>
             </tbody>
           </table>

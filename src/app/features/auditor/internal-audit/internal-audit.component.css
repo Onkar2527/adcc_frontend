@@ -486,6 +486,29 @@
     white-space: normal;
 }
 
+.carry-forward-comment-cell {
+    min-width: 16rem !important;
+}
+
+.carry-forward-comment {
+    width: 100%;
+    min-height: 3rem;
+    padding: .45rem .55rem;
+    border: 1px solid var(--surface-300);
+    border-radius: .35rem;
+    background: #ffffff;
+    color: var(--text-color);
+    font: inherit;
+    line-height: 1.35;
+    resize: vertical;
+}
+
+.carry-forward-comment:focus {
+    outline: 0;
+    border-color: #1f5f93;
+    box-shadow: 0 0 0 1px #1f5f93;
+}
+
 .workspace-empty {
     display: flex;
     align-items: center;
