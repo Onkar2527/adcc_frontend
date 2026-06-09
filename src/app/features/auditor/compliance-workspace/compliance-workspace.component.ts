@@ -9,6 +9,7 @@ import {
     inject,
     signal,
 } from '@angular/core';
+import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { forkJoin } from 'rxjs';
 import { ConfirmationService } from 'primeng/api';
@@ -51,6 +52,9 @@ export class ComplianceWorkspaceComponent implements OnInit {
 
     private confirmation =
         inject(ConfirmationService);
+
+    private router =
+        inject(Router);
 
     loadingQueue =
         signal(false);
@@ -186,6 +190,28 @@ export class ComplianceWorkspaceComponent implements OnInit {
         this.submissionPreview.set(null);
         this.navService.clear();
         this.loadQueue();
+    }
+
+    viewExecutiveSummary() {
+        const assessmentId =
+            Number(
+                this.detail()?.overview?.id
+                || this.selected()?.id
+                || 0,
+            );
+
+        if (!assessmentId) {
+            return;
+        }
+
+        this.router.navigate([
+            '/auditor/internal-audit/executive-summary',
+            assessmentId,
+        ], {
+            queryParams: {
+                mode: 'compliance-view',
+            },
+        });
     }
 
     isReCompliance() {

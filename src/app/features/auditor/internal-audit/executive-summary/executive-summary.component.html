@@ -125,6 +125,7 @@
                   pInputText
                   [ngModel]="i === 8 && item.value ? (item.value | date: 'yyyy-MM-dd') : item.value"
                   (ngModelChange)="item.value = $event"
+                  [disabled]="isReviewMode || viewOnlyModeFromRoute"
                   class="w-full"
                 />
               </ng-container>
@@ -167,7 +168,7 @@
   </div>
   <div class="col-12 flex justify-content-center mt-4">
     <button
-      *ngIf="!isReviewMode"
+      *ngIf="!isReviewMode && !viewOnlyModeFromRoute"
       pButton
       type="button"
       label="Save Basic Info"
@@ -432,7 +433,7 @@
 
       <div class="flex justify-content-center mt-4 gap-2">
         <button
-          *ngIf="!isReviewMode"
+          *ngIf="!isReviewMode && !viewOnlyModeFromRoute"
           pButton
           type="button"
           label="Save Accounts"

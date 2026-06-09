@@ -99,6 +99,7 @@ export class ExecutiveSummaryComponent
     summary: any = null;
     user: any = null;
     reviewModeFromRoute = false;
+    viewOnlyModeFromRoute = false;
 
     summary_detail: any[] = [];
 
@@ -114,9 +115,10 @@ export class ExecutiveSummaryComponent
         const roleText =
             String(this.user?.role || this.user?.role_name || this.user?.designation || '').toLowerCase();
 
-        return this.reviewModeFromRoute
+        return !this.viewOnlyModeFromRoute
+            && (this.reviewModeFromRoute
             || ['3', '4'].includes(userType)
-            || roleText.includes('reviewer');
+            || roleText.includes('reviewer'));
     }
 
     /** Show review columns whenever this screen is opened in reviewer mode. */
@@ -125,13 +127,18 @@ export class ExecutiveSummaryComponent
     }
 
     get shouldShowReviewerFeedback(): boolean {
-        return !this.isReviewMode
+        return !this.viewOnlyModeFromRoute
+            && !this.isReviewMode
             && this.financialPositionData.some(
                 (row: any) => !row.isHeader && this.hasExecutiveReviewFeedback(row),
             );
     }
 
     get backButtonLabel(): string {
+        if (this.viewOnlyModeFromRoute) {
+            return 'Back to Compliance';
+        }
+
         return this.reviewModeFromRoute
             ? 'Back to Review'
             : 'Back to Menu';
@@ -166,8 +173,14 @@ export class ExecutiveSummaryComponent
         this.user =
             JSON.parse(localStorage.getItem('user') || '{}');
 
+        const mode =
+            this.route.snapshot.queryParamMap.get('mode');
+
         this.reviewModeFromRoute =
-            this.route.snapshot.queryParamMap.get('mode') === 'reviewer';
+            mode === 'reviewer';
+
+        this.viewOnlyModeFromRoute =
+            mode === 'compliance-view';
 
         this.assessmentId =
             Number(
@@ -293,7 +306,8 @@ export class ExecutiveSummaryComponent
     }
 
     isExecutiveAmountReadOnly(row: any): boolean {
-        return this.isReviewMode
+        return this.viewOnlyModeFromRoute
+            || this.isReviewMode
             || (
                 this.isExecutiveReAuditMode()
                 && Number(row?.review_action || 0) !== 3
@@ -862,6 +876,15 @@ export class ExecutiveSummaryComponent
     }
 
     backToDashboard() {
+        if (
+            this.viewOnlyModeFromRoute
+        ) {
+            this.router.navigate([
+                '/auditor/compliance',
+            ]);
+            return;
+        }
+
         if (
             this.reviewModeFromRoute
         ) {

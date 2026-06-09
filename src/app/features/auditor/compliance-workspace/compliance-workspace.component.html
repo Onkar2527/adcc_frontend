@@ -82,7 +82,16 @@
                 </p>
             </div>
 
-            <div class="flex gap-2">
+            <div class="toolbar-actions">
+                <button
+                    pButton
+                    type="button"
+                    label="View Executive Summary"
+                    icon="pi pi-file-edit"
+                    severity="info"
+                    (click)="viewExecutiveSummary()"
+                ></button>
+
                 <button
                     pButton
                     type="button"

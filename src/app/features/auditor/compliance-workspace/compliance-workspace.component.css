@@ -101,6 +101,29 @@
     flex: 1;
 }
 
+.detail-toolbar > .toolbar-actions {
+    flex: 0 0 auto;
+}
+
+.toolbar-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    gap: .45rem;
+}
+
+:host ::ng-deep .detail-toolbar .toolbar-actions .p-button {
+    min-height: 2.35rem;
+    padding: .48rem .72rem;
+    font-size: .88rem;
+    line-height: 1.1;
+}
+
+:host ::ng-deep .detail-toolbar .toolbar-actions .p-button-label {
+    white-space: nowrap;
+}
+
 .compliance-metrics {
     display: grid;
     grid-template-columns: repeat(3, minmax(8rem, 1fr));
