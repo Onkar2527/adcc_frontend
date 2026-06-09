@@ -296,6 +296,63 @@
         </div>
       </div>
 
+      <div class="review-filter-panel">
+        <div>
+          <strong>{{ reviewFilterLabel() }}</strong>
+          <small>
+            Showing {{ filteredReviewAnswers().length }} of {{ allReviewAnswers().length }} question(s)
+          </small>
+        </div>
+
+        <div class="review-filter-chips">
+          <button
+            type="button"
+            class="review-filter-chip"
+            [class.active]="reviewFilter() === 'all'"
+            (click)="reviewFilter.set('all')"
+          >
+            All <span>{{ reviewFilterCount('all') }}</span>
+          </button>
+
+          <button
+            type="button"
+            class="review-filter-chip"
+            [class.active]="reviewFilter() === 'pending'"
+            (click)="reviewFilter.set('pending')"
+          >
+            Pending <span>{{ reviewFilterCount('pending') }}</span>
+          </button>
+
+          <button
+            type="button"
+            class="review-filter-chip danger"
+            [class.active]="reviewFilter() === 'highRisk'"
+            (click)="reviewFilter.set('highRisk')"
+          >
+            High Risk <span>{{ reviewFilterCount('highRisk') }}</span>
+          </button>
+
+          <button
+            type="button"
+            class="review-filter-chip warning"
+            [class.active]="reviewFilter() === 'rework'"
+            (click)="reviewFilter.set('rework')"
+          >
+            {{ isComplianceReview() ? 'Re-Compliance' : 'Re-Audit' }}
+            <span>{{ reviewFilterCount('rework') }}</span>
+          </button>
+
+          <button
+            type="button"
+            class="review-filter-chip success"
+            [class.active]="reviewFilter() === 'accepted'"
+            (click)="reviewFilter.set('accepted')"
+          >
+            Accepted <span>{{ reviewFilterCount('accepted') }}</span>
+          </button>
+        </div>
+      </div>
+
       <div class="bulk-review-actions">
         <div>
           <strong>Review Actions</strong>
@@ -341,6 +398,10 @@
       <div *ngIf="isComplianceReview()" class="review-key">
         <span class="key-red"></span>
         Review the Manager response for each compliance-required point.
+      </div>
+
+      <div *ngIf="!reviewAnswerGroups().length" class="review-filter-empty">
+        No questions found for this filter.
       </div>
 
       <ng-container *ngFor="let group of reviewAnswerGroups()">

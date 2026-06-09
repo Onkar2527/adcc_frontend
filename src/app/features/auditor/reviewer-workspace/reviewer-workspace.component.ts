@@ -133,6 +133,9 @@ export class ReviewerWorkspaceComponent implements OnInit {
 
     remarkMessage = '';
 
+    reviewFilter =
+        signal<'all' | 'pending' | 'highRisk' | 'rework' | 'accepted'>('all');
+
     dashboardUnits = computed(() => {
         let rows =
             this.assessments()
@@ -248,7 +251,7 @@ export class ReviewerWorkspaceComponent implements OnInit {
 
     reviewAnswerGroups = computed(() =>
         this.groupReviewAnswers(
-            this.detail()?.answers || [],
+            this.filteredReviewAnswers(),
         ),
     );
 
@@ -299,6 +302,7 @@ export class ReviewerWorkspaceComponent implements OnInit {
     openAssessment(
         assessment: any,
     ) {
+        this.reviewFilter.set('all');
         this.showRemarksPanel.set(false);
         this.selected.set(
             assessment,
@@ -356,6 +360,7 @@ export class ReviewerWorkspaceComponent implements OnInit {
     }
 
     closeAssessment() {
+        this.reviewFilter.set('all');
         this.showRemarksPanel.set(false);
         this.selected.set(null);
         this.detail.set(null);
@@ -553,6 +558,160 @@ export class ReviewerWorkspaceComponent implements OnInit {
                     ),
             )
             .length;
+    }
+
+    allReviewAnswers() {
+        return this.detail()?.answers || [];
+    }
+
+    filteredReviewAnswers() {
+        const answers =
+            this.allReviewAnswers();
+        const filter =
+            this.reviewFilter();
+
+        if (filter === 'all') {
+            return answers;
+        }
+
+        return answers.filter(
+            (answer: any) =>
+                this.answerMatchesReviewFilter(
+                    answer,
+                    filter,
+                ),
+        );
+    }
+
+    reviewFilterCount(
+        filter: 'all' | 'pending' | 'highRisk' | 'rework' | 'accepted',
+    ) {
+        const answers =
+            this.allReviewAnswers();
+
+        if (filter === 'all') {
+            return answers.length;
+        }
+
+        return answers.filter(
+            (answer: any) =>
+                this.answerMatchesReviewFilter(
+                    answer,
+                    filter,
+                ),
+        ).length;
+    }
+
+    reviewFilterLabel() {
+        const labels: Record<string, string> = {
+            all: 'All observations',
+            pending: 'Pending observations',
+            highRisk: 'High risk observations',
+            rework: this.isComplianceReview()
+                ? 'Re-compliance needed'
+                : 'Re-audit needed',
+            accepted: 'Accepted observations',
+        };
+
+        return labels[this.reviewFilter()] || 'Observations';
+    }
+
+    private answerMatchesReviewFilter(
+        answer: any,
+        filter: 'pending' | 'highRisk' | 'rework' | 'accepted',
+    ) {
+        const answerStatus =
+            Number(
+                this.reviewStatus(answer) || 0,
+            );
+
+        const annexureRows =
+            answer?.annexure_rows || [];
+
+        const hasAnnexureStatus =
+            (matcher: (status: number) => boolean) =>
+                annexureRows.some(
+                    (row: any) =>
+                        matcher(
+                            Number(
+                                this.reviewStatus(row) || 0,
+                            ),
+                        ),
+                );
+
+        if (filter === 'pending') {
+            const pendingStatuses =
+                [
+                    2,
+                    3,
+                    ...(this.isComplianceReview()
+                        ? [5]
+                        : []),
+                ];
+
+            return !pendingStatuses.includes(answerStatus)
+                || hasAnnexureStatus(
+                    (status) =>
+                        !pendingStatuses.includes(status),
+                );
+        }
+
+        if (filter === 'rework') {
+            return answerStatus === 3
+                || hasAnnexureStatus(
+                    (status) =>
+                        status === 3,
+                );
+        }
+
+        if (filter === 'accepted') {
+            return answerStatus === 2
+                || hasAnnexureStatus(
+                    (status) =>
+                        status === 2,
+                );
+        }
+
+        return this.isHighRiskObservation(answer);
+    }
+
+    private isHighRiskObservation(
+        answer: any,
+    ) {
+        const rows =
+            [
+                answer,
+                ...(answer?.annexure_rows || []),
+            ];
+
+        return rows.some(
+            (row: any) =>
+                this.riskText(row)
+                    .includes('high risk'),
+        );
+    }
+
+    private riskText(
+        row: any,
+    ) {
+        return [
+            row?.business_risk,
+            row?.business_risk_name,
+            row?.business_risk_label,
+            row?.control_risk,
+            row?.control_risk_name,
+            row?.control_risk_label,
+            row?.risk_type,
+            row?.risk_type_name,
+            row?.risk_type_label,
+        ]
+            .filter(
+                (value) =>
+                    value !== null
+                    && value !== undefined,
+            )
+            .join(' ')
+            .toLowerCase();
     }
 
     hasAccountDetails(

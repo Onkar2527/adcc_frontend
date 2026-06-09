@@ -93,6 +93,76 @@
     background: var(--surface-50);
 }
 
+.review-filter-panel {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: .75rem;
+    margin-bottom: 1rem;
+    padding: .7rem .75rem;
+    border: 1px solid var(--surface-border);
+    border-radius: .4rem;
+    background: var(--surface-0);
+}
+
+.review-filter-panel strong,
+.review-filter-panel small {
+    display: block;
+}
+
+.review-filter-panel small {
+    margin-top: .15rem;
+    color: var(--text-color-secondary);
+}
+
+.review-filter-chips {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: .4rem;
+}
+
+.review-filter-chip {
+    min-height: 2rem;
+    padding: .35rem .6rem;
+    border: 1px solid var(--surface-border);
+    border-radius: .35rem;
+    background: var(--surface-50);
+    color: var(--text-color);
+    font-size: .84rem;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.review-filter-chip span {
+    margin-left: .35rem;
+    color: var(--text-color-secondary);
+}
+
+.review-filter-chip.active {
+    border-color: var(--primary-color);
+    background: var(--primary-50);
+    color: var(--primary-color);
+}
+
+.review-filter-chip.danger.active {
+    border-color: var(--red-300);
+    background: var(--red-50);
+    color: var(--red-700);
+}
+
+.review-filter-chip.warning.active {
+    border-color: var(--orange-300);
+    background: var(--orange-50);
+    color: var(--orange-800);
+}
+
+.review-filter-chip.success.active {
+    border-color: var(--green-300);
+    background: var(--green-50);
+    color: var(--green-700);
+}
+
 .bulk-review-actions strong {
     display: block;
     color: var(--text-color);
@@ -123,6 +193,16 @@
     color: var(--orange-800);
     font-size: .88rem;
     font-weight: 700;
+}
+
+.review-filter-empty {
+    margin-bottom: 1rem;
+    padding: 1.25rem;
+    border: 1px dashed var(--surface-border);
+    border-radius: .4rem;
+    color: var(--text-color-secondary);
+    text-align: center;
+    background: var(--surface-50);
 }
 
 .review-metrics div {
