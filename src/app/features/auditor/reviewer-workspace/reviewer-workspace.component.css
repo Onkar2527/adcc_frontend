@@ -98,69 +98,148 @@
     align-items: center;
     justify-content: space-between;
     gap: .75rem;
-    margin-bottom: 1rem;
-    padding: .7rem .75rem;
+    margin-bottom: 1.25rem;
+    padding: 0.85rem 1.25rem;
     border: 1px solid var(--surface-border);
-    border-radius: .4rem;
-    background: var(--surface-0);
+    border-radius: .75rem;
+    background: var(--surface-card);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
 }
 
-.review-filter-panel strong,
+.review-filter-panel strong {
+    display: block;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--text-color);
+}
+
 .review-filter-panel small {
     display: block;
-}
-
-.review-filter-panel small {
-    margin-top: .15rem;
+    margin-top: .2rem;
     color: var(--text-color-secondary);
+    font-size: 0.825rem;
 }
 
 .review-filter-chips {
     display: flex;
     flex-wrap: wrap;
     justify-content: flex-end;
-    gap: .4rem;
+    gap: .5rem;
 }
 
 .review-filter-chip {
-    min-height: 2rem;
-    padding: .35rem .6rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    min-height: 2.2rem;
+    padding: 0.35rem 0.8rem;
     border: 1px solid var(--surface-border);
-    border-radius: .35rem;
+    border-radius: 2rem;
     background: var(--surface-50);
     color: var(--text-color);
     font-size: .84rem;
     font-weight: 700;
     cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.review-filter-chip:hover {
+    background: var(--surface-100);
+    border-color: var(--surface-300);
+    transform: translateY(-1px);
 }
 
 .review-filter-chip span {
-    margin-left: .35rem;
-    color: var(--text-color-secondary);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 1.4rem;
+    height: 1.4rem;
+    padding: 0 0.4rem;
+    border-radius: 999px;
+    background: var(--surface-200);
+    color: var(--text-color);
+    font-size: .75rem;
+    font-weight: 800;
+    transition: all 0.2s ease;
 }
 
 .review-filter-chip.active {
     border-color: var(--primary-color);
     background: var(--primary-50);
     color: var(--primary-color);
+    box-shadow: 0 0 0 1px var(--primary-color);
+}
+.review-filter-chip.active span {
+    background: var(--primary-color);
+    color: var(--primary-color-text);
 }
 
 .review-filter-chip.danger.active {
-    border-color: var(--red-300);
+    border-color: var(--red-500);
     background: var(--red-50);
     color: var(--red-700);
+    box-shadow: 0 0 0 1px var(--red-500);
+}
+.review-filter-chip.danger.active span {
+    background: var(--red-600);
+    color: #ffffff;
 }
 
+.review-filter-chip.warning {
+    border-color: var(--orange-200);
+    background: var(--surface-0);
+}
+.review-filter-chip.warning span {
+    background: var(--orange-100);
+    color: var(--orange-800);
+}
 .review-filter-chip.warning.active {
-    border-color: var(--orange-300);
+    border-color: var(--orange-500);
     background: var(--orange-50);
     color: var(--orange-800);
+    box-shadow: 0 0 0 1px var(--orange-500);
+}
+.review-filter-chip.warning.active span {
+    background: var(--orange-600);
+    color: #ffffff;
+}
+
+/* Attract user attention when Re-Compliance count is > 0 */
+.review-filter-chip.warning.warning-has-count {
+    border-color: var(--orange-400);
+    background: var(--orange-50);
+    box-shadow: 0 0 8px rgba(249, 115, 22, 0.2);
+    animation: re-compliance-glow 2.5s infinite ease-in-out;
+}
+.review-filter-chip.warning.warning-has-count span {
+    background: var(--orange-500);
+    color: #ffffff;
+}
+.review-filter-chip.warning.warning-has-count.active {
+    box-shadow: 0 0 0 2px var(--orange-500);
+}
+
+@keyframes re-compliance-glow {
+    0%, 100% {
+        box-shadow: 0 0 6px rgba(249, 115, 22, 0.2);
+        transform: scale(1);
+    }
+    50% {
+        box-shadow: 0 0 12px rgba(249, 115, 22, 0.45);
+        transform: scale(1.02);
+    }
 }
 
 .review-filter-chip.success.active {
-    border-color: var(--green-300);
+    border-color: var(--green-500);
     background: var(--green-50);
     color: var(--green-700);
+    box-shadow: 0 0 0 1px var(--green-500);
+}
+.review-filter-chip.success.active span {
+    background: var(--green-600);
+    color: #ffffff;
 }
 
 .bulk-review-actions strong {
@@ -257,6 +336,53 @@
 
 .answer-row.compliance-answer h4 {
     color: var(--red-700);
+}
+
+/* Re-compliance needed row styling */
+.answer-row.re-compliance-needed-row {
+    background: var(--red-50);
+    border: 1px solid var(--red-300);
+    border-left: .35rem solid var(--red-600);
+    box-shadow: 0 2px 8px rgba(239, 68, 68, 0.08);
+}
+
+.answer-row.re-compliance-needed-row h4 {
+    color: var(--red-900);
+}
+
+.answer-row.re-compliance-needed-row .review-action {
+    border-top-color: var(--red-200);
+}
+
+/* Evidence button highlighting for re-compliance needed rows */
+.answer-row.re-compliance-needed-row .evidence-actions .p-button {
+    background: var(--red-100) !important;
+    border-color: var(--red-300) !important;
+    color: var(--red-700) !important;
+}
+
+.answer-row.re-compliance-needed-row .evidence-actions .p-button:hover {
+    background: var(--red-200) !important;
+    border-color: var(--red-400) !important;
+    color: var(--red-800) !important;
+}
+
+/* Re-compliance needed annexure row styling */
+.annexure-review-table tr.re-compliance-needed-tr td {
+    background-color: var(--red-50) !important;
+    border-bottom-color: var(--red-200) !important;
+}
+
+.annexure-review-table tr.re-compliance-needed-tr .annexure-evidence-actions .p-button {
+    background: var(--red-100) !important;
+    border-color: var(--red-300) !important;
+    color: var(--red-700) !important;
+}
+
+.annexure-review-table tr.re-compliance-needed-tr .annexure-evidence-actions .p-button:hover {
+    background: var(--red-200) !important;
+    border-color: var(--red-400) !important;
+    color: var(--red-800) !important;
 }
 
 .account-question-group {
