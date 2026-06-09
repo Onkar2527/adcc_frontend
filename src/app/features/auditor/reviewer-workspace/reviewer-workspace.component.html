@@ -24,7 +24,7 @@
   <app-audit-unit-dashboard
     *ngIf="!selected()"
     eyebrow="Review"
-    title="Reviewer Workspace"
+    [title]="'Reviewer Workspace'"
     subtitle="Select an assigned audit unit to review audit observations or compliance responses"
     panelTitle="Pending Reviews"
     emptyTitle="No assessment is pending for review"
