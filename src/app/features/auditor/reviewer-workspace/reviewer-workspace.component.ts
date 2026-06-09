@@ -93,6 +93,9 @@ export class ReviewerWorkspaceComponent implements OnInit {
     detail =
         signal<any>(null);
 
+    annexureSavingQuestionId =
+        signal<number | null>(null);
+
     error =
         signal('');
 
@@ -282,6 +285,7 @@ export class ReviewerWorkspaceComponent implements OnInit {
         request
             .subscribe({
                 next: (res: any) => {
+                    res = this.initTempActions(res);
                     this.detail.set(res);
                     this.navService.setAssessmentMenus(
                         Number(assessment.id),
@@ -706,6 +710,123 @@ export class ReviewerWorkspaceComponent implements OnInit {
         });
     }
 
+    private initTempActions(res: any) {
+        if (!res || !res.answers) return res;
+        res.answers.forEach((answer: any) => {
+            if (answer.annexure_rows) {
+                answer.annexure_rows.forEach((row: any) => {
+                    row.temp_action = this.reviewStatus(row) || '';
+                    row.original_action = row.temp_action;
+                    row.original_comment = this.reviewComment(row) || '';
+                });
+            }
+        });
+        return res;
+    }
+
+    hasReviewableAnnexureRows(
+        answer: any,
+    ): boolean {
+        return (answer.annexure_rows || []).length > 0;
+    }
+
+    selectAcceptForAllAnnexureRows(
+        answer: any,
+    ) {
+        if (answer.annexure_rows) {
+            answer.annexure_rows.forEach((row: any) => {
+                row.temp_action = 2;
+            });
+        }
+    }
+
+    saveAllAnnexureActions(
+        answer: any,
+    ) {
+        const assessmentId =
+            Number(
+                this.detail()?.overview?.id || 0,
+            );
+        if (
+            !assessmentId
+        ) {
+            return;
+        }
+
+        const rowsToSave = (answer.annexure_rows || []).filter(
+            (row: any) => {
+                const actionChanged = String(row.temp_action) !== String(row.original_action);
+                const commentChanged = String(this.reviewComment(row)).trim() !== String(row.original_comment).trim();
+                return actionChanged || commentChanged;
+            }
+        );
+
+        if (
+            rowsToSave.length === 0
+        ) {
+            this.notification.info(
+                'No changes to save in annexure rows.',
+            );
+            return;
+        }
+
+        // Validate that all modified rows have a selected action (2, 3, or 5)
+        for (const row of rowsToSave) {
+            const action = Number(row.temp_action);
+            if (
+                ![2, 3, 5].includes(action)
+            ) {
+                this.notification.error(
+                    'Please select a valid action (Accept, Reject, etc.) for all modified rows.',
+                );
+                return;
+            }
+        }
+
+        this.annexureSavingQuestionId.set(answer.id);
+
+        const requests = rowsToSave.map((row: any) => {
+            const action = Number(row.temp_action);
+            const comment = this.reviewComment(row);
+
+            return this.isComplianceReview()
+                ? this.service.saveReviewerComplianceAction(
+                    assessmentId,
+                    'annexure',
+                    Number(row.id),
+                    this.employeeId(),
+                    action,
+                    comment,
+                )
+                : this.service.saveReviewerAction(
+                    assessmentId,
+                    'annexure',
+                    Number(row.id),
+                    this.employeeId(),
+                    action,
+                    comment,
+                );
+        });
+
+        forkJoin(requests).subscribe({
+            next: () => {
+                this.notification.success(
+                    'All annexure review actions saved successfully.',
+                );
+                this.annexureSavingQuestionId.set(null);
+                this.reloadDetail(assessmentId, '');
+            },
+            error: (err) => {
+                this.annexureSavingQuestionId.set(null);
+                this.notification.error(
+                    err?.error?.message
+                    || 'Unable to save some review actions. Please try again.',
+                );
+                this.reloadDetail(assessmentId, '');
+            },
+        });
+    }
+
     saveAction(
         targetType: 'answer' | 'annexure',
         observation: any,
@@ -926,6 +1047,7 @@ export class ReviewerWorkspaceComponent implements OnInit {
         request
             .subscribe({
                 next: (res: any) => {
+                    res = this.initTempActions(res);
                     this.detail.set(res);
                     this.navService.setAssessmentMenus(
                         assessmentId,

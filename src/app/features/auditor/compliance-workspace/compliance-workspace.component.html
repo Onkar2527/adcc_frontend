@@ -361,9 +361,20 @@
                 </div>
 
                 <div *ngIf="answer.annexure_rows?.length" class="annexure-section">
-                    <div class="annexure-title">
-                        <span>Annexure Rows</span>
-                        <small>{{ answer.annexure_rows.length }} row(s)</small>
+                    <div class="annexure-title flex align-items-center justify-content-between mb-2">
+                        <div class="flex align-items-center gap-2">
+                            <span>Annexure Rows</span>
+                            <small>{{ answer.annexure_rows.length }} row(s)</small>
+                        </div>
+                        <button
+                            pButton
+                            type="button"
+                            label="Fill 'Complied' For All Rows"
+                            icon="pi pi-check-square"
+                            severity="secondary"
+                            class="p-button-sm"
+                            (click)="fillCompliedForAllAnnexureRows(answer)"
+                        ></button>
                     </div>
 
                     <div class="annexure-table-wrap">
@@ -378,7 +389,6 @@
                                     <th>Compliance Evidence</th>
                                     <th>Manager Response</th>
                                     <th>Status</th>
-                                    <th>Action</th>
                                 </tr>
                             </thead>
 
@@ -459,22 +469,20 @@
                                         ></p-tag>
                                         <span *ngIf="!responseRequired(row)">-</span>
                                     </td>
-
-                                    <td>
-                                        <button
-                                            *ngIf="responseRequired(row)"
-                                            pButton
-                                            type="button"
-                                            icon="pi pi-save"
-                                            severity="secondary"
-                                            title="Save annexure response"
-                                            [loading]="responseSaving()[actionKey('annexure', row.id)]"
-                                            (click)="saveResponse('annexure', row)"
-                                        ></button>
-                                    </td>
                                 </tr>
                             </tbody>
                         </table>
+                    </div>
+
+                    <div class="flex justify-content-end mt-3" *ngIf="hasSaveableAnnexureRows(answer)">
+                        <button
+                            pButton
+                            type="button"
+                            label="Save All Annexure Responses"
+                            icon="pi pi-save"
+                            [loading]="annexureSavingQuestionId() === answer.id"
+                            (click)="saveAllAnnexureRows(answer)"
+                        ></button>
                     </div>
                 </div>
             </article>

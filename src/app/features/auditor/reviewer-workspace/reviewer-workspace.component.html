@@ -454,8 +454,19 @@
 
         <div *ngIf="answer.annexure_rows?.length" class="annexure-review">
           <div class="annexure-title">
-            <span>Annexure Rows</span>
-            <small>{{ answer.annexure_rows.length }} row(s)</small>
+            <div class="flex align-items-center gap-2">
+              <span>Annexure Rows</span>
+              <small>{{ answer.annexure_rows.length }} row(s)</small>
+            </div>
+            <button
+              pButton
+              type="button"
+              label="Select Accept For All Rows"
+              icon="pi pi-check"
+              severity="secondary"
+              class="p-button-sm"
+              (click)="selectAcceptForAllAnnexureRows(answer)"
+            ></button>
           </div>
 
           <div class="annexure-review-table-wrap">
@@ -469,7 +480,7 @@
                   <th>Evidence</th>
                   <th>Reviewer Comment</th>
                   <th>Status</th>
-                  <th>Action</th>
+                  <th style="min-width: 150px;">Action</th>
                 </tr>
               </thead>
 
@@ -525,44 +536,27 @@
                     ></p-tag>
                   </td>
                   <td>
-                    <div class="annexure-row-review-actions">
-                      <button
-                        pButton
-                        type="button"
-                        icon="pi pi-check"
-                        severity="success"
-                        title="Accept annexure row"
-                        [loading]="actionSaving()[actionKey('annexure', row.id)]"
-                        (click)="saveAction('annexure', row, 2)"
-                      ></button>
-                      <button
-                        pButton
-                        type="button"
-                        icon="pi pi-times"
-                        severity="danger"
-                        [title]="
-                          isComplianceReview()
-                            ? 'Send annexure row for re-compliance'
-                            : 'Send annexure row for re-audit'
-                        "
-                        [loading]="actionSaving()[actionKey('annexure', row.id)]"
-                        (click)="saveAction('annexure', row, 3)"
-                      ></button>
-                      <button
-                        *ngIf="isComplianceReview()"
-                        pButton
-                        type="button"
-                        icon="pi pi-forward"
-                        severity="info"
-                        title="Carry forward annexure row"
-                        [loading]="actionSaving()[actionKey('annexure', row.id)]"
-                        (click)="saveAction('annexure', row, 5)"
-                      ></button>
-                    </div>
+                    <select class="answer-control" [(ngModel)]="row.temp_action" style="min-width: 140px; padding: 0.25rem;">
+                      <option value="">Select Action</option>
+                      <option [value]="2">Accept</option>
+                      <option [value]="3">{{ isComplianceReview() ? 'Re-Compliance' : 'Re-Audit' }}</option>
+                      <option [value]="5" *ngIf="isComplianceReview()">Carry Forward</option>
+                    </select>
                   </td>
                 </tr>
               </tbody>
             </table>
+          </div>
+
+          <div class="flex justify-content-end mt-3" *ngIf="hasReviewableAnnexureRows(answer)">
+            <button
+              pButton
+              type="button"
+              label="Save All Annexure Actions"
+              icon="pi pi-save"
+              [loading]="annexureSavingQuestionId() === answer.id"
+              (click)="saveAllAnnexureActions(answer)"
+            ></button>
           </div>
         </div>
       </article>

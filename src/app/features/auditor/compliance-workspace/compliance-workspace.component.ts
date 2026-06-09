@@ -10,6 +10,7 @@ import {
     signal,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { forkJoin } from 'rxjs';
 import { ConfirmationService } from 'primeng/api';
 import { ButtonModule } from 'primeng/button';
 import { SkeletonModule } from 'primeng/skeleton';
@@ -62,6 +63,9 @@ export class ComplianceWorkspaceComponent implements OnInit {
 
     uploadingEvidenceKey =
         signal('');
+
+    annexureSavingQuestionId =
+        signal<number | null>(null);
 
     assessments =
         signal<any[]>([]);
@@ -345,6 +349,113 @@ export class ComplianceWorkspaceComponent implements OnInit {
         }
 
         return false;
+    }
+
+    hasSaveableAnnexureRows(
+        answer: any,
+    ): boolean {
+        return (answer.annexure_rows || []).some(
+            (row: any) => this.responseRequired(row),
+        );
+    }
+
+    fillCompliedForAllAnnexureRows(
+        answer: any,
+    ) {
+        if (answer.annexure_rows) {
+            answer.annexure_rows.forEach((row: any) => {
+                if (this.responseRequired(row)) {
+                    row.compliance_response = 'Complied';
+                }
+            });
+        }
+    }
+
+    saveAllAnnexureRows(
+        answer: any,
+    ) {
+        const assessmentId =
+            Number(
+                this.detail()?.overview?.id || 0,
+            );
+        if (
+            !assessmentId
+        ) {
+            return;
+        }
+
+        const rowsToSave = (answer.annexure_rows || []).filter(
+            (row: any) =>
+                this.responseRequired(row) && this.hasEditedResponse(row),
+        );
+
+        if (
+            rowsToSave.length === 0
+        ) {
+            this.notification.info(
+                'No changes to save in annexure rows.',
+            );
+            return;
+        }
+
+        // Validate that all modified rows have a non-empty response
+        for (const row of rowsToSave) {
+            const response =
+                String(
+                    row.compliance_response || '',
+                ).trim();
+            if (
+                !response
+            ) {
+                this.notification.error(
+                    'Enter a compliance response for all edited rows before saving.',
+                );
+                return;
+            }
+        }
+
+        this.annexureSavingQuestionId.set(answer.id);
+
+        const requests = rowsToSave.map((row: any) => {
+            const response =
+                String(
+                    row.compliance_response || '',
+                ).trim();
+            return this.service.saveComplianceResponse(
+                assessmentId,
+                'annexure',
+                Number(row.id),
+                this.employeeId(),
+                response,
+            );
+        });
+
+        forkJoin(requests).subscribe({
+            next: () => {
+                rowsToSave.forEach((row: any) => {
+                    const response =
+                        String(
+                            row.compliance_response || '',
+                        ).trim();
+                    row.compliance_response = response;
+                    row._savedComplianceResponse = response;
+                });
+                this.refreshCounts();
+                this.annexureSavingQuestionId.set(null);
+                this.notification.success(
+                    'All annexure responses saved successfully.',
+                );
+                this.checkCompletion();
+            },
+            error: (err) => {
+                this.annexureSavingQuestionId.set(null);
+                this.notification.error(
+                    err?.error?.message
+                    || 'Unable to save some annexure responses. Please try again.',
+                );
+                this.loadDetail(assessmentId);
+            },
+        });
     }
 
     saveResponse(
