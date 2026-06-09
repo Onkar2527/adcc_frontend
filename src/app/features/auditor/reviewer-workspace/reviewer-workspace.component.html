@@ -335,6 +335,7 @@
           <button
             type="button"
             class="review-filter-chip warning"
+            [class.warning-has-count]="reviewFilterCount('rework') > 0"
             [class.active]="reviewFilter() === 'rework'"
             (click)="reviewFilter.set('rework')"
           >
@@ -500,6 +501,7 @@
         class="answer-row"
         [class.compliance-answer]="answer.is_compliance == 1"
         [class.answer-row--account]="group.isAccountGroup"
+        [class.re-compliance-needed-row]="reviewStatus(answer) === 3"
       >
         <div class="answer-head">
           <div class="answer-title-wrap">
@@ -656,7 +658,7 @@
                 pButton
                 type="button"
                 class="evidence-link"
-                icon="pi pi-paperclip"
+                icon="pi pi-eye"
                 severity="secondary"
                 title="View manager evidence"
                 (click)="viewEvidence(answer.compliance_evidence)"
@@ -729,7 +731,7 @@
               </thead>
 
               <tbody>
-                <tr *ngFor="let row of answer.annexure_rows">
+                <tr *ngFor="let row of answer.annexure_rows" [class.re-compliance-needed-tr]="reviewStatus(row) === 3">
                   <td *ngFor="let column of annexureColumns(answer); let ci = index">
                     {{ row.values?.[ci] || '-' }}
                   </td>
@@ -751,7 +753,7 @@
                         *ngIf="isComplianceReview() && row.compliance_evidence"
                         pButton
                         type="button"
-                        icon="pi pi-paperclip"
+                        icon="pi pi-eye"
                         severity="secondary"
                         title="View manager evidence"
                         (click)="viewEvidence(row.compliance_evidence)"
