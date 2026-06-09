@@ -1547,18 +1547,18 @@ export class CategoryAssessmentComponent
     annexureEntryGridTemplate(
         question: any,
     ) {
-        return `repeat(${this.annexureColumnCount(question)}, minmax(8rem, 1fr)) repeat(3, minmax(7.5rem, .8fr))`;
+        return `repeat(${this.annexureColumnCount(question)}, minmax(4rem, 1fr)) repeat(3, minmax(4rem, .8fr))`;
     }
 
     annexureEntryMinWidth(
         question: any,
     ) {
         return `${Math.max(
-            680,
+            380,
             (
                 this.annexureColumnCount(question)
                 + 3
-            ) * 124,
+            ) * 65,
         )}px`;
     }
 
@@ -1566,11 +1566,11 @@ export class CategoryAssessmentComponent
         question: any,
     ) {
         return `${Math.max(
-            760,
+            440,
             (
                 this.annexureColumnCount(question)
                 + 5
-            ) * 116,
+            ) * 60,
         )}px`;
     }
 

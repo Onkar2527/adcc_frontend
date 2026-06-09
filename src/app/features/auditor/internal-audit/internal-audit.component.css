@@ -1930,9 +1930,9 @@ textarea.answer-control1 {
 
 .annexure-data-table th,
 .annexure-data-table td {
-    min-width: 7rem;
-    max-width: 16rem;
-    padding: .28rem .38rem;
+    min-width: 3rem;
+    max-width: 7.5rem;
+    padding: .2rem .3rem;
     border-bottom: 1px solid var(--surface-200);
     border-right: 1px solid var(--surface-200);
     text-align: left;
@@ -1954,7 +1954,7 @@ textarea.answer-control1 {
     font-size: .64rem;
     font-weight: 800;
     text-transform: uppercase;
-    white-space: nowrap;
+    white-space: pre-wrap;
 }
 
 .annexure-data-table tbody tr:nth-child(even) {
