@@ -411,14 +411,47 @@
             No question is configured for this audit category.
         </div>
 
+        <div *ngIf="visibleQuestionSets(detail).length" class="category-question-actions">
+            <div>
+                <strong>Category Questions</strong>
+                <small>Apply defaults or save all headers in this category.</small>
+            </div>
+
+            <div class="category-question-action-buttons">
+                <button
+                    *ngIf="canApplyDefaults()"
+                    pButton
+                    type="button"
+                    icon="pi pi-check-square"
+                    label="Apply Defaults to All Headers"
+                    severity="secondary"
+                    [disabled]="savingAllHeaders()"
+                    (click)="selectDefaultAnswersForCategory()"
+                ></button>
+
+                <button
+                    pButton
+                    type="button"
+                    icon="pi pi-save"
+                    label="Save All Headers"
+                    [loading]="savingAllHeaders()"
+                    (click)="saveAllHeaders()"
+                ></button>
+            </div>
+        </div>
+
         <div class="question-set"
-            *ngFor="let set of (isAccountCategory(detail) && !detail.selected_account ? [] : detail.sets)">
+            *ngFor="let set of visibleQuestionSets(detail); let setIndex = index">
 
             <div class="question-set-title">
                 {{ set.name }}
             </div>
 
-            <p-accordion [multiple]="true" [value]="['0']">
+            <p-accordion
+                [multiple]="true"
+                [value]="openedHeaderValues(set, setIndex)"
+                (valueChange)="setOpenedHeaderValues(set, setIndex, $event)"
+            >
                 <p-accordion-panel *ngFor="let header of set.headers; let i = index" [value]="i.toString()">
                     <p-accordion-header>
                         <div class="flex flex-column md:flex-row md:align-items-center md:justify-content-between gap-3 w-full pr-3" (click)="$event.stopPropagation()">

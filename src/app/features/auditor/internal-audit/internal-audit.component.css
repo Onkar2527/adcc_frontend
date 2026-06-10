@@ -1091,6 +1091,42 @@
     border: 1px solid var(--surface-200);
 }
 
+.category-question-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: .75rem;
+    margin-bottom: .75rem;
+    padding: .72rem .85rem;
+    border: 1px solid var(--surface-200);
+    border-radius: .35rem;
+    background: var(--surface-card);
+}
+
+.category-question-actions strong {
+    display: block;
+    color: var(--text-color);
+}
+
+.category-question-actions small {
+    display: block;
+    margin-top: .15rem;
+    color: var(--text-color-secondary);
+}
+
+.category-question-action-buttons {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: .5rem;
+    flex-wrap: wrap;
+}
+
+:host ::ng-deep .category-question-action-buttons .p-button {
+    min-height: 2.2rem;
+    font-size: .86rem;
+}
+
 .question-set-title {
     margin-bottom: .62rem;
     font-size: .98rem;
