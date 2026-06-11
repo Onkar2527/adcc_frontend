@@ -1943,3 +1943,50 @@ export class ManageAccountsDataService {
 
 
 }
+
+@Injectable({ providedIn: 'root' })
+export class PolicyDocumentsService {
+  private http = inject(HttpClient);
+  private config = inject(APP_CONFIG);
+  private apiUrl = `${this.config.apiUrl}/policy-documents`;
+
+  findAll(): Observable<any[]> {
+    return this.http.get<any>(this.apiUrl).pipe(
+      map((res: any) => {
+        const data = res.data || res;
+        return Array.isArray(data) ? data : [];
+      })
+    );
+  }
+
+  findOne(id: number | string): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/${id}`).pipe(
+      map((res: any) => res.data || res)
+    );
+  }
+
+  create(formData: FormData): Observable<any> {
+    return this.http.post<any>(this.apiUrl, formData);
+  }
+
+  update(id: number | string, formData: FormData): Observable<any> {
+    return this.http.patch<any>(`${this.apiUrl}/${id}`, formData);
+  }
+
+  toggleStatus(id: number | string): Observable<any> {
+    return this.http.patch<any>(`${this.apiUrl}/${id}/status`, {});
+  }
+
+  remove(id: number | string): Observable<any> {
+    return this.http.delete<any>(`${this.apiUrl}/${id}`);
+  }
+
+  getNextCode(): Observable<{ success: boolean; code: string }> {
+    return this.http.get<{ success: boolean; code: string }>(`${this.apiUrl}/next-code`);
+  }
+
+  getViewUrl(id: number | string): string {
+    return `${this.apiUrl}/${id}/view`;
+  }
+}
+

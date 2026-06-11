@@ -105,6 +105,13 @@ export class AppMenu implements OnInit, OnDestroy {
                             routerLink: [
                                 '/admin/password-policy-master'
                             ]
+                        },
+                        {
+                            label: 'Policy Documents',
+                            icon: 'pi pi-fw pi-file',
+                            routerLink: [
+                                '/admin/policy-documents'
+                            ]
                         }
                     ]
                 },
