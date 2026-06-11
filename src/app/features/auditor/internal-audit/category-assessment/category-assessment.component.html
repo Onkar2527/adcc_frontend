@@ -577,8 +577,20 @@
                                     </label>
                                     
 
-                                    <textarea class="answer-control" rows="2" placeholder="Audit Comment"
-                                        [(ngModel)]="question.audit_comment"></textarea>
+                                     <div class="audit-comment-wrapper">
+                                         <textarea class="answer-control" rows="2" placeholder="Audit Comment"
+                                             [(ngModel)]="question.audit_comment"
+                                             (focus)="onCommentFocus(question)"
+                                             (blur)="onCommentBlur(question)"
+                                             (input)="onCommentInput(question)"></textarea>
+                                         <div *ngIf="question.showSuggestions && getFilteredSuggestions(question).length > 0" class="audit-comment-suggestions" role="listbox">
+                                             <button type="button" *ngFor="let sug of getFilteredSuggestions(question)"
+                                                 class="audit-comment-suggestion-item" role="option"
+                                                 (mousedown)="selectSuggestion(question, sug, $event)">
+                                                 {{ sug }}
+                                             </button>
+                                         </div>
+                                     </div>
                                 </div>
                             </div>
 
@@ -1028,8 +1040,20 @@
                                             </label>
                                            
 
-                                            <textarea class="answer-control" rows="2" placeholder="Audit Comment"
-                                                [(ngModel)]="subsetQuestion.audit_comment"></textarea>
+                                             <div class="audit-comment-wrapper">
+                                                 <textarea class="answer-control" rows="2" placeholder="Audit Comment"
+                                                     [(ngModel)]="subsetQuestion.audit_comment"
+                                                     (focus)="onCommentFocus(subsetQuestion)"
+                                                     (blur)="onCommentBlur(subsetQuestion)"
+                                                     (input)="onCommentInput(subsetQuestion)"></textarea>
+                                                 <div *ngIf="subsetQuestion.showSuggestions && getFilteredSuggestions(subsetQuestion).length > 0" class="audit-comment-suggestions" role="listbox">
+                                                     <button type="button" *ngFor="let sug of getFilteredSuggestions(subsetQuestion)"
+                                                         class="audit-comment-suggestion-item" role="option"
+                                                         (mousedown)="selectSuggestion(subsetQuestion, sug, $event)">
+                                                         {{ sug }}
+                                                     </button>
+                                                 </div>
+                                             </div>
                                         </div>
                                     </div>
 

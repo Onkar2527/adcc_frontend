@@ -586,6 +586,20 @@ export class CategoryAssessmentComponent
                     question.audit_comment =
                         question.answer?.audit_comment || '';
 
+                    question.suggestions_parsed = null;
+                    if (question.suggestions) {
+                        try {
+                            if (typeof question.suggestions === 'string') {
+                                question.suggestions_parsed = JSON.parse(question.suggestions);
+                            } else {
+                                question.suggestions_parsed = question.suggestions;
+                            }
+                        } catch (e) {
+                            console.error('Failed to parse suggestions JSON', question.suggestions, e);
+                        }
+                    }
+                    question.showSuggestions = false;
+
                     question.is_compliance =
                         Boolean(
                             Number(
@@ -1181,6 +1195,7 @@ export class CategoryAssessmentComponent
             const question
             of questions || []
         ) {
+            let applied = false;
             const defaultAnswer =
                 this.defaultAnswerValue(
                     question,
@@ -1191,6 +1206,20 @@ export class CategoryAssessmentComponent
             ) {
                 question.answer_value =
                     defaultAnswer;
+                applied = true;
+            }
+
+            if (
+                question.suggestions_parsed?.default
+                &&
+                !String(question.audit_comment || '').trim()
+            ) {
+                question.audit_comment =
+                    question.suggestions_parsed.default;
+                applied = true;
+            }
+
+            if (applied) {
                 appliedCount++;
             }
 
@@ -1213,6 +1242,52 @@ export class CategoryAssessmentComponent
         }
 
         return appliedCount;
+    }
+
+    onCommentFocus(question: any) {
+        if (question.suggestions_parsed) {
+            question.showSuggestions = true;
+            if (!String(question.audit_comment || '').trim() && question.suggestions_parsed.default) {
+                question.audit_comment = question.suggestions_parsed.default;
+            }
+        }
+    }
+
+    onCommentBlur(question: any) {
+        // Delay hiding suggestions to allow mousedown selection to process first
+        setTimeout(() => {
+            question.showSuggestions = false;
+            this.cdr.detectChanges();
+        }, 200);
+    }
+
+    onCommentInput(question: any) {
+        if (question.suggestions_parsed) {
+            question.showSuggestions = true;
+        }
+    }
+
+    selectSuggestion(question: any, suggestion: string, event?: MouseEvent) {
+        if (event) {
+            event.preventDefault();
+        }
+        question.audit_comment = suggestion;
+        question.showSuggestions = false;
+    }
+
+    getFilteredSuggestions(question: any): string[] {
+        if (!question.suggestions_parsed || !Array.isArray(question.suggestions_parsed.suggestions)) {
+            return [];
+        }
+        const suggestions = question.suggestions_parsed.suggestions;
+        const currentText = (question.audit_comment || '').toLowerCase().trim();
+        if (!currentText) {
+            return suggestions;
+        }
+        const filtered = suggestions.filter((s: string) => 
+            s.toLowerCase().includes(currentText)
+        );
+        return filtered.length > 0 ? filtered : suggestions;
     }
 
     getAnsweredCount(header: any): number {
