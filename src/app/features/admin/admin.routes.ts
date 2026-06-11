@@ -32,6 +32,8 @@ import { DepositAccountsComponent } from './manage-accounts/deposit-accounts/dep
 import { AdvanceAccountsComponent } from './manage-accounts/advance-accounts/advance-accounts.component';
 import { AdminDashboardPlaceholderComponent } from './admin-dashboard-placeholder.component';
 import { PolicyDocumentsComponent } from './policy-documents/policy-documents.component';
+import { AuditCalendarComponent } from './audit-calendar/audit-calendar.component';
+import { AuditFrequencyMasterComponent } from './audit-frequency-master/audit-frequency-master.component';
 
 
 export const ADMIN_ROUTES: Routes = [
@@ -69,4 +71,6 @@ export const ADMIN_ROUTES: Routes = [
     { path: 'deposit-accounts', component: DepositAccountsComponent },
     { path: 'advance-accounts', component: AdvanceAccountsComponent },
     { path: 'policy-documents', component: PolicyDocumentsComponent },
-];
+    { path: 'audit-calendar', component: AuditCalendarComponent },
+    { path: 'audit-frequency-master', component: AuditFrequencyMasterComponent },
+]; // Routes configuration for admin master features

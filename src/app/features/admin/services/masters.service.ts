@@ -1990,3 +1990,63 @@ export class PolicyDocumentsService {
   }
 }
 
+@Injectable({ providedIn: 'root' })
+export class AuditCalendarService {
+  private http = inject(HttpClient);
+  private config = inject(APP_CONFIG);
+  private apiUrl = `${this.config.apiUrl}/audit-calendar`;
+
+  findAll(): Observable<any[]> {
+    return this.http.get<any>(this.apiUrl).pipe(
+      map((res: any) => {
+        const data = res.data || res;
+        return Array.isArray(data) ? data : [];
+      })
+    );
+  }
+
+  findOne(id: number | string): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/${id}`).pipe(
+      map((res: any) => res.data || res)
+    );
+  }
+
+  getLookups(): Observable<{ units: any[]; schemes: any[]; auditors: any[] }> {
+    return this.http.get<any>(`${this.apiUrl}/lookups`).pipe(
+      map((res: any) => res.data || res)
+    );
+  }
+
+  create(data: any): Observable<any> {
+    return this.http.post<any>(this.apiUrl, data);
+  }
+
+  update(id: number | string, data: any): Observable<any> {
+    return this.http.patch<any>(`${this.apiUrl}/${id}`, data);
+  }
+
+  toggleStatus(id: number | string): Observable<any> {
+    return this.http.patch<any>(`${this.apiUrl}/${id}/status`, {});
+  }
+
+  remove(id: number | string): Observable<any> {
+    return this.http.delete<any>(`${this.apiUrl}/${id}`);
+  }
+
+  getSchedulingData(): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/scheduling`);
+  }
+
+  setFrequencies(frequencies: Record<string, number>): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/set-frequencies`, { frequencies });
+  }
+
+  getRiskFrequencies(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/risk-frequencies`);
+  }
+
+  updateRiskFrequencies(frequencies: { risk_type_id: number; frequency: number }[]): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/risk-frequencies`, { frequencies });
+  }
+}
+
