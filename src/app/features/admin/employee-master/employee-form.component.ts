@@ -17,7 +17,8 @@ import {
   EmployeeService,
   PasswordPolicyService,
   UnitsService,
-  UpdateEmployeeDto
+  UpdateEmployeeDto,
+  RegionMasterService
 } from '../services/masters.service';
 import { MessageService } from 'primeng/api';
 import { ValidationService } from '../../../core/services/validation/validation.service';
@@ -161,8 +162,32 @@ import { ValidationService } from '../../../core/services/validation/validation.
       </div>
     }
 
+    <!-- Row 5: Region -->
+    @if (showRegion()) {
+      <div class="grid">
+        <div class="col-12 md:col-6">
+          <app-select-field
+            label="Assigned Region"
+            [field]="regionName"
+            [options]="regionNameOptions()"
+            optionLabel="label"
+            optionValue="value"
+            [required]="true"
+            [error]="regionNameError()"
+          ></app-select-field>
+        </div>
+
+        <div class="col-12 md:col-6 flex align-items-center pt-4">
+          <app-checkbox-field
+            label="Is Active"
+            [field]="isActive"
+          ></app-checkbox-field>
+        </div>
+      </div>
+    }
+
     <!-- Row 6 -->
-    @if (!showAuditUnits()) {
+    @if (!showAuditUnits() && !showRegion()) {
       <div class="grid">
         <div class="col-12 md:col-6 flex align-items-center pt-2">
           <app-checkbox-field
@@ -195,6 +220,7 @@ export class EmployeeFormComponent {
   private messageService = inject(MessageService);
   private policyService = inject(PasswordPolicyService);
   private validationService = inject(ValidationService);
+  private regionService = inject(RegionMasterService);
   empCode = signal('');
   name = signal('');
   email = signal('');
@@ -204,8 +230,10 @@ export class EmployeeFormComponent {
   userTypeId = signal<number | null>(null);
   password = signal('');
   unitIds = signal<number[]>([]);
+  regionName = signal('');
   isActive = signal(true);
   units = signal<AuditUnit[]>([]);
+  regionOptions = signal<string[]>([]);
   saving = signal(false);
   isEdit = false;
   minLength = signal<number | null>(8);
@@ -224,12 +252,22 @@ export class EmployeeFormComponent {
     { label: 'Auditor', value: 2 },
     { label: 'Employee', value: 3 },
     { label: 'Reviewer', value: 4 },
-    { label: 'Top Level Management', value: 5 }
+    { label: 'Top Level Management', value: 5 },
+    { label: 'Division', value: 6 }
   ];
 
   showAuditUnits = computed(() => {
     const userTypeId = Number(this.userTypeId());
     return userTypeId === 2 || userTypeId === 4;
+  });
+
+  showRegion = computed(() => {
+    const userTypeId = Number(this.userTypeId());
+    return userTypeId === 6;
+  });
+
+  regionNameOptions = computed(() => {
+    return this.regionOptions().map(name => ({ label: name, value: name }));
   });
 
   empCodeError = computed(() =>
@@ -276,6 +314,12 @@ export class EmployeeFormComponent {
       : '',
   );
 
+  regionNameError = computed(() =>
+    this.showRegion() && !this.regionName().trim()
+      ? 'Select an assigned region'
+      : '',
+  );
+
   passwordHelperText = computed(() =>
     this.passwordError()
       ? ''
@@ -290,6 +334,7 @@ export class EmployeeFormComponent {
       && !this.genderError()
       && !this.userTypeError()
       && !this.unitIdsError()
+      && !this.regionNameError()
       && (
         this.isEdit
         || !!this.password().trim()
@@ -303,6 +348,7 @@ export class EmployeeFormComponent {
   }
   constructor() {
     this.loadUnits();
+    this.loadRegions();
     this.loadPolicy();
     const data = this.ref.data as Employee | null;
     if (data) {
@@ -315,6 +361,7 @@ export class EmployeeFormComponent {
       this.gender.set(data.gender || null);
       this.userTypeId.set(data.user_type_id ? Number(data.user_type_id) : null);
       this.unitIds.set(this.parseUnitIds(data.audit_unit_authority));
+      this.regionName.set(data.region_name || '');
       this.isActive.set(Number(data.is_active) === 1);
     }
   }
@@ -368,7 +415,12 @@ export class EmployeeFormComponent {
       unit_ids:
         this.showAuditUnits()
           ? this.unitIds()
-          : []
+          : [],
+
+      region_name:
+        this.showRegion()
+          ? this.regionName()
+          : undefined
     };
 
     if (this.password().trim()) {
@@ -553,6 +605,20 @@ export class EmployeeFormComponent {
     });
   }
 
+  private loadRegions() {
+    this.regionService.findUniqueNames().subscribe({
+      next: (names: string[]) => this.regionOptions.set(names),
+      error: () => {
+        this.regionOptions.set([]);
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: 'Unable to load region names',
+        });
+      }
+    });
+  }
+
   private firstValidationError() {
     return [
       this.empCodeError(),
@@ -562,6 +628,7 @@ export class EmployeeFormComponent {
       this.genderError(),
       this.userTypeError(),
       this.unitIdsError(),
+      this.regionNameError(),
       (!this.isEdit && !this.password().trim())
         ? 'Password is required'
         : '',

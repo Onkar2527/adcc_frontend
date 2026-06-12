@@ -117,6 +117,9 @@ export class LoginComponent {
       case 2:
         return '/auditor/audit-dashboard';
 
+      case 6:
+        return '/reports';
+
       case 3:
         return '/auditor/compliance';
 

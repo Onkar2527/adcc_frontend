@@ -129,6 +129,7 @@ export interface Employee {
   gender: string;
   is_active: number;
   audit_unit_authority?: string;
+  region_name?: string;
   created_at?: string;
 }
 
@@ -144,6 +145,7 @@ export interface CreateEmployeeDto {
   is_active?: number;
   audit_unit_authority?: string;
   unit_ids?: number[];
+  region_name?: string;
 }
 
 export interface UpdateEmployeeDto extends Partial<CreateEmployeeDto> {
@@ -2049,4 +2051,62 @@ export class AuditCalendarService {
     return this.http.post<any>(`${this.apiUrl}/risk-frequencies`, { frequencies });
   }
 }
+
+export interface Region {
+  id: number;
+  region_name: string;
+  audit_unit_ids: string;
+  unit_ids: number[];
+  units: { id: number; name: string; audit_unit_code: string }[];
+  is_active: number;
+  admin_id?: number;
+  created_at?: string;
+}
+
+export interface CreateRegionDto {
+  region_name: string;
+  unit_ids: number[];
+  is_active?: number;
+  admin_id?: number;
+}
+
+export interface UpdateRegionDto extends Partial<CreateRegionDto> {
+  id?: number;
+}
+
+@Injectable({ providedIn: 'root' })
+export class RegionMasterService {
+  private http = inject(HttpClient);
+  private config = inject(APP_CONFIG);
+  private apiUrl = `${this.config.apiUrl}/regions`;
+
+  findAll(): Observable<Region[]> {
+    return this.http.get<Region[]>(this.apiUrl);
+  }
+
+  findUniqueNames(): Observable<string[]> {
+    return this.http.get<string[]>(`${this.apiUrl}/names`);
+  }
+
+  findOne(id: number | string): Observable<Region> {
+    return this.http.get<Region>(`${this.apiUrl}/${id}`);
+  }
+
+  create(data: CreateRegionDto): Observable<Region> {
+    return this.http.post<Region>(this.apiUrl, data);
+  }
+
+  update(id: number | string, data: UpdateRegionDto): Observable<Region> {
+    return this.http.patch<Region>(`${this.apiUrl}/${id}`, data);
+  }
+
+  toggleStatus(id: number | string): Observable<Region> {
+    return this.http.patch<Region>(`${this.apiUrl}/${id}/status`, {});
+  }
+
+  remove(id: number | string): Observable<any> {
+    return this.http.delete<any>(`${this.apiUrl}/${id}`);
+  }
+}
+
 

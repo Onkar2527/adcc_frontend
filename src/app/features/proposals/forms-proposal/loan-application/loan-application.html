@@ -630,13 +630,13 @@
                             <th>अंदाजे किंमत रु.</th>
                         </tr>
 
-                        <tr *ngFor="let m of gurantordata?.[0]?.machinery_details">
+                        <tr *ngFor="let m of gurantordata[0]?.machinery_details">
                             <td>{{ m.machinery_details || '-' }}</td>
                             <td>-</td>
                             <td>{{ m.valuation_amount | number }}</td>
                         </tr>
 
-                        <tr *ngIf="!gurantordata?.[0]?.machinery_details?.length">
+                        <tr *ngIf="!gurantordata[0]?.machinery_details?.length">
                             <td colspan="3" style="text-align:center">माहिती उपलब्ध नाही</td>
                         </tr>
 
@@ -774,7 +774,7 @@
                                         <th>तारण दिलेल्या वस्तूचा तपशील</th>
                                     </tr>
 
-                                    <tr *ngFor="let loan of gurantordata?.[0]?.credit_loans_other_banks; let i = index">
+                                    <tr *ngFor="let loan of gurantordata[0]?.credit_loans_other_banks; let i = index">
                                         <td>{{ i + 1 }}</td>
                                         <td>{{ loan.bank || '-' }}</td>
                                         <td>{{ loan.loan_type || '-' }}</td>
@@ -782,7 +782,7 @@
                                         <td>{{ loan.mortgage_details || '-' }}</td>
                                     </tr>
 
-                                    <tr *ngIf="!gurantordata?.[0]?.credit_loans_other_banks?.length">
+                                    <tr *ngIf="!gurantordata[0]?.credit_loans_other_banks?.length">
                                         <td colspan="5" style="text-align:center">No Data Available</td>
                                     </tr>
 

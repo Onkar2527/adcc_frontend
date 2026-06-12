@@ -37,7 +37,7 @@ export class ReportViewerComponent implements OnInit {
     const activeUnitId = activeOverview ? Number(activeOverview.audit_unit_id || 0) : 0;
 
     const branchFilters = definition.filters.filter(
-      (f) => f.key === 'audit_unit_id' || f.key === 'reportAuditUnit'
+      (f) => f.key === 'audit_unit_id' || f.key === 'reportAuditUnit',
     );
 
     for (const filter of branchFilters) {
@@ -46,19 +46,24 @@ export class ReportViewerComponent implements OnInit {
 
       if (activeUnitId) {
         filteredOptions = originalOptions.filter(
-          (opt) => String(opt.value) === String(activeUnitId)
+          (opt) => String(opt.value) === String(activeUnitId),
         );
-      } else if (userTypeId === '2' || userTypeId === '4' || userTypeId === '3') {
+      } else if (
+        userTypeId === '2' ||
+        userTypeId === '4' ||
+        userTypeId === '3' ||
+        userTypeId === '6'
+      ) {
         const assignedIds = auditUnitAuthority
           .split(',')
           .map((s) => s.trim())
           .filter(Boolean);
 
         if (assignedIds.length > 0) {
-          filteredOptions = originalOptions.filter(
-            (opt) => assignedIds.includes(String(opt.value))
+          filteredOptions = originalOptions.filter((opt) =>
+            assignedIds.includes(String(opt.value)),
           );
-        } else if (userTypeId === '2' || userTypeId === '4') {
+        } else if (userTypeId === '2' || userTypeId === '4' || userTypeId === '6') {
           filteredOptions = [];
         }
       }
@@ -69,7 +74,9 @@ export class ReportViewerComponent implements OnInit {
       let selectedValue = currentValue;
 
       if (activeUnitId) {
-        const hasActiveUnit = filteredOptions.some((opt) => String(opt.value) === String(activeUnitId));
+        const hasActiveUnit = filteredOptions.some(
+          (opt) => String(opt.value) === String(activeUnitId),
+        );
         if (hasActiveUnit) {
           selectedValue = String(activeUnitId);
         }
@@ -114,19 +121,20 @@ export class ReportViewerComponent implements OnInit {
 
   isAdvancedLayout(): boolean {
     const slug = this.definition()?.slug;
-    return slug === 'risk-weightage-report'
-      || slug === 'performance-risk-weightage-report'
-      || slug === 'performance-risk-weightage-report-category-wise'
-      || slug === 'broader-areawise-scoring-report'
-      || slug === 'questionwsie-broader-areawise-report'
-      || slug === 'pending-compliance-detail-report'
-      || slug === 'rbia-performance-risk-weightage-report-all-units';
+    return (
+      slug === 'risk-weightage-report' ||
+      slug === 'performance-risk-weightage-report' ||
+      slug === 'performance-risk-weightage-report-category-wise' ||
+      slug === 'broader-areawise-scoring-report' ||
+      slug === 'questionwsie-broader-areawise-report' ||
+      slug === 'pending-compliance-detail-report' ||
+      slug === 'rbia-performance-risk-weightage-report-all-units'
+    );
   }
 
   showsNestedComplianceColumn(): boolean {
     const slug = this.definition()?.slug;
-    return slug === 'compliance-summary-report'
-      || slug === 'pending-compliance-detail-report';
+    return slug === 'compliance-summary-report' || slug === 'pending-compliance-detail-report';
   }
 
   showsNestedReviewerCommentColumn(): boolean {
@@ -135,7 +143,9 @@ export class ReportViewerComponent implements OnInit {
 
   isExecutiveSummary(): boolean {
     const slug = this.definition()?.slug;
-    return slug === 'executive-summary-audit-report' || slug === 'executive-summary-compliance-report';
+    return (
+      slug === 'executive-summary-audit-report' || slug === 'executive-summary-compliance-report'
+    );
   }
 
   isAuditCommitteeBoardReport1(): boolean {
@@ -177,16 +187,12 @@ export class ReportViewerComponent implements OnInit {
     return options.filter((option: any) => {
       const optionParentValue = option[filter.optionParentKey as string];
 
-      return !optionParentValue
-        || (parentValue && String(optionParentValue) === parentValue);
+      return !optionParentValue || (parentValue && String(optionParentValue) === parentValue);
     });
   }
 
   onFilterChange(filter: ReportFilterDefinition) {
-    if (
-      this.isAdvancedLayout()
-      && filter.key === 'selectSearchTypeFilter'
-    ) {
+    if (this.isAdvancedLayout() && filter.key === 'selectSearchTypeFilter') {
       const searchType = String(this.filters['selectSearchTypeFilter'] || '3');
       if (searchType === '3' || searchType === '4') {
         this.filters['startDate'] = '';
@@ -197,18 +203,16 @@ export class ReportViewerComponent implements OnInit {
     }
 
     const childFilters =
-      this.definition()?.filters.filter((item) => item.dependsOn === filter.key)
-      || [];
+      this.definition()?.filters.filter((item) => item.dependsOn === filter.key) || [];
 
     childFilters.forEach((childFilter) => {
       const selectedValue = String(this.filters[childFilter.key] || '');
-      const isSelectedValueValid = this
-        .filterOptions(childFilter)
-        .some((option) => String(option.value) === selectedValue);
+      const isSelectedValueValid = this.filterOptions(childFilter).some(
+        (option) => String(option.value) === selectedValue,
+      );
 
       if (!isSelectedValueValid) {
-        this.filters[childFilter.key] =
-          childFilter.type === 'checkbox' ? [] : '';
+        this.filters[childFilter.key] = childFilter.type === 'checkbox' ? [] : '';
       }
     });
   }
@@ -242,10 +246,9 @@ export class ReportViewerComponent implements OnInit {
         definition.filters
           .filter((filter) => filter.type === 'checkbox')
           .forEach((filter) => {
-            this.filters[filter.key] =
-              Array.isArray(this.filters[filter.key])
-                ? this.filters[filter.key]
-                : [];
+            this.filters[filter.key] = Array.isArray(this.filters[filter.key])
+              ? this.filters[filter.key]
+              : [];
           });
         // Programmatically preload logo image to ensure browser caching
         const logoUrl = definition.brand?.logoUrl || '/assets/images/logos/auditpro-logo.png';
@@ -318,10 +321,9 @@ export class ReportViewerComponent implements OnInit {
     definition?.filters
       .filter((filter) => filter.type === 'checkbox')
       .forEach((filter) => {
-        this.filters[filter.key] =
-          Array.isArray(this.filters[filter.key])
-            ? this.filters[filter.key]
-            : [];
+        this.filters[filter.key] = Array.isArray(this.filters[filter.key])
+          ? this.filters[filter.key]
+          : [];
       });
     this.rows.set([]);
     this.summary.set(null);
@@ -349,9 +351,12 @@ export class ReportViewerComponent implements OnInit {
   }
 
   canExportExcel() {
-    return !['audit-complete-report', 'audit-observations-report', 'compliance-report', 'compliance-summary-report'].includes(
-      this.definition()?.slug || '',
-    );
+    return ![
+      'audit-complete-report',
+      'audit-observations-report',
+      'compliance-report',
+      'compliance-summary-report',
+    ].includes(this.definition()?.slug || '');
   }
 
   isInternalAssessmentReport(): boolean {
@@ -361,18 +366,31 @@ export class ReportViewerComponent implements OnInit {
   getInternalAssessmentMonths(): { label: string; monthVal: number; yearVal: number }[] {
     const header = this.reportHeader();
     if (!header || !header['financialYear']) return [];
-    
+
     const yearStr = String(header['financialYear']);
     const match = yearStr.match(/\d{4}/);
     if (!match) return [];
     const startYear = Number(match[0]);
-    
+
     const months: { label: string; monthVal: number; yearVal: number }[] = [];
-    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    
+    const monthNames = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
+    ];
+
     let m = 4; // April
     let y = startYear;
-    
+
     while (true) {
       months.push({
         label: `${monthNames[m - 1]} - ${String(y).slice(-2)}`,
@@ -386,7 +404,7 @@ export class ReportViewerComponent implements OnInit {
       }
       if (m === 4) break;
     }
-    
+
     return months;
   }
 
@@ -462,30 +480,35 @@ export class ReportViewerComponent implements OnInit {
     return `${day}-${month}-${year}`;
   }
 
-
   isRiskWiseAuditUnitsReport() {
     return this.definition()?.slug === 'risk-wise-audit-units-report';
   }
 
   isRiskWiseReport() {
     const slug = this.definition()?.slug;
-    return slug === 'risk-wise-audit-units-report'
-      || slug === 'rbia-performance-risk-weightage-report-all-units';
+    return (
+      slug === 'risk-wise-audit-units-report' ||
+      slug === 'rbia-performance-risk-weightage-report-all-units'
+    );
   }
 
   isPerformanceRiskWeightageReport() {
     const slug = this.definition()?.slug;
-    return slug === 'performance-risk-weightage-report'
-      || slug === 'performance-risk-weightage-report-category-wise';
+    return (
+      slug === 'performance-risk-weightage-report' ||
+      slug === 'performance-risk-weightage-report-category-wise'
+    );
   }
 
   riskWiseLeadingColumns() {
-    const sliceIndex = this.definition()?.slug === 'rbia-performance-risk-weightage-report-all-units' ? 3 : 2;
+    const sliceIndex =
+      this.definition()?.slug === 'rbia-performance-risk-weightage-report-all-units' ? 3 : 2;
     return this.riskWiseFixedColumns().slice(0, sliceIndex);
   }
 
   riskWiseTrailingColumns() {
-    const sliceIndex = this.definition()?.slug === 'rbia-performance-risk-weightage-report-all-units' ? 3 : 2;
+    const sliceIndex =
+      this.definition()?.slug === 'rbia-performance-risk-weightage-report-all-units' ? 3 : 2;
     return this.riskWiseFixedColumns().slice(sliceIndex);
   }
 
@@ -540,10 +563,7 @@ export class ReportViewerComponent implements OnInit {
     ) {
       const tableElement = document.querySelector('.official-report-table');
       if (tableElement) {
-        this.exportService.exportTableToExcel(
-          tableElement,
-          definition.fileName || definition.slug
-        );
+        this.exportService.exportTableToExcel(tableElement, definition.fileName || definition.slug);
         return;
       }
     }
@@ -571,9 +591,7 @@ export class ReportViewerComponent implements OnInit {
       exportCols,
       definition.fileName || definition.slug,
       [],
-      this.isRiskWiseReport()
-        ? this.riskWiseExcelHeader()
-        : undefined,
+      this.isRiskWiseReport() ? this.riskWiseExcelHeader() : undefined,
     );
   }
 
@@ -587,24 +605,30 @@ export class ReportViewerComponent implements OnInit {
     if (filter.type === 'checkbox') {
       const values = Array.isArray(value)
         ? value.map(String)
-        : String(value || '').split(',').filter(Boolean);
+        : String(value || '')
+            .split(',')
+            .filter(Boolean);
 
       if (!values.length) {
         return 'All';
       }
 
-      return (filter.options || [])
-        .filter((option) => values.includes(String(option.value)))
-        .map((option) => option.label)
-        .join(', ') || 'All';
+      return (
+        (filter.options || [])
+          .filter((option) => values.includes(String(option.value)))
+          .map((option) => option.label)
+          .join(', ') || 'All'
+      );
     }
 
     return filter.options?.find((option) => String(option.value) === String(value))?.label || '-';
   }
 
   checkboxSelected(filterKey: string, optionValue: any) {
-    return Array.isArray(this.filters[filterKey])
-      && this.filters[filterKey].map(String).includes(String(optionValue));
+    return (
+      Array.isArray(this.filters[filterKey]) &&
+      this.filters[filterKey].map(String).includes(String(optionValue))
+    );
   }
 
   toggleCheckboxFilter(filterKey: string, optionValue: any, checked: boolean) {
@@ -619,9 +643,7 @@ export class ReportViewerComponent implements OnInit {
   }
 
   reportRunDate() {
-    return this.formatDate(
-      this.generatedAt() || new Date().toISOString(),
-    );
+    return this.formatDate(this.generatedAt() || new Date().toISOString());
   }
 
   reportLogo() {
@@ -711,7 +733,9 @@ export class ReportViewerComponent implements OnInit {
   isLegacyData(): boolean {
     const data = this.exeReportData();
     if (!data) return false;
-    const hasLegacyBp = data.branchPositions?.some((r: any) => String(r.type_id).trim().length <= 2);
+    const hasLegacyBp = data.branchPositions?.some(
+      (r: any) => String(r.type_id).trim().length <= 2,
+    );
     const hasLegacyFa = data.freshAccounts?.some((r: any) => String(r.type_id).trim().length <= 2);
     return !!(hasLegacyBp || hasLegacyFa);
   }
@@ -736,7 +760,9 @@ export class ReportViewerComponent implements OnInit {
   getMarchValue(scheme: any): number {
     const data = this.exeReportData();
     if (!data || !data.marchPositions) return 0;
-    const row = data.marchPositions.find((r: any) => Number(r.gl_type_id) === Number(scheme.category_id));
+    const row = data.marchPositions.find(
+      (r: any) => Number(r.gl_type_id) === Number(scheme.category_id),
+    );
     return Number(row?.march_position || 0);
   }
 
@@ -768,12 +794,16 @@ export class ReportViewerComponent implements OnInit {
     // 1. Try matching scheme code directly
     if (isFresh) {
       if (data.freshAccounts) {
-        const row = data.freshAccounts.find((r: any) => String(r.type_id).trim() === String(scheme.scheme_code).trim());
+        const row = data.freshAccounts.find(
+          (r: any) => String(r.type_id).trim() === String(scheme.scheme_code).trim(),
+        );
         if (row) return Number(row.accounts || 0);
       }
     } else {
       if (data.branchPositions) {
-        const row = data.branchPositions.find((r: any) => String(r.type_id).trim() === String(scheme.scheme_code).trim());
+        const row = data.branchPositions.find(
+          (r: any) => String(r.type_id).trim() === String(scheme.scheme_code).trim(),
+        );
         if (row) return Number(row.amount || 0);
       }
     }
@@ -785,14 +815,18 @@ export class ReportViewerComponent implements OnInit {
         if (!data.freshAccounts) return 0;
         let sum = 0;
         for (const typeId of typeIds) {
-          const row = data.freshAccounts.find((r: any) => String(r.type_id).trim() === String(typeId).trim());
+          const row = data.freshAccounts.find(
+            (r: any) => String(r.type_id).trim() === String(typeId).trim(),
+          );
           sum += Number(row?.accounts || 0);
         }
         return sum;
       } else {
         if (!data.branchPositions) return 0;
         for (const typeId of typeIds) {
-          const row = data.branchPositions.find((r: any) => String(r.type_id).trim() === String(typeId).trim());
+          const row = data.branchPositions.find(
+            (r: any) => String(r.type_id).trim() === String(typeId).trim(),
+          );
           if (row) return Number(row.amount || 0);
         }
       }
@@ -812,12 +846,16 @@ export class ReportViewerComponent implements OnInit {
     // 1. Try matching scheme code directly
     if (isFresh) {
       if (data.freshAccounts) {
-        const row = data.freshAccounts.find((r: any) => String(r.type_id).trim() === String(scheme.scheme_code).trim());
+        const row = data.freshAccounts.find(
+          (r: any) => String(r.type_id).trim() === String(scheme.scheme_code).trim(),
+        );
         if (row) return row.audit_commpliance || '';
       }
     } else {
       if (data.branchPositions) {
-        const row = data.branchPositions.find((r: any) => String(r.type_id).trim() === String(scheme.scheme_code).trim());
+        const row = data.branchPositions.find(
+          (r: any) => String(r.type_id).trim() === String(scheme.scheme_code).trim(),
+        );
         if (row) return row.audit_commpliance || '';
       }
     }
@@ -828,13 +866,17 @@ export class ReportViewerComponent implements OnInit {
       if (isFresh) {
         if (!data.freshAccounts) return '';
         for (const typeId of typeIds) {
-          const row = data.freshAccounts.find((r: any) => String(r.type_id).trim() === String(typeId).trim());
+          const row = data.freshAccounts.find(
+            (r: any) => String(r.type_id).trim() === String(typeId).trim(),
+          );
           if (row?.audit_commpliance) return row.audit_commpliance;
         }
       } else {
         if (!data.branchPositions) return '';
         for (const typeId of typeIds) {
-          const row = data.branchPositions.find((r: any) => String(r.type_id).trim() === String(typeId).trim());
+          const row = data.branchPositions.find(
+            (r: any) => String(r.type_id).trim() === String(typeId).trim(),
+          );
           if (row?.audit_commpliance) return row.audit_commpliance;
         }
       }
@@ -874,12 +916,13 @@ export class ReportViewerComponent implements OnInit {
   }
 
   private riskWiseFixedColumns() {
-    return (this.definition()?.columns || [])
-      .filter((column) => !this.riskWiseColumnMatch(column));
+    return (this.definition()?.columns || []).filter((column) => !this.riskWiseColumnMatch(column));
   }
 
   private riskWiseColumnMatch(column: ReportColumnDefinition) {
-    return /^risk_(\d+)_(score|branch_percent|all_percent|highest_score|obtained_score|percent|rating)$/.exec(column.key);
+    return /^risk_(\d+)_(score|branch_percent|all_percent|highest_score|obtained_score|percent|rating)$/.exec(
+      column.key,
+    );
   }
 
   private riskWiseGroupLabel(column: ReportColumnDefinition) {
@@ -887,8 +930,10 @@ export class ReportViewerComponent implements OnInit {
   }
 
   private riskWiseChildLabel(column: ReportColumnDefinition) {
-    const label =
-      String(column.label || '').split(' - ').slice(1).join(' - ');
+    const label = String(column.label || '')
+      .split(' - ')
+      .slice(1)
+      .join(' - ');
 
     return label || column.label;
   }
@@ -927,10 +972,7 @@ export class ReportViewerComponent implements OnInit {
 
   private riskWiseExcelHeader() {
     const columns = this.definition()?.columns || [];
-    const headerRows = [
-      new Array(columns.length).fill(''),
-      new Array(columns.length).fill(''),
-    ];
+    const headerRows = [new Array(columns.length).fill(''), new Array(columns.length).fill('')];
     const merges: any[] = [];
     let columnIndex = 0;
 

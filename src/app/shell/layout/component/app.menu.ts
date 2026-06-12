@@ -81,7 +81,7 @@ export class AppMenu implements OnInit, OnDestroy {
         },
         {
             label: 'Reports',
-            authority: ['1', '2', '3', '4'],
+            authority: ['1', '2', '3', '4', '6'],
             items: [{ label: 'Reports', icon: 'pi pi-fw pi-file', routerLink: ['/reports'] }],
         },
         {
@@ -117,6 +117,7 @@ export class AppMenu implements OnInit, OnDestroy {
                 },
                 { label: 'Section Master', icon: 'pi pi-fw pi-list-check', routerLink: ['/admin/audit-section-master'] },
                 { label: 'Unit Master', icon: 'pi pi-fw pi-building', routerLink: ['/admin/audit-unit-master'] },
+                { label: 'Region Master', icon: 'pi pi-fw pi-map', routerLink: ['/admin/region-master'] },
                 { label: 'Audit Calendar', icon: 'pi pi-fw pi-calendar', routerLink: ['/admin/audit-calendar'] },
                 { label: 'Audit Frequency Master', icon: 'pi pi-fw pi-cog', routerLink: ['/admin/audit-frequency-master'] },
                 { label: 'Scheme Master', icon: 'pi pi-fw pi-sitemap', routerLink: ['/admin/audit-scheme-master'] },

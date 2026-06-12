@@ -3,7 +3,8 @@ export const user_types = [
     { label: 'Auditor', value: '2' },
     { label: 'Employee', value: '3' },
     { label: 'Reviewer', value: '4' },
-    { label: 'Top Level Management', value: '5' }
+    { label: 'Top Level Management', value: '5' },
+    { label: 'Division', value: '6' }
 ];
 
 export const audit_due_array = [
