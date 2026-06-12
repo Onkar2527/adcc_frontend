@@ -105,11 +105,20 @@ export class AppMenu implements OnInit, OnDestroy {
                             routerLink: [
                                 '/admin/password-policy-master'
                             ]
+                        },
+                        {
+                            label: 'Policy Documents',
+                            icon: 'pi pi-fw pi-file',
+                            routerLink: [
+                                '/admin/policy-documents'
+                            ]
                         }
                     ]
                 },
                 { label: 'Section Master', icon: 'pi pi-fw pi-list-check', routerLink: ['/admin/audit-section-master'] },
                 { label: 'Unit Master', icon: 'pi pi-fw pi-building', routerLink: ['/admin/audit-unit-master'] },
+                { label: 'Audit Calendar', icon: 'pi pi-fw pi-calendar', routerLink: ['/admin/audit-calendar'] },
+                { label: 'Audit Frequency Master', icon: 'pi pi-fw pi-cog', routerLink: ['/admin/audit-frequency-master'] },
                 { label: 'Scheme Master', icon: 'pi pi-fw pi-sitemap', routerLink: ['/admin/audit-scheme-master'] },
                 {
                     label: 'Question Master', icon: 'pi pi-fw pi-question-circle',
