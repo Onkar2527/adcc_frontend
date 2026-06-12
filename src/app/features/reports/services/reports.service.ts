@@ -1,6 +1,7 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { APP_CONFIG } from '../../../core/services/config/config.token';
+import { FREE_AUDIT_FLOW } from '../../admin/services/required-data';
 
 export interface ReportFilterDefinition {
   key: string;
@@ -54,8 +55,10 @@ export class ReportsService {
   private apiUrl = `${this.config.apiUrl}/reports`;
 
   getReportDefinition(reportSlug: string) {
+    let params = new HttpParams().set('freeFlow', FREE_AUDIT_FLOW ? 'true' : 'false');
     return this.http.get<ReportDefinition>(
       `${this.apiUrl}/${reportSlug}/definition`,
+      { params }
     );
   }
 
@@ -77,6 +80,8 @@ export class ReportsService {
       params = params.set('audit_unit_authority', String(user.audit_unit_authority || ''));
       params = params.set('employee_id', String(user.id || user.employee_id || user.emp_id || ''));
     }
+
+    params = params.set('freeFlow', FREE_AUDIT_FLOW ? 'true' : 'false');
 
     return this.http.get<any>(
       `${this.apiUrl}/${reportSlug}/data`,

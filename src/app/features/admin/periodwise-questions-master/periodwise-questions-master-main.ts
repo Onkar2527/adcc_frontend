@@ -1,7 +1,7 @@
 import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormDrawerRef } from '../../../core/services/drawer/form-drawer.ref';
-import { user_types } from '../services/required-data';
+import { user_types, FREE_AUDIT_FLOW } from '../services/required-data';
 import {
     TextFieldComponent,
     FormActionsComponent,
@@ -227,11 +227,38 @@ export class PeriodwiseQuestionsMasterFormComponent {
             return;
         }
 
+        if (FREE_AUDIT_FLOW) {
+            // Start month <= End month validation
+            if (
+                this.start_month_year().length === 7 &&
+                this.end_month_year().length === 7
+            ) {
+
+                if (
+                    this.start_month_year() >
+                    this.end_month_year()
+                ) {
+
+                    this.isMonthValid.set(false);
+
+                    this.messageService.add({
+                        severity: 'error',
+                        summary: 'Invalid Period',
+                        detail:
+                            'Start month cannot be greater than end month'
+                    });
+
+                    return;
+                }
+
+            }
+            return;
+        }
+
         const fyStart = Number(selectedYear.label);
          const fyEnd = fyStart + 1;
             
             
-
         const [year, month] =
             value.split('-').map(Number);
 

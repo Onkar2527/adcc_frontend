@@ -178,6 +178,17 @@ export class ReportViewerComponent implements OnInit {
   filterOptions(filter: ReportFilterDefinition) {
     const options = filter.options || [];
 
+    if (filter.key === 'reportAuditAssesment') {
+      const unitValue = String(this.filters['reportAuditUnit'] || '');
+      const yearValue = String(this.filters['financial_year'] || '');
+
+      return options.filter((option: any) => {
+        const matchesUnit = !option.audit_unit_id || String(option.audit_unit_id) === unitValue;
+        const matchesYear = !option.year_id || !yearValue || yearValue === 'all' || String(option.year_id) === yearValue;
+        return matchesUnit && matchesYear;
+      });
+    }
+
     if (!filter.dependsOn || !filter.optionParentKey) {
       return options;
     }
@@ -199,6 +210,19 @@ export class ReportViewerComponent implements OnInit {
         this.filters['endDate'] = '';
       } else {
         this.filters['reportAuditAssesment'] = '';
+      }
+    }
+
+    if (filter.key === 'financial_year') {
+      const assessmentFilter = this.definition()?.filters.find(f => f.key === 'reportAuditAssesment');
+      if (assessmentFilter) {
+        const selectedValue = String(this.filters['reportAuditAssesment'] || '');
+        const isSelectedValueValid = this.filterOptions(assessmentFilter).some(
+          (option) => String(option.value) === selectedValue,
+        );
+        if (!isSelectedValueValid) {
+          this.filters['reportAuditAssesment'] = '';
+        }
       }
     }
 

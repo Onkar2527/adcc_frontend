@@ -2,6 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { APP_CONFIG } from '../../../core/services/config/config.token';
+import { FREE_AUDIT_FLOW } from '../../admin/services/required-data';
 
 @Injectable({ providedIn: 'root' })
 export class AuditDashboardService {
@@ -932,6 +933,7 @@ export class AuditDashboardService {
         params: {
           employee_id:
             employeeId,
+          free_flow: FREE_AUDIT_FLOW ? '1' : '0',
         },
       },
     );
@@ -951,6 +953,7 @@ export class AuditDashboardService {
         params: {
           employee_id:
             employeeId,
+          free_flow: FREE_AUDIT_FLOW ? '1' : '0',
         },
       },
     );
@@ -969,6 +972,7 @@ export class AuditDashboardService {
       {
         employee_id:
           employeeId,
+        free_flow: FREE_AUDIT_FLOW,
       },
     );
   }
