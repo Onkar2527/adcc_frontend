@@ -242,6 +242,51 @@ export class ComplianceWorkspaceComponent implements OnInit {
         return `${targetType}-${observationId}`;
     }
 
+    evidenceList(
+        source: any,
+        field = 'evidence',
+    ) {
+        if (!source) {
+            return [];
+        }
+
+        const pluralField =
+            field === 'compliance_evidence'
+                ? 'compliance_evidences'
+                : 'evidences';
+
+        const list =
+            Array.isArray(source?.[pluralField])
+                ? source[pluralField]
+                : [];
+
+        const single =
+            Array.isArray(source?.[field])
+                ? source[field]
+                : source?.[field]
+                    ? [source[field]]
+                    : [];
+
+        const merged =
+            [...list, ...single];
+
+        const seen =
+            new Set<number>();
+
+        return merged.filter((evidence: any) => {
+            const id =
+                Number(evidence?.id || 0);
+
+            if (!id || seen.has(id)) {
+                return false;
+            }
+
+            seen.add(id);
+
+            return true;
+        });
+    }
+
     isSaved(
         observation: any,
     ) {
@@ -722,8 +767,8 @@ export class ComplianceWorkspaceComponent implements OnInit {
     ) {
         const input =
             event.target as HTMLInputElement;
-        const file =
-            input.files?.[0];
+        const files =
+            Array.from(input.files || []);
 
         input.value = '';
 
@@ -733,7 +778,7 @@ export class ComplianceWorkspaceComponent implements OnInit {
             );
 
         if (
-            !file
+            !files.length
             ||
             !assessmentId
             ||
@@ -750,7 +795,7 @@ export class ComplianceWorkspaceComponent implements OnInit {
         ];
 
         if (
-            !allowedTypes.includes(file.type)
+            files.some((file) => !allowedTypes.includes(file.type))
         ) {
             this.notification.error(
                 'Only JPG, JPEG, PNG and PDF evidence files are allowed.',
@@ -759,7 +804,7 @@ export class ComplianceWorkspaceComponent implements OnInit {
         }
 
         if (
-            file.size > 5 * 1024 * 1024
+            files.some((file) => file.size > 5 * 1024 * 1024)
         ) {
             this.notification.error(
                 'Evidence file size must be less than or equal to 5 MB.',
@@ -775,6 +820,38 @@ export class ComplianceWorkspaceComponent implements OnInit {
 
         this.uploadingEvidenceKey.set(key);
 
+        this.uploadEvidenceFiles(
+            targetType,
+            observation,
+            files,
+            0,
+            assessmentId,
+        );
+    }
+
+    private uploadEvidenceFiles(
+        targetType: 'answer' | 'annexure',
+        observation: any,
+        files: File[],
+        index: number,
+        assessmentId: number,
+    ) {
+        const file =
+            files[index];
+
+        if (!file) {
+            this.uploadingEvidenceKey.set('');
+
+            this.notification.success(
+                `${files.length} compliance evidence file${files.length === 1 ? '' : 's'} uploaded successfully.`,
+            );
+
+            this.loadDetail(assessmentId);
+            this.checkCompletion();
+
+            return;
+        }
+
         this.service
             .uploadComplianceEvidence(
                 assessmentId,
@@ -785,11 +862,11 @@ export class ComplianceWorkspaceComponent implements OnInit {
             )
             .subscribe({
                 next: (res: any) => {
-                    this.uploadingEvidenceKey.set('');
-
                     if (
                         !res?.success
                     ) {
+                        this.uploadingEvidenceKey.set('');
+
                         this.notification.error(
                             res?.message
                             || 'Unable to upload compliance evidence.',
@@ -797,12 +874,13 @@ export class ComplianceWorkspaceComponent implements OnInit {
                         return;
                     }
 
-                    this.notification.success(
-                        res?.message
-                        || 'Compliance evidence uploaded successfully.',
+                    this.uploadEvidenceFiles(
+                        targetType,
+                        observation,
+                        files,
+                        index + 1,
+                        assessmentId,
                     );
-                    this.loadDetail(assessmentId);
-                    this.checkCompletion();
                 },
                 error: (err) => {
                     this.uploadingEvidenceKey.set('');

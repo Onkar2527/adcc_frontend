@@ -1172,6 +1172,27 @@
     font-size: .82rem;
 }
 
+.evidence-chip-list {
+    display: inline-flex;
+    align-items: center;
+    gap: .25rem;
+    flex-wrap: wrap;
+}
+
+.evidence-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: .15rem;
+}
+
+:host ::ng-deep .evidence-chip .p-button,
+:host ::ng-deep .inline-evidence > .p-button,
+:host ::ng-deep .evidence-cell > .p-button {
+    width: 2rem;
+    height: 2rem;
+    padding: 0;
+}
+
 .question-card {
     display: grid;
     grid-template-columns: minmax(24rem, 1fr) minmax(25rem, .9fr);
