@@ -24,6 +24,7 @@ import { NotificationService } from '../../../../core/services/notification/noti
 import { AuditDashboardService } from '../../services/auditor-main.service';
 import { CategoryAssessmentComponent } from '../category-assessment/category-assessment.component';
 import { InternalAuditNavService } from '../../services/internal-audit-nav.service';
+import { audit_flow_config } from '../../../admin/services/required-data';
 
 @Component({
     selector: 'app-assessment-workspace',
@@ -914,15 +915,21 @@ export class AssessmentWorkspaceComponent implements OnInit {
             header:
                 Number(assessment.audit_status_id) === 3
                     ? 'Submit Re-Audit'
-                    : 'Submit Audit',
+                    : this.isLiveManagerComplianceFlow()
+                        ? 'Complete Audit'
+                        : 'Submit Audit',
             message:
                 Number(assessment.audit_status_id) === 3
                     ? 'Resubmit corrected audit points for reviewer action?'
-                    : 'Submit this audit for reviewer action?',
+                    : this.isLiveManagerComplianceFlow()
+                        ? 'Complete this audit assessment?'
+                        : 'Submit this audit for reviewer action?',
             icon:
                 'pi pi-send',
             acceptLabel:
-                'Submit',
+                this.isLiveManagerComplianceFlow() && Number(assessment.audit_status_id) !== 3
+                    ? 'Complete'
+                    : 'Submit',
             rejectLabel:
                 'Cancel',
             accept:
@@ -1245,6 +1252,22 @@ export class AssessmentWorkspaceComponent implements OnInit {
                     );
                 },
             });
+    }
+
+    isLiveManagerComplianceFlow() {
+        return audit_flow_config.liveManagerCompliance === true;
+    }
+
+    submitActionLabel(audit: any) {
+        if (
+            Number(audit?.audit_status_id) === 3
+        ) {
+            return 'Resubmit to Reviewer';
+        }
+
+        return this.isLiveManagerComplianceFlow()
+            ? 'Complete Assessment'
+            : 'Submit for Review';
     }
 
     financialYearLabel(

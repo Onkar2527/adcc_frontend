@@ -141,7 +141,8 @@ export class ReviewerWorkspaceComponent implements OnInit {
             this.assessments()
                 .map((assessment: any) => {
                     const isCompliance =
-                        Number(assessment.audit_status_id || 0) === 5;
+                        Number(assessment.audit_status_id || 0) === 5
+                        || assessment.live_manager_compliance === true;
 
                     return {
                         ...assessment,
@@ -312,6 +313,7 @@ export class ReviewerWorkspaceComponent implements OnInit {
 
         const request =
             Number(assessment.audit_status_id) === 5
+            || assessment.live_manager_compliance === true
                 ? this.service.getReviewerComplianceAssessment(
                     Number(assessment.id),
                     this.employeeId(),
@@ -410,7 +412,9 @@ export class ReviewerWorkspaceComponent implements OnInit {
     isComplianceReview() {
         return Number(
             this.selected()?.audit_status_id || 0,
-        ) === 5;
+        ) === 5
+        || this.selected()?.live_manager_compliance === true
+        || this.detail()?.overview?.live_manager_compliance === true;
     }
 
     reviewStatus(

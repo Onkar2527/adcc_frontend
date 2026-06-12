@@ -160,6 +160,10 @@ export class CategoryAssessmentComponent
         this.saved.emit();
     }
 
+    private markSavedLocalOnly() {
+        this.savedAny.set(true);
+    }
+
     selectedDumpId =
         signal(0);
 
@@ -1296,7 +1300,12 @@ export class CategoryAssessmentComponent
         }
         let count = 0;
         for (const q of header.questions) {
-            if (q.answer_value !== null && q.answer_value !== undefined && String(q.answer_value).trim() !== '') {
+            const value =
+                this.isTextAnswer(q)
+                    ? q.audit_comment
+                    : q.answer_value;
+
+            if (value !== null && value !== undefined && String(value).trim() !== '') {
                 count++;
             }
         }
@@ -1324,6 +1333,22 @@ export class CategoryAssessmentComponent
     ) {
 
         return question?.answer?.audit_reviewer_comment || '';
+    }
+
+    managerComplianceComment(
+        question: any,
+    ) {
+
+        return question?.answer?.compliance_response
+            || question?.answer?.audit_commpliance
+            || '';
+    }
+
+    complianceReviewerComment(
+        question: any,
+    ) {
+
+        return question?.answer?.compliance_reviewer_comment || '';
     }
 
     defaultAnswerValue(
@@ -1478,7 +1503,7 @@ export class CategoryAssessmentComponent
                         question.header_id || header.id,
 
                     answer_given:
-                        question.answer_value || '',
+                        this.answerValueForSave(question),
 
                     audit_comment:
                         question.audit_comment || '',
@@ -1490,6 +1515,20 @@ export class CategoryAssessmentComponent
                         question.audit_compulsary_ev_upload === true,
                 }),
             );
+    }
+
+    private answerValueForSave(
+        question: any,
+    ) {
+        if (
+            this.isTextAnswer(
+                question,
+            )
+        ) {
+            return question.audit_comment || '';
+        }
+
+        return question.answer_value || '';
     }
 
     saveHeader(
@@ -1508,31 +1547,6 @@ export class CategoryAssessmentComponent
         ) {
             this.notification.error(
                 'No answers are available to save for this header.',
-            );
-
-            return;
-        }
-
-        const requiredTextErrors =
-            this.validateRequiredTextAnswers(
-                [header],
-            );
-
-        if (
-            Object.keys(
-                requiredTextErrors,
-            ).length
-        ) {
-            this.answerErrors.set(
-                requiredTextErrors,
-            );
-
-            this.openHeadersWithAnswerErrors(
-                requiredTextErrors,
-            );
-
-            this.notification.error(
-                'Please complete the remaining manual answers before saving this header.',
             );
 
             return;
@@ -1634,31 +1648,6 @@ export class CategoryAssessmentComponent
             return;
         }
 
-        const requiredTextErrors =
-            this.validateRequiredTextAnswers(
-                headers,
-            );
-
-        if (
-            Object.keys(
-                requiredTextErrors,
-            ).length
-        ) {
-            this.answerErrors.set(
-                requiredTextErrors,
-            );
-
-            this.openHeadersWithAnswerErrors(
-                requiredTextErrors,
-            );
-
-            this.notification.error(
-                'Please complete the remaining manual answers before saving all headers.',
-            );
-
-            return;
-        }
-
         const answers =
             headers.flatMap(
                 (header: any) =>
@@ -1723,7 +1712,7 @@ export class CategoryAssessmentComponent
                         || 'All header answers saved successfully',
                     );
 
-                    this.markSaved();
+                    this.markSavedLocalOnly();
 
                     this.loadCategory(
                         Number(detail.overview.id),
@@ -2118,6 +2107,20 @@ export class CategoryAssessmentComponent
         return `${Number(questionId) || 0}:${Number(rowId) || 0}`;
     }
 
+    isSavingAnnexureQuestion(
+        question: any,
+    ) {
+        return this.savingAnnexureQuestion()
+            === Number(question?.id || 0);
+    }
+
+    isUploadingAnnexureQuestion(
+        question: any,
+    ) {
+        return this.uploadingAnnexureQuestion()
+            === Number(question?.id || 0);
+    }
+
     saveAnnexureRow(
         question: any,
     ) {
@@ -2175,23 +2178,23 @@ export class CategoryAssessmentComponent
                     this.notification.success(
                         res.message || 'Annexure row saved successfully',
                     );
-                    this.markSaved();
+                    this.markSavedLocalOnly();
+
+                    const nextAnswer = {
+                        ...(question.answer || {}),
+                        id:
+                            Number(
+                                res?.answer_id
+                                || question.answer?.id
+                                || 0,
+                            ),
+                        answer_given:
+                            question.answer_value,
+                    };
 
                     if (
                         res?.row?.id
                     ) {
-                        const nextAnswer = {
-                            ...(question.answer || {}),
-                            id:
-                                Number(
-                                    res?.answer_id
-                                    || question.answer?.id
-                                    || 0,
-                                ),
-                            answer_given:
-                                question.answer_value,
-                        };
-
                         const rowIndex =
                             (question.annexure_rows || [])
                                 .findIndex(
@@ -2221,24 +2224,18 @@ export class CategoryAssessmentComponent
                                     ...currentRows,
                                     res.row,
                                 ];
-
-                        question.answer = {
-                            ...nextAnswer,
-                            annexure_rows: [
-                                ...question.annexure_rows,
-                            ],
-                        };
-
-                        this.clearAnnexureDraft(
-                            question,
-                        );
-                    } else {
-                        this.loadCategory(
-                            Number(detail.overview.id),
-                            Number(detail.category.id),
-                            false,
-                        );
                     }
+
+                    question.answer = {
+                        ...nextAnswer,
+                        annexure_rows: [
+                            ...(question.annexure_rows || []),
+                        ],
+                    };
+
+                    this.clearAnnexureDraft(
+                        question,
+                    );
                 },
                 error: (err) => {
                     this.savingAnnexureQuestion.set(
@@ -3068,7 +3065,11 @@ export class CategoryAssessmentComponent
         question: any,
     ) {
         const hasAnswer =
-            String(question?.answer_value || '')
+            String(
+                this.isTextAnswer(question)
+                    ? question?.audit_comment || ''
+                    : question?.answer_value || '',
+            )
                 .trim()
                 .length > 0;
 

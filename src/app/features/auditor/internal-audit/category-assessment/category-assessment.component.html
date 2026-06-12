@@ -512,10 +512,7 @@
                                     </label>
                                   
 
-                                    <textarea *ngIf="isTextAnswer(question); else optionAnswer" class="answer-control"
-                                        rows="2" [(ngModel)]="question.answer_value"></textarea>
-
-                                    <ng-template #optionAnswer>
+                                    <ng-container *ngIf="!isTextAnswer(question)">
 
                                         <select class="answer-control" [(ngModel)]="question.answer_value" (ngModelChange)="onQuestionAnswerChange(question)">
 
@@ -529,7 +526,7 @@
 
                                         </select>
 
-                                    </ng-template>
+                                    </ng-container>
 
                                     <div class="answer-checks">
                                         <label class="compliance-check">
@@ -589,6 +586,40 @@
                                              </button>
                                          </div>
                                      </div>
+                                </div>
+                            </div>
+
+                            <div
+                                *ngIf="managerComplianceComment(question) || complianceReviewerComment(question) || evidenceList(question.answer, 'compliance_evidence').length"
+                                class="live-compliance-feedback"
+                            >
+                                <div *ngIf="managerComplianceComment(question)" class="live-feedback-box">
+                                    <span>Manager Response</span>
+                                    {{ managerComplianceComment(question) }}
+                                </div>
+
+                                <div *ngIf="complianceReviewerComment(question)" class="live-feedback-box">
+                                    <span>Reviewer Comment</span>
+                                    {{ complianceReviewerComment(question) }}
+                                </div>
+
+                                <div *ngIf="evidenceList(question.answer, 'compliance_evidence').length" class="live-feedback-box">
+                                    <span>Manager Evidence</span>
+                                    <span class="evidence-chip-list">
+                                        <span
+                                            class="evidence-chip"
+                                            *ngFor="let evidence of evidenceList(question.answer, 'compliance_evidence'); let ei = index"
+                                        >
+                                            <button
+                                                pButton
+                                                type="button"
+                                                icon="pi pi-eye"
+                                                severity="secondary"
+                                                [title]="'View manager evidence ' + (ei + 1)"
+                                                (click)="viewEvidence(evidence)"
+                                            ></button>
+                                        </span>
+                                    </span>
                                 </div>
                             </div>
 
@@ -751,18 +782,18 @@
                                         severity="secondary" (click)="downloadAnnexureSample(question)"></button>
 
                                     <button pButton type="button" icon="pi pi-upload" label="Upload CSV"
-                                        severity="secondary" [loading]="uploadingAnnexureQuestion() === question.id"
-                                        [disabled]="savingAnnexureQuestion() === question.id"
+                                        severity="secondary" [loading]="isUploadingAnnexureQuestion(question)"
+                                        [disabled]="isSavingAnnexureQuestion(question)"
                                         (click)="annexCsvInput.click()"></button>
 
                                     <button pButton type="button" icon="pi pi-times" label="Clear" severity="secondary"
-                                        [disabled]="savingAnnexureQuestion() === question.id"
+                                        [disabled]="isSavingAnnexureQuestion(question)"
                                         (click)="clearAnnexureDraft(question)"></button>
 
                                     <button pButton type="button" icon="pi pi-save"
                                         [label]="question.annexure_draft.id ? 'Update Row' : 'Add Row'"
-                                        [loading]="savingAnnexureQuestion() === question.id"
-                                        [disabled]="uploadingAnnexureQuestion() === question.id"
+                                        [loading]="isSavingAnnexureQuestion(question)"
+                                        [disabled]="isSavingAnnexureQuestion(question) || isUploadingAnnexureQuestion(question)"
                                         (click)="saveAnnexureRow(question)"></button>
 
                                 </div>
@@ -832,6 +863,15 @@
                                                         </span>
                                                     </span>
 
+                                                    <span class="evidence-chip-list" *ngIf="evidenceList(row, 'compliance_evidence').length">
+                                                        <span class="evidence-chip" *ngFor="let evidence of evidenceList(row, 'compliance_evidence'); let ei = index">
+                                                            <button pButton type="button" icon="pi pi-eye"
+                                                                severity="secondary"
+                                                                [title]="'View manager evidence ' + (ei + 1)"
+                                                                (click)="viewEvidence(evidence)"></button>
+                                                        </span>
+                                                    </span>
+
                                                     <input #rowEvidenceInput type="file" multiple
                                                         accept=".jpg,.jpeg,.png,.pdf,image/jpeg,image/png,application/pdf"
                                                         style="display: none"
@@ -855,7 +895,7 @@
                                                             <button pButton type="button" icon="pi pi-trash"
                                                                 severity="danger"
                                                                 [loading]="deletingAnnexureRowKey() === annexureRowKey(question.id, row.id)"
-                                                                [disabled]="savingAnnexureQuestion() === question.id"
+                                                                [disabled]="isSavingAnnexureQuestion(question)"
                                                                 (click)="deleteAnnexureRow(question, row)"></button>
 
                                                         </span>
@@ -964,11 +1004,7 @@
                                             </label>
                                             
 
-                                            <textarea *ngIf="isTextAnswer(subsetQuestion); else subsetOptionAnswer"
-                                                class="answer-control" rows="2"
-                                                [(ngModel)]="subsetQuestion.answer_value"></textarea>
-
-                                            <ng-template #subsetOptionAnswer>
+                                            <ng-container *ngIf="!isTextAnswer(subsetQuestion)">
 
                                                 <select class="answer-control"
                                                     [(ngModel)]="subsetQuestion.answer_value">
@@ -984,7 +1020,7 @@
 
                                                 </select>
 
-                                            </ng-template>
+                                            </ng-container>
 
                                             <div class="answer-checks">
                                                 <label class="compliance-check">
@@ -1047,6 +1083,40 @@
                                                      </button>
                                                  </div>
                                              </div>
+                                        </div>
+                                    </div>
+
+                                    <div
+                                        *ngIf="managerComplianceComment(subsetQuestion) || complianceReviewerComment(subsetQuestion) || evidenceList(subsetQuestion.answer, 'compliance_evidence').length"
+                                        class="live-compliance-feedback"
+                                    >
+                                        <div *ngIf="managerComplianceComment(subsetQuestion)" class="live-feedback-box">
+                                            <span>Manager Response</span>
+                                            {{ managerComplianceComment(subsetQuestion) }}
+                                        </div>
+
+                                        <div *ngIf="complianceReviewerComment(subsetQuestion)" class="live-feedback-box">
+                                            <span>Reviewer Comment</span>
+                                            {{ complianceReviewerComment(subsetQuestion) }}
+                                        </div>
+
+                                        <div *ngIf="evidenceList(subsetQuestion.answer, 'compliance_evidence').length" class="live-feedback-box">
+                                            <span>Manager Evidence</span>
+                                            <span class="evidence-chip-list">
+                                                <span
+                                                    class="evidence-chip"
+                                                    *ngFor="let evidence of evidenceList(subsetQuestion.answer, 'compliance_evidence'); let ei = index"
+                                                >
+                                                    <button
+                                                        pButton
+                                                        type="button"
+                                                        icon="pi pi-eye"
+                                                        severity="secondary"
+                                                        [title]="'View manager evidence ' + (ei + 1)"
+                                                        (click)="viewEvidence(evidence)"
+                                                    ></button>
+                                                </span>
+                                            </span>
                                         </div>
                                     </div>
 
@@ -1195,19 +1265,19 @@
 
                                                 <button pButton type="button" icon="pi pi-upload" label="Upload CSV"
                                                     severity="secondary"
-                                                    [loading]="uploadingAnnexureQuestion() === subsetQuestion.id"
-                                                    [disabled]="savingAnnexureQuestion() === subsetQuestion.id"
+                                                    [loading]="isUploadingAnnexureQuestion(subsetQuestion)"
+                                                    [disabled]="isSavingAnnexureQuestion(subsetQuestion)"
                                                     (click)="subsetAnnexCsvInput.click()"></button>
 
                                                 <button pButton type="button" icon="pi pi-times" label="Clear"
                                                     severity="secondary"
-                                                    [disabled]="savingAnnexureQuestion() === subsetQuestion.id"
+                                                    [disabled]="isSavingAnnexureQuestion(subsetQuestion)"
                                                     (click)="clearAnnexureDraft(subsetQuestion)"></button>
 
                                                 <button pButton type="button" icon="pi pi-save"
                                                     [label]="subsetQuestion.annexure_draft.id ? 'Update Row' : 'Add Row'"
-                                                    [loading]="savingAnnexureQuestion() === subsetQuestion.id"
-                                                    [disabled]="uploadingAnnexureQuestion() === subsetQuestion.id"
+                                                    [loading]="isSavingAnnexureQuestion(subsetQuestion)"
+                                                    [disabled]="isSavingAnnexureQuestion(subsetQuestion) || isUploadingAnnexureQuestion(subsetQuestion)"
                                                     (click)="saveAnnexureRow(subsetQuestion)"></button>
                                             </div>
 
@@ -1258,6 +1328,14 @@
                                                                         </span>
                                                                     </span>
 
+                                                                    <span class="evidence-chip-list" *ngIf="evidenceList(row, 'compliance_evidence').length">
+                                                                        <span class="evidence-chip" *ngFor="let evidence of evidenceList(row, 'compliance_evidence'); let ei = index">
+                                                                            <button pButton type="button" icon="pi pi-eye"
+                                                                                severity="secondary" [title]="'View manager evidence ' + (ei + 1)"
+                                                                                (click)="viewEvidence(evidence)"></button>
+                                                                        </span>
+                                                                    </span>
+
                                                                     <input #subsetRowEvidenceInput type="file" multiple
                                                                         accept=".jpg,.jpeg,.png,.pdf,image/jpeg,image/png,application/pdf"
                                                                         style="display: none"
@@ -1279,7 +1357,7 @@
                                                                     <button pButton type="button" icon="pi pi-trash"
                                                                         severity="danger"
                                                                         [loading]="deletingAnnexureRowKey() === annexureRowKey(subsetQuestion.id, row.id)"
-                                                                        [disabled]="savingAnnexureQuestion() === subsetQuestion.id"
+                                                                        [disabled]="isSavingAnnexureQuestion(subsetQuestion)"
                                                                         (click)="deleteAnnexureRow(subsetQuestion, row)"></button>
                                                                 </span>
                                                             </td>

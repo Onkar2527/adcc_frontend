@@ -178,7 +178,7 @@
             pButton
             type="button"
             icon="pi pi-send"
-            [label]="audit.audit_status_id == 3 ? 'Resubmit to Reviewer' : 'Submit for Review'"
+            [label]="submitActionLabel(audit)"
             [loading]="submitting()"
             [disabled]="!submissionPreview()?.can_submit || checkingSubmission()"
             (click)="submitForReview()"

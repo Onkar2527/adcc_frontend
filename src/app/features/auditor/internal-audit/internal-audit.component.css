@@ -1276,6 +1276,32 @@
     font-weight: 700;
 }
 
+.live-compliance-feedback {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: .75rem;
+    margin-top: .75rem;
+}
+
+.live-feedback-box {
+    border: 1px solid var(--surface-border);
+    border-radius: .35rem;
+    background: var(--surface-50);
+    color: var(--text-color);
+    padding: .6rem .7rem;
+    font-size: .84rem;
+    line-height: 1.35;
+}
+
+.live-feedback-box span {
+    display: block;
+    color: var(--text-color-secondary);
+    font-size: .68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    margin-bottom: .25rem;
+}
+
 .question-main {
     display: grid;
     grid-template-columns: 1.7rem minmax(0, 1fr);
