@@ -485,30 +485,30 @@
 
                         <div class="response-tools">
                             <button
-                                *ngIf="answer.evidence"
+                                *ngFor="let evidence of evidenceList(answer); let ei = index"
                                 pButton
                                 type="button"
                                 icon="pi pi-paperclip"
                                 severity="secondary"
-                                title="View auditor evidence"
-                                (click)="viewEvidence(answer.evidence)"
+                                [title]="'View auditor evidence ' + (ei + 1)"
+                                (click)="viewEvidence(evidence)"
                             ></button>
 
-                            <ng-container *ngIf="answer.compliance_evidence as evidence; else answerEvidenceUpload">
-                                <button
-                                    pButton
-                                    type="button"
-                                    icon="pi pi-eye"
-                                    severity="secondary"
-                                    title="View compliance evidence"
-                                    (click)="viewComplianceEvidence(evidence)"
-                                ></button>
-                            </ng-container>
+                            <button
+                                *ngFor="let evidence of evidenceList(answer, 'compliance_evidence'); let ei = index"
+                                pButton
+                                type="button"
+                                icon="pi pi-eye"
+                                severity="secondary"
+                                [title]="'View compliance evidence ' + (ei + 1)"
+                                (click)="viewComplianceEvidence(evidence)"
+                            ></button>
 
-                            <ng-template #answerEvidenceUpload>
+                            <ng-container>
                                 <input
                                     #answerEvidenceInput
                                     type="file"
+                                    multiple
                                     accept=".jpg,.jpeg,.png,.pdf,image/jpeg,image/png,application/pdf"
                                     style="display: none"
                                     (change)="uploadEvidence('answer', answer, $event)"
@@ -523,7 +523,7 @@
                                     [loading]="uploadingEvidenceKey() === evidenceKey('answer', answer.id)"
                                     (click)="answerEvidenceInput.click()"
                                 ></button>
-                            </ng-template>
+                            </ng-container>
 
                             <p-tag
                                 [value]="isSaved(answer) ? 'Saved' : 'Pending'"
@@ -598,49 +598,47 @@
 
                                     <td>
                                         <button
-                                            *ngIf="row.evidence"
+                                            *ngFor="let evidence of evidenceList(row); let ei = index"
                                             pButton
                                             type="button"
                                             icon="pi pi-paperclip"
                                             severity="secondary"
-                                            title="View auditor evidence"
-                                            (click)="viewEvidence(row.evidence)"
+                                            [title]="'View auditor evidence ' + (ei + 1)"
+                                            (click)="viewEvidence(evidence)"
                                         ></button>
-                                        <span *ngIf="!row.evidence">-</span>
+                                        <span *ngIf="!evidenceList(row).length">-</span>
                                     </td>
 
                                     <td>
                                         <ng-container *ngIf="responseRequired(row)">
-                                            <ng-container *ngIf="row.compliance_evidence as evidence; else rowEvidenceUpload">
-                                                <button
-                                                    pButton
-                                                    type="button"
-                                                    icon="pi pi-eye"
-                                                    severity="secondary"
-                                                    title="View compliance evidence"
-                                                    (click)="viewComplianceEvidence(evidence)"
-                                                ></button>
-                                            </ng-container>
+                                            <button
+                                                *ngFor="let evidence of evidenceList(row, 'compliance_evidence'); let ei = index"
+                                                pButton
+                                                type="button"
+                                                icon="pi pi-eye"
+                                                severity="secondary"
+                                                [title]="'View compliance evidence ' + (ei + 1)"
+                                                (click)="viewComplianceEvidence(evidence)"
+                                            ></button>
 
-                                            <ng-template #rowEvidenceUpload>
-                                                <input
-                                                    #rowEvidenceInput
-                                                    type="file"
-                                                    accept=".jpg,.jpeg,.png,.pdf,image/jpeg,image/png,application/pdf"
-                                                    style="display: none"
-                                                    (change)="uploadEvidence('annexure', row, $event)"
-                                                />
+                                            <input
+                                                #rowEvidenceInput
+                                                type="file"
+                                                multiple
+                                                accept=".jpg,.jpeg,.png,.pdf,image/jpeg,image/png,application/pdf"
+                                                style="display: none"
+                                                (change)="uploadEvidence('annexure', row, $event)"
+                                            />
 
-                                                <button
-                                                    pButton
-                                                    type="button"
-                                                    icon="pi pi-upload"
-                                                    severity="secondary"
-                                                    title="Upload compliance evidence"
-                                                    [loading]="uploadingEvidenceKey() === evidenceKey('annexure', row.id)"
-                                                    (click)="rowEvidenceInput.click()"
-                                                ></button>
-                                            </ng-template>
+                                            <button
+                                                pButton
+                                                type="button"
+                                                icon="pi pi-upload"
+                                                severity="secondary"
+                                                title="Upload compliance evidence"
+                                                [loading]="uploadingEvidenceKey() === evidenceKey('annexure', row.id)"
+                                                (click)="rowEvidenceInput.click()"
+                                            ></button>
                                         </ng-container>
                                         <span *ngIf="!responseRequired(row)">-</span>
                                     </td>

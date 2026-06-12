@@ -3035,11 +3035,15 @@ export class CategoryAssessmentComponent
                 ||
                 rows.some(
                     (row: any) =>
-                        !row?.evidence,
+                        !this.evidenceList(
+                            row,
+                        ).length,
                 );
         }
 
-        return !question?.answer?.evidence;
+        return !this.evidenceList(
+            question?.answer,
+        ).length;
     }
 
     isEvidenceRequired(
@@ -3057,6 +3061,63 @@ export class CategoryAssessmentComponent
         return `${Number(question?.id || 0)}:${Number(row?.id || 0)}`;
     }
 
+    evidenceList(
+        source: any,
+        field = 'evidence',
+    ) {
+        if (
+            !source
+        ) {
+            return [];
+        }
+
+        const pluralField =
+            field === 'compliance_evidence'
+                ? 'compliance_evidences'
+                : 'evidences';
+
+        const list =
+            Array.isArray(
+                source?.[pluralField],
+            )
+                ? source[pluralField]
+                : [];
+
+        const single =
+            Array.isArray(
+                source?.[field],
+            )
+                ? source[field]
+                : source?.[field]
+                    ? [source[field]]
+                    : [];
+
+        const merged =
+            [...list, ...single];
+
+        const seen =
+            new Set<number>();
+
+        return merged.filter(
+            (evidence: any) => {
+                const id =
+                    Number(evidence?.id || 0);
+
+                if (
+                    !id
+                    ||
+                    seen.has(id)
+                ) {
+                    return false;
+                }
+
+                seen.add(id);
+
+                return true;
+            },
+        );
+    }
+
     uploadEvidence(
         question: any,
         event: Event,
@@ -3066,8 +3127,10 @@ export class CategoryAssessmentComponent
         const input =
             event.target as HTMLInputElement;
 
-        const file =
-            input.files?.[0];
+        const files =
+            Array.from(
+                input.files || [],
+            );
 
         input.value = '';
 
@@ -3075,7 +3138,7 @@ export class CategoryAssessmentComponent
             this.categoryDetail();
 
         if (
-            !file
+            !files.length
             ||
             !detail?.overview?.id
             ||
@@ -3103,7 +3166,12 @@ export class CategoryAssessmentComponent
         ];
 
         if (
-            !allowedTypes.includes(file.type)
+            files.some(
+                (file) =>
+                    !allowedTypes.includes(
+                        file.type,
+                    ),
+            )
         ) {
             this.notification.error(
                 'Only JPG, JPEG, PNG and PDF evidence files are allowed.',
@@ -3112,7 +3180,10 @@ export class CategoryAssessmentComponent
         }
 
         if (
-            file.size > 5 * 1024 * 1024
+            files.some(
+                (file) =>
+                    file.size > 5 * 1024 * 1024,
+            )
         ) {
             this.notification.error(
                 'Evidence file size must be less than or equal to 5 MB.',
@@ -3126,6 +3197,46 @@ export class CategoryAssessmentComponent
                 row,
             ),
         );
+
+        this.uploadEvidenceFiles(
+            question,
+            row,
+            files,
+            0,
+        );
+    }
+
+    private uploadEvidenceFiles(
+        question: any,
+        row: any,
+        files: File[],
+        index: number,
+    ) {
+        const detail =
+            this.categoryDetail();
+
+        const file =
+            files[index];
+
+        if (
+            !file
+        ) {
+            this.uploadingEvidenceKey.set('');
+
+            this.notification.success(
+                `${files.length} evidence file${files.length === 1 ? '' : 's'} uploaded successfully.`,
+            );
+
+            this.markSaved();
+            this.loadCategory(
+                Number(detail.overview.id),
+                Number(detail.category.id),
+                false,
+            );
+
+            return;
+        }
+
         this.service
             .uploadInternalAuditEvidence(
                 Number(detail.overview.id),
@@ -3138,25 +3249,23 @@ export class CategoryAssessmentComponent
             )
             .subscribe({
                 next: (res: any) => {
-                    this.uploadingEvidenceKey.set('');
-
                     if (
                         !res?.success
                     ) {
+                        this.uploadingEvidenceKey.set('');
+
                         this.notification.error(
                             res?.message || 'Unable to upload evidence.',
                         );
+
                         return;
                     }
 
-                    this.notification.success(
-                        res.message || 'Evidence uploaded successfully.',
-                    );
-                    this.markSaved();
-                    this.loadCategory(
-                        Number(detail.overview.id),
-                        Number(detail.category.id),
-                        false,
+                    this.uploadEvidenceFiles(
+                        question,
+                        row,
+                        files,
+                        index + 1,
                     );
                 },
                 error: (err) => {

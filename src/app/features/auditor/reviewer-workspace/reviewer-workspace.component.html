@@ -639,29 +639,29 @@
 
           <div class="review-buttons">
             <div
-              *ngIf="answer.evidence || (isComplianceReview() && answer.compliance_evidence)"
+              *ngIf="evidenceList(answer).length || (isComplianceReview() && evidenceList(answer, 'compliance_evidence').length)"
               class="evidence-actions"
             >
               <button
-                *ngIf="answer.evidence"
+                *ngFor="let evidence of evidenceList(answer); let ei = index"
                 pButton
                 type="button"
                 class="evidence-link"
                 icon="pi pi-paperclip"
                 severity="secondary"
-                [title]="isComplianceReview() ? 'View auditor evidence' : 'View evidence'"
-                (click)="viewEvidence(answer.evidence)"
+                [title]="(isComplianceReview() ? 'View auditor evidence ' : 'View evidence ') + (ei + 1)"
+                (click)="viewEvidence(evidence)"
               ></button>
 
               <button
-                *ngIf="isComplianceReview() && answer.compliance_evidence"
+                *ngFor="let evidence of (isComplianceReview() ? evidenceList(answer, 'compliance_evidence') : []); let ei = index"
                 pButton
                 type="button"
                 class="evidence-link"
                 icon="pi pi-eye"
                 severity="secondary"
-                title="View manager evidence"
-                (click)="viewEvidence(answer.compliance_evidence)"
+                [title]="'View manager evidence ' + (ei + 1)"
+                (click)="viewEvidence(evidence)"
               ></button>
             </div>
 
@@ -741,22 +741,22 @@
                   <td>
                     <div class="annexure-evidence-actions">
                       <button
-                        *ngIf="row.evidence"
+                        *ngFor="let evidence of evidenceList(row); let ei = index"
                         pButton
                         type="button"
                         icon="pi pi-paperclip"
                         severity="secondary"
-                        [title]="isComplianceReview() ? 'View auditor evidence' : 'View evidence'"
-                        (click)="viewEvidence(row.evidence)"
+                        [title]="(isComplianceReview() ? 'View auditor evidence ' : 'View evidence ') + (ei + 1)"
+                        (click)="viewEvidence(evidence)"
                       ></button>
                       <button
-                        *ngIf="isComplianceReview() && row.compliance_evidence"
+                        *ngFor="let evidence of (isComplianceReview() ? evidenceList(row, 'compliance_evidence') : []); let ei = index"
                         pButton
                         type="button"
                         icon="pi pi-eye"
                         severity="secondary"
-                        title="View manager evidence"
-                        (click)="viewEvidence(row.compliance_evidence)"
+                        [title]="'View manager evidence ' + (ei + 1)"
+                        (click)="viewEvidence(evidence)"
                       ></button>
                     </div>
                   </td>

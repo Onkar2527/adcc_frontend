@@ -1164,6 +1164,51 @@ export class ReviewerWorkspaceComponent implements OnInit {
             });
     }
 
+    evidenceList(
+        source: any,
+        field = 'evidence',
+    ) {
+        if (!source) {
+            return [];
+        }
+
+        const pluralField =
+            field === 'compliance_evidence'
+                ? 'compliance_evidences'
+                : 'evidences';
+
+        const list =
+            Array.isArray(source?.[pluralField])
+                ? source[pluralField]
+                : [];
+
+        const single =
+            Array.isArray(source?.[field])
+                ? source[field]
+                : source?.[field]
+                    ? [source[field]]
+                    : [];
+
+        const merged =
+            [...list, ...single];
+
+        const seen =
+            new Set<number>();
+
+        return merged.filter((evidence: any) => {
+            const id =
+                Number(evidence?.id || 0);
+
+            if (!id || seen.has(id)) {
+                return false;
+            }
+
+            seen.add(id);
+
+            return true;
+        });
+    }
+
     submitReview() {
         const assessmentId =
             Number(

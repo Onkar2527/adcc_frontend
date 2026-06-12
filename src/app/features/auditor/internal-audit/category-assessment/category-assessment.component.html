@@ -544,28 +544,26 @@
                                                 <span>Evidence to be uploaded</span>
                                             </label>
 
-                                            <ng-container
-                                                *ngIf="!buildIsAnnexureSelected(question) || question.answer?.evidence">
-                                                <ng-container
-                                                    *ngIf="question.answer?.evidence as evidence; else questionEvidenceUpload">
-                                                    <button pButton type="button" icon="pi pi-eye" severity="secondary"
-                                                        title="View evidence" (click)="viewEvidence(evidence)"></button>
+                                            <ng-container *ngIf="!buildIsAnnexureSelected(question) || evidenceList(question.answer).length">
+                                                <span class="evidence-chip-list" *ngIf="evidenceList(question.answer).length">
+                                                    <span class="evidence-chip" *ngFor="let evidence of evidenceList(question.answer); let ei = index">
+                                                        <button pButton type="button" icon="pi pi-eye" severity="secondary"
+                                                            [title]="'View evidence ' + (ei + 1)" (click)="viewEvidence(evidence)"></button>
 
-                                                    <button pButton type="button" icon="pi pi-trash" severity="danger"
-                                                        title="Remove evidence" (click)="deleteEvidence(evidence)"></button>
-                                                </ng-container>
+                                                        <button pButton type="button" icon="pi pi-trash" severity="danger"
+                                                            [title]="'Remove evidence ' + (ei + 1)" (click)="deleteEvidence(evidence)"></button>
+                                                    </span>
+                                                </span>
 
-                                                <ng-template #questionEvidenceUpload>
-                                                    <input #questionEvidenceInput type="file"
-                                                        accept=".jpg,.jpeg,.png,.pdf,image/jpeg,image/png,application/pdf"
-                                                        style="display: none" (change)="uploadEvidence(question, $event)" />
+                                                <input #questionEvidenceInput type="file" multiple
+                                                    accept=".jpg,.jpeg,.png,.pdf,image/jpeg,image/png,application/pdf"
+                                                    style="display: none" (change)="uploadEvidence(question, $event)" />
 
-                                                    <button pButton type="button" icon="pi pi-upload"
-                                                        severity="secondary" title="Upload evidence"
-                                                        [disabled]="!question.answer?.id"
-                                                        [loading]="uploadingEvidenceKey() === evidenceKey(question)"
-                                                        (click)="questionEvidenceInput.click()"></button>
-                                                </ng-template>
+                                                <button pButton type="button" icon="pi pi-upload"
+                                                    severity="secondary" title="Upload evidence"
+                                                    [disabled]="!question.answer?.id"
+                                                    [loading]="uploadingEvidenceKey() === evidenceKey(question)"
+                                                    (click)="questionEvidenceInput.click()"></button>
                                             </ng-container>
                                         </div>
                                     </div>
@@ -808,32 +806,29 @@
                                                     <td>
                                                         <span class="evidence-cell">
 
-                                                    <ng-container
-                                                        *ngIf="row.evidence as evidence; else rowEvidenceUpload">
+                                                    <span class="evidence-chip-list" *ngIf="evidenceList(row).length">
+                                                        <span class="evidence-chip" *ngFor="let evidence of evidenceList(row); let ei = index">
+                                                            <button pButton type="button" icon="pi pi-eye"
+                                                                severity="secondary"
+                                                                [title]="'View evidence ' + (ei + 1)"
+                                                                (click)="viewEvidence(evidence)"></button>
 
-                                                        <button pButton type="button" icon="pi pi-eye"
-                                                            severity="secondary"
-                                                            (click)="viewEvidence(evidence)"></button>
+                                                            <button pButton type="button" icon="pi pi-trash"
+                                                                severity="danger"
+                                                                [title]="'Remove evidence ' + (ei + 1)"
+                                                                (click)="deleteEvidence(evidence)"></button>
+                                                        </span>
+                                                    </span>
 
-                                                        <button pButton type="button" icon="pi pi-trash"
-                                                            severity="danger"
-                                                            (click)="deleteEvidence(evidence)"></button>
+                                                    <input #rowEvidenceInput type="file" multiple
+                                                        accept=".jpg,.jpeg,.png,.pdf,image/jpeg,image/png,application/pdf"
+                                                        style="display: none"
+                                                        (change)="uploadEvidence(question, $event, row)" />
 
-                                                    </ng-container>
-
-                                                    <ng-template #rowEvidenceUpload>
-
-                                                        <input #rowEvidenceInput type="file"
-                                                            accept=".jpg,.jpeg,.png,.pdf,image/jpeg,image/png,application/pdf"
-                                                            style="display: none"
-                                                            (change)="uploadEvidence(question, $event, row)" />
-
-                                                        <button pButton type="button" icon="pi pi-upload"
-                                                            severity="secondary"
-                                                            [loading]="uploadingEvidenceKey() === evidenceKey(question, row)"
-                                                            (click)="rowEvidenceInput.click()"></button>
-
-                                                    </ng-template>
+                                                    <button pButton type="button" icon="pi pi-upload"
+                                                        severity="secondary"
+                                                        [loading]="uploadingEvidenceKey() === evidenceKey(question, row)"
+                                                        (click)="rowEvidenceInput.click()"></button>
 
                                                         </span>
                                                     </td>
@@ -992,31 +987,29 @@
                                                         <span>Evidence to be uploaded</span>
                                                     </label>
 
-                                                    <ng-container
-                                                        *ngIf="!buildIsAnnexureSelected(subsetQuestion) || subsetQuestion.answer?.evidence">
-                                                        <ng-container
-                                                            *ngIf="subsetQuestion.answer?.evidence as evidence; else subsetEvidenceUpload">
-                                                            <button pButton type="button" icon="pi pi-eye"
-                                                                severity="secondary" title="View evidence"
-                                                                (click)="viewEvidence(evidence)"></button>
+                                                    <ng-container *ngIf="!buildIsAnnexureSelected(subsetQuestion) || evidenceList(subsetQuestion.answer).length">
+                                                        <span class="evidence-chip-list" *ngIf="evidenceList(subsetQuestion.answer).length">
+                                                            <span class="evidence-chip" *ngFor="let evidence of evidenceList(subsetQuestion.answer); let ei = index">
+                                                                <button pButton type="button" icon="pi pi-eye"
+                                                                    severity="secondary" [title]="'View evidence ' + (ei + 1)"
+                                                                    (click)="viewEvidence(evidence)"></button>
 
-                                                            <button pButton type="button" icon="pi pi-trash"
-                                                                severity="danger" title="Remove evidence"
-                                                                (click)="deleteEvidence(evidence)"></button>
-                                                        </ng-container>
+                                                                <button pButton type="button" icon="pi pi-trash"
+                                                                    severity="danger" [title]="'Remove evidence ' + (ei + 1)"
+                                                                    (click)="deleteEvidence(evidence)"></button>
+                                                            </span>
+                                                        </span>
 
-                                                        <ng-template #subsetEvidenceUpload>
-                                                            <input #subsetEvidenceInput type="file"
-                                                                accept=".jpg,.jpeg,.png,.pdf,image/jpeg,image/png,application/pdf"
-                                                                style="display: none"
-                                                                (change)="uploadEvidence(subsetQuestion, $event)" />
+                                                        <input #subsetEvidenceInput type="file" multiple
+                                                            accept=".jpg,.jpeg,.png,.pdf,image/jpeg,image/png,application/pdf"
+                                                            style="display: none"
+                                                            (change)="uploadEvidence(subsetQuestion, $event)" />
 
-                                                            <button pButton type="button" icon="pi pi-upload"
-                                                                severity="secondary" title="Upload evidence"
-                                                                [disabled]="!subsetQuestion.answer?.id"
-                                                                [loading]="uploadingEvidenceKey() === evidenceKey(subsetQuestion)"
-                                                                (click)="subsetEvidenceInput.click()"></button>
-                                                        </ng-template>
+                                                        <button pButton type="button" icon="pi pi-upload"
+                                                            severity="secondary" title="Upload evidence"
+                                                            [disabled]="!subsetQuestion.answer?.id"
+                                                            [loading]="uploadingEvidenceKey() === evidenceKey(subsetQuestion)"
+                                                            (click)="subsetEvidenceInput.click()"></button>
                                                     </ng-container>
                                                 </div>
                                             </div>
@@ -1229,28 +1222,27 @@
 
                                                             <td>
                                                                 <span class="evidence-cell">
-                                                                    <ng-container
-                                                                        *ngIf="row.evidence as evidence; else subsetRowEvidenceUpload">
-                                                                        <button pButton type="button" icon="pi pi-eye"
-                                                                            severity="secondary" title="View evidence"
-                                                                            (click)="viewEvidence(evidence)"></button>
+                                                                    <span class="evidence-chip-list" *ngIf="evidenceList(row).length">
+                                                                        <span class="evidence-chip" *ngFor="let evidence of evidenceList(row); let ei = index">
+                                                                            <button pButton type="button" icon="pi pi-eye"
+                                                                                severity="secondary" [title]="'View evidence ' + (ei + 1)"
+                                                                                (click)="viewEvidence(evidence)"></button>
 
-                                                                        <button pButton type="button" icon="pi pi-trash"
-                                                                            severity="danger" title="Remove evidence"
-                                                                            (click)="deleteEvidence(evidence)"></button>
-                                                                    </ng-container>
+                                                                            <button pButton type="button" icon="pi pi-trash"
+                                                                                severity="danger" [title]="'Remove evidence ' + (ei + 1)"
+                                                                                (click)="deleteEvidence(evidence)"></button>
+                                                                        </span>
+                                                                    </span>
 
-                                                                    <ng-template #subsetRowEvidenceUpload>
-                                                                        <input #subsetRowEvidenceInput type="file"
-                                                                            accept=".jpg,.jpeg,.png,.pdf,image/jpeg,image/png,application/pdf"
-                                                                            style="display: none"
-                                                                            (change)="uploadEvidence(subsetQuestion, $event, row)" />
+                                                                    <input #subsetRowEvidenceInput type="file" multiple
+                                                                        accept=".jpg,.jpeg,.png,.pdf,image/jpeg,image/png,application/pdf"
+                                                                        style="display: none"
+                                                                        (change)="uploadEvidence(subsetQuestion, $event, row)" />
 
-                                                                        <button pButton type="button" icon="pi pi-upload"
-                                                                            severity="secondary" title="Upload evidence"
-                                                                            [loading]="uploadingEvidenceKey() === evidenceKey(subsetQuestion, row)"
-                                                                            (click)="subsetRowEvidenceInput.click()"></button>
-                                                                    </ng-template>
+                                                                    <button pButton type="button" icon="pi pi-upload"
+                                                                        severity="secondary" title="Upload evidence"
+                                                                        [loading]="uploadingEvidenceKey() === evidenceKey(subsetQuestion, row)"
+                                                                        (click)="subsetRowEvidenceInput.click()"></button>
                                                                 </span>
                                                             </td>
 
