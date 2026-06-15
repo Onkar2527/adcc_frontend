@@ -499,6 +499,52 @@
                                     {{ reviewerComment(question) }}
                                 </div>
 
+                                <!-- Timeline of older comments -->
+                                <div *ngIf="getTimeline(question).length" class="answers-timeline">
+                                    <label class="timeline-title"><i class="pi pi-history"></i> Compliance History</label>
+                                    <div class="timeline-container">
+                                        <div *ngFor="let item of getTimeline(question); let index = index" class="timeline-item">
+                                            <div class="timeline-badge"></div>
+                                            <div class="timeline-content">
+                                                <div class="timeline-header-meta">
+                                                    <span class="round-badge">Round {{ index + 1 }}</span>
+                                                    <span class="timeline-date" *ngIf="item.created_at">{{ item.created_at | date: 'medium' }}</span>
+                                                </div>
+                                                <div *ngIf="item.compliance_reviewer_comment || item.audit_reviewer_comment || item.comment || item.reviewer_comment" class="timeline-entry reviewer-entry">
+                                                    <span class="timeline-author">Reviewer Feedback</span>
+                                                    <p class="timeline-text">{{ item.compliance_reviewer_comment || item.audit_reviewer_comment || item.comment || item.reviewer_comment }}</p>
+                                                </div>
+                                                <div *ngIf="item.compliance_response || item.response || item.answer_given" class="timeline-entry manager-entry">
+                                                    <span class="timeline-author">Manager Response</span>
+                                                    <p class="timeline-text">{{ item.compliance_response || item.response || item.answer_given }}</p>
+                                                    <div class="timeline-evidences" *ngIf="evidenceList(item).length || evidenceList(item, 'compliance_evidence').length">
+                                                        <button
+                                                            *ngFor="let evidence of evidenceList(item); let ei = index"
+                                                            pButton
+                                                            type="button"
+                                                            icon="pi pi-paperclip"
+                                                            severity="secondary"
+                                                            [title]="'View auditor evidence ' + (ei + 1)"
+                                                            (click)="viewEvidence(evidence)"
+                                                            class="p-button-sm"
+                                                        ></button>
+                                                        <button
+                                                            *ngFor="let evidence of evidenceList(item, 'compliance_evidence'); let ei = index"
+                                                            pButton
+                                                            type="button"
+                                                            icon="pi pi-eye"
+                                                            severity="secondary"
+                                                            [title]="'View compliance evidence ' + (ei + 1)"
+                                                            (click)="viewComplianceEvidence(evidence)"
+                                                            class="p-button-sm"
+                                                        ></button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
                             </div>
 
                         </div>
@@ -616,7 +662,7 @@
                                                 icon="pi pi-eye"
                                                 severity="secondary"
                                                 [title]="'View manager evidence ' + (ei + 1)"
-                                                (click)="viewEvidence(evidence)"
+                                                (click)="viewComplianceEvidence(evidence)"
                                             ></button>
                                         </span>
                                     </span>
@@ -817,6 +863,7 @@
                                                     <th>Business Risk</th>
                                                     <th>Control Risk</th>
                                                     <th>Risk Type</th>
+                                                    <th *ngIf="isReAudit(detail)">Reviewer Feedback</th>
                                                     <th>
                                                         Evidence
                                                         <small *ngIf="isEvidenceRequired(question)"
@@ -846,6 +893,32 @@
                                                         {{ riskCategoryLabel(row.risk_cat_id) }}
                                                     </td>
 
+                                                    <td *ngIf="isReAudit(detail)" class="reviewer-feedback-cell">
+                                                        <div>{{ row.compliance_reviewer_comment || '-' }}</div>
+                                                        
+                                                        <!-- Inline tiny timeline for annexure row -->
+                                                        <div *ngIf="getTimeline(row).length" class="row-timeline-inline">
+                                                            <div *ngFor="let item of getTimeline(row); let index = index" class="row-timeline-item">
+                                                                <div class="row-timeline-header">
+                                                                    <span class="round-badge">R{{ index + 1 }}</span>
+                                                                    <span class="date" *ngIf="item.created_at">{{ item.created_at | date: 'dd/MM/yy' }}</span>
+                                                                </div>
+                                                                <div class="row-timeline-body">
+                                                                    <div *ngIf="item.compliance_reviewer_comment || item.audit_reviewer_comment || item.comment || item.reviewer_comment" class="row-comment text-red">
+                                                                        <strong>Rev:</strong> {{ item.compliance_reviewer_comment || item.audit_reviewer_comment || item.comment || item.reviewer_comment }}
+                                                                    </div>
+                                                                    <div *ngIf="item.compliance_response || item.response || item.answer_given" class="row-comment text-blue">
+                                                                        <strong>Mgr:</strong> {{ item.compliance_response || item.response || item.answer_given }}
+                                                                        <span class="inline-evidences" *ngIf="evidenceList(item).length || evidenceList(item, 'compliance_evidence').length">
+                                                                            <button *ngFor="let e of evidenceList(item); let ei = index" type="button" class="btn-link" (click)="viewEvidence(e)" title="View auditor evidence"><i class="pi pi-paperclip"></i></button>
+                                                                            <button *ngFor="let e of evidenceList(item, 'compliance_evidence'); let ei = index" type="button" class="btn-link" (click)="viewComplianceEvidence(e)" title="View manager evidence"><i class="pi pi-eye"></i></button>
+                                                                        </span>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </td>
+
                                                     <td>
                                                         <span class="evidence-cell">
 
@@ -868,7 +941,7 @@
                                                             <button pButton type="button" icon="pi pi-eye"
                                                                 severity="secondary"
                                                                 [title]="'View manager evidence ' + (ei + 1)"
-                                                                (click)="viewEvidence(evidence)"></button>
+                                                                (click)="viewComplianceEvidence(evidence)"></button>
                                                         </span>
                                                     </span>
 
@@ -987,6 +1060,52 @@
                                             class="reviewer-feedback">
                                             <span>Reviewer Comment</span>
                                             {{ reviewerComment(subsetQuestion) }}
+                                        </div>
+
+                                        <!-- Timeline of older comments -->
+                                        <div *ngIf="getTimeline(subsetQuestion).length" class="answers-timeline">
+                                            <label class="timeline-title"><i class="pi pi-history"></i> Compliance History</label>
+                                            <div class="timeline-container">
+                                                <div *ngFor="let item of getTimeline(subsetQuestion); let index = index" class="timeline-item">
+                                                    <div class="timeline-badge"></div>
+                                                    <div class="timeline-content">
+                                                        <div class="timeline-header-meta">
+                                                            <span class="round-badge">Round {{ index + 1 }}</span>
+                                                            <span class="timeline-date" *ngIf="item.created_at">{{ item.created_at | date: 'medium' }}</span>
+                                                        </div>
+                                                        <div *ngIf="item.compliance_reviewer_comment || item.audit_reviewer_comment || item.comment || item.reviewer_comment" class="timeline-entry reviewer-entry">
+                                                            <span class="timeline-author">Reviewer Feedback</span>
+                                                            <p class="timeline-text">{{ item.compliance_reviewer_comment || item.audit_reviewer_comment || item.comment || item.reviewer_comment }}</p>
+                                                        </div>
+                                                        <div *ngIf="item.compliance_response || item.response || item.answer_given" class="timeline-entry manager-entry">
+                                                            <span class="timeline-author">Manager Response</span>
+                                                            <p class="timeline-text">{{ item.compliance_response || item.response || item.answer_given }}</p>
+                                                            <div class="timeline-evidences" *ngIf="evidenceList(item).length || evidenceList(item, 'compliance_evidence').length">
+                                                                <button
+                                                                    *ngFor="let evidence of evidenceList(item); let ei = index"
+                                                                    pButton
+                                                                    type="button"
+                                                                    icon="pi pi-paperclip"
+                                                                    severity="secondary"
+                                                                    [title]="'View auditor evidence ' + (ei + 1)"
+                                                                    (click)="viewEvidence(evidence)"
+                                                                    class="p-button-sm"
+                                                                ></button>
+                                                                <button
+                                                                    *ngFor="let evidence of evidenceList(item, 'compliance_evidence'); let ei = index"
+                                                                    pButton
+                                                                    type="button"
+                                                                    icon="pi pi-eye"
+                                                                    severity="secondary"
+                                                                    [title]="'View compliance evidence ' + (ei + 1)"
+                                                                    (click)="viewComplianceEvidence(evidence)"
+                                                                    class="p-button-sm"
+                                                                ></button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
 
                                     </div>
@@ -1113,7 +1232,7 @@
                                                         icon="pi pi-eye"
                                                         severity="secondary"
                                                         [title]="'View manager evidence ' + (ei + 1)"
-                                                        (click)="viewEvidence(evidence)"
+                                                        (click)="viewComplianceEvidence(evidence)"
                                                     ></button>
                                                 </span>
                                             </span>
@@ -1293,6 +1412,7 @@
                                                             <th>Business Risk</th>
                                                             <th>Control Risk</th>
                                                             <th>Risk Type</th>
+                                                            <th *ngIf="isReAudit(detail)">Reviewer Feedback</th>
                                                             <th>
                                                                 Evidence
                                                                 <small *ngIf="isEvidenceRequired(subsetQuestion)"
@@ -1314,6 +1434,32 @@
                                                             <td>{{ riskLabel(row.control_risk, 'control_risks') }}</td>
                                                             <td>{{ riskCategoryLabel(row.risk_cat_id) }}</td>
 
+                                                            <td *ngIf="isReAudit(detail)" class="reviewer-feedback-cell">
+                                                                <div>{{ row.compliance_reviewer_comment || '-' }}</div>
+                                                                
+                                                                <!-- Inline tiny timeline for annexure row -->
+                                                                <div *ngIf="getTimeline(row).length" class="row-timeline-inline">
+                                                                    <div *ngFor="let item of getTimeline(row); let index = index" class="row-timeline-item">
+                                                                        <div class="row-timeline-header">
+                                                                            <span class="round-badge">R{{ index + 1 }}</span>
+                                                                            <span class="date" *ngIf="item.created_at">{{ item.created_at | date: 'dd/MM/yy' }}</span>
+                                                                        </div>
+                                                                        <div class="row-timeline-body">
+                                                                            <div *ngIf="item.compliance_reviewer_comment || item.audit_reviewer_comment || item.comment || item.reviewer_comment" class="row-comment text-red">
+                                                                                <strong>Rev:</strong> {{ item.compliance_reviewer_comment || item.audit_reviewer_comment || item.comment || item.reviewer_comment }}
+                                                                            </div>
+                                                                            <div *ngIf="item.compliance_response || item.response || item.answer_given" class="row-comment text-blue">
+                                                                                <strong>Mgr:</strong> {{ item.compliance_response || item.response || item.answer_given }}
+                                                                                <span class="inline-evidences" *ngIf="evidenceList(item).length || evidenceList(item, 'compliance_evidence').length">
+                                                                                    <button *ngFor="let e of evidenceList(item); let ei = index" type="button" class="btn-link" (click)="viewEvidence(e)" title="View auditor evidence"><i class="pi pi-paperclip"></i></button>
+                                                                                    <button *ngFor="let e of evidenceList(item, 'compliance_evidence'); let ei = index" type="button" class="btn-link" (click)="viewComplianceEvidence(e)" title="View manager evidence"><i class="pi pi-eye"></i></button>
+                                                                                </span>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </td>
+
                                                             <td>
                                                                 <span class="evidence-cell">
                                                                     <span class="evidence-chip-list" *ngIf="evidenceList(row).length">
@@ -1332,7 +1478,7 @@
                                                                         <span class="evidence-chip" *ngFor="let evidence of evidenceList(row, 'compliance_evidence'); let ei = index">
                                                                             <button pButton type="button" icon="pi pi-eye"
                                                                                 severity="secondary" [title]="'View manager evidence ' + (ei + 1)"
-                                                                                (click)="viewEvidence(evidence)"></button>
+                                                                                (click)="viewComplianceEvidence(evidence)"></button>
                                                                         </span>
                                                                     </span>
 

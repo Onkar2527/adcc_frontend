@@ -2271,3 +2271,225 @@ textarea.answer-control1 {
     outline: none;
 }
 
+/* Compliance & Re-Compliance Timeline */
+.answers-timeline {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px dashed var(--surface-border);
+}
+
+.timeline-title {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.78rem;
+    font-weight: 800;
+    color: var(--text-color-secondary);
+    text-transform: uppercase;
+    margin-bottom: 0.75rem;
+    letter-spacing: 0.05em;
+}
+
+.timeline-title i {
+    font-size: 0.9rem;
+    color: var(--primary-color);
+}
+
+.timeline-container {
+    position: relative;
+    padding-left: 1.5rem;
+    margin-left: 0.5rem;
+    border-left: 2px solid var(--surface-200);
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.timeline-item {
+    position: relative;
+}
+
+.timeline-badge {
+    position: absolute;
+    left: calc(-1.5rem - 6px);
+    top: 0.25rem;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--primary-color);
+    border: 2px solid var(--surface-card);
+    box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.2);
+}
+
+.timeline-item:hover .timeline-badge {
+    transform: scale(1.25);
+    transition: transform 0.2s ease-in-out;
+}
+
+.timeline-content {
+    background: var(--surface-50);
+    border: 1px solid var(--surface-border);
+    border-radius: 0.4rem;
+    padding: 0.85rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    transition: box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.timeline-content:hover {
+    border-color: var(--primary-color);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+}
+
+.timeline-header-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.25rem;
+}
+
+.timeline-entry {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.reviewer-entry {
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid color-mix(in srgb, var(--surface-border) 50%, transparent);
+}
+
+.reviewer-entry:last-child {
+    border-bottom: 0;
+    padding-bottom: 0;
+}
+
+.timeline-author {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 0.72rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+}
+
+.reviewer-entry .timeline-author {
+    color: var(--red-600);
+}
+
+.manager-entry .timeline-author {
+    color: var(--primary-color);
+}
+
+.timeline-date {
+    font-size: 0.68rem;
+    color: var(--text-color-secondary);
+    font-weight: 400;
+    text-transform: none;
+}
+
+.timeline-text {
+    margin: 0;
+    font-size: 0.86rem;
+    line-height: 1.4;
+    color: var(--text-color);
+    word-break: break-word;
+}
+
+.timeline-evidences {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    margin-top: 0.35rem;
+}
+
+.timeline-evidences .p-button {
+    height: 1.8rem;
+    padding: 0 0.5rem;
+    font-size: 0.75rem;
+}
+
+/* Inline Timeline inside Table Cells */
+.row-timeline-inline {
+    margin-top: 0.5rem;
+    padding-top: 0.5rem;
+    border-top: 1px dashed var(--surface-border);
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    max-width: 20rem;
+}
+
+.row-timeline-item {
+    background: var(--surface-100);
+    border: 1px solid var(--surface-border);
+    border-radius: 0.25rem;
+    padding: 0.35rem 0.5rem;
+    font-size: 0.76rem;
+}
+
+.row-timeline-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.2rem;
+    font-weight: 700;
+}
+
+.round-badge {
+    background: var(--primary-color);
+    color: var(--primary-color-text, #ffffff);
+    padding: 0.05rem 0.25rem;
+    border-radius: 0.25rem;
+    font-size: 0.65rem;
+}
+
+.row-timeline-header .date {
+    color: var(--text-color-secondary);
+    font-size: 0.65rem;
+}
+
+.row-timeline-body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+}
+
+.row-comment {
+    line-height: 1.3;
+}
+
+.row-comment.text-red {
+    color: var(--red-600);
+}
+
+.row-comment.text-blue {
+    color: var(--primary-color);
+}
+
+.inline-evidences {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.15rem;
+    margin-left: 0.25rem;
+}
+
+.btn-link {
+    background: none;
+    border: none;
+    padding: 0 0.15rem;
+    cursor: pointer;
+    color: var(--text-color-secondary);
+    transition: color 0.15s ease;
+}
+
+.btn-link:hover {
+    color: var(--primary-color);
+}
+
+.btn-link i {
+    font-size: 0.75rem;
+}
+

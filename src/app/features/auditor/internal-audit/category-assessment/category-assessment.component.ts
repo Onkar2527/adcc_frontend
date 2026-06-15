@@ -1328,6 +1328,69 @@ export class CategoryAssessmentComponent
         ) === 3;
     }
 
+    getTimeline(observation: any): any[] {
+        if (!observation) {
+            return [];
+        }
+        let timeline = observation.answers_data_timeline || observation.answer?.answers_data_timeline;
+        if (!timeline) {
+            return [];
+        }
+        if (typeof timeline === 'string') {
+            try {
+                return JSON.parse(timeline);
+            } catch (e) {
+                return [];
+            }
+        }
+        return Array.isArray(timeline) ? timeline : [];
+    }
+
+    viewComplianceEvidence(
+        evidence: any,
+    ) {
+        const detail =
+            this.categoryDetail();
+
+        if (
+            !detail?.overview?.id
+            ||
+            !evidence?.id
+        ) {
+            return;
+        }
+
+        this.service
+            .viewComplianceUploadedEvidence(
+                Number(detail.overview.id),
+                Number(evidence.id),
+                this.employeeId,
+            )
+            .subscribe({
+                next: (blob: Blob) => {
+                    const url =
+                        URL.createObjectURL(blob);
+
+                    window.open(
+                        url,
+                        '_blank',
+                    );
+
+                    setTimeout(
+                        () =>
+                            URL.revokeObjectURL(url),
+                        60000,
+                    );
+                },
+                error: (err) => {
+                    this.notification.error(
+                        err?.error?.message
+                        || 'Unable to open compliance evidence.',
+                    );
+                },
+            });
+    }
+
     reviewerComment(
         question: any,
     ) {
