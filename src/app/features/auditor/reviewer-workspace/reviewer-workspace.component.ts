@@ -134,7 +134,7 @@ export class ReviewerWorkspaceComponent implements OnInit {
     remarkMessage = '';
 
     reviewFilter =
-        signal<'all' | 'pending' | 'highRisk' | 'rework' | 'accepted'>('all');
+        signal<'all' | 'pending' | 'highRisk' | 'rework' | 'partial' | 'accepted'>('all');
 
     dashboardUnits = computed(() => {
         let rows =
@@ -313,7 +313,7 @@ export class ReviewerWorkspaceComponent implements OnInit {
 
         const request =
             Number(assessment.audit_status_id) === 5
-            || assessment.live_manager_compliance === true
+                || assessment.live_manager_compliance === true
                 ? this.service.getReviewerComplianceAssessment(
                     Number(assessment.id),
                     this.employeeId(),
@@ -431,8 +431,14 @@ export class ReviewerWorkspaceComponent implements OnInit {
         return Number(
             this.selected()?.audit_status_id || 0,
         ) === 5
-        || this.selected()?.live_manager_compliance === true
-        || this.detail()?.overview?.live_manager_compliance === true;
+            || this.selected()?.live_manager_compliance === true
+            || this.detail()?.overview?.live_manager_compliance === true;
+    }
+
+    isRegularComplianceReview() {
+        return this.isComplianceReview()
+            && this.selected()?.live_manager_compliance !== true
+            && this.detail()?.overview?.live_manager_compliance !== true;
     }
 
     getTimeline(observation: any): any[] {
@@ -488,12 +494,24 @@ export class ReviewerWorkspaceComponent implements OnInit {
             return 'Carry Forward';
         }
 
+        if (
+            Number(status) === 7
+        ) {
+            return 'Partially Pass';
+        }
+
+        if (
+            Number(status) === 8
+        ) {
+            return 'Partially Pass Response Pending';
+        }
+
         return 'Pending';
     }
 
     statusSeverity(
         status: number,
-    ): 'success' | 'danger' | 'secondary' | 'info' {
+    ): 'success' | 'danger' | 'secondary' | 'info' | 'warn' {
         if (
             Number(status) === 2
         ) {
@@ -510,6 +528,12 @@ export class ReviewerWorkspaceComponent implements OnInit {
             Number(status) === 5
         ) {
             return 'info';
+        }
+
+        if (
+            [7, 8].includes(Number(status))
+        ) {
+            return 'warn';
         }
 
         return 'secondary';
@@ -583,7 +607,7 @@ export class ReviewerWorkspaceComponent implements OnInit {
                         2,
                         3,
                         ...(this.isComplianceReview()
-                            ? [5]
+                            ? [5, 7]
                             : []),
                     ].includes(
                         Number(
@@ -620,13 +644,25 @@ export class ReviewerWorkspaceComponent implements OnInit {
     }
 
     reviewFilterCount(
-        filter: 'all' | 'pending' | 'highRisk' | 'rework' | 'accepted',
+        filter: 'all' | 'pending' | 'highRisk' | 'rework' | 'partial' | 'accepted',
     ) {
         const answers =
             this.allReviewAnswers();
 
         if (filter === 'all') {
             return answers.length;
+        }
+
+        if (filter === 'rework') {
+            return Number(
+                this.detail()?.counts?.rejected || 0,
+            );
+        }
+
+        if (filter === 'partial') {
+            return Number(
+                this.detail()?.counts?.partially_passed || 0,
+            );
         }
 
         return answers.filter(
@@ -646,6 +682,7 @@ export class ReviewerWorkspaceComponent implements OnInit {
             rework: this.isComplianceReview()
                 ? 'Re-compliance needed'
                 : 'Re-audit needed',
+            partial: 'Partially passed observations',
             accepted: 'Accepted observations',
         };
 
@@ -654,7 +691,7 @@ export class ReviewerWorkspaceComponent implements OnInit {
 
     private answerMatchesReviewFilter(
         answer: any,
-        filter: 'pending' | 'highRisk' | 'rework' | 'accepted',
+        filter: 'pending' | 'highRisk' | 'rework' | 'partial' | 'accepted',
     ) {
         const answerStatus =
             Number(
@@ -681,7 +718,7 @@ export class ReviewerWorkspaceComponent implements OnInit {
                     2,
                     3,
                     ...(this.isComplianceReview()
-                        ? [5]
+                        ? [5, 7, 8]
                         : []),
                 ];
 
@@ -705,6 +742,14 @@ export class ReviewerWorkspaceComponent implements OnInit {
                 || hasAnnexureStatus(
                     (status) =>
                         status === 2,
+                );
+        }
+
+        if (filter === 'partial') {
+            return [7, 8].includes(answerStatus)
+                || hasAnnexureStatus(
+                    (status: number) =>
+                        [7, 8].includes(status),
                 );
         }
 
@@ -1017,14 +1062,25 @@ export class ReviewerWorkspaceComponent implements OnInit {
             return;
         }
 
-        // Validate that all modified rows have a selected action (2, 3, or 5)
+        // Validate that all modified rows have a selected review action.
         for (const row of rowsToSave) {
             const action = Number(row.temp_action);
             if (
-                ![2, 3, 5].includes(action)
+                ![2, 3, 5, 7].includes(action)
             ) {
                 this.notification.error(
                     'Please select a valid action (Accept, Reject, etc.) for all modified rows.',
+                );
+                return;
+            }
+
+            if (
+                this.isComplianceReview()
+                && action === 7
+                && !String(this.reviewComment(row) || '').trim()
+            ) {
+                this.notification.error(
+                    'Enter a reviewer comment for every Partially Pass annexure row.',
                 );
                 return;
             }
@@ -1087,6 +1143,17 @@ export class ReviewerWorkspaceComponent implements OnInit {
         if (
             !assessmentId
         ) {
+            return;
+        }
+
+        if (
+            this.isComplianceReview()
+            && Number(action) === 7
+            && !String(this.reviewComment(observation) || '').trim()
+        ) {
+            this.notification.error(
+                'Enter a reviewer comment before marking the point as Partially Pass.',
+            );
             return;
         }
 
