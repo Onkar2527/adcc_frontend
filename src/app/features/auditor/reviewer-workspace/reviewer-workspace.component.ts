@@ -313,7 +313,7 @@ export class ReviewerWorkspaceComponent implements OnInit {
 
         const request =
             Number(assessment.audit_status_id) === 5
-            || assessment.live_manager_compliance === true
+                || assessment.live_manager_compliance === true
                 ? this.service.getReviewerComplianceAssessment(
                     Number(assessment.id),
                     this.employeeId(),
@@ -431,14 +431,28 @@ export class ReviewerWorkspaceComponent implements OnInit {
         return Number(
             this.selected()?.audit_status_id || 0,
         ) === 5
-        || this.selected()?.live_manager_compliance === true
-        || this.detail()?.overview?.live_manager_compliance === true;
+            || this.selected()?.live_manager_compliance === true
+            || this.detail()?.overview?.live_manager_compliance === true;
     }
 
     isRegularComplianceReview() {
         return this.isComplianceReview()
             && this.selected()?.live_manager_compliance !== true
             && this.detail()?.overview?.live_manager_compliance !== true;
+    }
+
+    getTimeline(observation: any): any[] {
+        if (!observation || !observation.answers_data_timeline) {
+            return [];
+        }
+        if (typeof observation.answers_data_timeline === 'string') {
+            try {
+                return JSON.parse(observation.answers_data_timeline);
+            } catch (e) {
+                return [];
+            }
+        }
+        return Array.isArray(observation.answers_data_timeline) ? observation.answers_data_timeline : [];
     }
 
     reviewStatus(
