@@ -653,6 +653,18 @@ export class ReviewerWorkspaceComponent implements OnInit {
             return answers.length;
         }
 
+        if (filter === 'rework') {
+            return Number(
+                this.detail()?.counts?.rejected || 0,
+            );
+        }
+
+        if (filter === 'partial') {
+            return Number(
+                this.detail()?.counts?.partially_passed || 0,
+            );
+        }
+
         return answers.filter(
             (answer: any) =>
                 this.answerMatchesReviewFilter(
