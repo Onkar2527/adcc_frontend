@@ -63,6 +63,10 @@ export class AuditUnitDashboardComponent implements OnInit {
     error =
         signal('');
 
+    readOnly = false;
+
+    backRoute = '/auditor/audit-dashboard';
+
     visibleYears =
         computed(() =>
             this.years()
@@ -126,6 +130,7 @@ export class AuditUnitDashboardComponent implements OnInit {
 
                     if (
                         year.can_start
+                        && !this.readOnly
                     ) {
                         rows.push({
                             year,
@@ -138,6 +143,13 @@ export class AuditUnitDashboardComponent implements OnInit {
         });
 
     ngOnInit() {
+        this.readOnly =
+            this.route.snapshot.data['readOnly'] === true;
+
+        this.backRoute =
+            this.route.snapshot.data['backRoute']
+            || '/auditor/audit-dashboard';
+
         const auditUnitId =
             Number(
                 this.route.snapshot.paramMap.get(
@@ -222,7 +234,7 @@ export class AuditUnitDashboardComponent implements OnInit {
 
     backToDashboard() {
         this.router.navigate([
-            '/auditor/audit-dashboard',
+            this.backRoute,
         ]);
     }
 
@@ -240,6 +252,29 @@ export class AuditUnitDashboardComponent implements OnInit {
             '/auditor/internal-audit',
             assessment.id,
         ]);
+    }
+
+    openCarryForwardReport(
+        assessment: any,
+        year: any,
+    ) {
+        if (
+            !assessment?.id
+            || Number(assessment?.carry_forward_count || 0) <= 0
+        ) {
+            return;
+        }
+
+        this.router.navigate(
+            ['/reports/carry-forward-report'],
+            {
+                queryParams: {
+                    source_assessment_id: Number(assessment.id),
+                    audit_unit_id: Number(assessment.audit_unit_id),
+                    financial_year: Number(year?.id || assessment.year_id || 0),
+                },
+            },
+        );
     }
 
     startAssessment(

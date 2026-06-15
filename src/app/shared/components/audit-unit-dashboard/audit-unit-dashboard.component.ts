@@ -64,11 +64,13 @@ export class AuditUnitDashboardComponent {
     @Input() emptyTitle = 'No audit units found';
     @Input() emptyMessage = 'Try changing the search or status filter.';
     @Input() refreshLabel = 'Refresh';
+    @Input() detailsActionLabel: string | null = null;
 
     @Output() searchChange = new EventEmitter<string>();
     @Output() selectedStatusChange = new EventEmitter<any>();
     @Output() refresh = new EventEmitter<void>();
     @Output() openUnit = new EventEmitter<any>();
+    @Output() viewDetails = new EventEmitter<any>();
 
     defaultSummaryItems() {
         return [
@@ -180,5 +182,9 @@ export class AuditUnitDashboardComponent {
 
     onOpenUnit(item: any) {
         this.openUnit.emit(item);
+    }
+
+    onViewDetails(item: any) {
+        this.viewDetails.emit(item);
     }
 }

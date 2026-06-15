@@ -361,6 +361,24 @@ export class ReviewerWorkspaceComponent implements OnInit {
             });
     }
 
+    viewAssessmentDetails(
+        assessment: any,
+    ) {
+        const auditUnitId = Number(
+            assessment?.audit_unit_id || 0,
+        );
+
+        if (!auditUnitId) {
+            return;
+        }
+
+        this.router.navigate([
+            '/auditor/reviewer/unit',
+            auditUnitId,
+            'details',
+        ]);
+    }
+
     closeAssessment() {
         this.reviewFilter.set('all');
         this.showRemarksPanel.set(false);

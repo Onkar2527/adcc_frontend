@@ -30,6 +30,7 @@
     emptyTitle="No assessment is pending for review"
     emptyMessage="Assigned reviews will appear here once an auditor or manager submits them."
     refreshLabel="Refresh"
+    detailsActionLabel="View assessment history"
     [units]="dashboardUnits()"
     [loading]="loadingQueue()"
     [search]="search()"
@@ -47,6 +48,7 @@
     (selectedStatusChange)="selectedStatus.set($event)"
     (refresh)="loadQueue()"
     (openUnit)="openAssessment($event)"
+    (viewDetails)="viewAssessmentDetails($event)"
   ></app-audit-unit-dashboard>
 
   <section *ngIf="selected()" class="review-detail">

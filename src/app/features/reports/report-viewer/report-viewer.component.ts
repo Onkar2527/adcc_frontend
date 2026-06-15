@@ -274,12 +274,37 @@ export class ReportViewerComponent implements OnInit {
               ? this.filters[filter.key]
               : [];
           });
+
+        if (slug === 'carry-forward-report') {
+          const sourceAssessmentId = Number(
+            this.route.snapshot.queryParamMap.get('source_assessment_id') || 0,
+          );
+          const auditUnitId = this.route.snapshot.queryParamMap.get('audit_unit_id');
+          const financialYear = this.route.snapshot.queryParamMap.get('financial_year');
+
+          if (sourceAssessmentId > 0) {
+            this.filters['source_assessment_id'] = sourceAssessmentId;
+          }
+          if (auditUnitId) {
+            this.filters['audit_unit_id'] = auditUnitId;
+          }
+          if (financialYear) {
+            this.filters['financial_year'] = financialYear;
+          }
+        }
         // Programmatically preload logo image to ensure browser caching
         const logoUrl = definition.brand?.logoUrl || '/assets/images/logos/auditpro-logo.png';
         const img = new Image();
         img.src = logoUrl;
 
         this.loading.set(false);
+
+        if (
+          slug === 'carry-forward-report'
+          && Number(this.filters['source_assessment_id'] || 0) > 0
+        ) {
+          this.findReport();
+        }
       },
       error: (err) => {
         this.definition.set(null);

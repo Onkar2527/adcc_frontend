@@ -436,3 +436,9 @@
 .unit-card__metrics--compact {
     grid-template-columns: repeat(auto-fit, minmax(8rem, 1fr));
 }
+
+.unit-card__footer-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}

@@ -130,14 +130,27 @@
             <ng-template #readyToOpen>Ready to open</ng-template>
           </span>
 
-          <button
-            type="button"
-            class="unit-open-btn"
-            aria-label="Open audit unit"
-            (click)="$event.stopPropagation(); onOpenUnit(item)"
-          >
-            <i class="pi pi-arrow-right"></i>
-          </button>
+          <div class="unit-card__footer-actions">
+            <button
+              *ngIf="detailsActionLabel"
+              type="button"
+              class="unit-open-btn"
+              [attr.aria-label]="detailsActionLabel"
+              [title]="detailsActionLabel"
+              (click)="$event.stopPropagation(); onViewDetails(item)"
+            >
+              <i class="pi pi-history"></i>
+            </button>
+
+            <button
+              type="button"
+              class="unit-open-btn"
+              aria-label="Open audit unit"
+              (click)="$event.stopPropagation(); onOpenUnit(item)"
+            >
+              <i class="pi pi-arrow-right"></i>
+            </button>
+          </div>
         </div>
       </article>
     </div>

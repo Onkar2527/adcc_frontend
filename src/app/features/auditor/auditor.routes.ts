@@ -11,6 +11,14 @@ import { ComplianceWorkspaceComponent } from './compliance-workspace/compliance-
 export const AUDITOR_ROUTES: Routes = [
     { path: 'audit-dashboard', component: AuditDashboardComponent },
     { path: 'reviewer', component: ReviewerWorkspaceComponent },
+    {
+        path: 'reviewer/unit/:auditUnitId/details',
+        component: AuditUnitDashboardComponent,
+        data: {
+            readOnly: true,
+            backRoute: '/auditor/reviewer',
+        },
+    },
     { path: 'compliance', component: ComplianceWorkspaceComponent },
     { path: 'internal-audit/unit/:auditUnitId/start/:yearId', component: StartAssessmentComponent },
     { path: 'internal-audit/unit/:auditUnitId', component: AuditUnitDashboardComponent },

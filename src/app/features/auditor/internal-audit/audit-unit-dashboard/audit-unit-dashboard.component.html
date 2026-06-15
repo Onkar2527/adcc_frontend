@@ -1,7 +1,7 @@
 <section class="unit-assessment-page">
     <header class="unit-assessment-header">
         <div>
-            <p>Internal Audit</p>
+            <p>{{ readOnly ? 'Review History' : 'Internal Audit' }}</p>
             <h1>Assessment Details</h1>
         </div>
 
@@ -9,7 +9,7 @@
             pButton
             type="button"
             icon="pi pi-arrow-left"
-            label="Assigned Units"
+            [label]="readOnly ? 'Reviewer Workspace' : 'Assigned Units'"
             severity="secondary"
             class="p-button-outlined"
             (click)="backToDashboard()"
@@ -105,13 +105,13 @@
                             <th>Audit Status</th>
                             <th>Compliance Status</th>
                             <th>Due Date</th>
-                            <th class="text-right">Action</th>
+                            <th *ngIf="!readOnly" class="text-right">Action</th>
                         </tr>
                     </thead>
 
                     <tbody>
                         <tr *ngIf="assessmentRows().length === 0">
-                            <td colspan="6" class="empty-cell">
+                            <td [attr.colspan]="readOnly ? 5 : 6" class="empty-cell">
                                 No assessment details found.
                             </td>
                         </tr>
@@ -129,6 +129,16 @@
                                         {{ row.assessment.assesment_period_to | date: 'dd MMM yyyy' }}
                                     </strong>
                                     <span>Frequency: {{ row.assessment.frequency || unit.frequency || '-' }} Months</span>
+
+                                    <button
+                                        *ngIf="row.assessment.carry_forward_count > 0"
+                                        pButton
+                                        type="button"
+                                        class="p-button-sm p-button-text mt-1"
+                                        icon="pi pi-file"
+                                        [label]="'Carry Forward Report (' + row.assessment.carry_forward_count + ')'"
+                                        (click)="openCarryForwardReport(row.assessment, row.year)"
+                                    ></button>
                                 </ng-container>
 
                                 <ng-template #noAssessmentPeriod>
@@ -169,7 +179,7 @@
                                 <span *ngIf="!hasVisibleDueDate(row.assessment)">-</span>
                             </td>
 
-                            <td class="text-right">
+                            <td *ngIf="!readOnly" class="text-right">
                                 <button
                                     *ngIf="row.assessment?.can_continue"
                                     pButton
