@@ -338,7 +338,18 @@ export class ReportViewerComponent implements OnInit {
 
     this.reportsService.getReportData(definition.slug, this.filters).subscribe({
       next: (res) => {
-        this.rows.set(res?.rows || []);
+        const isHeaderMultiple = !!res?.header?.isMultipleAuditors;
+        const processedRows = (res?.rows || []).map((row: any) => {
+          const isMultiple = isHeaderMultiple || !!row.is_multiple_auditors;
+          if (isMultiple && row.question && row.auditor_emp_code && row.auditor_emp_code !== '-') {
+            return {
+              ...row,
+              question: `[${row.auditor_emp_code}] ${row.question}`
+            };
+          }
+          return row;
+        });
+        this.rows.set(processedRows);
         this.summary.set(res?.summary || null);
         this.reportHeader.set(res?.header || null);
         this.reportMeta.set(res?.meta || null);

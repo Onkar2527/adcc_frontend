@@ -2,6 +2,7 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
+  computed,
   inject,
   OnInit,
   signal
@@ -141,21 +142,64 @@ export class PeriodwiseQuestionsMasterViewComponent
 
   expandedHeaders = new Set<number>();
 
+  eligibleAuditors = signal<any[]>([]);
+
+  categoryAssignments = signal<any[]>([]);
+
+  auditorAssignmentMap = new Map<number, Set<number>>();
+
+  isMultipleAuditors = signal<boolean>(false);
+
+  // ── Dirty-state tracking ──────────────────────────────────────
+  dirtySchemes          = signal(false);
+  dirtyDepositSchemes   = signal(false);
+  dirtyMenus            = signal(false);
+  dirtyCategories       = signal(false);
+  dirtyQuestions        = signal(false);
+  dirtyAuditorAssign    = signal(false);
+
+  /** True only AFTER the initial data load — prevents marking dirty during init */
+  private _dataLoaded = false;
+
+  dirtySectionLabels = computed(() => {
+    const labels: string[] = [];
+    if (this.dirtySchemes())        labels.push('Advance Schemes');
+    if (this.dirtyDepositSchemes()) labels.push('Deposit Schemes');
+    if (this.dirtyMenus())          labels.push('Menus');
+    if (this.dirtyCategories())     labels.push('Categories');
+    if (this.dirtyQuestions())      labels.push('Questions');
+    if (this.dirtyAuditorAssign())  labels.push('Auditor Assignments');
+    return labels;
+  });
+
+  hasUnsavedChanges = computed(() => this.dirtySectionLabels().length > 0);
+
   sectionLinks = [
-    { id: 'advance-schemes', label: 'Advance Schemes' },
-    { id: 'deposit-schemes', label: 'Deposit Schemes' },
-    { id: 'menus', label: 'Menus' },
-    { id: 'categories', label: 'Categories' },
-    { id: 'questions', label: 'Questions' }
+    { id: 'advance-schemes', label: 'Advance Schemes',  dirtyFn: () => this.dirtySchemes() },
+    { id: 'deposit-schemes', label: 'Deposit Schemes',  dirtyFn: () => this.dirtyDepositSchemes() },
+    { id: 'menus',           label: 'Menus',            dirtyFn: () => this.dirtyMenus() },
+    { id: 'categories',      label: 'Categories',       dirtyFn: () => this.dirtyCategories() },
+    { id: 'multiple-auditors', label: 'Multiple Auditor', dirtyFn: () => this.dirtyAuditorAssign() },
+    { id: 'questions',       label: 'Questions',        dirtyFn: () => this.dirtyQuestions() }
   ];
 
   ngOnInit() {
+
+    // Initialize toggle from saved data
+    this.isMultipleAuditors.set(
+      !!this.data?.is_multiple_auditors
+    );
 
     this.loadSchemes();
     this.loadDepositSchemes();
     this.loadMenus();
     this.loadCategories();
     this.loadQuestionData(this.data.id);
+    this.loadEligibleAuditors();
+    this.loadCategoryAssignments();
+
+    // Allow dirty tracking after all loads have been dispatched
+    setTimeout(() => { this._dataLoaded = true; }, 300);
 
   }
 
@@ -303,6 +347,8 @@ export class PeriodwiseQuestionsMasterViewComponent
       updatedCategories
     );
 
+    if (this._dataLoaded) this.dirtyCategories.set(true);
+
   }
 
   updateCategorySelectAllStatus() {
@@ -312,6 +358,8 @@ export class PeriodwiseQuestionsMasterViewComponent
       this.allCategories().every(
         (x: any) => x.checked
       );
+
+    if (this._dataLoaded) this.dirtyCategories.set(true);
 
   }
 
@@ -354,6 +402,7 @@ export class PeriodwiseQuestionsMasterViewComponent
             false
           );
 
+          this.dirtyCategories.set(false);
 
           this.data.cat_ids =
             ids;
@@ -456,6 +505,8 @@ export class PeriodwiseQuestionsMasterViewComponent
 
     this.allMenus.set(updated);
 
+    if (this._dataLoaded) this.dirtyMenus.set(true);
+
   }
 
   updateMenuSelectAllStatus() {
@@ -465,6 +516,8 @@ export class PeriodwiseQuestionsMasterViewComponent
       this.allMenus().every(
         (x: any) => x.checked
       );
+
+    if (this._dataLoaded) this.dirtyMenus.set(true);
 
   }
 
@@ -506,7 +559,7 @@ export class PeriodwiseQuestionsMasterViewComponent
             false
           );
 
-
+          this.dirtyMenus.set(false);
 
           this.data.menu_ids =
             ids;
@@ -634,6 +687,8 @@ export class PeriodwiseQuestionsMasterViewComponent
             false
           );
 
+          this.dirtySchemes.set(false);
+
           this.data.advances_scheme_ids =
             ids;
 
@@ -683,6 +738,8 @@ export class PeriodwiseQuestionsMasterViewComponent
 
     this.allSchemes.set(updated);
 
+    if (this._dataLoaded) this.dirtySchemes.set(true);
+
   }
 
   updateSelectAllStatus() {
@@ -691,6 +748,8 @@ export class PeriodwiseQuestionsMasterViewComponent
       this.allSchemes().every(
         (x: any) => x.checked
       );
+
+    if (this._dataLoaded) this.dirtySchemes.set(true);
 
   }
 
@@ -786,6 +845,7 @@ export class PeriodwiseQuestionsMasterViewComponent
             false
           );
 
+          this.dirtyDepositSchemes.set(false);
 
           this.data.deposits_scheme_ids =
             ids;
@@ -838,6 +898,8 @@ export class PeriodwiseQuestionsMasterViewComponent
 
     this.allDepositSchemes.set(updated);
 
+    if (this._dataLoaded) this.dirtyDepositSchemes.set(true);
+
   }
 
   updateDepositSelectAllStatus() {
@@ -846,6 +908,8 @@ export class PeriodwiseQuestionsMasterViewComponent
       this.allDepositSchemes().every(
         (x: any) => x.checked
       );
+
+    if (this._dataLoaded) this.dirtyDepositSchemes.set(true);
 
   }
 
@@ -1108,7 +1172,7 @@ export class PeriodwiseQuestionsMasterViewComponent
       question.checked = checked;
     });
 
-    this.onQuestionChange();
+    this.onQuestionChange(true);
   }
 
   toggleAllQuestions(checked: boolean) {
@@ -1122,7 +1186,7 @@ export class PeriodwiseQuestionsMasterViewComponent
       });
     });
 
-    this.onQuestionChange();
+    this.onQuestionChange(true);
   }
 
   scrollToSection(sectionId: string) {
@@ -1135,7 +1199,7 @@ export class PeriodwiseQuestionsMasterViewComponent
     return item?.id ?? item?.question_id ?? item?.header_id ?? item?.category_id ?? item?.menu_id ?? index;
   }
 
-  onQuestionChange() {
+  onQuestionChange(fromUserInteraction = false) {
 
     const questionIds: number[] = [];
 
@@ -1193,6 +1257,10 @@ export class PeriodwiseQuestionsMasterViewComponent
     this.selectedHeaderIds =
       headerIds;
 
+    if (fromUserInteraction && this._dataLoaded) {
+      this.dirtyQuestions.set(true);
+    }
+
   }
 
   updateQuestionHeaders() {
@@ -1211,7 +1279,7 @@ export class PeriodwiseQuestionsMasterViewComponent
 
         next: () => {
 
-
+          this.dirtyQuestions.set(false);
 
           this.data.question_ids =
 
@@ -1260,5 +1328,112 @@ export class PeriodwiseQuestionsMasterViewComponent
 
       });
 
+  }
+
+  loadEligibleAuditors() {
+    this.periodwiseQuestionsService.getEligibleAuditors(this.data.id).subscribe({
+      next: (res: any) => {
+        this.eligibleAuditors.set(this.parseRows(res));
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  loadCategoryAssignments() {
+    this.periodwiseQuestionsService.getCategoryAssignments(this.data.id).subscribe({
+      next: (res: any) => {
+        const list = this.parseRows(res);
+        this.categoryAssignments.set(list);
+        
+        this.auditorAssignmentMap.clear();
+        list.forEach((item: any) => {
+           const catId = Number(item.category_id);
+           const empId = Number(item.audit_emp_id);
+           if (!this.auditorAssignmentMap.has(catId)) {
+             this.auditorAssignmentMap.set(catId, new Set<number>());
+           }
+           this.auditorAssignmentMap.get(catId)!.add(empId);
+        });
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  isAuditorAssigned(categoryId: number, empId: number): boolean {
+    const catId = Number(categoryId);
+    const auditorId = Number(empId);
+    return this.auditorAssignmentMap.get(catId)?.has(auditorId) ?? false;
+  }
+
+  toggleAuditorAssignment(categoryId: number, empId: number) {
+    const catId = Number(categoryId);
+    const auditorId = Number(empId);
+    
+    if (!this.auditorAssignmentMap.has(catId)) {
+      this.auditorAssignmentMap.set(catId, new Set<number>());
+    }
+    
+    const set = this.auditorAssignmentMap.get(catId)!;
+    if (set.has(auditorId)) {
+      set.delete(auditorId);
+    } else {
+      set.add(auditorId);
+    }
+    if (this._dataLoaded) this.dirtyAuditorAssign.set(true);
+    this.cdr.detectChanges();
+  }
+
+  saveCategoryAssignments() {
+    const assignments: { category_id: number; audit_emp_id: number }[] = [];
+    this.auditorAssignmentMap.forEach((empIds, catId) => {
+      empIds.forEach((empId) => {
+        assignments.push({ category_id: catId, audit_emp_id: empId });
+      });
+    });
+
+    this.periodwiseQuestionsService.assignCategories(this.data.id, assignments).subscribe({
+      next: () => {
+        this.dirtyAuditorAssign.set(false);
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Success',
+          detail: 'Auditor Assignments Saved Successfully'
+        });
+        this.loadCategoryAssignments();
+      },
+      error: (err) => {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: 'Unable to save auditor assignments'
+        });
+      }
+    });
+  }
+
+  toggleMultipleAuditors() {
+    const newVal = !this.isMultipleAuditors();
+    this.periodwiseQuestionsService
+      .updateMultipleAuditors(this.data.id, newVal)
+      .subscribe({
+        next: () => {
+          this.isMultipleAuditors.set(newVal);
+          this.data.is_multiple_auditors = newVal;
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Updated',
+            detail: newVal
+              ? 'Multiple auditor mode enabled'
+              : 'Multiple auditor mode disabled'
+          });
+        },
+        error: () => {
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'Failed to update auditor mode'
+          });
+        }
+      });
   }
 }
