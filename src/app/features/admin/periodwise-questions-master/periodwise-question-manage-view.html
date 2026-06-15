@@ -44,14 +44,33 @@
 
     </div>
 
+    <!-- UNSAVED CHANGES BANNER -->
+    <div *ngIf="hasUnsavedChanges()" class="flex align-items-center gap-3 border-round-xl px-4 py-3 mb-4"
+         style="background: #fff7ed; border: 1.5px solid #f97316;">
+        <i class="pi pi-exclamation-triangle text-xl" style="color:#f97316"></i>
+        <div>
+            <span class="font-bold" style="color:#c2410c">Unsaved Changes</span>
+            <span class="ml-2 text-700">You have unsaved changes in:</span>
+            <span *ngFor="let label of dirtySectionLabels(); let last = last" class="ml-1">
+                <span class="font-semibold" style="color:#ea580c">{{ label }}</span><span *ngIf="!last">, </span>
+            </span>
+            <span class="ml-2 text-500 text-sm">— Click <strong>Save Changes</strong> inside each section to save.</span>
+        </div>
+    </div>
+
     <div class="periodwise-section-nav surface-card border-1 surface-border border-round-xl shadow-1 p-2 mb-4">
         <div class="flex align-items-center gap-2 flex-wrap">
             <span class="text-600 text-sm font-semibold px-2">Go to</span>
-
-            <button *ngFor="let section of sectionLinks; trackBy: trackById" pButton type="button"
-                class="p-button-sm p-button-text"
-                [label]="section.label"
-                (click)="scrollToSection(section.id)"></button>
+            <div *ngFor="let section of sectionLinks; trackBy: trackById" class="relative">
+                <button pButton type="button"
+                    class="p-button-sm p-button-text"
+                    [label]="section.label"
+                    (click)="scrollToSection(section.id)"></button>
+                <!-- Dirty dot indicator -->
+                <span *ngIf="section.dirtyFn()" class="absolute border-circle"
+                    style="width:8px;height:8px;background:#f97316;top:4px;right:4px;"
+                    title="Unsaved changes"></span>
+            </div>
         </div>
     </div>
 
@@ -128,10 +147,16 @@
                 <div class="text-2xl font-semibold">
                     Select Advance Schemes
                 </div>
+                <!-- Unsaved label -->
+                <div *ngIf="dirtySchemes()" class="flex align-items-center gap-1 mt-1">
+                    <i class="pi pi-circle-fill text-xs" style="color:#f97316"></i>
+                    <span class="text-sm font-semibold" style="color:#f97316">Unsaved changes — click Save Changes to apply</span>
+                </div>
 
             </div>
 
             <button pButton type="button" label="Save Changes" icon="pi pi-check" class="p-button-success"
+                [disabled]="!dirtySchemes()"
                 (click)="updateSchemes()"></button>
 
         </div>
@@ -290,10 +315,16 @@
                 <div class="text-2xl font-semibold">
                     Select Deposit Schemes
                 </div>
+                <!-- Unsaved label -->
+                <div *ngIf="dirtyDepositSchemes()" class="flex align-items-center gap-1 mt-1">
+                    <i class="pi pi-circle-fill text-xs" style="color:#f97316"></i>
+                    <span class="text-sm font-semibold" style="color:#f97316">Unsaved changes — click Save Changes to apply</span>
+                </div>
 
             </div>
 
             <button pButton type="button" label="Save Changes" icon="pi pi-check" class="p-button-success"
+                [disabled]="!dirtyDepositSchemes()"
                 (click)="updateDepositSchemes()"></button>
 
         </div>
@@ -444,10 +475,16 @@
                 <div class="text-2xl font-semibold">
                     Select Menus
                 </div>
+                <!-- Unsaved label -->
+                <div *ngIf="dirtyMenus()" class="flex align-items-center gap-1 mt-1">
+                    <i class="pi pi-circle-fill text-xs" style="color:#f97316"></i>
+                    <span class="text-sm font-semibold" style="color:#f97316">Unsaved changes — click Save Changes to apply</span>
+                </div>
 
             </div>
 
             <button pButton type="button" label="Save Changes" icon="pi pi-check" class="p-button-success"
+                [disabled]="!dirtyMenus()"
                 (click)="updateMenus()"></button>
 
         </div>
@@ -592,10 +629,16 @@
                 <div class="text-2xl font-semibold">
                     Select Categories
                 </div>
+                <!-- Unsaved label -->
+                <div *ngIf="dirtyCategories()" class="flex align-items-center gap-1 mt-1">
+                    <i class="pi pi-circle-fill text-xs" style="color:#f97316"></i>
+                    <span class="text-sm font-semibold" style="color:#f97316">Unsaved changes — click Save Changes to apply</span>
+                </div>
 
             </div>
 
             <button pButton type="button" label="Save Changes" icon="pi pi-check" class="p-button-success"
+                [disabled]="!dirtyCategories()"
                 (click)="updateCategories()"></button>
 
         </div>
@@ -688,6 +731,94 @@
 
     </div>
 
+    <!-- MULTIPLE AUDITORS -->
+    <div id="multiple-auditors" class="border-round-xl p-4 surface-card shadow-1 mt-4 periodwise-section">
+        <!-- SECTION HEADER -->
+        <div class="flex justify-content-between align-items-start mb-4">
+            <div>
+                <div class="text-2xl font-semibold text-primary">
+                    Multiple Auditor Assignment
+                </div>
+                <div class="text-500 mt-1">
+                    Enable to assign different categories to different auditors during assessment.
+                </div>
+            </div>
+            <!-- TOGGLE SWITCH -->
+            <div class="flex align-items-center gap-3 mt-1">
+                <span class="font-semibold text-sm"
+                    [class.text-500]="!isMultipleAuditors()"
+                    [class.text-primary]="isMultipleAuditors()">
+                    {{ isMultipleAuditors() ? 'Multiple Auditors' : 'Single Auditor' }}
+                </span>
+                <div class="relative cursor-pointer"
+                    (click)="toggleMultipleAuditors()"
+                    style="width:52px;height:28px;">
+                    <div class="border-round-3xl transition-all transition-duration-200 w-full h-full"
+                        [style.background]="isMultipleAuditors() ? 'var(--primary-color)' : 'var(--surface-300)'">
+                    </div>
+                    <div class="absolute border-circle bg-white shadow-2 transition-all transition-duration-200"
+                        style="top:3px;width:22px;height:22px;"
+                        [style.left]="isMultipleAuditors() ? '27px' : '3px'">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <p-divider></p-divider>
+        <!-- SINGLE AUDITOR MODE MESSAGE -->
+        <div *ngIf="!isMultipleAuditors()" class="text-center py-5">
+            <i class="pi pi-user text-4xl text-400 mb-3 block"></i>
+            <div class="text-700 font-semibold text-lg mb-2">Single Auditor Mode</div>
+            <div class="text-500">
+                All audit questions will be assigned to the primary auditor. Enable Multiple Auditor mode above to assign specific categories to different auditors.
+            </div>
+        </div>
+        <!-- MULTIPLE AUDITORS MODE -->
+        <div *ngIf="isMultipleAuditors()">
+            <div *ngIf="selectedCategories().length === 0" class="text-center p-5 text-500">
+                <i class="pi pi-info-circle text-4xl mb-3"></i>
+                <div>No active categories configured. Select active categories in the section above first.</div>
+            </div>
+            <div *ngIf="selectedCategories().length > 0">
+                <div class="flex justify-content-between align-items-center mb-3">
+                    <div *ngIf="dirtyAuditorAssign()" class="flex align-items-center gap-1">
+                        <i class="pi pi-circle-fill text-xs" style="color:#f97316"></i>
+                        <span class="text-sm font-semibold" style="color:#f97316">Unsaved changes — click Save Auditor Assignments to apply</span>
+                    </div>
+                    <div *ngIf="!dirtyAuditorAssign()"></div>
+                    <button pButton type="button" label="Save Auditor Assignments" icon="pi pi-save" class="p-button-success"
+                        [disabled]="!dirtyAuditorAssign()"
+                        (click)="saveCategoryAssignments()"></button>
+                </div>
+                <div class="grid">
+                    <div *ngFor="let cat of selectedCategories(); trackBy: trackById" class="col-12 lg:col-6 mb-3">
+                        <div class="border-1 surface-border border-round-xl p-4 h-full bg-light">
+                            <div class="text-lg font-bold text-gray-800 mb-3 flex align-items-center justify-content-between">
+                                <span>{{ cat.name }}</span>
+                                <span class="text-sm text-500 font-normal">Category ID: {{ cat.id }}</span>
+                            </div>
+                            <div class="text-sm font-semibold text-600 mb-2">Assign to Auditors:</div>
+                            <div class="flex flex-column gap-2">
+                                <div *ngFor="let auditor of eligibleAuditors(); trackBy: trackById"
+                                     class="flex align-items-center p-2 border-round hover:bg-100 transition-colors transition-duration-150">
+                                    <p-checkbox [binary]="true"
+                                                [ngModel]="isAuditorAssigned(cat.id, auditor.id)"
+                                                (onChange)="toggleAuditorAssignment(cat.id, auditor.id)"></p-checkbox>
+                                    <div class="ml-3 flex flex-column">
+                                        <span class="font-medium text-800">{{ auditor.name }}</span>
+                                        <span class="text-xs text-500">Code: {{ auditor.emp_code }}</span>
+                                    </div>
+                                </div>
+                                <div *ngIf="eligibleAuditors().length === 0" class="text-sm text-amber-600">
+                                    No eligible auditors found with authority for this unit.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- ACTIVE QUESTIONS -->
 
 
@@ -711,6 +842,11 @@
                     {{ totalQuestions }}
 
                 </div>
+                <!-- Unsaved questions indicator -->
+                <div *ngIf="dirtyQuestions()" class="flex align-items-center gap-1 mt-2">
+                    <i class="pi pi-circle-fill text-xs" style="color:#f97316"></i>
+                    <span class="text-sm font-semibold" style="color:#f97316">Unsaved changes — click Update Questions to apply</span>
+                </div>
 
             </div>
 
@@ -724,6 +860,7 @@
                     (click)="toggleAllQuestions(false)"></button>
 
                 <button pButton type="button" label="Update Questions" icon="pi pi-save" class="p-button-primary"
+                    [disabled]="!dirtyQuestions()"
                     (click)="updateQuestionHeaders()"></button>
             </div>
 
@@ -815,7 +952,7 @@
                             <!-- CHECKBOX -->
 
                             <p-checkbox [binary]="true" [(ngModel)]="question.checked"
-                                (onChange)="onQuestionChange()"></p-checkbox>
+                                (onChange)="onQuestionChange(true)"></p-checkbox>
 
                             <!-- QUESTION -->
 

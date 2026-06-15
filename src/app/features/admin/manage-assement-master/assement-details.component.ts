@@ -1,5 +1,7 @@
 import { Component, inject, signal } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { MessageService } from 'primeng/api';
 
 import { FormDrawerRef } from '../../../core/services/drawer/form-drawer.ref';
 
@@ -19,6 +21,7 @@ import {
   standalone: true,
   imports: [
     CommonModule,
+    FormsModule,
     SelectFieldComponent,
     DateFieldComponent,
     ButtonModule
@@ -37,10 +40,25 @@ import {
 
     </div>
 
-    <!-- Main Table -->
-    <div
-      class="border-1 border-gray-300 border-round overflow-hidden"
-    >
+    <!-- Tabs -->
+    <div class="flex gap-2 mb-4 border-b border-gray-300 pb-2">
+      <button pButton type="button" 
+              [label]="'Details'" 
+              [severity]="activeTab() === 'details' ? 'primary' : 'secondary'"
+              [text]="activeTab() !== 'details'"
+              (click)="activeTab.set('details')"></button>
+      <button pButton type="button" 
+              [label]="'Question Assignments'" 
+              [severity]="activeTab() === 'assignments' ? 'primary' : 'secondary'"
+              [text]="activeTab() !== 'assignments'"
+              (click)="activeTab.set('assignments'); loadAssignmentsData()"></button>
+    </div>
+
+    @if (activeTab() === 'details') {
+      <!-- Main Table -->
+      <div
+        class="border-1 border-gray-300 border-round overflow-hidden"
+      >
 
       <table class="w-full border-collapse">
 
@@ -386,6 +404,64 @@ import {
 
     }
 
+    }
+
+    @if (activeTab() === 'assignments') {
+      <div class="p-2">
+        <h3 class="text-xl font-bold mb-3">Assign Questions to Auditors</h3>
+        
+        <div *ngIf="loadingAssignments()" class="flex align-items-center justify-content-center p-5">
+          <i class="pi pi-spin pi-spinner" style="font-size: 2rem"></i>
+          <span class="ml-2 font-medium">Loading questions and auditors...</span>
+        </div>
+
+        <div *ngIf="!loadingAssignments()">
+          <div *ngIf="categories().length === 0" class="text-gray-500 p-3 text-center border-1 border-gray-300 border-round">
+            No questions found for this assessment.
+          </div>
+
+          <div *ngIf="categories().length > 0">
+            <div style="max-height: 50vh; overflow-y: auto; padding-right: 8px;">
+              <div *ngFor="let cat of categories()" class="mb-4 border-1 border-gray-300 border-round p-3 surface-card">
+                <h4 class="text-lg font-bold text-primary mb-3 pb-2 border-bottom-1 border-gray-200">
+                  {{ cat.name }}
+                </h4>
+
+                <div class="flex flex-column gap-3">
+                  <div *ngFor="let q of cat.questions" class="flex flex-column md:flex-row align-items-start md:align-items-center justify-content-between p-2 border-round hover:bg-gray-50 gap-3">
+                    <div class="flex-grow-1">
+                      <span class="font-bold text-gray-500 mr-2">Q:</span>
+                      <span class="font-medium text-800">{{ q.question }}</span>
+                    </div>
+
+                    <div class="flex align-items-center gap-2">
+                      <label class="text-gray-600 font-semibold text-sm">Assignee:</label>
+                      <select class="p-inputtext p-component p-2 border-round border-1 border-gray-300"
+                              style="min-width: 250px;"
+                              [(ngModel)]="q.assigned_emp_id">
+                        <option [value]="null">-- Unassigned --</option>
+                        <option *ngFor="let emp of eligibleAuditors()" [value]="emp.id">
+                          {{ emp.name }} (EMP. {{ emp.emp_code }})
+                        </option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="flex justify-content-end gap-2 mt-4">
+              <button pButton type="button" 
+                      label="Save Assignments" 
+                      icon="pi pi-save"
+                      [loading]="savingAssignments()"
+                      (click)="saveAssignments()"></button>
+            </div>
+          </div>
+        </div>
+      </div>
+    }
+
     <!-- Footer -->
 
     <div class="flex justify-content-end mt-4">
@@ -411,6 +487,14 @@ export class AssessmentDetailsFormComponent {
 
   private assessmentService =
     inject(ManageAssessmentMasterService);
+
+  private messageService = inject(MessageService);
+
+  activeTab = signal<'details' | 'assignments'>('details');
+  loadingAssignments = signal(false);
+  savingAssignments = signal(false);
+  eligibleAuditors = signal<any[]>([]);
+  categories = signal<any[]>([]);
 
   assessment = signal<any | null>(null);
 
@@ -775,6 +859,93 @@ export class AssessmentDetailsFormComponent {
     return map[id] || '-';
   }
 
+
+  loadAssignmentsData() {
+    const id = this.assessment()?.id;
+    if (!id) return;
+
+    this.loadingAssignments.set(true);
+
+    this.assessmentService.getEligibleAuditors(id).subscribe({
+      next: (auditors) => {
+        this.eligibleAuditors.set(auditors || []);
+
+        this.assessmentService.getAssessmentQuestions(id).subscribe({
+          next: (questions) => {
+            this.assessmentService.getQuestionAssignments(id).subscribe({
+              next: (assignments) => {
+                const assignmentMap = new Map<number, number>();
+                for (const a of assignments || []) {
+                  assignmentMap.set(Number(a.question_id), Number(a.audit_emp_id));
+                }
+
+                const catMap = new Map<number, any>();
+                for (const q of questions || []) {
+                  const catId = Number(q.category_id);
+                  if (!catMap.has(catId)) {
+                    catMap.set(catId, {
+                      id: catId,
+                      name: q.category_name,
+                      questions: []
+                    });
+                  }
+                  catMap.get(catId).questions.push({
+                    question_id: Number(q.question_id),
+                    question: q.question,
+                    assigned_emp_id: assignmentMap.get(Number(q.question_id)) || null
+                  });
+                }
+
+                this.categories.set(Array.from(catMap.values()));
+                this.loadingAssignments.set(false);
+              },
+              error: () => this.loadingAssignments.set(false)
+            });
+          },
+          error: () => this.loadingAssignments.set(false)
+        });
+      },
+      error: () => this.loadingAssignments.set(false)
+    });
+  }
+
+  saveAssignments() {
+    const id = this.assessment()?.id;
+    if (!id) return;
+
+    this.savingAssignments.set(true);
+
+    const assignmentsList: any[] = [];
+    for (const cat of this.categories()) {
+      for (const q of cat.questions) {
+        if (q.assigned_emp_id !== null && q.assigned_emp_id !== 'null' && q.assigned_emp_id !== '' && q.assigned_emp_id !== undefined) {
+          assignmentsList.push({
+            question_id: q.question_id,
+            audit_emp_id: Number(q.assigned_emp_id)
+          });
+        }
+      }
+    }
+
+    this.assessmentService.assignQuestions(id, assignmentsList).subscribe({
+      next: (res) => {
+        this.savingAssignments.set(false);
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Success',
+          detail: 'Question assignments updated successfully'
+        });
+      },
+      error: (err) => {
+        this.savingAssignments.set(false);
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: 'Failed to update question assignments'
+        });
+      }
+    });
+  }
 
   close() {
     this.ref.close();

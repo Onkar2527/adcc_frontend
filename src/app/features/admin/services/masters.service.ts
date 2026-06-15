@@ -13,10 +13,18 @@ export class BranchService {
   findAll(): Observable<{ data: any[] }> {
     return this.http.get<{ data: any[] }>(this.apiUrl);
   }
-  findOne(id: string) { return this.http.get<any>(`${this.apiUrl}/${id}`); }
-  create(data: any) { return this.http.post<any>(this.apiUrl, data); }
-  update(id: string, data: any) { return this.http.put<any>(`${this.apiUrl}/${id}`, data); }
-  remove(id: string) { return this.http.delete<any>(`${this.apiUrl}/${id}`); }
+  findOne(id: string) {
+    return this.http.get<any>(`${this.apiUrl}/${id}`);
+  }
+  create(data: any) {
+    return this.http.post<any>(this.apiUrl, data);
+  }
+  update(id: string, data: any) {
+    return this.http.put<any>(`${this.apiUrl}/${id}`, data);
+  }
+  remove(id: string) {
+    return this.http.delete<any>(`${this.apiUrl}/${id}`);
+  }
 }
 
 @Injectable({ providedIn: 'root' })
@@ -28,10 +36,18 @@ export class RoleService {
   findAll(): Observable<{ data: any[] }> {
     return this.http.get<{ data: any[] }>(this.apiUrl);
   }
-  findOne(id: string) { return this.http.get<any>(`${this.apiUrl}/${id}`); }
-  create(data: any) { return this.http.post<any>(this.apiUrl, data); }
-  update(id: string, data: any) { return this.http.put<any>(`${this.apiUrl}/${id}`, data); }
-  remove(id: string) { return this.http.delete<any>(`${this.apiUrl}/${id}`); }
+  findOne(id: string) {
+    return this.http.get<any>(`${this.apiUrl}/${id}`);
+  }
+  create(data: any) {
+    return this.http.post<any>(this.apiUrl, data);
+  }
+  update(id: string, data: any) {
+    return this.http.put<any>(`${this.apiUrl}/${id}`, data);
+  }
+  remove(id: string) {
+    return this.http.delete<any>(`${this.apiUrl}/${id}`);
+  }
 }
 
 @Injectable({ providedIn: 'root' })
@@ -43,10 +59,18 @@ export class MasterUserService {
   findAll(): Observable<{ data: any[] }> {
     return this.http.get<{ data: any[] }>(this.apiUrl);
   }
-  findOne(id: string) { return this.http.get<any>(`${this.apiUrl}/${id}`); }
-  create(data: any) { return this.http.post<any>(this.apiUrl, data); }
-  update(id: string, data: any) { return this.http.put<any>(`${this.apiUrl}/${id}`, data); }
-  remove(id: string) { return this.http.delete<any>(`${this.apiUrl}/${id}`); }
+  findOne(id: string) {
+    return this.http.get<any>(`${this.apiUrl}/${id}`);
+  }
+  create(data: any) {
+    return this.http.post<any>(this.apiUrl, data);
+  }
+  update(id: string, data: any) {
+    return this.http.put<any>(`${this.apiUrl}/${id}`, data);
+  }
+  remove(id: string) {
+    return this.http.delete<any>(`${this.apiUrl}/${id}`);
+  }
 }
 
 @Injectable({ providedIn: 'root' })
@@ -58,10 +82,18 @@ export class LoanTypeService {
   findAll(): Observable<{ data: any[] }> {
     return this.http.get<{ data: any[] }>(this.apiUrl);
   }
-  findOne(id: string) { return this.http.get<any>(`${this.apiUrl}/${id}`); }
-  create(data: any) { return this.http.post<any>(this.apiUrl, data); }
-  update(id: string, data: any) { return this.http.put<any>(`${this.apiUrl}/${id}`, data); }
-  remove(id: string) { return this.http.delete<any>(`${this.apiUrl}/${id}`); }
+  findOne(id: string) {
+    return this.http.get<any>(`${this.apiUrl}/${id}`);
+  }
+  create(data: any) {
+    return this.http.post<any>(this.apiUrl, data);
+  }
+  update(id: string, data: any) {
+    return this.http.put<any>(`${this.apiUrl}/${id}`, data);
+  }
+  remove(id: string) {
+    return this.http.delete<any>(`${this.apiUrl}/${id}`);
+  }
 }
 
 @Injectable({ providedIn: 'root' })
@@ -73,10 +105,18 @@ export class AuditSectionService {
   findAll(): Observable<{ data: any[] } | any[]> {
     return this.http.get<{ data: any[] } | any[]>(this.apiUrl);
   }
-  create(data: { name: string }) { return this.http.post<any>(this.apiUrl, data); }
-  update(id: string | number, data: { name: string }) { return this.http.put<any>(`${this.apiUrl}/${id}`, data); }
-  toggleStatus(id: string | number) { return this.http.put<any>(`${this.apiUrl}/${id}/toggle-status`, {}); }
-  remove(id: string | number) { return this.http.delete<any>(`${this.apiUrl}/${id}`); }
+  create(data: { name: string }) {
+    return this.http.post<any>(this.apiUrl, data);
+  }
+  update(id: string | number, data: { name: string }) {
+    return this.http.put<any>(`${this.apiUrl}/${id}`, data);
+  }
+  toggleStatus(id: string | number) {
+    return this.http.put<any>(`${this.apiUrl}/${id}/toggle-status`, {});
+  }
+  remove(id: string | number) {
+    return this.http.delete<any>(`${this.apiUrl}/${id}`);
+  }
 }
 
 export interface CreateAuditUnitDto {
@@ -101,21 +141,51 @@ export class AuditUnitService {
   private config = inject(APP_CONFIG);
   private apiUrl = `${this.config.apiUrl}/audit-units`;
 
-  findAll() { return this.http.get<any>(this.apiUrl); }
-  findOne(id: string | number) { return this.http.get<any>(`${this.apiUrl}/${id}`); }
-  create(data: CreateAuditUnitDto) { return this.http.post<any>(this.apiUrl, data); }
-  update(id: string | number, data: UpdateAuditUnitDto) { return this.http.patch<any>(`${this.apiUrl}/${id}`, data); }
-  toggleStatus(id: string | number) { return this.http.patch<any>(`${this.apiUrl}/${id}/status`, {}); }
-  updateFrequency(id: string | number, frequency: number) { return this.http.patch<any>(`${this.apiUrl}/${id}/frequency`, { frequency }); }
-  remove(id: string | number) { return this.http.delete<any>(`${this.apiUrl}/${id}`); }
-  getLookups() { return this.http.get<any>(`${this.apiUrl}/lookups`); }
-  getFrequencyOptions() { return this.http.get<any>(`${this.apiUrl}/frequency-options`); }
-  getByAuditByUnit(auditUnitId: number) { return this.http.get<any>(`${this.apiUrl}/get-target/${auditUnitId}`) }
-  getByAuditAndYear(auditUnitId: number, yearId: number) { return this.http.get(`${this.apiUrl}/audit-unit/${auditUnitId}/year/${yearId}`) }
-  createTarget(data: any) { return this.http.post(`${this.apiUrl}/create-target`, data) }
-  updateTarget(id: number, data: any) { return this.http.patch(`${this.apiUrl}/update-target/${id}`, data) }
-  removeTarget(id: number) { return this.http.delete(`${this.apiUrl}/remove-target/${id}`) }
-  getYears() { return this.http.get(`${this.apiUrl}/years`) };
+  findAll() {
+    return this.http.get<any>(this.apiUrl);
+  }
+  findOne(id: string | number) {
+    return this.http.get<any>(`${this.apiUrl}/${id}`);
+  }
+  create(data: CreateAuditUnitDto) {
+    return this.http.post<any>(this.apiUrl, data);
+  }
+  update(id: string | number, data: UpdateAuditUnitDto) {
+    return this.http.patch<any>(`${this.apiUrl}/${id}`, data);
+  }
+  toggleStatus(id: string | number) {
+    return this.http.patch<any>(`${this.apiUrl}/${id}/status`, {});
+  }
+  updateFrequency(id: string | number, frequency: number) {
+    return this.http.patch<any>(`${this.apiUrl}/${id}/frequency`, { frequency });
+  }
+  remove(id: string | number) {
+    return this.http.delete<any>(`${this.apiUrl}/${id}`);
+  }
+  getLookups() {
+    return this.http.get<any>(`${this.apiUrl}/lookups`);
+  }
+  getFrequencyOptions() {
+    return this.http.get<any>(`${this.apiUrl}/frequency-options`);
+  }
+  getByAuditByUnit(auditUnitId: number) {
+    return this.http.get<any>(`${this.apiUrl}/get-target/${auditUnitId}`);
+  }
+  getByAuditAndYear(auditUnitId: number, yearId: number) {
+    return this.http.get(`${this.apiUrl}/audit-unit/${auditUnitId}/year/${yearId}`);
+  }
+  createTarget(data: any) {
+    return this.http.post(`${this.apiUrl}/create-target`, data);
+  }
+  updateTarget(id: number, data: any) {
+    return this.http.patch(`${this.apiUrl}/update-target/${id}`, data);
+  }
+  removeTarget(id: number) {
+    return this.http.delete(`${this.apiUrl}/remove-target/${id}`);
+  }
+  getYears() {
+    return this.http.get(`${this.apiUrl}/years`);
+  }
 }
 
 export interface Employee {
@@ -158,14 +228,30 @@ export class EmployeeService {
   private config = inject(APP_CONFIG);
   private apiUrl = `${this.config.apiUrl}/employees`;
 
-  getEmployees(): Observable<Employee[]> { return this.http.get<Employee[]>(this.apiUrl); }
-  getEmployee(id: number): Observable<Employee> { return this.http.get<Employee>(`${this.apiUrl}/${id}`); }
-  createEmployee(data: CreateEmployeeDto): Observable<Employee> { return this.http.post<Employee>(this.apiUrl, data); }
-  updateEmployee(id: number, data: UpdateEmployeeDto): Observable<Employee> { return this.http.patch<Employee>(`${this.apiUrl}/${id}`, data); }
-  deleteEmployee(id: number): Observable<any> { return this.http.delete(`${this.apiUrl}/${id}`); }
-  toggleStatus(id: number): Observable<Employee> { return this.http.patch<Employee>(`${this.apiUrl}/${id}/status`, {}); }
-  setPassword(id: number, password: string): Observable<any> { return this.http.patch(`${this.apiUrl}/${id}/password`, { password }); }
-  updateAuthority(id: number, unitIds: number[]): Observable<any> { return this.http.patch(`${this.apiUrl}/${id}/authority`, { unit_ids: unitIds }); }
+  getEmployees(): Observable<Employee[]> {
+    return this.http.get<Employee[]>(this.apiUrl);
+  }
+  getEmployee(id: number): Observable<Employee> {
+    return this.http.get<Employee>(`${this.apiUrl}/${id}`);
+  }
+  createEmployee(data: CreateEmployeeDto): Observable<Employee> {
+    return this.http.post<Employee>(this.apiUrl, data);
+  }
+  updateEmployee(id: number, data: UpdateEmployeeDto): Observable<Employee> {
+    return this.http.patch<Employee>(`${this.apiUrl}/${id}`, data);
+  }
+  deleteEmployee(id: number): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/${id}`);
+  }
+  toggleStatus(id: number): Observable<Employee> {
+    return this.http.patch<Employee>(`${this.apiUrl}/${id}/status`, {});
+  }
+  setPassword(id: number, password: string): Observable<any> {
+    return this.http.patch(`${this.apiUrl}/${id}/password`, { password });
+  }
+  updateAuthority(id: number, unitIds: number[]): Observable<any> {
+    return this.http.patch(`${this.apiUrl}/${id}/authority`, { unit_ids: unitIds });
+  }
 }
 
 export interface AuditUnit {
@@ -195,9 +281,7 @@ export class UnitsService {
           .filter((unit: any) => Number(unit?.is_active ?? 1) === 1)
           .map((unit: any) => ({
             id: Number(unit.id),
-            name: unit.audit_unit_code
-              ? `${unit.name} (${unit.audit_unit_code})`
-              : unit.name,
+            name: unit.audit_unit_code ? `${unit.name} (${unit.audit_unit_code})` : unit.name,
             audit_unit_code: unit.audit_unit_code || '',
           }));
       }),
@@ -221,8 +305,12 @@ export class PasswordPolicyService {
   private config = inject(APP_CONFIG);
   private apiUrl = `${this.config.apiUrl}/password-policy`;
 
-  getPolicy(): Observable<PasswordPolicy> { return this.http.get<PasswordPolicy>(this.apiUrl); }
-  updatePolicy(data: PasswordPolicy): Observable<PasswordPolicy> { return this.http.post<PasswordPolicy>(this.apiUrl, data); }
+  getPolicy(): Observable<PasswordPolicy> {
+    return this.http.get<PasswordPolicy>(this.apiUrl);
+  }
+  updatePolicy(data: PasswordPolicy): Observable<PasswordPolicy> {
+    return this.http.post<PasswordPolicy>(this.apiUrl, data);
+  }
 }
 
 export interface MenuMaster {
@@ -248,12 +336,24 @@ export class MenuMasterService {
   private config = inject(APP_CONFIG);
   private apiUrl = `${this.config.apiUrl}/menu-masters`;
 
-  getMenuMasters(): Observable<MenuMaster[]> { return this.http.get<MenuMaster[]>(this.apiUrl); }
-  getMenuMaster(id: number): Observable<MenuMaster> { return this.http.get<MenuMaster>(`${this.apiUrl}/${id}`); }
-  createMenuMaster(data: CreateMenuMasterDto): Observable<MenuMaster> { return this.http.post<MenuMaster>(this.apiUrl, data); }
-  updateMenuMaster(id: number, data: UpdateMenuMasterDto): Observable<MenuMaster> { return this.http.patch<MenuMaster>(`${this.apiUrl}/${id}`, data); }
-  deleteMenuMaster(id: number): Observable<any> { return this.http.delete(`${this.apiUrl}/${id}`); }
-  toggleStatus(id: string | number) { return this.http.put<any>(`${this.apiUrl}/${id}/toggle-status`, {}); }
+  getMenuMasters(): Observable<MenuMaster[]> {
+    return this.http.get<MenuMaster[]>(this.apiUrl);
+  }
+  getMenuMaster(id: number): Observable<MenuMaster> {
+    return this.http.get<MenuMaster>(`${this.apiUrl}/${id}`);
+  }
+  createMenuMaster(data: CreateMenuMasterDto): Observable<MenuMaster> {
+    return this.http.post<MenuMaster>(this.apiUrl, data);
+  }
+  updateMenuMaster(id: number, data: UpdateMenuMasterDto): Observable<MenuMaster> {
+    return this.http.patch<MenuMaster>(`${this.apiUrl}/${id}`, data);
+  }
+  deleteMenuMaster(id: number): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/${id}`);
+  }
+  toggleStatus(id: string | number) {
+    return this.http.put<any>(`${this.apiUrl}/${id}/toggle-status`, {});
+  }
 }
 
 export interface CreateSchemeDto {
@@ -288,33 +388,20 @@ export class AuditSchemeMasterService {
     return this.http.post<any>(this.apiUrl, data);
   }
 
-  update(
-    id: string | number,
-    data: UpdateSchemeDto,
-  ) {
-    return this.http.patch<any>(
-      `${this.apiUrl}/${id}`,
-      data,
-    );
+  update(id: string | number, data: UpdateSchemeDto) {
+    return this.http.patch<any>(`${this.apiUrl}/${id}`, data);
   }
 
   toggleStatus(id: string | number) {
-    return this.http.patch<any>(
-      `${this.apiUrl}/${id}/status`,
-      {},
-    );
+    return this.http.patch<any>(`${this.apiUrl}/${id}/status`, {});
   }
 
   remove(id: string | number) {
-    return this.http.delete<any>(
-      `${this.apiUrl}/${id}`,
-    );
+    return this.http.delete<any>(`${this.apiUrl}/${id}`);
   }
 
   getCategories(schemeTypeId: number) {
-    return this.http.get<any>(
-      `${this.apiUrl}/categories/${schemeTypeId}`,
-    );
+    return this.http.get<any>(`${this.apiUrl}/categories/${schemeTypeId}`);
   }
 }
 
@@ -325,8 +412,7 @@ export interface CreateQuestionSetDto {
   admin_id?: number;
 }
 
-export interface UpdateQuestionSetDto
-  extends Partial<CreateQuestionSetDto> {
+export interface UpdateQuestionSetDto extends Partial<CreateQuestionSetDto> {
   id?: number;
 }
 
@@ -337,8 +423,7 @@ export interface CreateQuestionHeaderDto {
   admin_id?: number;
 }
 
-export interface UpdateQuestionHeaderDto
-  extends Partial<CreateQuestionHeaderDto> {
+export interface UpdateQuestionHeaderDto extends Partial<CreateQuestionHeaderDto> {
   id?: number;
 }
 
@@ -363,8 +448,7 @@ export interface CreateQuestionDto {
   admin_id?: number;
 }
 
-export interface UpdateQuestionDto
-  extends Partial<CreateQuestionDto> {
+export interface UpdateQuestionDto extends Partial<CreateQuestionDto> {
   id?: number;
 }
 
@@ -381,187 +465,108 @@ export class AuditQuestionMasterService {
   private http = inject(HttpClient);
   private config = inject(APP_CONFIG);
 
-  private apiUrl =
-    `${this.config.apiUrl}/audit-question-master`;
+  private apiUrl = `${this.config.apiUrl}/audit-question-master`;
 
   // Question Set
   findAllSets() {
-    return this.http.get<any>(
-      `${this.apiUrl}/sets`,
-    );
+    return this.http.get<any>(`${this.apiUrl}/sets`);
   }
 
   findOneSet(id: string | number) {
-    return this.http.get<any>(
-      `${this.apiUrl}/sets/${id}`,
-    );
+    return this.http.get<any>(`${this.apiUrl}/sets/${id}`);
   }
 
   createSet(data: CreateQuestionSetDto) {
-    return this.http.post<any>(
-      `${this.apiUrl}/sets`,
-      data,
-    );
+    return this.http.post<any>(`${this.apiUrl}/sets`, data);
   }
 
-  updateSet(
-    id: string | number,
-    data: UpdateQuestionSetDto,
-  ) {
-    return this.http.patch<any>(
-      `${this.apiUrl}/sets/${id}`,
-      data,
-    );
+  updateSet(id: string | number, data: UpdateQuestionSetDto) {
+    return this.http.patch<any>(`${this.apiUrl}/sets/${id}`, data);
   }
 
   toggleSetStatus(id: string | number) {
-    return this.http.patch<any>(
-      `${this.apiUrl}/sets/${id}/status`,
-      {},
-    );
+    return this.http.patch<any>(`${this.apiUrl}/sets/${id}/status`, {});
   }
 
   removeSet(id: string | number) {
-    return this.http.delete<any>(
-      `${this.apiUrl}/sets/${id}`,
-    );
+    return this.http.delete<any>(`${this.apiUrl}/sets/${id}`);
   }
 
-  // Question Header 
+  // Question Header
 
   findHeadersBySet(setId: string | number) {
-    return this.http.get<any>(
-      `${this.apiUrl}/headers/${setId}`,
-    );
+    return this.http.get<any>(`${this.apiUrl}/headers/${setId}`);
   }
 
   findOneHeader(id: string | number) {
-    return this.http.get<any>(
-      `${this.apiUrl}/header/${id}`,
-    );
+    return this.http.get<any>(`${this.apiUrl}/header/${id}`);
   }
 
   createHeader(data: CreateQuestionHeaderDto) {
-    return this.http.post<any>(
-      `${this.apiUrl}/headers`,
-      data,
-    );
+    return this.http.post<any>(`${this.apiUrl}/headers`, data);
   }
 
-  updateHeader(
-    id: string | number,
-    data: UpdateQuestionHeaderDto,
-  ) {
-    return this.http.patch<any>(
-      `${this.apiUrl}/headers/${id}`,
-      data,
-    );
+  updateHeader(id: string | number, data: UpdateQuestionHeaderDto) {
+    return this.http.patch<any>(`${this.apiUrl}/headers/${id}`, data);
   }
 
   toggleHeaderStatus(id: string | number) {
-    return this.http.patch<any>(
-      `${this.apiUrl}/headers/${id}/status`,
-      {},
-    );
+    return this.http.patch<any>(`${this.apiUrl}/headers/${id}/status`, {});
   }
 
   removeHeader(id: string | number) {
-    return this.http.delete<any>(
-      `${this.apiUrl}/headers/${id}`,
-    );
+    return this.http.delete<any>(`${this.apiUrl}/headers/${id}`);
   }
 
   // Question Master
 
-  findQuestionsByHeader(
-    headerId: string | number,
-  ) {
-    return this.http.get<any>(
-      `${this.apiUrl}/questions/${headerId}`,
-    );
+  findQuestionsByHeader(headerId: string | number) {
+    return this.http.get<any>(`${this.apiUrl}/questions/${headerId}`);
   }
 
   findOneQuestion(id: string | number) {
-    return this.http.get<any>(
-      `${this.apiUrl}/question/${id}`,
-    );
+    return this.http.get<any>(`${this.apiUrl}/question/${id}`);
   }
 
   createQuestion(data: CreateQuestionDto) {
-    return this.http.post<any>(
-      `${this.apiUrl}/questions`,
-      data,
-    );
+    return this.http.post<any>(`${this.apiUrl}/questions`, data);
   }
 
-  updateQuestion(
-    id: string | number,
-    data: UpdateQuestionDto,
-  ) {
-    return this.http.patch<any>(
-      `${this.apiUrl}/questions/${id}`,
-      data,
-    );
+  updateQuestion(id: string | number, data: UpdateQuestionDto) {
+    return this.http.patch<any>(`${this.apiUrl}/questions/${id}`, data);
   }
 
-  toggleQuestionStatus(
-    id: string | number,
-  ) {
-    return this.http.patch<any>(
-      `${this.apiUrl}/questions/${id}/status`,
-      {},
-    );
+  toggleQuestionStatus(id: string | number) {
+    return this.http.patch<any>(`${this.apiUrl}/questions/${id}/status`, {});
   }
 
   removeQuestion(id: string | number) {
-    return this.http.delete<any>(
-      `${this.apiUrl}/questions/${id}`,
-    );
+    return this.http.delete<any>(`${this.apiUrl}/questions/${id}`);
   }
 
   getQuestionLookups() {
-    return this.http.get<any>(
-      `${this.apiUrl}/lookups`,
-    );
+    return this.http.get<any>(`${this.apiUrl}/lookups`);
   }
 
-  findQuestionsBySet(
-    setId: string | number,
-  ) {
-    return this.http.get<any>(
-      `${this.apiUrl}/questions-set/${setId}`,
-    );
+  findQuestionsBySet(setId: string | number) {
+    return this.http.get<any>(`${this.apiUrl}/questions-set/${setId}`);
   }
 
   // Question Risk Mapping
 
-  findRiskMappings(
-    questionId: string | number,
-  ) {
-    return this.http.get<any>(
-      `${this.apiUrl}/question-risk-mapping/${questionId}`,
-    );
+  findRiskMappings(questionId: string | number) {
+    return this.http.get<any>(`${this.apiUrl}/question-risk-mapping/${questionId}`);
   }
 
-  createRiskMapping(
-    data: CreateQuestionRiskMappingDto,
-  ) {
-    return this.http.post<any>(
-      `${this.apiUrl}/question-risk-mapping`,
-      data,
-    );
+  createRiskMapping(data: CreateQuestionRiskMappingDto) {
+    return this.http.post<any>(`${this.apiUrl}/question-risk-mapping`, data);
   }
 
-  removeRiskMapping(
-    id: string | number,
-  ) {
-    return this.http.delete<any>(
-      `${this.apiUrl}/question-risk-mapping/${id}`,
-    );
+  removeRiskMapping(id: string | number) {
+    return this.http.delete<any>(`${this.apiUrl}/question-risk-mapping/${id}`);
   }
 }
 export interface CreateCategoryDto {
-
   menu_id: number;
 
   name: string;
@@ -575,101 +580,60 @@ export interface CreateCategoryDto {
   admin_id?: number;
 }
 
-export interface UpdateCategoryDto
-  extends Partial<CreateCategoryDto> { }
+export interface UpdateCategoryDto extends Partial<CreateCategoryDto> {}
 
 @Injectable({
   providedIn: 'root',
 })
 export class AuditCategoryMasterService {
+  private http = inject(HttpClient);
 
-  private http =
-    inject(HttpClient);
+  private config = inject(APP_CONFIG);
 
-  private config =
-    inject(APP_CONFIG);
-
-  private apiUrl =
-    `${this.config.apiUrl}/audit-category-master`;
+  private apiUrl = `${this.config.apiUrl}/audit-category-master`;
 
   findAll() {
-    return this.http.get<any>(
-      this.apiUrl,
-    );
+    return this.http.get<any>(this.apiUrl);
   }
 
-  findOne(
-    id: string | number,
-  ) {
-    return this.http.get<any>(
-      `${this.apiUrl}/${id}`,
-    );
+  findOne(id: string | number) {
+    return this.http.get<any>(`${this.apiUrl}/${id}`);
   }
 
-  create(
-    data: CreateCategoryDto,
-  ) {
-    return this.http.post<any>(
-      this.apiUrl,
-      data,
-    );
+  create(data: CreateCategoryDto) {
+    return this.http.post<any>(this.apiUrl, data);
   }
 
-  update(
-    id: string | number,
-    data: UpdateCategoryDto,
-  ) {
-    return this.http.patch<any>(
-      `${this.apiUrl}/${id}`,
-      data,
-    );
+  update(id: string | number, data: UpdateCategoryDto) {
+    return this.http.patch<any>(`${this.apiUrl}/${id}`, data);
   }
 
-  toggleStatus(
-    id: string | number,
-  ) {
-    return this.http.patch<any>(
-      `${this.apiUrl}/${id}/status`,
-      {},
-    );
+  toggleStatus(id: string | number) {
+    return this.http.patch<any>(`${this.apiUrl}/${id}/status`, {});
   }
 
-  remove(
-    id: string | number,
-  ) {
-    return this.http.delete<any>(
-      `${this.apiUrl}/${id}`,
-    );
+  remove(id: string | number) {
+    return this.http.delete<any>(`${this.apiUrl}/${id}`);
   }
 
   getLookups() {
-    return this.http.get<any>(
-      `${this.apiUrl}/lookups`,
-    );
+    return this.http.get<any>(`${this.apiUrl}/lookups`);
   }
 
   // Question Set Mapping
 
-  getQuestionMapping(
-    id: string | number,
-  ) {
-    return this.http.get<any>(
-      `${this.apiUrl}/question-mapping/${id}`,
-    );
+  getQuestionMapping(id: string | number) {
+    return this.http.get<any>(`${this.apiUrl}/question-mapping/${id}`);
   }
 
   updateQuestionMapping(
-
     id: string | number,
 
     question_set_ids: string,
   ) {
-    return this.http.patch<any>(
-      `${this.apiUrl}/question-mapping/${id}`,
-      {
-        question_set_ids,
-      },
-    );
+    return this.http.patch<any>(`${this.apiUrl}/question-mapping/${id}`, {
+      question_set_ids,
+    });
   }
 }
 
@@ -683,8 +647,7 @@ export interface CreateAnnexureDto {
   admin_id?: number;
 }
 
-export interface UpdateAnnexureDto
-  extends Partial<CreateAnnexureDto> {
+export interface UpdateAnnexureDto extends Partial<CreateAnnexureDto> {
   id?: number;
 }
 
@@ -696,8 +659,7 @@ export interface CreateAnnexureColumnDto {
   admin_id?: number;
 }
 
-export interface UpdateAnnexureColumnDto
-  extends Partial<CreateAnnexureColumnDto> {
+export interface UpdateAnnexureColumnDto extends Partial<CreateAnnexureColumnDto> {
   id?: number;
 }
 
@@ -715,86 +677,51 @@ export class AuditAnnexureMasterService {
   }
 
   findOne(id: string | number) {
-    return this.http.get<any>(
-      `${this.apiUrl}/${id}`,
-    );
+    return this.http.get<any>(`${this.apiUrl}/${id}`);
   }
 
   create(data: CreateAnnexureDto) {
-    return this.http.post<any>(
-      this.apiUrl,
-      data,
-    );
+    return this.http.post<any>(this.apiUrl, data);
   }
 
-  update(
-    id: string | number,
-    data: UpdateAnnexureDto,
-  ) {
-    return this.http.put<any>(
-      `${this.apiUrl}/${id}`,
-      data,
-    );
+  update(id: string | number, data: UpdateAnnexureDto) {
+    return this.http.put<any>(`${this.apiUrl}/${id}`, data);
   }
 
   toggleStatus(id: string | number) {
-    return this.http.patch<any>(
-      `${this.apiUrl}/${id}/toggle-status`,
-      {},
-    );
+    return this.http.patch<any>(`${this.apiUrl}/${id}/toggle-status`, {});
   }
 
   remove(id: string | number) {
-    return this.http.delete<any>(
-      `${this.apiUrl}/${id}`,
-    );
+    return this.http.delete<any>(`${this.apiUrl}/${id}`);
   }
 
   getLookups() {
-    return this.http.get<any>(
-      `${this.apiUrl}/lookups`,
-    );
+    return this.http.get<any>(`${this.apiUrl}/lookups`);
   }
 
   // Annexure Columns
 
   getColumns(annexureId: string | number) {
-    return this.http.get<any>(
-      `${this.apiUrl}/${annexureId}/columns`,
-    );
+    return this.http.get<any>(`${this.apiUrl}/${annexureId}/columns`);
   }
 
-  createColumn(
-    data: CreateAnnexureColumnDto,
-  ) {
-    return this.http.post<any>(
-      `${this.apiUrl}/columns`,
-      data,
-    );
+  createColumn(data: CreateAnnexureColumnDto) {
+    return this.http.post<any>(`${this.apiUrl}/columns`, data);
   }
 
-  updateColumn(
-    id: string | number,
-    data: UpdateAnnexureColumnDto,
-  ) {
-    return this.http.put<any>(
-      `${this.apiUrl}/columns/${id}`,
-      data,
-    );
+  updateColumn(id: string | number, data: UpdateAnnexureColumnDto) {
+    return this.http.put<any>(`${this.apiUrl}/columns/${id}`, data);
   }
 
   deleteColumn(id: string | number) {
-    return this.http.delete<any>(
-      `${this.apiUrl}/columns/${id}`,
-    );
+    return this.http.delete<any>(`${this.apiUrl}/columns/${id}`);
   }
 }
 
-
-// Risk Masters - Risk Category 
+// Risk Masters - Risk Category
 
 export interface CreateRiskCategoryDto {
-
   risk_category: string;
 
   is_active?: number;
@@ -802,14 +729,11 @@ export interface CreateRiskCategoryDto {
   admin_id?: number;
 }
 
-export interface UpdateRiskCategoryDto
-  extends Partial<CreateRiskCategoryDto> {
-
+export interface UpdateRiskCategoryDto extends Partial<CreateRiskCategoryDto> {
   id?: number;
 }
 
 export interface CreateRiskCategoryWeightDto {
-
   risk_category_id: number;
 
   year_id: number;
@@ -827,31 +751,22 @@ export interface CreateRiskCategoryWeightDto {
   providedIn: 'root',
 })
 export class RiskCategoryMasterService {
-
   private http = inject(HttpClient);
 
   private config = inject(APP_CONFIG);
 
-  private apiUrl =
-    `${this.config.apiUrl}/risk-categories`;
+  private apiUrl = `${this.config.apiUrl}/risk-categories`;
 
   findAll() {
-    return this.http.get<any>(
-      this.apiUrl,
-    );
+    return this.http.get<any>(this.apiUrl);
   }
 
   findOne(id: string | number) {
-    return this.http.get<any>(
-      `${this.apiUrl}/${id}`,
-    );
+    return this.http.get<any>(`${this.apiUrl}/${id}`);
   }
 
   create(data: CreateRiskCategoryDto) {
-    return this.http.post<any>(
-      this.apiUrl,
-      data,
-    );
+    return this.http.post<any>(this.apiUrl, data);
   }
 
   update(
@@ -859,42 +774,25 @@ export class RiskCategoryMasterService {
 
     data: UpdateRiskCategoryDto,
   ) {
-    return this.http.patch<any>(
-      `${this.apiUrl}/${id}`,
-      data,
-    );
+    return this.http.patch<any>(`${this.apiUrl}/${id}`, data);
   }
 
   toggleStatus(id: string | number) {
-    return this.http.patch<any>(
-      `${this.apiUrl}/${id}/status`,
-      {},
-    );
+    return this.http.patch<any>(`${this.apiUrl}/${id}/status`, {});
   }
 
   remove(id: string | number) {
-    return this.http.delete<any>(
-      `${this.apiUrl}/${id}`,
-    );
+    return this.http.delete<any>(`${this.apiUrl}/${id}`);
   }
 
   // Risk Category Weights
 
-  findAllWeights(
-    riskCategoryId: number,
-  ) {
-    return this.http.get<any>(
-      `${this.apiUrl}/${riskCategoryId}/weights`,
-    );
+  findAllWeights(riskCategoryId: number) {
+    return this.http.get<any>(`${this.apiUrl}/${riskCategoryId}/weights`);
   }
 
-  createWeight(
-    data: CreateRiskCategoryWeightDto,
-  ) {
-    return this.http.post<any>(
-      `${this.apiUrl}/weights`,
-      data,
-    );
+  createWeight(data: CreateRiskCategoryWeightDto) {
+    return this.http.post<any>(`${this.apiUrl}/weights`, data);
   }
 
   updateWeight(
@@ -902,31 +800,21 @@ export class RiskCategoryMasterService {
 
     data: CreateRiskCategoryWeightDto,
   ) {
-    return this.http.patch<any>(
-      `${this.apiUrl}/weights/${id}`,
-      data,
-    );
+    return this.http.patch<any>(`${this.apiUrl}/weights/${id}`, data);
   }
 
   removeWeight(id: string | number) {
-    return this.http.delete<any>(
-      `${this.apiUrl}/weights/${id}`,
-    );
+    return this.http.delete<any>(`${this.apiUrl}/weights/${id}`);
   }
 
   getYears() {
-    return this.http.get<any>(
-      `${this.apiUrl}/lookups/years`,
-    );
+    return this.http.get<any>(`${this.apiUrl}/lookups/years`);
   }
-
 }
-
 
 // Risk Control
 
 export interface CreateRiskControlDto {
-
   name: string;
 
   is_active?: number;
@@ -935,7 +823,6 @@ export interface CreateRiskControlDto {
 }
 
 export interface CreateRiskControlKeyAspectDto {
-
   risk_control_id: number;
 
   name: string;
@@ -948,37 +835,23 @@ export interface CreateRiskControlKeyAspectDto {
 @Injectable({
   providedIn: 'root',
 })
-
 export class RiskControlMasterService {
-
   private http = inject(HttpClient);
 
   private config = inject(APP_CONFIG);
 
-  private apiUrl =
-    `${this.config.apiUrl}/risk-controls`;
+  private apiUrl = `${this.config.apiUrl}/risk-controls`;
 
   findAllRiskControls() {
-    return this.http.get<any>(
-      this.apiUrl,
-    );
+    return this.http.get<any>(this.apiUrl);
   }
 
-  findOneRiskControl(
-    id: string | number,
-  ) {
-    return this.http.get<any>(
-      `${this.apiUrl}/${id}`,
-    );
+  findOneRiskControl(id: string | number) {
+    return this.http.get<any>(`${this.apiUrl}/${id}`);
   }
 
-  createRiskControl(
-    data: CreateRiskControlDto,
-  ) {
-    return this.http.post<any>(
-      this.apiUrl,
-      data,
-    );
+  createRiskControl(data: CreateRiskControlDto) {
+    return this.http.post<any>(this.apiUrl, data);
   }
 
   updateRiskControl(
@@ -986,46 +859,25 @@ export class RiskControlMasterService {
 
     data: CreateRiskControlDto,
   ) {
-    return this.http.patch<any>(
-      `${this.apiUrl}/${id}`,
-      data,
-    );
+    return this.http.patch<any>(`${this.apiUrl}/${id}`, data);
   }
 
-  toggleRiskControlStatus(
-    id: string | number,
-  ) {
-    return this.http.patch<any>(
-      `${this.apiUrl}/${id}/status`,
-      {},
-    );
+  toggleRiskControlStatus(id: string | number) {
+    return this.http.patch<any>(`${this.apiUrl}/${id}/status`, {});
   }
 
-  removeRiskControl(
-    id: string | number,
-  ) {
-    return this.http.delete<any>(
-      `${this.apiUrl}/${id}`,
-    );
+  removeRiskControl(id: string | number) {
+    return this.http.delete<any>(`${this.apiUrl}/${id}`);
   }
 
   // KEY ASPECT
 
-  findAllKeyAspects(
-    riskControlId: number,
-  ) {
-    return this.http.get<any>(
-      `${this.apiUrl}/${riskControlId}/key-aspects`,
-    );
+  findAllKeyAspects(riskControlId: number) {
+    return this.http.get<any>(`${this.apiUrl}/${riskControlId}/key-aspects`);
   }
 
-  createKeyAspect(
-    data: CreateRiskControlKeyAspectDto,
-  ) {
-    return this.http.post<any>(
-      `${this.apiUrl}/key-aspects`,
-      data,
-    );
+  createKeyAspect(data: CreateRiskControlKeyAspectDto) {
+    return this.http.post<any>(`${this.apiUrl}/key-aspects`, data);
   }
 
   updateKeyAspect(
@@ -1033,27 +885,17 @@ export class RiskControlMasterService {
 
     data: CreateRiskControlKeyAspectDto,
   ) {
-    return this.http.patch<any>(
-      `${this.apiUrl}/key-aspects/${id}`,
-      data,
-    );
+    return this.http.patch<any>(`${this.apiUrl}/key-aspects/${id}`, data);
   }
 
-  removeKeyAspect(
-    id: string | number,
-  ) {
-    return this.http.delete<any>(
-      `${this.apiUrl}/key-aspects/${id}`,
-    );
+  removeKeyAspect(id: string | number) {
+    return this.http.delete<any>(`${this.apiUrl}/key-aspects/${id}`);
   }
-
 }
-
 
 // Risk Composite
 
 export interface CreateRiskCompositeDto {
-
   business_risk: number;
 
   control_risk: number;
@@ -1066,37 +908,23 @@ export interface CreateRiskCompositeDto {
 @Injectable({
   providedIn: 'root',
 })
-
 export class RiskCompositeMasterService {
-
   private http = inject(HttpClient);
 
   private config = inject(APP_CONFIG);
 
-  private apiUrl =
-    `${this.config.apiUrl}/risk-composites`;
+  private apiUrl = `${this.config.apiUrl}/risk-composites`;
 
   findAllRiskComposites() {
-    return this.http.get<any>(
-      this.apiUrl,
-    );
+    return this.http.get<any>(this.apiUrl);
   }
 
-  findOneRiskComposite(
-    id: string | number,
-  ) {
-    return this.http.get<any>(
-      `${this.apiUrl}/${id}`,
-    );
+  findOneRiskComposite(id: string | number) {
+    return this.http.get<any>(`${this.apiUrl}/${id}`);
   }
 
-  createRiskComposite(
-    data: CreateRiskCompositeDto,
-  ) {
-    return this.http.post<any>(
-      this.apiUrl,
-      data,
-    );
+  createRiskComposite(data: CreateRiskCompositeDto) {
+    return this.http.post<any>(this.apiUrl, data);
   }
 
   updateRiskComposite(
@@ -1104,27 +932,17 @@ export class RiskCompositeMasterService {
 
     data: CreateRiskCompositeDto,
   ) {
-    return this.http.patch<any>(
-      `${this.apiUrl}/${id}`,
-      data,
-    );
+    return this.http.patch<any>(`${this.apiUrl}/${id}`, data);
   }
 
-  removeRiskComposite(
-    id: string | number,
-  ) {
-    return this.http.delete<any>(
-      `${this.apiUrl}/${id}`,
-    );
+  removeRiskComposite(id: string | number) {
+    return this.http.delete<any>(`${this.apiUrl}/${id}`);
   }
-
 }
-
 
 // Risk Matrix
 
 export interface RiskMatrixRow {
-
   risk_parameter: number;
 
   business_risk_app: number;
@@ -1139,51 +957,35 @@ export interface RiskMatrixRow {
 }
 
 export interface CreateRiskMatrixDto {
-
   rows: RiskMatrixRow[];
 }
-
 
 @Injectable({
   providedIn: 'root',
 })
-
 export class RiskMatrixService {
-
   private http = inject(HttpClient);
 
   private config = inject(APP_CONFIG);
 
-  private apiUrl =
-    `${this.config.apiUrl}/risk-matrix`;
+  private apiUrl = `${this.config.apiUrl}/risk-matrix`;
 
-  findRiskMatrixByYear(
-    yearId: number,
-  ) {
-    return this.http.get<any>(
-      `${this.apiUrl}/${yearId}`,
-    );
+  findRiskMatrixByYear(yearId: number) {
+    return this.http.get<any>(`${this.apiUrl}/${yearId}`);
   }
 
   saveRiskMatrix(
-
     yearId: number,
 
     data: CreateRiskMatrixDto,
   ) {
-    return this.http.post<any>(
-      `${this.apiUrl}/${yearId}`,
-      data,
-    );
+    return this.http.post<any>(`${this.apiUrl}/${yearId}`, data);
   }
-
 }
 
-
-// Branch Rating 
+// Branch Rating
 
 export interface CreateBranchRatingDto {
-
   year_id: number;
 
   audit_unit_id: number;
@@ -1208,61 +1010,36 @@ export interface CreateBranchRatingDto {
 @Injectable({
   providedIn: 'root',
 })
-
 export class BranchRatingService {
-
   private http = inject(HttpClient);
 
   private config = inject(APP_CONFIG);
 
-  private apiUrl =
-    `${this.config.apiUrl}/branch-rating`;
+  private apiUrl = `${this.config.apiUrl}/branch-rating`;
 
-  findBranchRatingsByYear(
-    yearId: number,
-  ) {
-    return this.http.get<any>(
-      `${this.apiUrl}/year/${yearId}`,
-    );
+  findBranchRatingsByYear(yearId: number) {
+    return this.http.get<any>(`${this.apiUrl}/year/${yearId}`);
   }
 
-  findOneBranchRating(
-    id: number,
-  ) {
-    return this.http.get<any>(
-      `${this.apiUrl}/${id}`,
-    );
+  findOneBranchRating(id: number) {
+    return this.http.get<any>(`${this.apiUrl}/${id}`);
   }
 
-  createBranchRating(
-    data: CreateBranchRatingDto,
-  ) {
-    return this.http.post<any>(
-      this.apiUrl,
-      data,
-    );
+  createBranchRating(data: CreateBranchRatingDto) {
+    return this.http.post<any>(this.apiUrl, data);
   }
 
   updateBranchRating(
-
     id: number,
 
     data: CreateBranchRatingDto,
   ) {
-    return this.http.patch<any>(
-      `${this.apiUrl}/${id}`,
-      data,
-    );
+    return this.http.patch<any>(`${this.apiUrl}/${id}`, data);
   }
 
-  removeBranchRating(
-    id: number,
-  ) {
-    return this.http.delete<any>(
-      `${this.apiUrl}/${id}`,
-    );
+  removeBranchRating(id: number) {
+    return this.http.delete<any>(`${this.apiUrl}/${id}`);
   }
-
 }
 export interface BroaderAreaMaster {
   id: number;
@@ -1272,7 +1049,7 @@ export interface BroaderAreaMaster {
   magnitude: string;
   frequency: string;
   average_qualitative_count: string;
-  average_quantitative_count: string
+  average_quantitative_count: string;
 }
 
 export interface CreateBroaderAreaMasterDto {
@@ -1282,7 +1059,7 @@ export interface CreateBroaderAreaMasterDto {
   magnitude: string;
   frequency: string;
   average_qualitative_count: string;
-  average_quantitative_count: string
+  average_quantitative_count: string;
 }
 
 export interface UpdateBroaderAreaMasterDto extends Partial<CreateBroaderAreaMasterDto> {
@@ -1295,11 +1072,21 @@ export class BroaderAreaMasterService {
   private config = inject(APP_CONFIG);
   private apiUrl = `${this.config.apiUrl}/broader-area-masters`;
 
-  getBroaderAreas(): Observable<BroaderAreaMaster[]> { return this.http.get<BroaderAreaMaster[]>(this.apiUrl); }
-  getBroaderArea(id: number): Observable<BroaderAreaMaster> { return this.http.get<BroaderAreaMaster>(`${this.apiUrl}/${id}`); }
-  createBroaderArea(data: CreateBroaderAreaMasterDto): Observable<BroaderAreaMaster> { return this.http.post<BroaderAreaMaster>(this.apiUrl, data); }
-  updateBroaderArea(id: number, data: UpdateBroaderAreaMasterDto): Observable<BroaderAreaMaster> { return this.http.put<BroaderAreaMaster>(`${this.apiUrl}/${id}`, data); }
-  deleteBroaderArea(id: number): Observable<any> { return this.http.delete(`${this.apiUrl}/${id}`); }
+  getBroaderAreas(): Observable<BroaderAreaMaster[]> {
+    return this.http.get<BroaderAreaMaster[]>(this.apiUrl);
+  }
+  getBroaderArea(id: number): Observable<BroaderAreaMaster> {
+    return this.http.get<BroaderAreaMaster>(`${this.apiUrl}/${id}`);
+  }
+  createBroaderArea(data: CreateBroaderAreaMasterDto): Observable<BroaderAreaMaster> {
+    return this.http.post<BroaderAreaMaster>(this.apiUrl, data);
+  }
+  updateBroaderArea(id: number, data: UpdateBroaderAreaMasterDto): Observable<BroaderAreaMaster> {
+    return this.http.put<BroaderAreaMaster>(`${this.apiUrl}/${id}`, data);
+  }
+  deleteBroaderArea(id: number): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/${id}`);
+  }
 }
 export interface ManageAssessmentMaster {
   id: number;
@@ -1319,11 +1106,9 @@ export interface ManageAssessmentMaster {
   is_limit_blocked: number;
 }
 
-
 export interface UpdateManageAssessmentMasterDto extends Partial<ManageAssessmentMaster> {
   id?: number;
 }
-
 
 @Injectable({ providedIn: 'root' })
 export class ManageAssessmentMasterService {
@@ -1335,24 +1120,31 @@ export class ManageAssessmentMasterService {
   getManageAssessmentMaster(
     assesment_period_from: string,
     assesment_period_to: string,
-    audit_unit_id: number
+    audit_unit_id: number,
   ): Observable<ManageAssessmentMaster[]> {
-
     return this.http.get<ManageAssessmentMaster[]>(
-      `${this.apiUrl}?assesment_period_from=${assesment_period_from}&assesment_period_to=${assesment_period_to}&audit_unit_id=${audit_unit_id}`
+      `${this.apiUrl}?assesment_period_from=${assesment_period_from}&assesment_period_to=${assesment_period_to}&audit_unit_id=${audit_unit_id}`,
     );
   }
-  updateManageAssessmentMaster(
-    id: number,
-    data: any
-  ): Observable<any> {
-
-    return this.http.put(
-      `${this.apiUrl}/${id}`,
-      data
-    );
+  updateManageAssessmentMaster(id: number, data: any): Observable<any> {
+    return this.http.put(`${this.apiUrl}/${id}`, data);
   }
 
+  getEligibleAuditors(id: number): Observable<any[]> {
+    return this.http.get<any[]>(`${this.config.apiUrl}/manage-assessment-masters/${id}/eligible-auditors`);
+  }
+
+  getQuestionAssignments(id: number): Observable<any[]> {
+    return this.http.get<any[]>(`${this.config.apiUrl}/manage-assessment-masters/${id}/question-assignments`);
+  }
+
+  getAssessmentQuestions(id: number): Observable<any[]> {
+    return this.http.get<any[]>(`${this.config.apiUrl}/manage-assessment-masters/${id}/questions`);
+  }
+
+  assignQuestions(id: number, assignments: any[]): Observable<any> {
+    return this.http.post<any>(`${this.config.apiUrl}/manage-assessment-masters/${id}/assign-questions`, { assignments });
+  }
 }
 export interface PeriodwiseQuestionsMaster {
   id: number;
@@ -1399,16 +1191,14 @@ export interface CreatePeriodwiseQuestionsMasterDto {
   admin_id?: number;
 }
 
-export interface UpdatePeriodwiseQuestionsMasterDto
-  extends Partial<CreatePeriodwiseQuestionsMasterDto> {
+export interface UpdatePeriodwiseQuestionsMasterDto extends Partial<CreatePeriodwiseQuestionsMasterDto> {
   id?: number;
 }
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class PeriodwiseQuestionsMasterService {
-
   private http = inject(HttpClient);
   private config = inject(APP_CONFIG);
 
@@ -1419,107 +1209,91 @@ export class PeriodwiseQuestionsMasterService {
   }
 
   getQuestionData(id: number): Observable<PeriodwiseQuestionsMaster> {
-    return this.http.get<PeriodwiseQuestionsMaster>(
-      `${this.apiUrl}/${id}`
-    );
+    return this.http.get<PeriodwiseQuestionsMaster>(`${this.apiUrl}/${id}`);
   }
   getById(id: number): Observable<PeriodwiseQuestionsMaster> {
-    return this.http.get<PeriodwiseQuestionsMaster>(
-      `${this.apiUrl}/${id}`
-    );
+    return this.http.get<PeriodwiseQuestionsMaster>(`${this.apiUrl}/${id}`);
   }
 
-  create(
-    data: CreatePeriodwiseQuestionsMasterDto
-  ): Observable<PeriodwiseQuestionsMaster> {
-    return this.http.post<PeriodwiseQuestionsMaster>(
-      this.apiUrl,
-      data
-    );
+  create(data: CreatePeriodwiseQuestionsMasterDto): Observable<PeriodwiseQuestionsMaster> {
+    return this.http.post<PeriodwiseQuestionsMaster>(this.apiUrl, data);
   }
 
   update(
     id: number,
-    data: UpdatePeriodwiseQuestionsMasterDto
+    data: UpdatePeriodwiseQuestionsMasterDto,
   ): Observable<PeriodwiseQuestionsMaster> {
-    return this.http.put<PeriodwiseQuestionsMaster>(
-      `${this.apiUrl}/${id}`,
-      data
-    );
+    return this.http.put<PeriodwiseQuestionsMaster>(`${this.apiUrl}/${id}`, data);
   }
   updateAdvancesSchemes(
     id: number,
-    advances_scheme_ids: string
+    advances_scheme_ids: string,
   ): Observable<PeriodwiseQuestionsMaster> {
-    return this.http.put<PeriodwiseQuestionsMaster>(
-      `${this.apiUrl}/advances-schemes/${id}`,
-      { advances_scheme_ids }
-    );
+    return this.http.put<PeriodwiseQuestionsMaster>(`${this.apiUrl}/advances-schemes/${id}`, {
+      advances_scheme_ids,
+    });
   }
   updateDepositsSchemes(
     id: number,
-    deposits_scheme_ids: string
+    deposits_scheme_ids: string,
   ): Observable<PeriodwiseQuestionsMaster> {
-    return this.http.put<PeriodwiseQuestionsMaster>(
-      `${this.apiUrl}/deposit-schemes/${id}`,
-      { deposits_scheme_ids }
-    );
+    return this.http.put<PeriodwiseQuestionsMaster>(`${this.apiUrl}/deposit-schemes/${id}`, {
+      deposits_scheme_ids,
+    });
   }
-  updateMenus(
-    id: number,
-    menu_ids: string
-  ): Observable<PeriodwiseQuestionsMaster> {
-    return this.http.put<PeriodwiseQuestionsMaster>(
-      `${this.apiUrl}/menu/${id}`,
-      { menu_ids }
-    );
+  updateMenus(id: number, menu_ids: string): Observable<PeriodwiseQuestionsMaster> {
+    return this.http.put<PeriodwiseQuestionsMaster>(`${this.apiUrl}/menu/${id}`, { menu_ids });
   }
-  updateCategories(
-    id: number,
-    cat_ids: string
-  ): Observable<PeriodwiseQuestionsMaster> {
-    return this.http.put<PeriodwiseQuestionsMaster>(
-      `${this.apiUrl}/category/${id}`,
-      { cat_ids }
-    );
+  updateCategories(id: number, cat_ids: string): Observable<PeriodwiseQuestionsMaster> {
+    return this.http.put<PeriodwiseQuestionsMaster>(`${this.apiUrl}/category/${id}`, { cat_ids });
   }
   updateQuestionHeaders(
-
     id: number,
 
     header_ids: string,
 
-    question_ids: string
-
+    question_ids: string,
   ) {
-
     return this.http.put(
-
       `${this.apiUrl}/question-and-headers/${id}`,
 
       {
-
         header_ids,
-        question_ids
-
-      }
-
+        question_ids,
+      },
     );
-
   }
 
+  updateMultipleAuditors(
+    id: number,
+    is_multiple_auditors: boolean,
+  ): Observable<any> {
+    return this.http.put<any>(`${this.apiUrl}/multiple-auditors/${id}`, { is_multiple_auditors });
+  }
+
+  getEligibleAuditors(id: number): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/${id}/eligible-auditors`);
+  }
+
+  getCategoryAssignments(id: number): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/${id}/category-assignments`);
+  }
+
+  assignCategories(
+    id: number,
+    assignments: { category_id: number; audit_emp_id: number }[],
+  ): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/${id}/assign-categories`, { assignments });
+  }
 
   delete(id: number): Observable<any> {
     return this.http.delete(`${this.apiUrl}/${id}`);
   }
-
 }
-
 
 // Manage Accounts Data
 
 export interface DepositAccountFilters {
-
   search?: string;
 
   search_type?: string;
@@ -1538,7 +1312,6 @@ export interface DepositAccountFilters {
 }
 
 export interface CreateDepositAccountDto {
-
   branch_id: number;
 
   scheme_id: number;
@@ -1583,7 +1356,6 @@ export interface CreateDepositAccountDto {
 }
 
 export interface AdvancesAccountFilters {
-
   search?: string;
 
   search_type?: string;
@@ -1602,7 +1374,6 @@ export interface AdvancesAccountFilters {
 }
 
 export interface CreateAdvanceAccountDto {
-
   branch_id: number;
 
   scheme_id: number;
@@ -1657,94 +1428,56 @@ export interface CreateAdvanceAccountDto {
 }
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class ManageAccountsDataService {
-
   private http = inject(HttpClient);
   private config = inject(APP_CONFIG);
 
   private apiUrl = `${this.config.apiUrl}/deposit-accounts`;
   private apiUrl1 = `${this.config.apiUrl}/advance-accounts`;
 
-
-
-  findAllDepositAccounts(
-    filters?: DepositAccountFilters,
-  ) {
-
-    return this.http.get<any>(
-      this.apiUrl,
-      {
-        params: filters as any,
-      },
-    );
+  findAllDepositAccounts(filters?: DepositAccountFilters) {
+    return this.http.get<any>(this.apiUrl, {
+      params: filters as any,
+    });
   }
 
-  findOneDepositAccount(
-    id: number,
-  ) {
-    return this.http.get<any>(
-      `${this.apiUrl}/${id}`,
-    );
+  findOneDepositAccount(id: number) {
+    return this.http.get<any>(`${this.apiUrl}/${id}`);
   }
 
-  createDepositAccount(
-    data: CreateDepositAccountDto,
-  ) {
-    return this.http.post<any>(
-      this.apiUrl,
-      data,
-    );
+  createDepositAccount(data: CreateDepositAccountDto) {
+    return this.http.post<any>(this.apiUrl, data);
   }
 
   updateDepositAccount(
-
     id: number,
 
     data: CreateDepositAccountDto,
   ) {
-    return this.http.patch<any>(
-      `${this.apiUrl}/${id}`,
-      data,
-    );
+    return this.http.patch<any>(`${this.apiUrl}/${id}`, data);
   }
 
-  removeDepositAccount(
-    id: number,
-  ) {
-    return this.http.delete<any>(
-      `${this.apiUrl}/${id}`,
-    );
+  removeDepositAccount(id: number) {
+    return this.http.delete<any>(`${this.apiUrl}/${id}`);
   }
 
   getUploadDumps() {
-
-    return this.http.get<any[]>(
-      `${this.apiUrl}/upload-dumps`,
-    );
+    return this.http.get<any[]>(`${this.apiUrl}/upload-dumps`);
   }
 
-  private formatUploadDate(
-    value: any,
-  ) {
-
+  private formatUploadDate(value: any) {
     if (!value) {
       return '';
     }
 
     if (value instanceof Date) {
+      const year = value.getFullYear();
 
-      const year =
-        value.getFullYear();
+      const month = String(value.getMonth() + 1).padStart(2, '0');
 
-      const month =
-        String(value.getMonth() + 1)
-          .padStart(2, '0');
-
-      const day =
-        String(value.getDate())
-          .padStart(2, '0');
+      const day = String(value.getDate()).padStart(2, '0');
 
       return `${year}-${month}-${day}`;
     }
@@ -1752,45 +1485,24 @@ export class ManageAccountsDataService {
     return String(value);
   }
 
-  validateDepositCsv(
-    file: File,
-    payload: any,
-  ) {
+  validateDepositCsv(file: File, payload: any) {
+    const formData = new FormData();
 
-    const formData =
-      new FormData();
+    formData.append('file', file);
 
-    formData.append(
-      'file',
-      file,
-    );
+    formData.append('upload_date', this.formatUploadDate(payload.upload_date));
 
-    formData.append(
-      'upload_date',
-      this.formatUploadDate(payload.upload_date),
-    );
+    formData.append('period_from', this.formatUploadDate(payload.period_from));
 
-    formData.append(
-      'period_from',
-      this.formatUploadDate(payload.period_from),
-    );
-
-    formData.append(
-      'period_to',
-      this.formatUploadDate(payload.period_to),
-    );
+    formData.append('period_to', this.formatUploadDate(payload.period_to));
 
     const params = {
-      upload_date:
-        this.formatUploadDate(payload.upload_date),
-      period_from:
-        this.formatUploadDate(payload.period_from),
-      period_to:
-        this.formatUploadDate(payload.period_to),
+      upload_date: this.formatUploadDate(payload.upload_date),
+      period_from: this.formatUploadDate(payload.period_from),
+      period_to: this.formatUploadDate(payload.period_to),
     };
 
     return this.http.post<any>(
-
       `${this.apiUrl}/validate-upload`,
 
       formData,
@@ -1800,12 +1512,8 @@ export class ManageAccountsDataService {
     );
   }
 
-  addDepositDump(
-    uploadKey: string,
-  ) {
-
+  addDepositDump(uploadKey: string) {
     return this.http.post<any>(
-
       `${this.apiUrl}/add-dump`,
 
       {
@@ -1814,105 +1522,56 @@ export class ManageAccountsDataService {
     );
   }
 
-
-
   // Advance Dump
 
-  findAllAdvanceAccounts(
-    filters?: AdvancesAccountFilters,
-  ) {
-
-    return this.http.get<any>(
-      this.apiUrl1,
-      {
-        params: filters as any,
-      },
-    );
+  findAllAdvanceAccounts(filters?: AdvancesAccountFilters) {
+    return this.http.get<any>(this.apiUrl1, {
+      params: filters as any,
+    });
   }
 
-  findOneAdvanceAccount(
-    id: number,
-  ) {
-    return this.http.get<any>(
-      `${this.apiUrl1}/${id}`,
-    );
+  findOneAdvanceAccount(id: number) {
+    return this.http.get<any>(`${this.apiUrl1}/${id}`);
   }
 
-  createAdvanceAccount(
-    data: CreateAdvanceAccountDto,
-  ) {
-    return this.http.post<any>(
-      this.apiUrl1,
-      data,
-    );
+  createAdvanceAccount(data: CreateAdvanceAccountDto) {
+    return this.http.post<any>(this.apiUrl1, data);
   }
 
   updateAdvanceAccount(
-
     id: number,
 
     data: CreateAdvanceAccountDto,
   ) {
-    return this.http.patch<any>(
-      `${this.apiUrl1}/${id}`,
-      data,
-    );
+    return this.http.patch<any>(`${this.apiUrl1}/${id}`, data);
   }
 
-  removeAdvanceAccount(
-    id: number,
-  ) {
-    return this.http.delete<any>(
-      `${this.apiUrl1}/${id}`,
-    );
+  removeAdvanceAccount(id: number) {
+    return this.http.delete<any>(`${this.apiUrl1}/${id}`);
   }
 
   getUploadDumpsAdvance() {
-
-    return this.http.get<any[]>(
-      `${this.apiUrl1}/upload-dumps`,
-    );
+    return this.http.get<any[]>(`${this.apiUrl1}/upload-dumps`);
   }
 
-  validateAdvanceCsv(
-    file: File,
-    payload: any,
-  ) {
+  validateAdvanceCsv(file: File, payload: any) {
+    const formData = new FormData();
 
-    const formData =
-      new FormData();
+    formData.append('file', file);
 
-    formData.append(
-      'file',
-      file,
-    );
+    formData.append('upload_date', this.formatUploadDate(payload.upload_date));
 
-    formData.append(
-      'upload_date',
-      this.formatUploadDate(payload.upload_date),
-    );
+    formData.append('period_from', this.formatUploadDate(payload.period_from));
 
-    formData.append(
-      'period_from',
-      this.formatUploadDate(payload.period_from),
-    );
-
-    formData.append(
-      'period_to',
-      this.formatUploadDate(payload.period_to),
-    );
+    formData.append('period_to', this.formatUploadDate(payload.period_to));
 
     const params = {
-      upload_date:
-        this.formatUploadDate(payload.upload_date),
-      period_from:
-        this.formatUploadDate(payload.period_from),
-      period_to:
-        this.formatUploadDate(payload.period_to),
+      upload_date: this.formatUploadDate(payload.upload_date),
+      period_from: this.formatUploadDate(payload.period_from),
+      period_to: this.formatUploadDate(payload.period_to),
     };
 
     return this.http.post<any>(
-
       `${this.apiUrl1}/validate-upload`,
 
       formData,
@@ -1922,12 +1581,8 @@ export class ManageAccountsDataService {
     );
   }
 
-  addAdvanceDump(
-    uploadKey: string,
-  ) {
-
+  addAdvanceDump(uploadKey: string) {
     return this.http.post<any>(
-
       `${this.apiUrl1}/add-dump`,
 
       {
@@ -1936,14 +1591,7 @@ export class ManageAccountsDataService {
     );
   }
 
-
   // Advance Dump
-
-
-
-
-
-
 }
 
 @Injectable({ providedIn: 'root' })
@@ -1957,14 +1605,12 @@ export class PolicyDocumentsService {
       map((res: any) => {
         const data = res.data || res;
         return Array.isArray(data) ? data : [];
-      })
+      }),
     );
   }
 
   findOne(id: number | string): Observable<any> {
-    return this.http.get<any>(`${this.apiUrl}/${id}`).pipe(
-      map((res: any) => res.data || res)
-    );
+    return this.http.get<any>(`${this.apiUrl}/${id}`).pipe(map((res: any) => res.data || res));
   }
 
   create(formData: FormData): Observable<any> {
@@ -2003,20 +1649,16 @@ export class AuditCalendarService {
       map((res: any) => {
         const data = res.data || res;
         return Array.isArray(data) ? data : [];
-      })
+      }),
     );
   }
 
   findOne(id: number | string): Observable<any> {
-    return this.http.get<any>(`${this.apiUrl}/${id}`).pipe(
-      map((res: any) => res.data || res)
-    );
+    return this.http.get<any>(`${this.apiUrl}/${id}`).pipe(map((res: any) => res.data || res));
   }
 
   getLookups(): Observable<{ units: any[]; schemes: any[]; auditors: any[] }> {
-    return this.http.get<any>(`${this.apiUrl}/lookups`).pipe(
-      map((res: any) => res.data || res)
-    );
+    return this.http.get<any>(`${this.apiUrl}/lookups`).pipe(map((res: any) => res.data || res));
   }
 
   create(data: any): Observable<any> {
@@ -2047,7 +1689,9 @@ export class AuditCalendarService {
     return this.http.get<any[]>(`${this.apiUrl}/risk-frequencies`);
   }
 
-  updateRiskFrequencies(frequencies: { risk_type_id: number; frequency: number }[]): Observable<any> {
+  updateRiskFrequencies(
+    frequencies: { risk_type_id: number; frequency: number }[],
+  ): Observable<any> {
     return this.http.post<any>(`${this.apiUrl}/risk-frequencies`, { frequencies });
   }
 }
@@ -2108,5 +1752,3 @@ export class RegionMasterService {
     return this.http.delete<any>(`${this.apiUrl}/${id}`);
   }
 }
-
-
