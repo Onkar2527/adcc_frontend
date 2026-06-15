@@ -296,7 +296,7 @@
           <span>{{ isComplianceReview() ? 'Re-Compliance Needed' : 'Re-Audit Needed' }}</span
           ><strong class="red">{{ review.counts.rejected }}</strong>
         </div>
-        <div *ngIf="isRegularComplianceReview()">
+        <div *ngIf="isComplianceReview()">
           <span>Partially Pass</span><strong>{{ review.counts.partially_passed || 0 }}</strong>
         </div>
       </div>
@@ -352,7 +352,7 @@
           <button
             type="button"
             class="review-filter-chip warning"
-            *ngIf="isRegularComplianceReview()"
+            *ngIf="isComplianceReview()"
             [class.active]="reviewFilter() === 'partial'"
             (click)="reviewFilter.set('partial')"
           >
@@ -765,6 +765,7 @@
                 icon="pi pi-check"
                 severity="success"
                 [loading]="actionSaving()[actionKey('answer', answer.id)]"
+                [disabled]="reviewStatus(answer) === 9"
                 (click)="saveAction('answer', answer, 2)"
               ></button>
 
@@ -775,6 +776,7 @@
                 icon="pi pi-times"
                 severity="danger"
                 [loading]="actionSaving()[actionKey('answer', answer.id)]"
+                [disabled]="reviewStatus(answer) === 9"
                 (click)="saveAction('answer', answer, 3)"
               ></button>
 
@@ -786,17 +788,19 @@
                 icon="pi pi-forward"
                 severity="info"
                 [loading]="actionSaving()[actionKey('answer', answer.id)]"
+                [disabled]="reviewStatus(answer) === 9"
                 (click)="saveAction('answer', answer, 5)"
               ></button>
 
               <button
-                *ngIf="isRegularComplianceReview()"
+                *ngIf="isComplianceReview()"
                 pButton
                 type="button"
                 label="Partially Pass"
                 icon="pi pi-percentage"
                 severity="warn"
                 [loading]="actionSaving()[actionKey('answer', answer.id)]"
+                [disabled]="reviewStatus(answer) === 9"
                 (click)="saveAction('answer', answer, 7)"
               ></button>
             </div>
@@ -970,6 +974,7 @@
                       <select
                         class="answer-control"
                         [(ngModel)]="row.temp_action"
+                        [disabled]="reviewStatus(row) === 9"
                         style="min-width: 140px; padding: 0.25rem"
                       >
                         <option value="">Select Action</option>
@@ -978,7 +983,7 @@
                           {{ isComplianceReview() ? 'Re-Compliance' : 'Re-Audit' }}
                         </option>
                         <option [value]="5" *ngIf="isComplianceReview()">Carry Forward</option>
-                        <option [value]="7" *ngIf="isRegularComplianceReview()">
+                        <option [value]="7" *ngIf="isComplianceReview()">
                           Partially Pass
                         </option>
                       </select>

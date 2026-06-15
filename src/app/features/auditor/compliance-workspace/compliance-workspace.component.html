@@ -23,8 +23,17 @@
 
   <section *ngIf="!selected()" class="queue-panel">
     <div class="section-title">
-      Pending Compliance
-      <p-tag [value]="assessments().length + ' pending'" severity="contrast"></p-tag>
+      <div>
+        Pending Compliance
+        <p-tag [value]="filteredAssessments().length + ' pending'" severity="contrast"></p-tag>
+      </div>
+
+      <input
+        type="text"
+        class="queue-search"
+        [(ngModel)]="queueSearch"
+        placeholder="Search unit code or unit name"
+      />
     </div>
 
     <div *ngIf="loadingQueue()" class="loading-stack">
@@ -32,12 +41,12 @@
       <p-skeleton height="4.5rem"></p-skeleton>
     </div>
 
-    <div *ngIf="!loadingQueue() && !assessments().length" class="empty-state">
-      No assessment is pending for compliance.
-    </div>
+    <div *ngIf="!loadingQueue() && !filteredAssessments().length" class="empty-state">
+  No assessment found.
+</div>
 
     <button
-      *ngFor="let assessment of assessments()"
+  *ngFor="let assessment of filteredAssessments()"
       type="button"
       class="queue-row"
       (click)="openAssessment(assessment)"

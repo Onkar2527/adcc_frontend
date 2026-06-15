@@ -118,6 +118,8 @@ export class ComplianceWorkspaceComponent implements OnInit {
 
     remarkSubject = '';
 
+    queueSearch = ''
+
     remarkMessage = '';
 
     complianceAnswerGroups = computed(() =>
@@ -168,6 +170,31 @@ export class ComplianceWorkspaceComponent implements OnInit {
                     this.loadingQueue.set(false);
                 },
             });
+    }
+
+    filteredAssessments() {
+        const search =
+            this.queueSearch
+                .trim()
+                .toLowerCase();
+
+        const rows =
+            this.assessments() || [];
+
+        if (!search) {
+            return rows;
+        }
+
+        return rows.filter(
+            (assessment: any) =>
+                String(assessment.audit_unit_code || '')
+                    .toLowerCase()
+                    .includes(search)
+                ||
+                String(assessment.audit_unit_name || '')
+                    .toLowerCase()
+                    .includes(search),
+        );
     }
 
     openAssessment(
@@ -333,17 +360,13 @@ export class ComplianceWorkspaceComponent implements OnInit {
     hasAccountDetails(
         answer: any,
     ) {
-        return Number(answer?.dump_id || 0) > 0
-            &&
-            (
-                answer?.account_no
-                ||
-                answer?.account_holder_name
-                ||
-                answer?.scheme_name
-                ||
-                answer?.scheme_code
-            );
+        return Boolean(
+            answer?.account_no
+            || answer?.account_holder_name
+            || answer?.scheme_name
+            || answer?.scheme_code
+            || answer?.ucic,
+        );
     }
 
     private groupComplianceAnswers(

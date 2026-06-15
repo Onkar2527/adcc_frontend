@@ -506,6 +506,12 @@ export class ReviewerWorkspaceComponent implements OnInit {
             return 'Partially Pass Response Pending';
         }
 
+        if (
+            Number(status) === 9
+        ) {
+            return 'Partially Pass Settled';
+        }
+
         return 'Pending';
     }
 
@@ -534,6 +540,12 @@ export class ReviewerWorkspaceComponent implements OnInit {
             [7, 8].includes(Number(status))
         ) {
             return 'warn';
+        }
+
+        if (
+            Number(status) === 9
+        ) {
+            return 'success';
         }
 
         return 'secondary';
@@ -607,7 +619,7 @@ export class ReviewerWorkspaceComponent implements OnInit {
                         2,
                         3,
                         ...(this.isComplianceReview()
-                            ? [5, 7]
+                            ? [5, 7, 9]
                             : []),
                     ].includes(
                         Number(
@@ -718,7 +730,7 @@ export class ReviewerWorkspaceComponent implements OnInit {
                     2,
                     3,
                     ...(this.isComplianceReview()
-                        ? [5, 7, 8]
+                        ? [5, 7, 8, 9]
                         : []),
                 ];
 
@@ -738,10 +750,10 @@ export class ReviewerWorkspaceComponent implements OnInit {
         }
 
         if (filter === 'accepted') {
-            return answerStatus === 2
+            return [2, 9].includes(answerStatus)
                 || hasAnnexureStatus(
                     (status) =>
-                        status === 2,
+                        [2, 9].includes(status),
                 );
         }
 
@@ -798,17 +810,13 @@ export class ReviewerWorkspaceComponent implements OnInit {
     hasAccountDetails(
         answer: any,
     ) {
-        return Number(answer?.dump_id || 0) > 0
-            &&
-            (
-                answer?.account_no
-                ||
-                answer?.account_holder_name
-                ||
-                answer?.scheme_name
-                ||
-                answer?.scheme_code
-            );
+        return Boolean(
+            answer?.account_no
+            || answer?.account_holder_name
+            || answer?.scheme_name
+            || answer?.scheme_code
+            || answer?.ucic,
+        );
     }
 
     private groupReviewAnswers(

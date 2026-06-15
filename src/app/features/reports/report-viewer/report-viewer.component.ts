@@ -134,11 +134,20 @@ export class ReportViewerComponent implements OnInit {
 
   showsNestedComplianceColumn(): boolean {
     const slug = this.definition()?.slug;
-    return slug === 'compliance-summary-report' || slug === 'pending-compliance-detail-report';
+    return [
+      'compliance-summary-report',
+      'pending-compliance-detail-report',
+      'carry-forward-report',
+      'partially-pass-report',
+    ].includes(slug || '');
   }
 
   showsNestedReviewerCommentColumn(): boolean {
-    return this.definition()?.slug === 'pending-compliance-detail-report';
+    return [
+      'pending-compliance-detail-report',
+      'carry-forward-report',
+      'partially-pass-report',
+    ].includes(this.definition()?.slug || '');
   }
 
   isExecutiveSummary(): boolean {
@@ -275,7 +284,7 @@ export class ReportViewerComponent implements OnInit {
               : [];
           });
 
-        if (slug === 'carry-forward-report') {
+        if (['carry-forward-report', 'partially-pass-report'].includes(slug)) {
           const sourceAssessmentId = Number(
             this.route.snapshot.queryParamMap.get('source_assessment_id') || 0,
           );
@@ -300,7 +309,7 @@ export class ReportViewerComponent implements OnInit {
         this.loading.set(false);
 
         if (
-          slug === 'carry-forward-report'
+          ['carry-forward-report', 'partially-pass-report'].includes(slug)
           && Number(this.filters['source_assessment_id'] || 0) > 0
         ) {
           this.findReport();

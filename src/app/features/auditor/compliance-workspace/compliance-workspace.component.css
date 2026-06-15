@@ -46,6 +46,35 @@
     margin-bottom: .85rem;
 }
 
+.queue-search {
+    width: 18rem;
+    max-width: 100%;
+    min-height: 2.1rem;
+    padding: .4rem .55rem;
+    border: 1px solid var(--surface-border);
+    border-radius: .35rem;
+    background: var(--surface-0);
+    color: var(--text-color);
+    font: inherit;
+    font-size: .9rem;
+}
+
+.queue-search:focus {
+    outline: 0;
+    border-color: var(--primary-color);
+}
+
+@media (max-width: 720px) {
+    .section-title {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .queue-search {
+        width: 100%;
+    }
+}
+
 .loading-stack {
     display: grid;
     gap: .75rem;

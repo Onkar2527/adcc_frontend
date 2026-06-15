@@ -277,6 +277,29 @@ export class AuditUnitDashboardComponent implements OnInit {
         );
     }
 
+    openPartiallyPassReport(
+        assessment: any,
+        year: any,
+    ) {
+        if (
+            !assessment?.id
+            || Number(assessment?.partially_pass_count || 0) <= 0
+        ) {
+            return;
+        }
+
+        this.router.navigate(
+            ['/reports/partially-pass-report'],
+            {
+                queryParams: {
+                    source_assessment_id: Number(assessment.id),
+                    audit_unit_id: Number(assessment.audit_unit_id),
+                    financial_year: Number(year?.id || assessment?.year_id || 0),
+                },
+            },
+        );
+    }
+
     startAssessment(
         year: any,
     ) {

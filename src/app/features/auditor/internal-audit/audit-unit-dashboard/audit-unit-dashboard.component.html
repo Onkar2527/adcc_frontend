@@ -139,6 +139,15 @@
                                         [label]="'Carry Forward Report (' + row.assessment.carry_forward_count + ')'"
                                         (click)="openCarryForwardReport(row.assessment, row.year)"
                                     ></button>
+                                    <button
+                                        *ngIf="row.assessment.partially_pass_count > 0"
+                                        pButton
+                                        type="button"
+                                        class="p-button-sm p-button-text mt-1"
+                                        icon="pi pi-percentage"
+                                        [label]="'Partially Pass Report (' + row.assessment.partially_pass_count + ')'"
+                                        (click)="openPartiallyPassReport(row.assessment, row.year)"
+                                    ></button>
                                 </ng-container>
 
                                 <ng-template #noAssessmentPeriod>
