@@ -296,6 +296,9 @@
           <span>{{ isComplianceReview() ? 'Re-Compliance Needed' : 'Re-Audit Needed' }}</span
           ><strong class="red">{{ review.counts.rejected }}</strong>
         </div>
+        <div *ngIf="isRegularComplianceReview()">
+          <span>Partially Pass</span><strong>{{ review.counts.partially_passed || 0 }}</strong>
+        </div>
       </div>
 
       <div class="review-filter-panel">
@@ -343,6 +346,16 @@
           >
             {{ isComplianceReview() ? 'Re-Compliance' : 'Re-Audit' }}
             <span>{{ reviewFilterCount('rework') }}</span>
+          </button>
+
+          <button
+            type="button"
+            class="review-filter-chip warning"
+            *ngIf="isRegularComplianceReview()"
+            [class.active]="reviewFilter() === 'partial'"
+            (click)="reviewFilter.set('partial')"
+          >
+            Partially Pass <span>{{ reviewFilterCount('partial') }}</span>
           </button>
 
           <button
@@ -697,6 +710,17 @@
               [loading]="actionSaving()[actionKey('answer', answer.id)]"
               (click)="saveAction('answer', answer, 5)"
             ></button>
+
+            <button
+              *ngIf="isRegularComplianceReview()"
+              pButton
+              type="button"
+              label="Partially Pass"
+              icon="pi pi-percentage"
+              severity="warn"
+              [loading]="actionSaving()[actionKey('answer', answer.id)]"
+              (click)="saveAction('answer', answer, 7)"
+            ></button>
           </div>
         </div>
 
@@ -789,6 +813,7 @@
                       <option [value]="2">Accept</option>
                       <option [value]="3">{{ isComplianceReview() ? 'Re-Compliance' : 'Re-Audit' }}</option>
                       <option [value]="5" *ngIf="isComplianceReview()">Carry Forward</option>
+                      <option [value]="7" *ngIf="isRegularComplianceReview()">Partially Pass</option>
                     </select>
                   </td>
                 </tr>

@@ -78,7 +78,7 @@
                 <h3>{{ selected().audit_unit_name }}</h3>
                 <p>
                     {{ selected().audit_unit_code }} |
-                    {{ isReCompliance() ? 'Re-Compliance Corrections' : 'Compliance Required Points' }}
+                    {{ isReCompliance() ? 'Re-Compliance / Partially Pass Corrections' : 'Compliance Required Points' }}
                 </p>
             </div>
 
@@ -401,7 +401,14 @@
                         </div>
                     </div>
 
-                    <p-tag value="Compliance Required" severity="danger"></p-tag>
+                    <div class="flex align-items-center gap-2">
+                        <p-tag
+                            *ngIf="isPartiallyPass(answer)"
+                            value="Partially Pass"
+                            severity="warn"
+                        ></p-tag>
+                        <p-tag value="Compliance Required" severity="danger"></p-tag>
+                    </div>
                 </div>
 
                 <div class="observation-body">
@@ -593,6 +600,12 @@
                                     </td>
 
                                     <td *ngIf="isReCompliance()" class="reviewer-feedback-cell">
+                                        <p-tag
+                                            *ngIf="isPartiallyPass(row)"
+                                            value="Partially Pass"
+                                            severity="warn"
+                                            class="mr-2"
+                                        ></p-tag>
                                         {{ row.compliance_reviewer_comment || '-' }}
                                     </td>
 

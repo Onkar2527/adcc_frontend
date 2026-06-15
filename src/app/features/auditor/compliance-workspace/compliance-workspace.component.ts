@@ -228,6 +228,16 @@ export class ComplianceWorkspaceComponent implements OnInit {
         return observation?.response_required !== false;
     }
 
+    isPartiallyPass(
+        observation: any,
+    ) {
+        const status = Number(
+            observation?.compliance_status_id || 0,
+        );
+
+        return [7, 8].includes(status);
+    }
+
     actionKey(
         targetType: string,
         observationId: number,
