@@ -20,118 +20,24 @@ import {
     ],
     providers: [MessageService],
     template: `
+        <div class="card">
+            <div class="flex align-items-center justify-content-between mb-4">
+                <h5 class="m-0 text-xl font-semibold">Special Audit</h5>
+            </div>
+
+            <app-table
+                [columns]="columns"
+                [data]="audits()"
+                [loading]="loading()"
+                [globalFilterFields]="globalFilterFields"
+                [actionDisplayMode]="'buttons'"
+                (onAdd)="openCreate()"
+                (onActionClick)="onAction($event)"
+                (onRefresh)="loadData()"
+            ></app-table>
+        </div>
         <p-toast></p-toast>
-
-        <section class="special-audit">
-            <header class="special-audit__header">
-                <div>
-                    <span>Audit Setup</span>
-                    <h1>Special Audit</h1>
-                    <p>
-                        Create one-off or multiple special audits for selected branches without
-                        disturbing the regular internal audit cycle.
-                    </p>
-                </div>
-
-            </header>
-
-            <div class="special-audit__summary">
-                <div>
-                    <small>Total Special Audits</small>
-                    <strong>{{ audits().length }}</strong>
-                </div>
-            </div>
-
-            <div class="card">
-                <app-table
-                    [columns]="columns"
-                    [data]="audits()"
-                    [loading]="loading()"
-                    [globalFilterFields]="globalFilterFields"
-                    [actionDisplayMode]="'buttons'"
-                    (onAdd)="openCreate()"
-                    (onActionClick)="onAction($event)"
-                    (onRefresh)="loadData()"
-                ></app-table>
-            </div>
-
-            <div class="special-audit__note">
-                <i class="pi pi-info-circle"></i>
-                <span>
-                    Special Audit uses the same question engine as Internal Audit, but it is created
-                    independently from branch frequency cycles.
-                </span>
-            </div>
-        </section>
-
     `,
-    styles: [`
-        .special-audit {
-            display: grid;
-            gap: 1rem;
-        }
-
-        .special-audit__header,
-        .special-audit__summary,
-        .special-audit__note {
-            border: 1px solid var(--surface-border);
-            border-radius: .45rem;
-            background: var(--surface-card);
-        }
-
-        .special-audit__header {
-            padding: 1rem 1.15rem;
-            border-left: .25rem solid var(--primary-color);
-        }
-
-        .special-audit__header span {
-            color: var(--primary-color);
-            font-size: .72rem;
-            font-weight: 800;
-            text-transform: uppercase;
-        }
-
-        .special-audit__header h1 {
-            margin: .2rem 0;
-            color: var(--text-color);
-            font-size: 1.35rem;
-        }
-
-        .special-audit__header p {
-            max-width: 58rem;
-            margin: 0;
-            color: var(--text-color-secondary);
-            line-height: 1.4;
-        }
-
-        .special-audit__summary {
-            padding: .85rem 1rem;
-        }
-
-        .special-audit__summary div {
-            display: grid;
-            gap: .15rem;
-        }
-
-        .special-audit__summary small,
-        .special-audit__note {
-            color: var(--text-color-secondary);
-        }
-
-        .special-audit__summary strong {
-            color: var(--text-color);
-            font-size: 1.4rem;
-        }
-
-        .special-audit__note {
-            display: flex;
-            align-items: center;
-            gap: .5rem;
-            padding: .85rem 1rem;
-            font-size: .9rem;
-            line-height: 1.4;
-        }
-    `],
 })
 export class SpecialAuditComponent implements OnInit {
     private service = inject(SpecialAuditService);
