@@ -80,6 +80,9 @@ export class ComplianceWorkspaceComponent implements OnInit {
     assessments =
         signal<any[]>([]);
 
+    complianceMode =
+        signal<'regular' | 'special'>('regular');
+
     selected =
         signal<any>(null);
 
@@ -132,6 +135,24 @@ export class ComplianceWorkspaceComponent implements OnInit {
         this.loadQueue();
     }
 
+    regularAssessments = computed(() =>
+        this.assessments().filter(
+            (assessment: any) => Number(assessment.audit_type_id || 1) !== 2,
+        ),
+    );
+
+    specialAssessments = computed(() =>
+        this.assessments().filter(
+            (assessment: any) => Number(assessment.audit_type_id || 1) === 2,
+        ),
+    );
+
+    modeAssessments = computed(() =>
+        this.complianceMode() === 'special'
+            ? this.specialAssessments()
+            : this.regularAssessments(),
+    );
+
     employeeId() {
         const user =
             JSON.parse(
@@ -179,7 +200,7 @@ export class ComplianceWorkspaceComponent implements OnInit {
                 .toLowerCase();
 
         const rows =
-            this.assessments() || [];
+            this.modeAssessments() || [];
 
         if (!search) {
             return rows;
@@ -195,6 +216,43 @@ export class ComplianceWorkspaceComponent implements OnInit {
                     .toLowerCase()
                     .includes(search),
         );
+    }
+
+    selectComplianceMode(
+        mode: 'regular' | 'special',
+    ) {
+        this.complianceMode.set(mode);
+        this.queueSearch = '';
+    }
+
+    selectedTitle() {
+        const item =
+            this.detail()?.overview
+            || this.selected();
+
+        return Number(item?.audit_type_id || 1) === 2
+            ? (item?.special_audit_title || item?.audit_unit_name || 'Special Audit')
+            : item?.audit_unit_name;
+    }
+
+    selectedSubtitle() {
+        const item =
+            this.detail()?.overview
+            || this.selected();
+
+        const prefix =
+            Number(item?.audit_type_id || 1) === 2
+                ? 'Special Audit'
+                : (item?.audit_unit_code || '');
+
+        const stage =
+            this.isReCompliance()
+                ? 'Re-Compliance / Partially Pass Corrections'
+                : 'Compliance Required Points';
+
+        return prefix
+            ? `${prefix} | ${stage}`
+            : stage;
     }
 
     openAssessment(

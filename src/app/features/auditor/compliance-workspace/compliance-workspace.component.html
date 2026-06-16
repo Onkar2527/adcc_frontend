@@ -21,10 +21,30 @@
     {{ error() }}
   </div>
 
+  <div *ngIf="!selected()" class="audit-mode-switch" aria-label="Compliance type">
+    <button
+      type="button"
+      [class.active]="complianceMode() === 'regular'"
+      (click)="selectComplianceMode('regular')"
+    >
+      Internal Audits
+      <span>{{ regularAssessments().length }}</span>
+    </button>
+
+    <button
+      type="button"
+      [class.active]="complianceMode() === 'special'"
+      (click)="selectComplianceMode('special')"
+    >
+      Special Audits
+      <span>{{ specialAssessments().length }}</span>
+    </button>
+  </div>
+
   <section *ngIf="!selected()" class="queue-panel">
     <div class="section-title">
       <div>
-        Pending Compliance
+        {{ complianceMode() === 'special' ? 'Pending Special Audit Compliance' : 'Pending Compliance' }}
         <p-tag [value]="filteredAssessments().length + ' pending'" severity="contrast"></p-tag>
       </div>
 
@@ -52,8 +72,14 @@
       (click)="openAssessment(assessment)"
     >
       <span class="queue-unit">
-        <strong>{{ assessment.audit_unit_name }}</strong>
-        <small>{{ assessment.audit_unit_code }} | F.Y. {{ assessment.year }}</small>
+        <strong>{{ assessment.audit_type_id === 2 ? (assessment.special_audit_title || assessment.audit_unit_name) : assessment.audit_unit_name }}</strong>
+        <small>
+          {{
+            assessment.audit_type_id === 2
+              ? ('Branch: ' + assessment.audit_unit_name + (assessment.audit_unit_code ? ' (' + assessment.audit_unit_code + ')' : ''))
+              : (assessment.audit_unit_code + ' | F.Y. ' + assessment.year)
+          }}
+        </small>
         <p-tag [value]="assessment.compliance_stage" severity="secondary"></p-tag>
       </span>
 
@@ -84,15 +110,8 @@
       ></button>
 
       <div>
-        <h3>{{ selected().audit_unit_name }}</h3>
-        <p>
-          {{ selected().audit_unit_code }} |
-          {{
-            isReCompliance()
-              ? 'Re-Compliance / Partially Pass Corrections'
-              : 'Compliance Required Points'
-          }}
-        </p>
+        <h3>{{ selectedTitle() }}</h3>
+        <p>{{ selectedSubtitle() }}</p>
       </div>
 
       <div class="toolbar-actions">

@@ -82,6 +82,9 @@ export class ReviewerWorkspaceComponent implements OnInit {
     selectedStatus =
         signal<any>(null);
 
+    reviewMode =
+        signal<'regular' | 'special'>('regular');
+
     statusOptions = [
         {
             label: 'Audit Review',
@@ -136,9 +139,27 @@ export class ReviewerWorkspaceComponent implements OnInit {
     reviewFilter =
         signal<'all' | 'pending' | 'highRisk' | 'rework' | 'partial' | 'accepted'>('all');
 
+    regularAssessments = computed(() =>
+        this.assessments().filter(
+            (assessment: any) => Number(assessment.audit_type_id || 1) !== 2,
+        ),
+    );
+
+    specialAssessments = computed(() =>
+        this.assessments().filter(
+            (assessment: any) => Number(assessment.audit_type_id || 1) === 2,
+        ),
+    );
+
+    modeAssessments = computed(() =>
+        this.reviewMode() === 'special'
+            ? this.specialAssessments()
+            : this.regularAssessments(),
+    );
+
     dashboardUnits = computed(() => {
         let rows =
-            this.assessments()
+            this.modeAssessments()
                 .map((assessment: any) => {
                     const isCompliance =
                         Number(assessment.audit_status_id || 0) === 5
@@ -152,6 +173,18 @@ export class ReviewerWorkspaceComponent implements OnInit {
                             assessment.audit_unit_name,
                         audit_unit_code:
                             assessment.audit_unit_code,
+                        display_title:
+                            Number(assessment.audit_type_id || 1) === 2
+                                ? (assessment.special_audit_title || assessment.audit_unit_name)
+                                : assessment.audit_unit_name,
+                        display_code:
+                            Number(assessment.audit_type_id || 1) === 2
+                                ? `Branch: ${assessment.audit_unit_name}${assessment.audit_unit_code ? ` (${assessment.audit_unit_code})` : ''}`
+                                : `Code: ${assessment.audit_unit_code}`,
+                        audit_type_label:
+                            Number(assessment.audit_type_id || 1) === 2
+                                ? 'Special Audit'
+                                : 'Internal Audit',
                         latest_status:
                             isCompliance ? 'Compliance Review' : 'Audit Review',
                         assessment_period_label:
@@ -196,7 +229,7 @@ export class ReviewerWorkspaceComponent implements OnInit {
     });
 
     totalReviewPending = computed(() =>
-        this.assessments()
+        this.modeAssessments()
             .reduce(
                 (sum, item: any) =>
                     sum + Number(item.total_points || 0),
@@ -205,7 +238,7 @@ export class ReviewerWorkspaceComponent implements OnInit {
     );
 
     totalCompliancePending = computed(() =>
-        this.assessments()
+        this.modeAssessments()
             .reduce(
                 (sum, item: any) =>
                     sum + Number(item.compliance_points || 0),
@@ -216,7 +249,7 @@ export class ReviewerWorkspaceComponent implements OnInit {
     reviewerSummaryItems = computed(() => [
         {
             label: 'Total Assessments',
-            value: this.assessments().length,
+            value: this.modeAssessments().length,
         },
         {
             label: 'Total Questions',
@@ -255,6 +288,38 @@ export class ReviewerWorkspaceComponent implements OnInit {
             this.filteredReviewAnswers(),
         ),
     );
+
+    dashboardEyebrow = computed(() =>
+        this.reviewMode() === 'special'
+            ? 'Special Audit Review'
+            : 'Review',
+    );
+
+    dashboardTitle = computed(() =>
+        this.reviewMode() === 'special'
+            ? 'Reviewer Workspace - Special Audits'
+            : 'Reviewer Workspace',
+    );
+
+    dashboardSubtitle = computed(() =>
+        this.reviewMode() === 'special'
+            ? 'Select an assigned special audit to review observations or compliance responses'
+            : 'Select an assigned audit unit to review audit observations or compliance responses',
+    );
+
+    dashboardPanelTitle = computed(() =>
+        this.reviewMode() === 'special'
+            ? 'Pending Special Audit Reviews'
+            : 'Pending Reviews',
+    );
+
+    selectReviewMode(
+        mode: 'regular' | 'special',
+    ) {
+        this.reviewMode.set(mode);
+        this.search.set('');
+        this.selectedStatus.set(null);
+    }
 
     ngOnInit() {
         this.loadQueue();
@@ -817,6 +882,30 @@ export class ReviewerWorkspaceComponent implements OnInit {
             || answer?.scheme_code
             || answer?.ucic,
         );
+    }
+
+    selectedTitle() {
+        const item = this.selected();
+        return Number(item?.audit_type_id || 1) === 2
+            ? (item?.special_audit_title || item?.audit_unit_name || 'Special Audit')
+            : item?.audit_unit_name;
+    }
+
+    selectedSubtitle() {
+        const item = this.selected();
+        const prefix =
+            Number(item?.audit_type_id || 1) === 2
+                ? 'Special Audit'
+                : (item?.audit_unit_code || '');
+
+        const stage =
+            this.isComplianceReview()
+                ? 'Compliance Review'
+                : 'Audit Review';
+
+        return prefix
+            ? `${prefix} | ${stage}`
+            : stage;
     }
 
     private groupReviewAnswers(

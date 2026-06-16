@@ -21,12 +21,32 @@
     {{ error() }}
   </div>
 
+  <div *ngIf="!selected()" class="audit-mode-switch" aria-label="Review type">
+    <button
+      type="button"
+      [class.active]="reviewMode() === 'regular'"
+      (click)="selectReviewMode('regular')"
+    >
+      Internal Audits
+      <span>{{ regularAssessments().length }}</span>
+    </button>
+
+    <button
+      type="button"
+      [class.active]="reviewMode() === 'special'"
+      (click)="selectReviewMode('special')"
+    >
+      Special Audits
+      <span>{{ specialAssessments().length }}</span>
+    </button>
+  </div>
+
   <app-audit-unit-dashboard
     *ngIf="!selected()"
-    eyebrow="Review"
-    [title]="'Reviewer Workspace'"
-    subtitle="Select an assigned audit unit to review audit observations or compliance responses"
-    panelTitle="Pending Reviews"
+    [eyebrow]="dashboardEyebrow()"
+    [title]="dashboardTitle()"
+    [subtitle]="dashboardSubtitle()"
+    [panelTitle]="dashboardPanelTitle()"
     emptyTitle="No assessment is pending for review"
     emptyMessage="Assigned reviews will appear here once an auditor or manager submits them."
     refreshLabel="Refresh"
@@ -36,7 +56,7 @@
     [search]="search()"
     [selectedStatus]="selectedStatus()"
     [statusOptions]="statusOptions"
-    [totalUnits]="assessments().length"
+    [totalUnits]="modeAssessments().length"
     [totalAuditPending]="0"
     [totalReviewPending]="totalReviewPending()"
     [totalCompliancePending]="totalCompliancePending()"
@@ -63,11 +83,8 @@
       ></button>
 
       <div>
-        <h3>{{ selected().audit_unit_name }}</h3>
-        <p>
-          {{ selected().audit_unit_code }} |
-          {{ isComplianceReview() ? 'Compliance Review' : 'Audit Review' }}
-        </p>
+        <h3>{{ selectedTitle() }}</h3>
+        <p>{{ selectedSubtitle() }}</p>
       </div>
 
       <div class="toolbar-actions">

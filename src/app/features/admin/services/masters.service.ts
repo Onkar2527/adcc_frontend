@@ -1752,3 +1752,37 @@ export class RegionMasterService {
     return this.http.delete<any>(`${this.apiUrl}/${id}`);
   }
 }
+
+export interface SpecialAuditPayload {
+  title: string;
+  year_id: number;
+  audit_unit_id: number;
+  control_master_id: number;
+  auditor_id: number;
+  assesment_period_from: string;
+  assesment_period_to: string;
+  audit_due_date?: string;
+}
+
+@Injectable({ providedIn: 'root' })
+export class SpecialAuditService {
+  private http = inject(HttpClient);
+  private config = inject(APP_CONFIG);
+  private apiUrl = `${this.config.apiUrl}/special-audit`;
+
+  findAll() {
+    return this.http.get<any>(this.apiUrl).pipe(map((res: any) => res.data || res));
+  }
+
+  lookups() {
+    return this.http.get<any>(`${this.apiUrl}/lookups`).pipe(map((res: any) => res.data || res));
+  }
+
+  create(data: SpecialAuditPayload) {
+    return this.http.post<any>(this.apiUrl, data);
+  }
+
+  update(id: number | string, data: SpecialAuditPayload) {
+    return this.http.patch<any>(`${this.apiUrl}/${id}`, data);
+  }
+}

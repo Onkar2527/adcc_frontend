@@ -24,6 +24,11 @@ export const audit_type_array = [
     { label: 'Concurrent Audit', value: '2' },
 ];
 
+export const assessment_audit_type_array = [
+    { label: 'Internal Audit', value: '1' },
+    { label: 'Special Audit', value: '2' },
+];
+
 export const review_timeline_status = [
     { label: 'Accept All Observations', value: '1' },
     { label: 'Reject All Observations', value: '2' },
