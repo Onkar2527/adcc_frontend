@@ -41,62 +41,34 @@
     </button>
   </div>
 
-  <section *ngIf="!selected()" class="queue-panel">
-    <div class="section-title">
-      <div>
-        {{ complianceMode() === 'special' ? 'Pending Special Audit Compliance' : 'Pending Compliance' }}
-        <p-tag [value]="filteredAssessments().length + ' pending'" severity="contrast"></p-tag>
-      </div>
-
-      <input
-        type="text"
-        class="queue-search"
-        [(ngModel)]="queueSearch"
-        placeholder="Search unit code or unit name"
-      />
-    </div>
-
-    <div *ngIf="loadingQueue()" class="loading-stack">
-      <p-skeleton height="4.5rem"></p-skeleton>
-      <p-skeleton height="4.5rem"></p-skeleton>
-    </div>
-
-    <div *ngIf="!loadingQueue() && !filteredAssessments().length" class="empty-state">
-  No assessment found.
-</div>
-
-    <button
-  *ngFor="let assessment of filteredAssessments()"
-      type="button"
-      class="queue-row"
-      (click)="openAssessment(assessment)"
-    >
-      <span class="queue-unit">
-        <strong>{{ assessment.audit_type_id === 2 ? (assessment.special_audit_title || assessment.audit_unit_name) : assessment.audit_unit_name }}</strong>
-        <small>
-          {{
-            assessment.audit_type_id === 2
-              ? ('Branch: ' + assessment.audit_unit_name + (assessment.audit_unit_code ? ' (' + assessment.audit_unit_code + ')' : ''))
-              : (assessment.audit_unit_code + ' | F.Y. ' + assessment.year)
-          }}
-        </small>
-        <p-tag [value]="assessment.compliance_stage" severity="secondary"></p-tag>
-      </span>
-
-      <span>
-        {{ assessment.assesment_period_from | date: 'mediumDate' }}
-        -
-        {{ assessment.assesment_period_to | date: 'mediumDate' }}
-      </span>
-
-      <span class="queue-counts">
-        <small>{{ assessment.responded_points }} saved</small>
-        <strong>{{ assessment.compliance_points }} points</strong>
-      </span>
-
-      <i class="pi pi-arrow-right"></i>
-    </button>
-  </section>
+  <app-audit-unit-dashboard
+    *ngIf="!selected()"
+    [eyebrow]="dashboardEyebrow()"
+    [title]="dashboardTitle()"
+    [subtitle]="dashboardSubtitle()"
+    [panelTitle]="dashboardPanelTitle()"
+    emptyTitle="No assessment is pending for compliance"
+    emptyMessage="Assigned compliance points will appear here once review moves observations forward."
+    refreshLabel="Refresh"
+    [units]="dashboardUnits()"
+    [loading]="loadingQueue()"
+    [search]="search()"
+    [selectedStatus]="selectedStatus()"
+    [statusOptions]="statusOptions"
+    [totalUnits]="modeAssessments().length"
+    [totalAuditPending]="0"
+    [totalReviewPending]="0"
+    [totalCompliancePending]="totalCompliancePending()"
+    [totalCompleted]="0"
+    [summaryItems]="complianceSummaryItems()"
+    [cardMetrics]="complianceCardMetrics"
+    [cardMetaItems]="complianceCardMetaItems"
+    [groupAssessments]="true"
+    (searchChange)="search.set($event)"
+    (selectedStatusChange)="selectedStatus.set($event)"
+    (refresh)="loadQueue()"
+    (openUnit)="openAssessment($event)"
+  ></app-audit-unit-dashboard>
 
   <section *ngIf="selected()" class="compliance-detail">
     <div class="detail-toolbar">

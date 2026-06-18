@@ -22,6 +22,7 @@ import { TextareaModule } from 'primeng/textarea';
 import { NotificationService } from '../../../core/services/notification/notification.service';
 import { AuditDashboardService } from '../services/auditor-main.service';
 import { InternalAuditNavService } from '../services/internal-audit-nav.service';
+import { AuditUnitDashboardComponent } from '../../../shared/components/audit-unit-dashboard/audit-unit-dashboard.component';
 
 @Component({
     selector: 'app-compliance-workspace',
@@ -36,6 +37,7 @@ import { InternalAuditNavService } from '../services/internal-audit-nav.service'
         SelectModule,
         InputTextModule,
         TextareaModule,
+        AuditUnitDashboardComponent,
     ],
     templateUrl: './compliance-workspace.component.html',
     styleUrl: './compliance-workspace.component.css',
@@ -79,6 +81,12 @@ export class ComplianceWorkspaceComponent implements OnInit {
 
     assessments =
         signal<any[]>([]);
+
+    search =
+        signal('');
+
+    selectedStatus =
+        signal<any>(null);
 
     complianceMode =
         signal<'regular' | 'special'>('regular');
@@ -131,6 +139,17 @@ export class ComplianceWorkspaceComponent implements OnInit {
         ),
     );
 
+    statusOptions = [
+        {
+            label: 'Compliance Required Points',
+            value: 'Compliance Required Points',
+        },
+        {
+            label: 'Re-Compliance / Partially Pass Corrections',
+            value: 'Re-Compliance / Partially Pass Corrections',
+        },
+    ];
+
     ngOnInit() {
         this.loadQueue();
     }
@@ -152,6 +171,133 @@ export class ComplianceWorkspaceComponent implements OnInit {
             ? this.specialAssessments()
             : this.regularAssessments(),
     );
+
+    dashboardUnits = computed(() => {
+        let rows =
+            this.modeAssessments()
+                .map((assessment: any) => ({
+                    ...assessment,
+                    display_title:
+                        Number(assessment.audit_type_id || 1) === 2
+                            ? (assessment.special_audit_title || assessment.audit_unit_name)
+                            : assessment.audit_unit_name,
+                    display_code:
+                        Number(assessment.audit_type_id || 1) === 2
+                            ? `Branch: ${assessment.audit_unit_name}${assessment.audit_unit_code ? ` (${assessment.audit_unit_code})` : ''}`
+                            : `Code: ${assessment.audit_unit_code}`,
+                    latest_status:
+                        assessment.compliance_stage || 'Compliance Required Points',
+                    assessment_period_label:
+                        `${this.formatDate(assessment.assesment_period_from)} - ${this.formatDate(assessment.assesment_period_to)}`,
+                    audit_pending: 0,
+                    review_pending: 0,
+                    compliance_pending: Number(assessment.compliance_points || 0),
+                    audit_completed: 0,
+                    not_started_count: 0,
+                }));
+
+        const search =
+            this.search()
+                .trim()
+                .toLowerCase();
+
+        if (search) {
+            rows = rows.filter((item: any) =>
+                String(item.audit_unit_name || '')
+                    .toLowerCase()
+                    .includes(search)
+                ||
+                String(item.audit_unit_code || '')
+                    .toLowerCase()
+                    .includes(search),
+            );
+        }
+
+        if (this.selectedStatus()) {
+            rows = rows.filter((item: any) =>
+                String(item.latest_status || '') === String(this.selectedStatus()),
+            );
+        }
+
+        const grouped = new Map<string, any>();
+
+        rows.forEach((item: any) => {
+            const key =
+                `${item.audit_type_id || 1}-${item.audit_unit_id}`;
+            const existing =
+                grouped.get(key);
+
+            if (!existing) {
+                grouped.set(key, {
+                    ...item,
+                    assessments: [item],
+                    compliance_pending: Number(item.compliance_pending || 0),
+                });
+                return;
+            }
+
+            existing.assessments.push(item);
+            existing.compliance_pending += Number(item.compliance_pending || 0);
+        });
+
+        return Array.from(grouped.values())
+            .map((group: any) => ({
+                ...group,
+                assessments:
+                    [...group.assessments].sort((a: any, b: any) =>
+                        String(b.assesment_period_from || '').localeCompare(
+                            String(a.assesment_period_from || ''),
+                        ),
+                    ),
+                latest_status:
+                    group.assessments.length > 1
+                        ? 'Multiple Assessments'
+                        : group.latest_status,
+                assessment_period_label:
+                    group.assessments.length > 1
+                        ? `${group.assessments.length} assessment periods`
+                        : group.assessment_period_label,
+            }))
+            .sort((a: any, b: any) =>
+                String(a.audit_unit_name || '').localeCompare(String(b.audit_unit_name || '')),
+            );
+    });
+
+    totalCompliancePending = computed(() =>
+        this.modeAssessments()
+            .reduce(
+                (sum, item: any) =>
+                    sum + Number(item.compliance_points || 0),
+                0,
+            ),
+    );
+
+    complianceSummaryItems = computed(() => [
+        {
+            label: 'Total Assessments',
+            value: this.modeAssessments().length,
+        },
+        {
+            label: 'Compliance Points',
+            value: this.totalCompliancePending(),
+            className: 'text-danger',
+        },
+    ]);
+
+    complianceCardMetrics = [
+        {
+            label: 'Compliance',
+            key: 'compliance_pending',
+            className: 'text-danger',
+        },
+    ];
+
+    complianceCardMetaItems = [
+        {
+            label: 'Assessment Period',
+            key: 'assessment_period_label',
+        },
+    ];
 
     employeeId() {
         const user =
@@ -223,6 +369,51 @@ export class ComplianceWorkspaceComponent implements OnInit {
     ) {
         this.complianceMode.set(mode);
         this.queueSearch = '';
+        this.search.set('');
+        this.selectedStatus.set(null);
+    }
+
+    dashboardEyebrow() {
+        return this.complianceMode() === 'special'
+            ? 'Special Audit Compliance'
+            : 'Compliance';
+    }
+
+    dashboardTitle() {
+        return this.complianceMode() === 'special'
+            ? 'Pending Special Audit Compliance'
+            : 'Pending Compliance';
+    }
+
+    dashboardSubtitle() {
+        return 'Assessments awaiting compliance response or required correction.';
+    }
+
+    dashboardPanelTitle() {
+        return this.complianceMode() === 'special'
+            ? 'Pending Special Audit Compliance'
+            : 'Pending Compliance';
+    }
+
+    private formatDate(
+        value: any,
+    ) {
+        if (!value) {
+            return '-';
+        }
+
+        const date =
+            new Date(value);
+
+        if (Number.isNaN(date.getTime())) {
+            return String(value);
+        }
+
+        return date.toLocaleDateString('en-GB', {
+            day: '2-digit',
+            month: 'short',
+            year: 'numeric',
+        });
     }
 
     selectedTitle() {
