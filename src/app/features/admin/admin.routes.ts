@@ -36,6 +36,7 @@ import { PolicyDocumentsComponent } from './policy-documents/policy-documents.co
 import { AuditCalendarComponent } from './audit-calendar/audit-calendar.component';
 import { AuditFrequencyMasterComponent } from './audit-frequency-master/audit-frequency-master.component';
 import { SpecialAuditComponent } from './special-audit/special-audit.component';
+import { MultipleAuditorAssignmentComponent } from './multiple-auditor-assignment/multiple-auditor-assignment.component';
 
 
 export const ADMIN_ROUTES: Routes = [
@@ -77,4 +78,5 @@ export const ADMIN_ROUTES: Routes = [
     { path: 'audit-calendar', component: AuditCalendarComponent },
     { path: 'audit-frequency-master', component: AuditFrequencyMasterComponent },
     { path: 'special-audit', component: SpecialAuditComponent },
+    { path: 'multiple-auditor-assignment', component: MultipleAuditorAssignmentComponent },
 ]; // Routes configuration for admin master features
