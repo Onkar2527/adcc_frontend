@@ -363,6 +363,17 @@ export class CategoryAssessmentComponent
         }
 
         if (
+            (
+                changes['assessmentIdInput']
+                || changes['categoryIdInput']
+            )
+            &&
+            !changes['dumpIdInput']
+        ) {
+            this.selectedDumpId.set(0);
+        }
+
+        if (
             changes['assessmentIdInput']
             ||
             changes['categoryIdInput']
@@ -472,6 +483,34 @@ export class CategoryAssessmentComponent
                     }
 
                     this.activeLoadKey = '';
+
+                    const message =
+                        err?.error?.message || '';
+
+                    if (
+                        this.isAccountCategory({
+                            category: {
+                                linked_table_id:
+                                    this.categoryDetail()?.category?.linked_table_id
+                                    || 0,
+                            },
+                        })
+                        &&
+                        Number(dumpId || 0) > 0
+                        &&
+                        String(message)
+                            .toLowerCase()
+                            .includes('selected sampled account is not available for this category')
+                    ) {
+                        this.selectedDumpId.set(0);
+                        this.loadCategory(
+                            assessmentId,
+                            categoryId,
+                            showLoader,
+                            0,
+                        );
+                        return;
+                    }
 
                     if (
                         showLoader
