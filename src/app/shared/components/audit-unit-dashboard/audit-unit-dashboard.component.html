@@ -87,12 +87,13 @@
       <article
         class="unit-card"
         [class.unit-card--compact]="unitCardMetrics().length < 4"
+        [class.unit-card--grouped]="hasAssessmentGroup(item)"
         tabindex="0"
         role="button"
         *ngFor="let item of units"
-        (click)="onOpenUnit(item)"
-        (keydown.enter)="onOpenUnit(item)"
-        (keydown.space)="onOpenUnit(item)"
+        (click)="toggleGroup(item)"
+        (keydown.enter)="toggleGroup(item)"
+        (keydown.space)="toggleGroup(item)"
       >
         <div class="unit-card__top">
           <div class="unit-card__title">
@@ -108,7 +109,7 @@
           </div>
 
           <p-tag
-            [value]="item.latest_status || 'NOT STARTED'"
+            [value]="hasAssessmentGroup(item) ? ((assessmentItems(item).length) + ' Assessments') : (item.latest_status || 'NOT STARTED')"
             [severity]="getSeverity(item.latest_status)"
           ></p-tag>
         </div>
@@ -120,14 +121,45 @@
           </div>
         </div>
 
+        <div
+          *ngIf="hasAssessmentGroup(item) && expandedGroupKey === groupKey(item)"
+          class="unit-card__assessment-picker"
+          (click)="$event.stopPropagation()"
+        >
+          <p-select
+            [options]="assessmentItems(item)"
+            [ngModel]="selectedGroupAssessmentIds[groupKey(item)]"
+            (ngModelChange)="selectedGroupAssessmentIds[groupKey(item)] = $event"
+            optionLabel="assessment_period_label"
+            optionValue="id"
+            placeholder="Select assessment period"
+            styleClass="dashboard-select"
+          ></p-select>
+
+          <button
+            pButton
+            type="button"
+            icon="pi pi-arrow-right"
+            label="Open"
+            class="p-button-sm"
+            (click)="openGroupedAssessment(item)"
+          ></button>
+        </div>
+
         <div class="unit-card__footer">
           <span>
-            <ng-container *ngIf="item.not_started_count > 0; else readyToOpen">
+            <ng-container *ngIf="hasAssessmentGroup(item)">
+              Click to choose assessment period
+            </ng-container>
+
+            <ng-container *ngIf="!hasAssessmentGroup(item) && item.not_started_count > 0; else readyToOpen">
               {{ item.not_started_count }} audit{{ item.not_started_count === 1 ? '' : 's' }} not
               started
             </ng-container>
 
-            <ng-template #readyToOpen>Ready to open</ng-template>
+            <ng-template #readyToOpen>
+              <ng-container *ngIf="!hasAssessmentGroup(item)">Ready to open</ng-container>
+            </ng-template>
           </span>
 
           <div class="unit-card__footer-actions">
@@ -143,10 +175,11 @@
             </button>
 
             <button
+              *ngIf="!hasAssessmentGroup(item)"
               type="button"
               class="unit-open-btn"
               aria-label="Open audit unit"
-              (click)="$event.stopPropagation(); onOpenUnit(item)"
+              (click)="$event.stopPropagation(); openPrimaryItem(item)"
             >
               <i class="pi pi-arrow-right"></i>
             </button>

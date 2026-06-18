@@ -211,6 +211,7 @@
     grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr));
     gap: 1rem;
     padding: 1rem;
+    align-items: start;
 }
 
 /* Unit Card */
@@ -227,6 +228,7 @@
     border-radius: 8px;
     box-shadow: 0 3px 10px rgba(24, 47, 69, 0.08);
     cursor: pointer;
+    align-self: start;
     transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
 }
 
@@ -234,6 +236,10 @@
     min-height: 12.4rem;
     gap: 1rem;
     padding: 1.1rem;
+}
+
+.unit-card--grouped {
+    min-height: auto;
 }
 
 .unit-card:hover {
@@ -441,4 +447,11 @@
     display: flex;
     align-items: center;
     gap: 0.4rem;
+}
+
+.unit-card__assessment-picker {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 0.5rem;
+    align-items: center;
 }

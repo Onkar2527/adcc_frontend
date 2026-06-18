@@ -64,6 +64,7 @@
     [summaryItems]="reviewerSummaryItems()"
     [cardMetrics]="reviewerCardMetrics"
     [cardMetaItems]="reviewerCardMetaItems"
+    [groupAssessments]="true"
     (searchChange)="search.set($event)"
     (selectedStatusChange)="selectedStatus.set($event)"
     (refresh)="loadQueue()"

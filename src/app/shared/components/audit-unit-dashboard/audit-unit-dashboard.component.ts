@@ -65,12 +65,16 @@ export class AuditUnitDashboardComponent {
     @Input() emptyMessage = 'Try changing the search or status filter.';
     @Input() refreshLabel = 'Refresh';
     @Input() detailsActionLabel: string | null = null;
+    @Input() groupAssessments = false;
 
     @Output() searchChange = new EventEmitter<string>();
     @Output() selectedStatusChange = new EventEmitter<any>();
     @Output() refresh = new EventEmitter<void>();
     @Output() openUnit = new EventEmitter<any>();
     @Output() viewDetails = new EventEmitter<any>();
+
+    expandedGroupKey: string | null = null;
+    selectedGroupAssessmentIds: Record<string, any> = {};
 
     defaultSummaryItems() {
         return [
@@ -186,5 +190,84 @@ export class AuditUnitDashboardComponent {
 
     onViewDetails(item: any) {
         this.viewDetails.emit(item);
+    }
+
+    assessmentItems(item: any): any[] {
+        return Array.isArray(item?.assessments)
+            ? item.assessments
+            : [];
+    }
+
+    hasAssessmentGroup(item: any) {
+        return this.groupAssessments
+            && this.assessmentItems(item).length > 1;
+    }
+
+    groupKey(item: any) {
+        return String(
+            item?.audit_unit_id
+            ?? item?.id
+            ?? item?.audit_unit_code
+            ?? '',
+        );
+    }
+
+    toggleGroup(item: any) {
+        if (!this.hasAssessmentGroup(item)) {
+            this.openPrimaryItem(item);
+            return;
+        }
+
+        const key =
+            this.groupKey(item);
+
+        if (this.expandedGroupKey === key) {
+            this.expandedGroupKey = null;
+            return;
+        }
+
+        this.expandedGroupKey = key;
+
+        if (
+            !this.selectedGroupAssessmentIds[key]
+            && this.assessmentItems(item).length
+        ) {
+            this.selectedGroupAssessmentIds[key] =
+                this.assessmentItems(item)[0]?.id;
+        }
+    }
+
+    selectedGroupedAssessment(item: any) {
+        const key =
+            this.groupKey(item);
+        const selectedId =
+            this.selectedGroupAssessmentIds[key];
+
+        return this.assessmentItems(item).find(
+            (assessment: any) =>
+                String(assessment?.id) === String(selectedId),
+        ) || this.assessmentItems(item)[0] || null;
+    }
+
+    openGroupedAssessment(item: any) {
+        const selected =
+            this.selectedGroupedAssessment(item);
+
+        if (!selected) {
+            return;
+        }
+
+        this.onOpenUnit(selected);
+    }
+
+    openPrimaryItem(item: any) {
+        if (this.hasAssessmentGroup(item)) {
+            return;
+        }
+
+        const firstAssessment =
+            this.assessmentItems(item)[0];
+
+        this.onOpenUnit(firstAssessment || item);
     }
 }

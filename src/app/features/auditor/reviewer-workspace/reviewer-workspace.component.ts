@@ -225,7 +225,50 @@ export class ReviewerWorkspaceComponent implements OnInit {
             );
         }
 
-        return rows;
+        const grouped = new Map<string, any>();
+
+        rows.forEach((item: any) => {
+            const key =
+                `${item.audit_type_id || 1}-${item.audit_unit_id}`;
+            const existing =
+                grouped.get(key);
+
+            if (!existing) {
+                grouped.set(key, {
+                    ...item,
+                    assessments: [item],
+                    review_pending: Number(item.review_pending || 0),
+                    compliance_pending: Number(item.compliance_pending || 0),
+                });
+                return;
+            }
+
+            existing.assessments.push(item);
+            existing.review_pending += Number(item.review_pending || 0);
+            existing.compliance_pending += Number(item.compliance_pending || 0);
+        });
+
+        return Array.from(grouped.values())
+            .map((group: any) => ({
+                ...group,
+                assessments:
+                    [...group.assessments].sort((a: any, b: any) =>
+                        String(b.assesment_period_from || '').localeCompare(
+                            String(a.assesment_period_from || ''),
+                        ),
+                    ),
+                latest_status:
+                    group.assessments.length > 1
+                        ? 'Multiple Assessments'
+                        : group.latest_status,
+                assessment_period_label:
+                    group.assessments.length > 1
+                        ? `${group.assessments.length} assessment periods`
+                        : group.assessment_period_label,
+            }))
+            .sort((a: any, b: any) =>
+                String(a.audit_unit_name || '').localeCompare(String(b.audit_unit_name || '')),
+            );
     });
 
     totalReviewPending = computed(() =>
