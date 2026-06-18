@@ -523,10 +523,10 @@
               </div>
               <div class="header-answer-actions flex align-items-center gap-2">
                 <span class="badge-answered">
-                  Answered: {{ getAnsweredCount(header) }} / {{ header.questions?.length || 0 }}
+                  Answered: {{ getAnsweredCount(header) }} / {{ getHeaderQuestionCount(header) }}
                 </span>
                 <span class="badge-remaining">
-                  Remaining: {{ (header.questions?.length || 0) - getAnsweredCount(header) }}
+                  Remaining: {{ getHeaderQuestionCount(header) - getAnsweredCount(header) }}
                 </span>
                 @if (canApplyDefaults()) {
                   <button
@@ -1343,11 +1343,11 @@
                     <div class="header-answer-actions flex align-items-center gap-2">
                       <span class="badge-answered">
                         Answered: {{ getAnsweredCount(subsetHeader) }} /
-                        {{ subsetHeader.questions?.length || 0 }}
+                        {{ getHeaderQuestionCount(subsetHeader) }}
                       </span>
                       <span class="badge-remaining">
                         Remaining:
-                        {{ (subsetHeader.questions?.length || 0) - getAnsweredCount(subsetHeader) }}
+                        {{ getHeaderQuestionCount(subsetHeader) - getAnsweredCount(subsetHeader) }}
                       </span>
                       @if (canApplyDefaults()) {
                         <button

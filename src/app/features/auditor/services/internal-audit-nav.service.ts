@@ -34,6 +34,43 @@ export class InternalAuditNavService {
         );
     }
 
+    updateCategoryProgress(
+        assessmentId: number,
+        categoryId: number,
+        updates: {
+            answered_count?: number;
+            question_count?: number;
+            completed_account_count?: number;
+            account_count?: number;
+        },
+    ) {
+        if (
+            Number(this.assessmentId()) !== Number(assessmentId)
+            || !Array.isArray(this.menus())
+        ) {
+            return;
+        }
+
+        this.menus.update(
+            (menus: any[]) =>
+                (menus || []).map(
+                    (menu: any) => ({
+                        ...menu,
+                        categories:
+                            (menu?.categories || []).map(
+                                (category: any) =>
+                                    Number(category?.id) === Number(categoryId)
+                                        ? {
+                                            ...category,
+                                            ...updates,
+                                        }
+                                        : category,
+                            ),
+                    }),
+                ),
+        );
+    }
+
     clear() {
         this.assessmentId.set(
             null,

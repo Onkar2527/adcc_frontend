@@ -43,6 +43,9 @@ import {
 import {
     AuditDashboardService,
 } from '../../services/auditor-main.service';
+import {
+    InternalAuditNavService,
+} from '../../services/internal-audit-nav.service';
 import { TableModule } from 'primeng/table';
 import { AccordionModule } from 'primeng/accordion';
 
@@ -81,6 +84,9 @@ export class CategoryAssessmentComponent
 
     private service =
         inject(AuditDashboardService);
+
+    private auditNavService =
+        inject(InternalAuditNavService);
 
     private notification =
         inject(NotificationService);
@@ -795,6 +801,8 @@ export class CategoryAssessmentComponent
                 question,
             );
 
+        this.syncSidebarCategoryCounts();
+
         if (
             Number(question?.option_id) !== 5
         ) {
@@ -864,6 +872,7 @@ export class CategoryAssessmentComponent
         ) {
             question.subset_sets = [];
             question.selectedSubsetSets = [];
+            this.syncSidebarCategoryCounts();
             this.cdr.detectChanges();
             return;
         }
@@ -899,6 +908,7 @@ export class CategoryAssessmentComponent
                         setTimeout(() => {
                             question.subset_sets = [];
                             question.selectedSubsetSets = [];
+                            this.syncSidebarCategoryCounts();
 
                             this.notification.error(
                                 'Selected subset questions are not configured.',
@@ -929,6 +939,7 @@ export class CategoryAssessmentComponent
                             subsetSet,
                         ];
 
+                        this.syncSidebarCategoryCounts();
                         this.cdr.detectChanges();
                     }, 0);
                 },
@@ -939,6 +950,7 @@ export class CategoryAssessmentComponent
                     setTimeout(() => {
                         question.subset_sets = [];
                         question.selectedSubsetSets = [];
+                        this.syncSidebarCategoryCounts();
 
                         this.notification.error(
                             err?.error?.message ||
@@ -1245,6 +1257,8 @@ export class CategoryAssessmentComponent
             }
         }
 
+        this.syncSidebarCategoryCounts();
+
         return appliedCount;
     }
 
@@ -1269,6 +1283,8 @@ export class CategoryAssessmentComponent
         if (question.suggestions_parsed) {
             question.showSuggestions = true;
         }
+
+        this.syncSidebarCategoryCounts();
     }
 
     selectSuggestion(question: any, suggestion: string, event?: MouseEvent) {
@@ -1277,6 +1293,7 @@ export class CategoryAssessmentComponent
         }
         question.audit_comment = suggestion;
         question.showSuggestions = false;
+        this.syncSidebarCategoryCounts();
     }
 
     getFilteredSuggestions(question: any): string[] {
@@ -1295,21 +1312,90 @@ export class CategoryAssessmentComponent
     }
 
     getAnsweredCount(header: any): number {
-        if (!header?.questions?.length) {
+        const questions =
+            this.collectHeaderQuestionsForSave(
+                header,
+            );
+
+        if (!questions.length) {
             return 0;
         }
+
         let count = 0;
-        for (const q of header.questions) {
+        for (const q of questions) {
             const value =
-                this.isTextAnswer(q)
-                    ? q.audit_comment
-                    : q.answer_value;
+                this.answerValueForSave(
+                    q,
+                );
 
             if (value !== null && value !== undefined && String(value).trim() !== '') {
                 count++;
             }
         }
         return count;
+    }
+
+    getHeaderQuestionCount(
+        header: any,
+    ): number {
+        return this.collectHeaderQuestionsForSave(
+            header,
+        ).length;
+    }
+
+    private syncSidebarCategoryCounts() {
+        const detail =
+            this.categoryDetail();
+
+        if (
+            !detail?.overview?.id
+            || !detail?.category?.id
+            || detail?.category?.account_based
+        ) {
+            return;
+        }
+
+        const sets =
+            this.visibleQuestionSets(
+                detail,
+            );
+
+        let answered = 0;
+        let total = 0;
+
+        for (
+            const set
+            of sets || []
+        ) {
+            for (
+                const header
+                of set.headers || []
+            ) {
+                answered +=
+                    this.getAnsweredCount(
+                        header,
+                    );
+                total +=
+                    this.getHeaderQuestionCount(
+                        header,
+                    );
+            }
+        }
+
+        this.auditNavService.updateCategoryProgress(
+            Number(
+                detail.overview.id,
+            ),
+            Number(
+                detail.category.id,
+            ),
+            {
+                answered_count:
+                    answered,
+                question_count:
+                    total,
+            },
+        );
     }
 
     canApplyDefaults() {
@@ -1805,7 +1891,9 @@ export class CategoryAssessmentComponent
         )
             &&
             !String(
-                question?.answer_value || '',
+                this.answerValueForSave(
+                    question,
+                ) || '',
             ).trim();
     }
 
