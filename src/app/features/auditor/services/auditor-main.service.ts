@@ -101,6 +101,23 @@ export class AuditDashboardService {
     );
   }
 
+  getSpecialAudits(
+    employeeId: number,
+  ) {
+
+    return this.http.get<any>(
+
+      `${this.config.apiUrl}/special-audit`,
+
+      {
+        params: {
+          employee_id:
+            employeeId,
+        },
+      },
+    );
+  }
+
   getInternalAuditMenu(
     assessmentId: number,
     employeeId: number,

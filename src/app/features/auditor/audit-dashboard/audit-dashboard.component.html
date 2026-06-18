@@ -1,14 +1,34 @@
+<div class="audit-mode-switch" aria-label="Audit type">
+  <button
+    type="button"
+    [class.active]="auditMode() === 'regular'"
+    (click)="selectMode('regular')"
+  >
+    Internal Audits
+    <span>{{ regularRows().length }}</span>
+  </button>
+
+  <button
+    type="button"
+    [class.active]="auditMode() === 'special'"
+    (click)="selectMode('special')"
+  >
+    Special Audits
+    <span>{{ specialRows().length }}</span>
+  </button>
+</div>
+
 <app-audit-unit-dashboard
-  eyebrow="Internal Audit"
-  title="Select Audit Unit"
-  subtitle="Select a branch/unit to continue the audit workflow"
-  panelTitle="Assigned Branches"
+  [eyebrow]="dashboardEyebrow()"
+  [title]="dashboardTitle()"
+  [subtitle]="dashboardSubtitle()"
+  [panelTitle]="panelTitle()"
   [units]="filteredData()"
   [loading]="loading()"
   [search]="search()"
   [selectedStatus]="selectedStatus()"
   [statusOptions]="statusOptions"
-  [totalUnits]="dashboardData().length"
+  [totalUnits]="modeRows().length"
   [totalAuditPending]="totalAuditPending()"
   [totalReviewPending]="totalReviewPending()"
   [totalCompliancePending]="totalCompliancePending()"

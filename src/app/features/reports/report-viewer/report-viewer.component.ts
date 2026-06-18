@@ -27,6 +27,16 @@ export class ReportViewerComponent implements OnInit {
   private reportsService = inject(ReportsService);
   private exportService = inject(ExportService);
   private auditNavService = inject(InternalAuditNavService);
+  private readonly auditTypeFilter: ReportFilterDefinition = {
+    key: 'audit_type_id',
+    label: 'Audit Type',
+    type: 'select',
+    options: [
+      { value: 'all', label: 'All Audit Types' },
+      { value: '1', label: 'Internal Audit' },
+      { value: '2', label: 'Special Audit' },
+    ],
+  };
 
   applyBranchFilterRestrictions(definition: ReportDefinition) {
     const user = JSON.parse(localStorage.getItem('user') || '{}');
@@ -134,11 +144,20 @@ export class ReportViewerComponent implements OnInit {
 
   showsNestedComplianceColumn(): boolean {
     const slug = this.definition()?.slug;
-    return slug === 'compliance-summary-report' || slug === 'pending-compliance-detail-report';
+    return [
+      'compliance-summary-report',
+      'pending-compliance-detail-report',
+      'carry-forward-report',
+      'partially-pass-report',
+    ].includes(slug || '');
   }
 
   showsNestedReviewerCommentColumn(): boolean {
-    return this.definition()?.slug === 'pending-compliance-detail-report';
+    return [
+      'pending-compliance-detail-report',
+      'carry-forward-report',
+      'partially-pass-report',
+    ].includes(this.definition()?.slug || '');
   }
 
   isExecutiveSummary(): boolean {
@@ -181,11 +200,16 @@ export class ReportViewerComponent implements OnInit {
     if (filter.key === 'reportAuditAssesment') {
       const unitValue = String(this.filters['reportAuditUnit'] || '');
       const yearValue = String(this.filters['financial_year'] || '');
+      const auditTypeValue = String(this.filters['audit_type_id'] || 'all');
 
       return options.filter((option: any) => {
         const matchesUnit = !option.audit_unit_id || String(option.audit_unit_id) === unitValue;
         const matchesYear = !option.year_id || !yearValue || yearValue === 'all' || String(option.year_id) === yearValue;
-        return matchesUnit && matchesYear;
+        const matchesAuditType =
+          auditTypeValue === 'all'
+            || !option.audit_type_id
+            || String(option.audit_type_id) === auditTypeValue;
+        return matchesUnit && matchesYear && matchesAuditType;
       });
     }
 
@@ -215,6 +239,19 @@ export class ReportViewerComponent implements OnInit {
 
     if (filter.key === 'financial_year') {
       const assessmentFilter = this.definition()?.filters.find(f => f.key === 'reportAuditAssesment');
+      if (assessmentFilter) {
+        const selectedValue = String(this.filters['reportAuditAssesment'] || '');
+        const isSelectedValueValid = this.filterOptions(assessmentFilter).some(
+          (option) => String(option.value) === selectedValue,
+        );
+        if (!isSelectedValueValid) {
+          this.filters['reportAuditAssesment'] = '';
+        }
+      }
+    }
+
+    if (filter.key === 'audit_type_id') {
+      const assessmentFilter = this.definition()?.filters.find((f) => f.key === 'reportAuditAssesment');
       if (assessmentFilter) {
         const selectedValue = String(this.filters['reportAuditAssesment'] || '');
         const isSelectedValueValid = this.filterOptions(assessmentFilter).some(
@@ -261,6 +298,7 @@ export class ReportViewerComponent implements OnInit {
 
     this.reportsService.getReportDefinition(slug).subscribe({
       next: (definition) => {
+        definition = this.ensureAuditTypeFilter(definition);
         this.definition.set(definition);
         this.filters = {
           ...(definition.defaultFilters || {}),
@@ -275,7 +313,7 @@ export class ReportViewerComponent implements OnInit {
               : [];
           });
 
-        if (slug === 'carry-forward-report') {
+        if (['carry-forward-report', 'partially-pass-report'].includes(slug)) {
           const sourceAssessmentId = Number(
             this.route.snapshot.queryParamMap.get('source_assessment_id') || 0,
           );
@@ -300,7 +338,7 @@ export class ReportViewerComponent implements OnInit {
         this.loading.set(false);
 
         if (
-          slug === 'carry-forward-report'
+          ['carry-forward-report', 'partially-pass-report'].includes(slug)
           && Number(this.filters['source_assessment_id'] || 0) > 0
         ) {
           this.findReport();
@@ -314,6 +352,26 @@ export class ReportViewerComponent implements OnInit {
         this.router.navigate(['/reports/detail'], { queryParams: { name } });
       },
     });
+  }
+
+  private ensureAuditTypeFilter(definition: ReportDefinition): ReportDefinition {
+    const alreadyExists = definition.filters.some((filter) => filter.key === 'audit_type_id');
+
+    if (alreadyExists) {
+      return definition;
+    }
+
+    return {
+      ...definition,
+      defaultFilters: {
+        audit_type_id: 'all',
+        ...(definition.defaultFilters || {}),
+      },
+      filters: [
+        this.auditTypeFilter,
+        ...definition.filters,
+      ],
+    };
   }
 
   findReport() {

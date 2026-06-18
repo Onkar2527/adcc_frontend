@@ -23,6 +23,7 @@ import { DividerModule } from 'primeng/divider';
 import { ChipModule } from 'primeng/chip';
 
 import { ScrollPanelModule } from 'primeng/scrollpanel';
+import { SelectModule } from 'primeng/select';
 
 import {
   AuditCategoryMasterService,
@@ -47,6 +48,7 @@ import { NotificationService } from '../../../core/services/notification/notific
     DividerModule,
     ChipModule,
     ScrollPanelModule,
+    SelectModule,
     ToastModule
   ],
   providers: [MessageService, NotificationService],
@@ -146,9 +148,7 @@ export class PeriodwiseQuestionsMasterViewComponent
 
   categoryAssignments = signal<any[]>([]);
 
-  auditorAssignmentMap = new Map<number, Set<number>>();
-
-  isMultipleAuditors = signal<boolean>(false);
+  selectedAuditorId = signal<number | null>(null);
 
   // ── Dirty-state tracking ──────────────────────────────────────
   dirtySchemes          = signal(false);
@@ -168,7 +168,7 @@ export class PeriodwiseQuestionsMasterViewComponent
     if (this.dirtyMenus())          labels.push('Menus');
     if (this.dirtyCategories())     labels.push('Categories');
     if (this.dirtyQuestions())      labels.push('Questions');
-    if (this.dirtyAuditorAssign())  labels.push('Auditor Assignments');
+    if (this.dirtyAuditorAssign())  labels.push('Auditor');
     return labels;
   });
 
@@ -179,16 +179,11 @@ export class PeriodwiseQuestionsMasterViewComponent
     { id: 'deposit-schemes', label: 'Deposit Schemes',  dirtyFn: () => this.dirtyDepositSchemes() },
     { id: 'menus',           label: 'Menus',            dirtyFn: () => this.dirtyMenus() },
     { id: 'categories',      label: 'Categories',       dirtyFn: () => this.dirtyCategories() },
-    { id: 'multiple-auditors', label: 'Multiple Auditor', dirtyFn: () => this.dirtyAuditorAssign() },
+    { id: 'auditor',         label: 'Auditor',          dirtyFn: () => this.dirtyAuditorAssign() },
     { id: 'questions',       label: 'Questions',        dirtyFn: () => this.dirtyQuestions() }
   ];
 
   ngOnInit() {
-
-    // Initialize toggle from saved data
-    this.isMultipleAuditors.set(
-      !!this.data?.is_multiple_auditors
-    );
 
     this.loadSchemes();
     this.loadDepositSchemes();
@@ -1344,96 +1339,120 @@ export class PeriodwiseQuestionsMasterViewComponent
       next: (res: any) => {
         const list = this.parseRows(res);
         this.categoryAssignments.set(list);
-        
-        this.auditorAssignmentMap.clear();
-        list.forEach((item: any) => {
-           const catId = Number(item.category_id);
-           const empId = Number(item.audit_emp_id);
-           if (!this.auditorAssignmentMap.has(catId)) {
-             this.auditorAssignmentMap.set(catId, new Set<number>());
-           }
-           this.auditorAssignmentMap.get(catId)!.add(empId);
-        });
+
+        const uniqueAuditors = Array.from(
+          new Set(
+            list
+              .map((item: any) => Number(item.audit_emp_id))
+              .filter((id: number) => Number.isFinite(id) && id > 0),
+          ),
+        );
+
+        this.selectedAuditorId.set(
+          uniqueAuditors.length === 1
+            ? uniqueAuditors[0]
+            : (uniqueAuditors[0] || null),
+        );
+
         this.cdr.detectChanges();
       }
     });
   }
 
-  isAuditorAssigned(categoryId: number, empId: number): boolean {
-    const catId = Number(categoryId);
-    const auditorId = Number(empId);
-    return this.auditorAssignmentMap.get(catId)?.has(auditorId) ?? false;
+  onAuditorChange(value: any) {
+    this.selectedAuditorId.set(value ? Number(value) : null);
+    if (this._dataLoaded) {
+      this.dirtyAuditorAssign.set(true);
+    }
   }
 
-  toggleAuditorAssignment(categoryId: number, empId: number) {
-    const catId = Number(categoryId);
-    const auditorId = Number(empId);
-    
-    if (!this.auditorAssignmentMap.has(catId)) {
-      this.auditorAssignmentMap.set(catId, new Set<number>());
+  saveAuditorAssignment() {
+    if (!this.selectedAuditorId()) {
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Select Auditor',
+        detail: 'Please select one auditor for this periodwise setup'
+      });
+      return;
     }
-    
-    const set = this.auditorAssignmentMap.get(catId)!;
-    if (set.has(auditorId)) {
-      set.delete(auditorId);
-    } else {
-      set.add(auditorId);
-    }
-    if (this._dataLoaded) this.dirtyAuditorAssign.set(true);
-    this.cdr.detectChanges();
-  }
 
-  saveCategoryAssignments() {
+    if (this.selectedCategories().length === 0) {
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'No Categories',
+        detail: 'Please select categories before assigning an auditor'
+      });
+      return;
+    }
+
     const assignments: { category_id: number; audit_emp_id: number }[] = [];
-    this.auditorAssignmentMap.forEach((empIds, catId) => {
-      empIds.forEach((empId) => {
-        assignments.push({ category_id: catId, audit_emp_id: empId });
+    this.selectedCategories().forEach((category: any) => {
+      assignments.push({
+        category_id: Number(category.id),
+        audit_emp_id: Number(this.selectedAuditorId()),
       });
     });
 
-    this.periodwiseQuestionsService.assignCategories(this.data.id, assignments).subscribe({
-      next: () => {
-        this.dirtyAuditorAssign.set(false);
-        this.messageService.add({
-          severity: 'success',
-          summary: 'Success',
-          detail: 'Auditor Assignments Saved Successfully'
-        });
-        this.loadCategoryAssignments();
-      },
-      error: (err) => {
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Error',
-          detail: 'Unable to save auditor assignments'
-        });
-      }
-    });
-  }
-
-  toggleMultipleAuditors() {
-    const newVal = !this.isMultipleAuditors();
     this.periodwiseQuestionsService
-      .updateMultipleAuditors(this.data.id, newVal)
+      .updateMultipleAuditors(this.data.id, false)
       .subscribe({
         next: () => {
-          this.isMultipleAuditors.set(newVal);
-          this.data.is_multiple_auditors = newVal;
-          this.messageService.add({
-            severity: 'success',
-            summary: 'Updated',
-            detail: newVal
-              ? 'Multiple auditor mode enabled'
-              : 'Multiple auditor mode disabled'
+          this.periodwiseQuestionsService.assignCategories(this.data.id, assignments).subscribe({
+            next: () => {
+              this.dirtyAuditorAssign.set(false);
+              this.data.is_multiple_auditors = false;
+              this.messageService.add({
+                severity: 'success',
+                summary: 'Success',
+                detail: 'Auditor saved successfully'
+              });
+              this.loadCategoryAssignments();
+            },
+            error: () => {
+              this.messageService.add({
+                severity: 'error',
+                summary: 'Error',
+                detail: 'Unable to save auditor'
+              });
+            }
           });
         },
         error: () => {
           this.messageService.add({
             severity: 'error',
             summary: 'Error',
-            detail: 'Failed to update auditor mode'
+            detail: 'Unable to update auditor mode'
           });
         }
       });
+  }
+
+  selectedAuditorLabel() {
+    const selectedId = Number(this.selectedAuditorId() || 0);
+    const selected = this.eligibleAuditors().find(
+      (auditor: any) => Number(auditor.id) === selectedId,
+    );
+    return selected
+      ? `${selected.name} (${selected.emp_code})`
+      : '-';
+  }
+
+  // Temporary compatibility methods/properties while the old UI stays hidden.
+  isMultipleAuditors() {
+    return false;
+  }
+
+  toggleMultipleAuditors() {}
+
+  isAuditorAssigned(categoryId: number, empId: number): boolean {
+    return Number(this.selectedAuditorId() || 0) === Number(empId);
+  }
+
+  toggleAuditorAssignment(categoryId: number, empId: number) {
+    this.onAuditorChange(empId);
+  }
+
+  saveCategoryAssignments() {
+    this.saveAuditorAssignment();
   }
 }

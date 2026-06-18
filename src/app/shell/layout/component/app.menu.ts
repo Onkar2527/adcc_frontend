@@ -149,7 +149,9 @@ export class AppMenu implements OnInit, OnDestroy {
                 },
                 { label: 'Broader Area Master', icon: 'pi pi-fw pi-map-marker', routerLink: ['/admin/broader-area-master'] },
                 { label: 'Periodwise Questions Master', icon: 'pi pi-fw pi-list', routerLink: ['/admin/periodwise-questions-master'] },
+                { label: 'Multiple Auditor Assignment', icon: 'pi pi-fw pi-users', routerLink: ['/admin/multiple-auditor-assignment'] },
                 { label: 'Manage Assessment Master', icon: 'pi pi-fw pi-chart-bar', routerLink: ['/admin/manage-assessment-master'] },
+                { label: 'Special Audit', icon: 'pi pi-fw pi-flag', routerLink: ['/admin/special-audit'] },
                 { label: 'Annexure Master', icon: 'pi pi-fw pi-file-edit', routerLink: ['/admin/audit-annexure-master'] },
                 {
                     label: 'Risk Master',

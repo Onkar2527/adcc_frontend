@@ -11,6 +11,8 @@ import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 
 import { FormsModule } from '@angular/forms';
+import { forkJoin, of } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 
 import { AuditDashboardService }
     from '../services/auditor-main.service';
@@ -59,6 +61,9 @@ export class AuditDashboardComponent
     selectedStatus =
         signal<any>(null);
 
+    auditMode =
+        signal<'regular' | 'special'>('regular');
+
     statusOptions = [
         {
             label: 'Not Started',
@@ -89,7 +94,7 @@ export class AuditDashboardComponent
     filteredData = computed(() => {
 
         let rows =
-            this.dashboardData();
+            this.modeRows();
 
         if (this.search()) {
 
@@ -125,10 +130,57 @@ export class AuditDashboardComponent
         return rows;
     });
 
+    regularRows =
+        computed(() =>
+            this.dashboardData()
+                .filter((item: any) => !item.is_special_audit),
+        );
+
+    specialRows =
+        computed(() =>
+            this.dashboardData()
+                .filter((item: any) => item.is_special_audit),
+        );
+
+    modeRows =
+        computed(() =>
+            this.auditMode() === 'special'
+                ? this.specialRows()
+                : this.regularRows(),
+        );
+
+    dashboardEyebrow =
+        computed(() =>
+            this.auditMode() === 'special'
+                ? 'Special Audit'
+                : 'Internal Audit',
+        );
+
+    dashboardTitle =
+        computed(() =>
+            this.auditMode() === 'special'
+                ? 'Select Special Audit'
+                : 'Select Audit Unit',
+        );
+
+    dashboardSubtitle =
+        computed(() =>
+            this.auditMode() === 'special'
+                ? 'Open assigned one-off special audit assessments'
+                : 'Select a branch/unit to continue the audit workflow',
+        );
+
+    panelTitle =
+        computed(() =>
+            this.auditMode() === 'special'
+                ? 'Assigned Special Audits'
+                : 'Assigned Branches',
+        );
+
     totalAuditPending =
         computed(() =>
 
-            this.dashboardData()
+            this.modeRows()
                 .reduce(
 
                     (
@@ -148,7 +200,7 @@ export class AuditDashboardComponent
     totalCompliancePending =
         computed(() =>
 
-            this.dashboardData()
+            this.modeRows()
                 .reduce(
 
                     (
@@ -168,7 +220,7 @@ export class AuditDashboardComponent
     totalReviewPending =
         computed(() =>
 
-            this.dashboardData()
+            this.modeRows()
                 .reduce(
 
                     (
@@ -188,7 +240,7 @@ export class AuditDashboardComponent
     totalCompleted =
         computed(() =>
 
-            this.dashboardData()
+            this.modeRows()
                 .reduce(
 
                     (
@@ -204,6 +256,14 @@ export class AuditDashboardComponent
                     0,
                 ),
         );
+
+    selectMode(
+        mode: 'regular' | 'special',
+    ) {
+        this.auditMode.set(mode);
+        this.search.set('');
+        this.selectedStatus.set(null);
+    }
 
 
     ngOnInit() {
@@ -241,19 +301,40 @@ export class AuditDashboardComponent
                 this.employee_id(),
         };
 
-        this.service
-            .findAll(payload)
-            .subscribe({
+        forkJoin({
+            regular: this.service
+                .findAll(payload)
+                .pipe(catchError(() => of([]))),
+            special: this.service
+                .getSpecialAudits(this.employee_id())
+                .pipe(catchError(() => of([]))),
+        }).subscribe({
 
                 next: (res: any) => {
 
                     const rows =
                         this.parseRows(
-                            res,
+                            res.regular,
                         );
 
+                    const specialRows =
+                        this.parseRows(
+                            res.special,
+                        )
+                            .filter((row: any) =>
+                                !row.auditor_id
+                                ||
+                                Number(row.auditor_id) === this.employee_id(),
+                            )
+                            .map((row: any) =>
+                                this.mapSpecialAuditRow(row),
+                            );
+
                     this.dashboardData.set(
-                        rows,
+                        [
+                            ...rows,
+                            ...specialRows,
+                        ],
                     );
 
                     this.loading.set(
@@ -304,6 +385,68 @@ export class AuditDashboardComponent
         }
 
         return [];
+    }
+
+    mapSpecialAuditRow(row: any) {
+        const status =
+            this.specialAuditStatus(row);
+
+        return {
+            ...row,
+            audit_unit_id:
+                row.audit_unit_id,
+            audit_unit_name:
+                row.audit_unit_name || row.title || 'Special Audit',
+            audit_unit_code:
+                row.audit_unit_code || 'SPECIAL',
+            display_title:
+                row.title || row.audit_unit_name || 'Special Audit',
+            display_code:
+                `Branch: ${row.audit_unit_name || '-'}${row.audit_unit_code ? ` (${row.audit_unit_code})` : ''}`,
+            latest_status:
+                status,
+            audit_pending:
+                status.includes('AUDIT') || status.includes('NOT STARTED')
+                    ? 1
+                    : 0,
+            review_pending:
+                status.includes('REVIEW')
+                    ? 1
+                    : 0,
+            compliance_pending:
+                status.includes('COMPLIANCE')
+                    ? 1
+                    : 0,
+            audit_completed:
+                status.includes('COMPLETED')
+                    ? 1
+                    : 0,
+            is_special_audit:
+                true,
+            assessment_id:
+                row.assessment_id || row.assesment_id || row.id,
+        };
+    }
+
+    specialAuditStatus(row: any) {
+        const statusId =
+            Number(row.audit_status_id || 1);
+
+        if (statusId === 6) {
+            return 'ASSESMENT COMPLETED';
+        }
+
+        if (statusId === 4 || statusId === 5) {
+            return 'COMPLIANCE PENDING';
+        }
+
+        if (statusId === 2 || statusId === 3) {
+            return 'REVIEW PENDING';
+        }
+
+        return statusId === 1
+            ? 'AUDIT PENDING'
+            : 'NOT STARTED';
     }
 
     /* ===================================================== */
@@ -374,6 +517,19 @@ export class AuditDashboardComponent
     openAssessment(
         item: any,
     ) {
+
+        if (
+            item?.is_special_audit
+            &&
+            item?.assessment_id
+        ) {
+            this.router.navigate([
+                '/auditor/internal-audit',
+                item.assessment_id,
+            ]);
+
+            return;
+        }
 
         const payload = {
 

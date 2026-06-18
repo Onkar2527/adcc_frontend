@@ -80,6 +80,9 @@ export class ComplianceWorkspaceComponent implements OnInit {
     assessments =
         signal<any[]>([]);
 
+    complianceMode =
+        signal<'regular' | 'special'>('regular');
+
     selected =
         signal<any>(null);
 
@@ -118,6 +121,8 @@ export class ComplianceWorkspaceComponent implements OnInit {
 
     remarkSubject = '';
 
+    queueSearch = ''
+
     remarkMessage = '';
 
     complianceAnswerGroups = computed(() =>
@@ -129,6 +134,24 @@ export class ComplianceWorkspaceComponent implements OnInit {
     ngOnInit() {
         this.loadQueue();
     }
+
+    regularAssessments = computed(() =>
+        this.assessments().filter(
+            (assessment: any) => Number(assessment.audit_type_id || 1) !== 2,
+        ),
+    );
+
+    specialAssessments = computed(() =>
+        this.assessments().filter(
+            (assessment: any) => Number(assessment.audit_type_id || 1) === 2,
+        ),
+    );
+
+    modeAssessments = computed(() =>
+        this.complianceMode() === 'special'
+            ? this.specialAssessments()
+            : this.regularAssessments(),
+    );
 
     employeeId() {
         const user =
@@ -168,6 +191,68 @@ export class ComplianceWorkspaceComponent implements OnInit {
                     this.loadingQueue.set(false);
                 },
             });
+    }
+
+    filteredAssessments() {
+        const search =
+            this.queueSearch
+                .trim()
+                .toLowerCase();
+
+        const rows =
+            this.modeAssessments() || [];
+
+        if (!search) {
+            return rows;
+        }
+
+        return rows.filter(
+            (assessment: any) =>
+                String(assessment.audit_unit_code || '')
+                    .toLowerCase()
+                    .includes(search)
+                ||
+                String(assessment.audit_unit_name || '')
+                    .toLowerCase()
+                    .includes(search),
+        );
+    }
+
+    selectComplianceMode(
+        mode: 'regular' | 'special',
+    ) {
+        this.complianceMode.set(mode);
+        this.queueSearch = '';
+    }
+
+    selectedTitle() {
+        const item =
+            this.detail()?.overview
+            || this.selected();
+
+        return Number(item?.audit_type_id || 1) === 2
+            ? (item?.special_audit_title || item?.audit_unit_name || 'Special Audit')
+            : item?.audit_unit_name;
+    }
+
+    selectedSubtitle() {
+        const item =
+            this.detail()?.overview
+            || this.selected();
+
+        const prefix =
+            Number(item?.audit_type_id || 1) === 2
+                ? 'Special Audit'
+                : (item?.audit_unit_code || '');
+
+        const stage =
+            this.isReCompliance()
+                ? 'Re-Compliance / Partially Pass Corrections'
+                : 'Compliance Required Points';
+
+        return prefix
+            ? `${prefix} | ${stage}`
+            : stage;
     }
 
     openAssessment(
@@ -333,17 +418,13 @@ export class ComplianceWorkspaceComponent implements OnInit {
     hasAccountDetails(
         answer: any,
     ) {
-        return Number(answer?.dump_id || 0) > 0
-            &&
-            (
-                answer?.account_no
-                ||
-                answer?.account_holder_name
-                ||
-                answer?.scheme_name
-                ||
-                answer?.scheme_code
-            );
+        return Boolean(
+            answer?.account_no
+            || answer?.account_holder_name
+            || answer?.scheme_name
+            || answer?.scheme_code
+            || answer?.ucic,
+        );
     }
 
     private groupComplianceAnswers(
