@@ -2678,7 +2678,8 @@ export class CategoryAssessmentComponent
         }
 
         this.samplingLoading.set(true);
-        this.samplingSelection = [];
+        this.samplingSelection = (detail?.accounts || [])
+            .map((account: any) => Number(account.id));
 
         this.service
             .getInternalAuditAccountSampling(
@@ -2694,6 +2695,20 @@ export class CategoryAssessmentComponent
                     this.samplingData.set(
                         res,
                     );
+                    if (res?.candidates) {
+                        const candidateIds = new Set(res.candidates.map((c: any) => Number(c.id)));
+                        
+                        // Keep current selections that are not in the new candidates list
+                        const nonCandidateSelections = this.samplingSelection
+                            .filter(id => !candidateIds.has(id));
+                            
+                        // Get selections from the candidate list that are sampled
+                        const sampledCandidateIds = res.candidates
+                            .filter((c: any) => Number(c.sampling_filter) === 1)
+                            .map((c: any) => Number(c.id));
+                            
+                        this.samplingSelection = [...nonCandidateSelections, ...sampledCandidateIds];
+                    }
                     this.samplingLoading.set(false);
                 },
                 error: (err) => {
@@ -2712,6 +2727,13 @@ export class CategoryAssessmentComponent
     ) {
         const id =
             Number(accountId);
+
+        const candidate = (this.samplingData()?.candidates || [])
+            .find((c: any) => Number(c.id) === id);
+
+        if (candidate && (candidate.is_completed || candidate.has_answers)) {
+            return;
+        }
 
         if (
             checked
@@ -2736,14 +2758,14 @@ export class CategoryAssessmentComponent
     toggleAllSamplingAccounts(
         checked: boolean,
     ) {
-        this.samplingSelection =
-            checked
-                ? (this.samplingData()?.candidates || [])
-                    .map(
-                        (account: any) =>
-                            Number(account.id),
-                    )
-                : [];
+        if (checked) {
+            this.samplingSelection = (this.samplingData()?.candidates || [])
+                .map((account: any) => Number(account.id));
+        } else {
+            this.samplingSelection = (this.samplingData()?.candidates || [])
+                .filter((account: any) => account.is_completed || account.has_answers)
+                .map((account: any) => Number(account.id));
+        }
     }
 
     samplingAccountSelected(
@@ -2885,6 +2907,12 @@ export class CategoryAssessmentComponent
         this.selectedDumpId.set(
             Number(account.id),
         );
+
+        this.notification.info(
+            `Account ${account.account_no} selected for audit.`,
+            'Account Selected',
+        );
+
         this.loadCategory(
             Number(detail.overview.id),
             Number(detail.category.id),

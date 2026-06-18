@@ -485,6 +485,11 @@ export class AppMenu implements OnInit, OnDestroy {
                 Number(
                     category?.account_count || 0,
                 );
+
+            if (total === 0) {
+                return '';
+            }
+
             const remaining =
                 Math.max(
                     total - completed,
@@ -502,6 +507,11 @@ export class AppMenu implements OnInit, OnDestroy {
             Number(
                 category?.question_count || 0,
             );
+
+        if (total === 0) {
+            return '';
+        }
+
         const remaining =
             Math.max(
                 total - answered,
