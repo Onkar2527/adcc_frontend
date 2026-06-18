@@ -635,6 +635,9 @@ export class CategoryAssessmentComponent
                         this.buildAnswerOptions(
                             question,
                         );
+                    this.applyComplianceSelectionRule(
+                        question,
+                    );
                     question.is_re_audit =
                         this.isReAudit
                     question.selectedSubsetSets = [];
@@ -800,6 +803,10 @@ export class CategoryAssessmentComponent
             this.buildIsAnnexureSelected(
                 question,
             );
+
+        this.applyComplianceSelectionRule(
+            question,
+        );
 
         this.syncSidebarCategoryCounts();
 
@@ -1222,6 +1229,9 @@ export class CategoryAssessmentComponent
             ) {
                 question.answer_value =
                     defaultAnswer;
+                this.applyComplianceSelectionRule(
+                    question,
+                );
                 applied = true;
             }
 
@@ -1341,6 +1351,80 @@ export class CategoryAssessmentComponent
         return this.collectHeaderQuestionsForSave(
             header,
         ).length;
+    }
+
+    private applyComplianceSelectionRule(
+        question: any,
+    ) {
+        if (
+            this.isTextAnswer(
+                question,
+            )
+            || Number(question?.option_id) === 5
+        ) {
+            return;
+        }
+
+        if (
+            Number(question?.option_id) === 4
+        ) {
+            question.is_compliance =
+                Boolean(
+                    question?.annexure_id,
+                )
+                &&
+                String(
+                    question?.answer_value || '',
+                )
+                ===
+                String(
+                    question?.annexure_id || '',
+                );
+            return;
+        }
+
+        const selectedParameter =
+            (Array.isArray(
+                question?.parameters,
+            )
+                ? question.parameters
+                : []
+            ).find(
+                (item: any) =>
+                    String(
+                        item?.rt ?? '',
+                    ) ===
+                    String(
+                        question?.answer_value ?? '',
+                    ),
+            );
+
+        if (
+            !selectedParameter
+        ) {
+            return;
+        }
+
+        const businessRisk =
+            Number(
+                selectedParameter?.br || 0,
+            );
+        const controlRisk =
+            Number(
+                selectedParameter?.cr || 0,
+            );
+
+        const shouldMarkCompliance =
+            [1, 2].includes(
+                businessRisk,
+            )
+            ||
+            [1, 2].includes(
+                controlRisk,
+            );
+
+        question.is_compliance =
+            shouldMarkCompliance;
     }
 
     private syncSidebarCategoryCounts() {
@@ -2383,6 +2467,9 @@ export class CategoryAssessmentComponent
                             ...(question.annexure_rows || []),
                         ],
                     };
+
+                    question.is_compliance =
+                        true;
 
                     this.clearAnnexureDraft(
                         question,
