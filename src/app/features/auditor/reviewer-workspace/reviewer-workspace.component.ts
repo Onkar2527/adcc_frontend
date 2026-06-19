@@ -571,6 +571,52 @@ export class ReviewerWorkspaceComponent implements OnInit {
             : observation.audit_status_id;
     }
 
+    isReviewActionDisabled(
+        observation: any,
+        action: 2 | 3 | 5 | 7,
+    ) {
+        const status =
+            Number(
+                this.reviewStatus(
+                    observation,
+                ) || 0,
+            );
+
+        if (
+            status === 9
+        ) {
+            return true;
+        }
+
+        if (
+            action === 2
+        ) {
+            return status === 2;
+        }
+
+        if (
+            action === 3
+        ) {
+            return status === 3;
+        }
+
+        if (
+            action === 5
+        ) {
+            return status === 5;
+        }
+
+        if (
+            action === 7
+        ) {
+            return [7, 8].includes(
+                status,
+            );
+        }
+
+        return false;
+    }
+
     reviewComment(
         observation: any,
     ) {
@@ -689,6 +735,12 @@ export class ReviewerWorkspaceComponent implements OnInit {
     reviewTargets() {
         const answers =
             (this.detail()?.answers || [])
+                .filter(
+                    (answer: any) =>
+                        Number(
+                            answer?.is_compliance || 0,
+                        ) === 1,
+                )
                 .map(
                     (answer: any) => ({
                         type:
@@ -702,7 +754,11 @@ export class ReviewerWorkspaceComponent implements OnInit {
             (this.detail()?.answers || [])
                 .flatMap(
                     (answer: any) =>
-                        answer.annexure_rows || [],
+                        Number(
+                            answer?.is_compliance || 0,
+                        ) === 1
+                            ? (answer.annexure_rows || [])
+                            : [],
                 )
                 .map(
                     (row: any) => ({
