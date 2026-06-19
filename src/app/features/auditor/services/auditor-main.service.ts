@@ -90,10 +90,15 @@ export class AuditDashboardService {
   }
   getBranchFinancialPosition(
     branch_id: number,
+    assessmentId?: number,
   ) {
-
+    const params: any = {};
+    if (assessmentId) {
+      params.assessment_id = String(assessmentId);
+    }
     return this.http.get(
       `${this.apiUrl}/branch-financial-position/${branch_id}`,
+      { params },
     );
 
   }
