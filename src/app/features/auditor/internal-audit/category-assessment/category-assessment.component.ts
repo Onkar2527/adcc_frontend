@@ -335,6 +335,21 @@ export class CategoryAssessmentComponent
         }
 
         if (
+            changes['assessmentIdInput']
+            ||
+            changes['categoryIdInput']
+        ) {
+            this.samplingOpen.set(false);
+            this.samplingData.set(null);
+            this.samplingFilterType = 0;
+            this.samplingPrimaryValue = '';
+            this.samplingSecondaryValue = '';
+            this.samplingSelection = [];
+            this.accountSearch = '';
+            this.answerErrors.set({});
+        }
+
+        if (
             changes['pendingQuestionIdsInput']
         ) {
             this.pendingQuestionIds =
@@ -628,9 +643,7 @@ export class CategoryAssessmentComponent
                 ) {
 
                     question.answer_value =
-                        Number(question.option_id) === 5
-                            ? ''
-                            : question.answer?.answer_given || '';
+                        question.answer?.answer_given || '';
 
                     question.audit_comment =
                         question.answer?.audit_comment || '';
@@ -679,7 +692,8 @@ export class CategoryAssessmentComponent
                     );
                     question.is_re_audit =
                         this.isReAudit
-                    question.selectedSubsetSets = [];
+                    question.selectedSubsetSets =
+                        question.subset_sets || [];
 
                     question.isAnnexureSelected =
                         this.buildIsAnnexureSelected(
@@ -889,6 +903,22 @@ export class CategoryAssessmentComponent
         );
 
         this.accountSearch = '';
+
+        this.router.navigate(
+            [],
+            {
+                relativeTo:
+                    this.route,
+                queryParams: {
+                    dumpId:
+                        null,
+                },
+                queryParamsHandling:
+                    'merge',
+                replaceUrl:
+                    true,
+            },
+        );
 
         this.loadCategory(
             Number(detail.overview.id),
@@ -3127,6 +3157,22 @@ export class CategoryAssessmentComponent
             'Account Selected',
         );
 
+        this.router.navigate(
+            [],
+            {
+                relativeTo:
+                    this.route,
+                queryParams: {
+                    dumpId:
+                        account.id,
+                },
+                queryParamsHandling:
+                    'merge',
+                replaceUrl:
+                    true,
+            },
+        );
+
         this.loadCategory(
             Number(detail.overview.id),
             Number(detail.category.id),
@@ -3157,69 +3203,129 @@ export class CategoryAssessmentComponent
             return;
         }
 
-        const localPending =
-            this.accountCompletionPendingMessages(
-                detail,
-            );
-
-        if (
-            localPending.length
-        ) {
-            this.notification.error(
-                localPending[0],
-            );
-            return;
-        }
-
         this.completingAccount.set(
             true,
         );
 
-        this.service
-            .completeInternalAuditAccount(
-                Number(detail.overview.id),
-                Number(detail.category.id),
-                dumpId,
-                this.employeeId,
-            )
-            .subscribe({
-                next: (res: any) => {
-                    this.completingAccount.set(
-                        false,
-                    );
+        this.answerErrors.set(
+            {},
+        );
 
-                    if (
-                        !res?.success
-                    ) {
-                        this.notification.error(
-                            res?.message
-                            || 'Complete pending account points first.',
+        const headers =
+            this.visibleHeaders(
+                detail,
+            );
+
+        const answers =
+            headers.flatMap(
+                (header: any) =>
+                    this.buildAnswersForHeader(
+                        header,
+                    ),
+            );
+
+        const executeCompletion = () => {
+            this.service
+                .completeInternalAuditAccount(
+                    Number(detail.overview.id),
+                    Number(detail.category.id),
+                    dumpId,
+                    this.employeeId,
+                )
+                .subscribe({
+                    next: (res: any) => {
+                        this.completingAccount.set(
+                            false,
                         );
-                        return;
-                    }
 
-                    this.notification.success(
-                        res?.message
-                        || 'Account assessment marked complete.',
-                    );
-                    this.markSaved();
-                    this.loadCategory(
-                        Number(detail.overview.id),
-                        Number(detail.category.id),
-                        false,
-                        dumpId,
-                    );
-                },
-                error: (err) => {
-                    this.completingAccount.set(
-                        false,
-                    );
-                    this.notification.error(
-                        err?.error?.message
-                        || 'Unable to complete account assessment.',
-                    );
-                },
-            });
+                        if (
+                            !res?.success
+                        ) {
+                            this.notification.error(
+                                res?.message
+                                || 'Complete pending account points first.',
+                            );
+                            return;
+                        }
+
+                        this.notification.success(
+                            res?.message
+                            || 'Account assessment marked complete.',
+                        );
+                        this.markSaved();
+                        this.loadCategory(
+                            Number(detail.overview.id),
+                            Number(detail.category.id),
+                            false,
+                            dumpId,
+                        );
+                    },
+                    error: (err) => {
+                        this.completingAccount.set(
+                            false,
+                        );
+                        this.notification.error(
+                            err?.error?.message
+                            || 'Unable to complete account assessment.',
+                        );
+                    },
+                });
+        };
+
+        const executeSaveAndValidate = () => {
+            this.service
+                .saveInternalAuditCategoryAnswers(
+                    Number(detail.overview.id),
+                    Number(detail.category.id),
+                    this.employeeId,
+                    answers,
+                    dumpId,
+                )
+                .subscribe({
+                    next: (res: any) => {
+                        if (
+                            !res?.success
+                        ) {
+                            this.completingAccount.set(
+                                false,
+                            );
+                            this.answerErrors.set(
+                                res?.errors || {},
+                            );
+
+                            this.openHeadersWithAnswerErrors(
+                                res?.errors || {},
+                            );
+
+                            this.notification.error(
+                                res?.message
+                                || 'Please correct highlighted answers.',
+                            );
+                            return;
+                        }
+
+                        // Save succeeded, directly proceed to complete
+                        executeCompletion();
+                    },
+                    error: (err) => {
+                        this.completingAccount.set(
+                            false,
+                        );
+                        this.notification.error(
+                            err?.error?.message
+                            || 'Unable to save answers.',
+                        );
+                    },
+                });
+        };
+
+        if (
+            answers.length
+        ) {
+            executeSaveAndValidate();
+        } else {
+            executeCompletion();
+        }
     }
 
     completeRemainingAccounts() {
@@ -3311,11 +3417,36 @@ export class CategoryAssessmentComponent
                 detail?.sets || [],
             )
         ) {
+            const hasAnswer =
+                String(
+                    this.isTextAnswer(question)
+                        ? question?.audit_comment || ''
+                        : question?.answer_value || '',
+                )
+                    .trim()
+                    .length > 0;
+
+            if (!hasAnswer) {
+                messages.push(
+                    `Answer is pending for question: "${question.question}"`,
+                );
+                break;
+            }
+
+            if (!question?.answer?.id) {
+                messages.push(
+                    `Save answer for question: "${question.question}"`,
+                );
+                break;
+            }
+
             if (
-                this.isQuestionPendingForCompletion(question)
+                this.buildIsAnnexureSelected(question)
+                &&
+                !question?.annexure_rows?.length
             ) {
                 messages.push(
-                    'Save all account answers before marking the account complete.',
+                    `Please add at least one annexure row for question: "${question.question}"`,
                 );
                 break;
             }
@@ -3324,7 +3455,7 @@ export class CategoryAssessmentComponent
                 this.isQuestionEvidencePending(question)
             ) {
                 messages.push(
-                    'Upload required evidence before marking the account complete.',
+                    `Upload required evidence for question: "${question.question}"`,
                 );
                 break;
             }
@@ -3592,6 +3723,7 @@ export class CategoryAssessmentComponent
         row: any,
         files: File[],
         index: number,
+        uploadedEvidences: any[] = [],
     ) {
         const detail =
             this.categoryDetail();
@@ -3608,13 +3740,20 @@ export class CategoryAssessmentComponent
                 `${files.length} evidence file${files.length === 1 ? '' : 's'} uploaded successfully.`,
             );
 
-            this.markSaved();
-            this.loadCategory(
-                Number(detail.overview.id),
-                Number(detail.category.id),
-                false,
-            );
+            if (row) {
+                if (!Array.isArray(row.evidences)) {
+                    row.evidences = [];
+                }
+                row.evidences.push(...uploadedEvidences);
+            } else if (question?.answer) {
+                if (!Array.isArray(question.answer.evidences)) {
+                    question.answer.evidences = [];
+                }
+                question.answer.evidences.push(...uploadedEvidences);
+            }
 
+            this.categoryDetail.set({ ...detail });
+            this.markSaved();
             return;
         }
 
@@ -3642,11 +3781,16 @@ export class CategoryAssessmentComponent
                         return;
                     }
 
+                    if (res?.evidence) {
+                        uploadedEvidences.push(res.evidence);
+                    }
+
                     this.uploadEvidenceFiles(
                         question,
                         row,
                         files,
                         index + 1,
+                        uploadedEvidences,
                     );
                 },
                 error: (err) => {
@@ -3709,6 +3853,53 @@ export class CategoryAssessmentComponent
             });
     }
 
+    private removeEvidenceFromLocal(evidenceId: number) {
+        const detail = this.categoryDetail();
+        if (!detail) return;
+
+        const removeRecursive = (sets: any[]) => {
+            for (const set of sets || []) {
+                for (const header of set.headers || []) {
+                    for (const question of header.questions || []) {
+                        if (question.answer) {
+                            if (Array.isArray(question.answer.evidences)) {
+                                question.answer.evidences = question.answer.evidences.filter(
+                                    (e: any) => Number(e.id) !== evidenceId
+                                );
+                            }
+                            if (question.answer.evidence && Number(question.answer.evidence.id) === evidenceId) {
+                                question.answer.evidence = null;
+                            }
+                        }
+
+                        if (Array.isArray(question.annexure_rows)) {
+                            for (const row of question.annexure_rows) {
+                                if (Array.isArray(row.evidences)) {
+                                    row.evidences = row.evidences.filter(
+                                        (e: any) => Number(e.id) !== evidenceId
+                                    );
+                                }
+                                if (row.evidence && Number(row.evidence.id) === evidenceId) {
+                                    row.evidence = null;
+                                }
+                            }
+                        }
+
+                        if (question.subset_sets) {
+                            removeRecursive(question.subset_sets);
+                        }
+                        if (question.pending_subset_sets) {
+                            removeRecursive(question.pending_subset_sets);
+                        }
+                    }
+                }
+            }
+        };
+
+        removeRecursive(detail.sets);
+        this.categoryDetail.set({ ...detail });
+    }
+
     deleteEvidence(
         evidence: any,
     ) {
@@ -3748,12 +3939,8 @@ export class CategoryAssessmentComponent
                     this.notification.success(
                         res.message || 'Evidence removed successfully.',
                     );
+                    this.removeEvidenceFromLocal(Number(evidence.id));
                     this.markSaved();
-                    this.loadCategory(
-                        Number(detail.overview.id),
-                        Number(detail.category.id),
-                        false,
-                    );
                 },
                 error: (err) => {
                     this.notification.error(
