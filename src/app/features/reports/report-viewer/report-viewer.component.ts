@@ -5,6 +5,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { ButtonModule } from 'primeng/button';
 import { TagModule } from 'primeng/tag';
 import { ExportService } from '../../../core/services/export/export.service';
+import { DateTimeService } from '../../../core/services/datetime/datetime.service';
 import { DateRangeFieldComponent } from '../../../shared/components/form/date-range-field/date-range-field.component';
 import {
   ReportColumnDefinition,
@@ -27,6 +28,7 @@ export class ReportViewerComponent implements OnInit {
   private reportsService = inject(ReportsService);
   private exportService = inject(ExportService);
   private auditNavService = inject(InternalAuditNavService);
+  private dateTimeService = inject(DateTimeService);
   private readonly auditTypeFilter: ReportFilterDefinition = {
     key: 'audit_type_id',
     label: 'Audit Type',
@@ -761,7 +763,9 @@ export class ReportViewerComponent implements OnInit {
   }
 
   reportRunDate() {
-    return this.formatDate(this.generatedAt() || new Date().toISOString());
+    return this.dateTimeService.formatDateTimeDisplay(
+      this.generatedAt() || this.dateTimeService.nowISOString(),
+    );
   }
 
   reportLogo() {

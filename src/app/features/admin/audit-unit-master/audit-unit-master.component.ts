@@ -1,6 +1,7 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ToastModule } from 'primeng/toast';
+import { ButtonModule } from 'primeng/button';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { TableComponent, TableColumn } from '../../../shared/components/table/table.component';
 import { FormDrawerService } from '../../../core/services/drawer/form-drawer.service';
@@ -8,11 +9,13 @@ import { AuditUnitService } from '../services/masters.service';
 import { AuditUnitFormComponent } from './audit-unit-form.component';
 import { Router } from '@angular/router';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
+import { MasterBulkUploadComponent } from '../shared/master-bulk-upload/master-bulk-upload.component';
+import { MasterBulkUploadService } from '../services/master-bulk-upload.service';
 
 @Component({
     selector: 'app-audit-unit-master',
     standalone: true,
-    imports: [CommonModule, TableComponent, ToastModule, ConfirmDialogModule],
+    imports: [CommonModule, TableComponent, ToastModule, ConfirmDialogModule, ButtonModule],
     providers: [MessageService, ConfirmationService],
     template: `
   <div class="card">
@@ -32,7 +35,17 @@ import { ConfirmDialogModule } from 'primeng/confirmdialog';
       (onAdd)="openForm()"
       (onActionClick)="onAction($event)"
       (onRefresh)="loadAuditUnits()"
-    ></app-table>
+    >
+      <button
+        toolbar-actions
+        pButton
+        type="button"
+        icon="pi pi-upload"
+        label="Bulk Upload"
+        class="p-button-outlined"
+        (click)="openBulkUpload()"
+      ></button>
+    </app-table>
 
   </div>
 
@@ -46,6 +59,7 @@ export class AuditUnitMasterComponent implements OnInit {
     private messageService = inject(MessageService);
     private router = inject(Router);
     private confirmationService = inject(ConfirmationService)
+    private bulkUploadService = inject(MasterBulkUploadService);
 
     auditUnits = signal<any[]>([]);
     loading = signal(false);
@@ -121,6 +135,20 @@ export class AuditUnitMasterComponent implements OnInit {
         if (res?.saved) {
             this.loadAuditUnits();
             this.messageService.add({ severity: 'success', summary: 'Success', detail: `Audit unit ${unit ? 'updated' : 'created'} successfully` });
+        }
+    }
+
+    async openBulkUpload() {
+        const res = await this.drawer.open(MasterBulkUploadComponent, {
+            header: 'Audit Unit Bulk Upload',
+            data: {
+                config: this.bulkUploadService.getConfig('auditUnits'),
+            },
+            width: 'min(1100px, 100vw)',
+        });
+
+        if (res?.saved) {
+            this.loadAuditUnits();
         }
     }
 

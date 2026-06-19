@@ -1131,6 +1131,7 @@ export class ComplianceWorkspaceComponent implements OnInit {
         files: File[],
         index: number,
         assessmentId: number,
+        uploadedEvidences: any[] = [],
     ) {
         const file =
             files[index];
@@ -1142,7 +1143,14 @@ export class ComplianceWorkspaceComponent implements OnInit {
                 `${files.length} compliance evidence file${files.length === 1 ? '' : 's'} uploaded successfully.`,
             );
 
-            this.loadDetail(assessmentId);
+            if (observation) {
+                if (!Array.isArray(observation.compliance_evidences)) {
+                    observation.compliance_evidences = [];
+                }
+                observation.compliance_evidences.push(...uploadedEvidences);
+            }
+
+            this.detail.set({ ...this.detail() });
             this.checkCompletion();
 
             return;
@@ -1170,12 +1178,17 @@ export class ComplianceWorkspaceComponent implements OnInit {
                         return;
                     }
 
+                    if (res?.evidence) {
+                        uploadedEvidences.push(res.evidence);
+                    }
+
                     this.uploadEvidenceFiles(
                         targetType,
                         observation,
                         files,
                         index + 1,
                         assessmentId,
+                        uploadedEvidences,
                     );
                 },
                 error: (err) => {

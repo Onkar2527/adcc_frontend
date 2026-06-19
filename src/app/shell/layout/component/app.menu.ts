@@ -361,6 +361,9 @@ export class AppMenu implements OnInit, OnDestroy {
                 ],
                 queryParams: {
                     view: 'summary',
+                    categoryId: null,
+                    dumpId: null,
+                    pending: null,
                 },
                 routerLinkActiveOptions: {
                     paths: 'exact',
@@ -422,12 +425,22 @@ export class AppMenu implements OnInit, OnDestroy {
                                     ? {
                                         view:
                                             'carry-forward',
+                                        categoryId:
+                                            null,
+                                        dumpId:
+                                            null,
+                                        pending:
+                                            null,
                                     }
                                     : {
                                         view:
                                             'category',
                                         categoryId:
                                             Number(category.id),
+                                        dumpId:
+                                            null,
+                                        pending:
+                                            null,
                                     },
                                 routerLinkActiveOptions: {
                                     paths:
