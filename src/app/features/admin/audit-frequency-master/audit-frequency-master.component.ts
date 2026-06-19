@@ -12,6 +12,9 @@ import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { ToastModule } from 'primeng/toast';
 import { ButtonModule } from 'primeng/button';
 import { AuditCalendarService } from '../services/masters.service';
+import { FormDrawerService } from '../../../core/services/drawer/form-drawer.service';
+import { MasterBulkUploadComponent } from '../shared/master-bulk-upload/master-bulk-upload.component';
+import { MasterBulkUploadService } from '../services/master-bulk-upload.service';
 
 export interface RiskFrequency {
     risk_type_id: number;
@@ -43,15 +46,26 @@ export interface RiskFrequency {
                         <i class="pi pi-cog text-primary text-3xl mr-2"></i>
                         Audit Frequency Master
                     </h5>
-                    <button 
-                        pButton 
-                        type="button" 
-                        label="Back to Calendar" 
-                        icon="pi pi-arrow-left" 
-                        class="p-button-outlined p-button-secondary ml-auto"
-                        routerLink="/admin/audit-calendar"
-                        style="width: auto;"
-                    ></button>
+                    <div class="flex align-items-center gap-2 ml-auto">
+                        <button 
+                            pButton
+                            type="button"
+                            label="Bulk Upload CSV"
+                            icon="pi pi-upload"
+                            class="p-button-outlined"
+                            style="width: auto;"
+                            (click)="openBulkUpload()"
+                        ></button>
+                        <button 
+                            pButton 
+                            type="button" 
+                            label="Back to Calendar" 
+                            icon="pi pi-arrow-left" 
+                            class="p-button-outlined p-button-secondary"
+                            routerLink="/admin/audit-calendar"
+                            style="width: auto;"
+                        ></button>
+                    </div>
                 </div>
                 <p class="text-gray-500 mt-2">
                     Define the recommended standard audit frequency (in months) for each of the core risk classifications.
@@ -193,6 +207,8 @@ export class AuditFrequencyMasterComponent implements OnInit {
     private service = inject(AuditCalendarService);
     private messageService = inject(MessageService);
     private confirmationService = inject(ConfirmationService);
+    private drawer = inject(FormDrawerService);
+    private bulkUploadService = inject(MasterBulkUploadService);
 
     frequencies = signal<RiskFrequency[]>([]);
     loading = signal(false);
@@ -260,6 +276,20 @@ export class AuditFrequencyMasterComponent implements OnInit {
             }
         });
         this.isDirty.set(dirty);
+    }
+
+    async openBulkUpload() {
+        const res = await this.drawer.open(MasterBulkUploadComponent, {
+            header: 'Audit Frequency Bulk Upload',
+            data: {
+                config: this.bulkUploadService.getConfig('frequencies'),
+            },
+            width: 'min(980px, 100vw)',
+        });
+
+        if (res?.saved) {
+            this.load();
+        }
     }
 
     cancelChanges() {
