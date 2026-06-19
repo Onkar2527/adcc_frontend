@@ -61,8 +61,8 @@ export class AppMenu implements OnInit, OnDestroy {
     private baseModel: MenuItem[] = [
         {
             label: 'Home',
-            authority: ['1'],
-            items: [{ label: 'Dashboard', icon: 'pi pi-fw pi-home', routerLink: ['/admin'] }],
+            authority: ['1', '2', '3', '4', '5', '9'],
+            items: [{ label: 'Dashboard', icon: 'pi pi-fw pi-home', routerLink: ['/home'] }],
         },
         {
             label: 'Audit Management',
@@ -83,6 +83,11 @@ export class AppMenu implements OnInit, OnDestroy {
             label: 'Reports',
             authority: ['1', '2', '3', '4', '6'],
             items: [{ label: 'Reports', icon: 'pi pi-fw pi-file', routerLink: ['/reports'] }],
+        },
+        {
+            label: 'System Audit',
+            authority: ['1'],
+            items: [{ label: 'Audit Trail Logs', icon: 'pi pi-fw pi-history', routerLink: ['/admin/audit-logs'] }],
         },
         {
             label: 'Masters',

@@ -21,6 +21,13 @@ export class AuditDashboardService {
       payload,
     );
   }
+
+  getHomeStats(employeeId: number, auditUnitId?: number, assesPeriodId?: string) {
+    const params: any = { employee_id: employeeId };
+    if (auditUnitId) params.audit_unit_id = auditUnitId;
+    if (assesPeriodId) params.asses_period = assesPeriodId;
+    return this.http.get<any>(`${this.apiUrl}/home-stats`, { params });
+  }
   // service.ts (frontend)
 
   getExecutiveSummary(
