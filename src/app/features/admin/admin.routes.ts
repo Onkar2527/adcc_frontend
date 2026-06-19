@@ -79,4 +79,5 @@ export const ADMIN_ROUTES: Routes = [
     { path: 'audit-frequency-master', component: AuditFrequencyMasterComponent },
     { path: 'special-audit', component: SpecialAuditComponent },
     { path: 'multiple-auditor-assignment', component: MultipleAuditorAssignmentComponent },
+    { path: 'audit-logs', loadComponent: () => import('./audit-logs/audit-logs.component').then(mod => mod.AuditLogsComponent) },
 ]; // Routes configuration for admin master features

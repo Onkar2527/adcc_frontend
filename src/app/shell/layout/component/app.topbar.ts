@@ -27,6 +27,7 @@ import { InputIconModule } from 'primeng/inputicon';
 import { FormsModule } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { KeyboardShortcutService } from '../../../core/services/keyboard-shortcut';
+import { AuthService } from '../../../core/services/auth/auth.service';
 
 interface SearchItem {
   label: string;
@@ -347,6 +348,7 @@ interface SearchItem {
 export class AppTopbar implements OnInit, OnDestroy {
   searchService = inject(SearchService);
   router = inject(Router);
+  authService = inject(AuthService);
 
   @ViewChild('searchInput') searchInput!: AutoComplete;
   private searchSubscription?: Subscription;
@@ -453,7 +455,7 @@ export class AppTopbar implements OnInit, OnDestroy {
   }
 
   logout() {
-    this.router.navigate(['/login']);
+    this.authService.logout();
   }
 
   getAvatarInitial(): string {

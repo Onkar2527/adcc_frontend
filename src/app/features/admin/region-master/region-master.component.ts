@@ -1,16 +1,19 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ToastModule } from 'primeng/toast';
+import { ButtonModule } from 'primeng/button';
 import { MessageService } from 'primeng/api';
 import { TableComponent, TableColumn } from '../../../shared/components/table/table.component';
 import { FormDrawerService } from '../../../core/services/drawer/form-drawer.service';
 import { Region, RegionMasterService } from '../services/masters.service';
 import { RegionFormComponent } from './region-form.component';
+import { MasterBulkUploadComponent } from '../shared/master-bulk-upload/master-bulk-upload.component';
+import { MasterBulkUploadService } from '../services/master-bulk-upload.service';
 
 @Component({
   selector: 'app-region-master',
   standalone: true,
-  imports: [CommonModule, TableComponent, ToastModule],
+  imports: [CommonModule, TableComponent, ToastModule, ButtonModule],
   providers: [MessageService],
   template: `
     <div class="card">
@@ -27,7 +30,17 @@ import { RegionFormComponent } from './region-form.component';
         (onAdd)="openForm()"
         (onActionClick)="onAction($event)"
         (onRefresh)="loadRegions()"
-      ></app-table>
+      >
+        <button
+          toolbar-actions
+          pButton
+          type="button"
+          icon="pi pi-upload"
+          label="Bulk Upload"
+          class="p-button-outlined"
+          (click)="openBulkUpload()"
+        ></button>
+      </app-table>
     </div>
     <p-toast></p-toast>
   `
@@ -36,6 +49,7 @@ export class RegionMasterComponent implements OnInit {
   private regionService = inject(RegionMasterService);
   private drawer = inject(FormDrawerService);
   private messageService = inject(MessageService);
+  private bulkUploadService = inject(MasterBulkUploadService);
 
   regions = signal<any[]>([]);
   loading = signal(false);
@@ -85,6 +99,20 @@ export class RegionMasterComponent implements OnInit {
         summary: 'Success',
         detail: `Region ${region ? 'updated' : 'created'} successfully`
       });
+    }
+  }
+
+  async openBulkUpload() {
+    const res = await this.drawer.open(MasterBulkUploadComponent, {
+      header: 'Region Bulk Upload',
+      data: {
+        config: this.bulkUploadService.getConfig('regions'),
+      },
+      width: 'min(1100px, 100vw)',
+    });
+
+    if (res?.saved) {
+      this.loadRegions();
     }
   }
 

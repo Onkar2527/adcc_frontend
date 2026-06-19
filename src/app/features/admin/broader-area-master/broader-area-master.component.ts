@@ -1,18 +1,21 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ToastModule } from 'primeng/toast';
+import { ButtonModule } from 'primeng/button';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { TableComponent, TableColumn } from '../../../shared/components/table/table.component';
 import { FormDrawerService } from '../../../core/services/drawer/form-drawer.service';
 import { AuditSectionService, BroaderAreaMasterService, MenuMasterService } from '../services/masters.service';
 import { BroaderAreaMasterFormComponent } from './broader-area-master-main.component';
 import { MenuMasterFormComponent } from '../menu-master/menu-master-main.component';
+import { MasterBulkUploadComponent } from '../shared/master-bulk-upload/master-bulk-upload.component';
+import { MasterBulkUploadService } from '../services/master-bulk-upload.service';
 
 
 @Component({
   selector: 'app-broader-area-master',
   standalone: true,
-  imports: [CommonModule, TableComponent, ToastModule],
+  imports: [CommonModule, TableComponent, ToastModule, ButtonModule],
   providers: [MessageService],
   template: `
     <div class="card">
@@ -28,7 +31,17 @@ import { MenuMasterFormComponent } from '../menu-master/menu-master-main.compone
         (onAdd)="openForm()"
         (onActionClick)="onAction($event)"
         (onRefresh)="loadBorderAreas()"
-      ></app-table>
+      >
+        <button
+          toolbar-actions
+          pButton
+          type="button"
+          icon="pi pi-upload"
+          label="Bulk Upload"
+          class="p-button-outlined"
+          (click)="openBulkUpload()"
+        ></button>
+      </app-table>
     </div>
     <p-toast></p-toast>
   `
@@ -38,6 +51,7 @@ export class BroaderAreaMasterComponent implements OnInit {
   private drawer = inject(FormDrawerService);
   private messageService = inject(MessageService);
   private confirmationService = inject(ConfirmationService);
+  private bulkUploadService = inject(MasterBulkUploadService);
 
   borderAreas = signal<any[]>([]);
   loading = signal(false);
@@ -97,6 +111,20 @@ export class BroaderAreaMasterComponent implements OnInit {
         summary: 'Success',
         detail: `Border area ${borderArea ? 'updated' : 'created'} successfully`
       });
+    }
+  }
+
+  async openBulkUpload() {
+    const res = await this.drawer.open(MasterBulkUploadComponent, {
+      header: 'Broader Area Bulk Upload',
+      data: {
+        config: this.bulkUploadService.getConfig('broaderAreas'),
+      },
+      width: 'min(1100px, 100vw)',
+    });
+
+    if (res?.saved) {
+      this.loadBorderAreas();
     }
   }
 

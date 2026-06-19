@@ -222,6 +222,14 @@ export interface UpdateEmployeeDto extends Partial<CreateEmployeeDto> {
   id?: number;
 }
 
+export interface BulkUploadEmployeesDto {
+  rows: CreateEmployeeDto[];
+}
+
+export interface MasterBulkUploadDto {
+  rows: any[];
+}
+
 @Injectable({ providedIn: 'root' })
 export class EmployeeService {
   private http = inject(HttpClient);
@@ -236,6 +244,9 @@ export class EmployeeService {
   }
   createEmployee(data: CreateEmployeeDto): Observable<Employee> {
     return this.http.post<Employee>(this.apiUrl, data);
+  }
+  bulkUploadEmployees(data: BulkUploadEmployeesDto): Observable<{ successCount: number; errors: string[]; data?: Employee[] }> {
+    return this.http.post<{ successCount: number; errors: string[]; data?: Employee[] }>(`${this.apiUrl}/bulk-upload`, data);
   }
   updateEmployee(id: number, data: UpdateEmployeeDto): Observable<Employee> {
     return this.http.patch<Employee>(`${this.apiUrl}/${id}`, data);
@@ -1764,6 +1775,17 @@ export class RegionMasterService {
 
   remove(id: number | string): Observable<any> {
     return this.http.delete<any>(`${this.apiUrl}/${id}`);
+  }
+}
+
+@Injectable({ providedIn: 'root' })
+export class MasterBulkUploadApiService {
+  private http = inject(HttpClient);
+  private config = inject(APP_CONFIG);
+  private apiUrl = `${this.config.apiUrl}/master-bulk-upload`;
+
+  upload(masterKey: string, data: MasterBulkUploadDto): Observable<{ successCount: number; errors: string[]; data?: any[] }> {
+    return this.http.post<{ successCount: number; errors: string[]; data?: any[] }>(`${this.apiUrl}/${masterKey}`, data);
   }
 }
 

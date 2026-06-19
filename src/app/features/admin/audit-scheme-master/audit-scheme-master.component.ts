@@ -10,6 +10,7 @@ import { RouterModule } from '@angular/router';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { ToastModule } from 'primeng/toast';
+import { ButtonModule } from 'primeng/button';
 
 import { TableColumn } from '../../../shared/components/table/table.component';
 import { TableComponent } from '../../../shared/components/table/table.component';
@@ -19,6 +20,8 @@ import { FormDrawerService } from '../../../core/services/drawer/form-drawer.ser
 import { AuditSchemeMasterService } from '../services/masters.service';
 
 import { AuditSchemeFormComponent } from './audit-scheme-form.component';
+import { MasterBulkUploadComponent } from '../shared/master-bulk-upload/master-bulk-upload.component';
+import { MasterBulkUploadService } from '../services/master-bulk-upload.service';
 
 @Component({
     selector: 'app-scheme-master',
@@ -28,6 +31,7 @@ import { AuditSchemeFormComponent } from './audit-scheme-form.component';
         TableComponent,
         ToastModule,
         ConfirmDialogModule,
+        ButtonModule,
     ],
     providers: [MessageService, ConfirmationService],
     template: `
@@ -48,7 +52,17 @@ import { AuditSchemeFormComponent } from './audit-scheme-form.component';
       (onAdd)="openForm()"
       (onActionClick)="onAction($event)"
       (onRefresh)="loadSchemes()"
-    ></app-table>
+    >
+      <button
+        toolbar-actions
+        pButton
+        type="button"
+        icon="pi pi-upload"
+        label="Bulk Upload"
+        class="p-button-outlined"
+        (click)="openBulkUpload()"
+      ></button>
+    </app-table>
 
   </div>
 
@@ -61,6 +75,7 @@ export class AuditSchemeMasterComponent implements OnInit {
     private drawer = inject(FormDrawerService);
     private messageService = inject(MessageService);
     private confirmationService = inject(ConfirmationService);
+    private bulkUploadService = inject(MasterBulkUploadService);
 
     schemes = signal<any[]>([]);
     loading = signal(false);
@@ -198,6 +213,20 @@ export class AuditSchemeMasterComponent implements OnInit {
                 detail: `Scheme ${row ? 'updated' : 'created'
                     } successfully`,
             });
+        }
+    }
+
+    async openBulkUpload() {
+        const res = await this.drawer.open(MasterBulkUploadComponent, {
+            header: 'Audit Scheme Bulk Upload',
+            data: {
+                config: this.bulkUploadService.getConfig('schemes'),
+            },
+            width: 'min(1100px, 100vw)',
+        });
+
+        if (res?.saved) {
+            this.loadSchemes();
         }
     }
 
