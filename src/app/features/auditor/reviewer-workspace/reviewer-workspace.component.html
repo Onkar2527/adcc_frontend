@@ -776,51 +776,53 @@
                 ></button>
               </div>
 
-              <button
-                pButton
-                type="button"
-                label="Accept"
-                icon="pi pi-check"
-                severity="success"
-                [loading]="actionSaving()[actionKey('answer', answer.id)]"
-                [disabled]="reviewStatus(answer) === 9"
-                (click)="saveAction('answer', answer, 2)"
-              ></button>
+              <ng-container *ngIf="answer.is_compliance == 1">
+                <button
+                  pButton
+                  type="button"
+                  label="Accept"
+                  icon="pi pi-check"
+                  severity="success"
+                  [loading]="actionSaving()[actionKey('answer', answer.id)]"
+                  [disabled]="isReviewActionDisabled(answer, 2)"
+                  (click)="saveAction('answer', answer, 2)"
+                ></button>
 
-              <button
-                pButton
-                type="button"
-                [label]="isComplianceReview() ? 'Re-Compliance' : 'Re-Audit'"
-                icon="pi pi-times"
-                severity="danger"
-                [loading]="actionSaving()[actionKey('answer', answer.id)]"
-                [disabled]="reviewStatus(answer) === 9"
-                (click)="saveAction('answer', answer, 3)"
-              ></button>
+                <button
+                  pButton
+                  type="button"
+                  [label]="isComplianceReview() ? 'Re-Compliance' : 'Re-Audit'"
+                  icon="pi pi-times"
+                  severity="danger"
+                  [loading]="actionSaving()[actionKey('answer', answer.id)]"
+                  [disabled]="isReviewActionDisabled(answer, 3)"
+                  (click)="saveAction('answer', answer, 3)"
+                ></button>
 
-              <button
-                *ngIf="isComplianceReview()"
-                pButton
-                type="button"
-                label="Carry Forward"
-                icon="pi pi-forward"
-                severity="info"
-                [loading]="actionSaving()[actionKey('answer', answer.id)]"
-                [disabled]="reviewStatus(answer) === 9"
-                (click)="saveAction('answer', answer, 5)"
-              ></button>
+                <button
+                  *ngIf="isComplianceReview()"
+                  pButton
+                  type="button"
+                  label="Carry Forward"
+                  icon="pi pi-forward"
+                  severity="info"
+                  [loading]="actionSaving()[actionKey('answer', answer.id)]"
+                  [disabled]="isReviewActionDisabled(answer, 5)"
+                  (click)="saveAction('answer', answer, 5)"
+                ></button>
 
-              <button
-                *ngIf="isComplianceReview()"
-                pButton
-                type="button"
-                label="Partially Pass"
-                icon="pi pi-percentage"
-                severity="warn"
-                [loading]="actionSaving()[actionKey('answer', answer.id)]"
-                [disabled]="reviewStatus(answer) === 9"
-                (click)="saveAction('answer', answer, 7)"
-              ></button>
+                <button
+                  *ngIf="isComplianceReview()"
+                  pButton
+                  type="button"
+                  label="Partially Pass"
+                  icon="pi pi-percentage"
+                  severity="warn"
+                  [loading]="actionSaving()[actionKey('answer', answer.id)]"
+                  [disabled]="isReviewActionDisabled(answer, 7)"
+                  (click)="saveAction('answer', answer, 7)"
+                ></button>
+              </ng-container>
             </div>
           </div>
 
