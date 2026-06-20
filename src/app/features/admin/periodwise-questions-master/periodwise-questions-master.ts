@@ -29,7 +29,7 @@ import { PeriodwiseQuestionsMasterViewComponent } from './periodwise-question-ma
   template: `
     <div class="card">
       <div class="flex align-items-center justify-content-between mb-4">
-        <h5 class="m-0 text-xl font-semibold">Periodwise Questions Master</h5>
+        <h5 class="m-0 text-xl font-semibold">Question Setup</h5>
       </div>
 
       <app-table
@@ -49,49 +49,49 @@ export class PeriodwiseQuestionsMasterComponent implements OnInit {
   private periodwiseQuestionsService = inject(PeriodwiseQuestionsMasterService);
   private drawer = inject(FormDrawerService);
   private messageService = inject(MessageService);
-   private confirmationService = inject(ConfirmationService);
+  private confirmationService = inject(ConfirmationService);
   periodwiseQuestionsMasters = signal<any[]>([]);
   loading = signal(false);
 
-columns: TableColumn[] = [
+  columns: TableColumn[] = [
 
-  {
-    field: 'audit_unit_name',
-    header: 'Audit Unit Name',
-    width: '250px'
-  },
+    {
+      field: 'audit_unit_name',
+      header: 'Audit Unit Name',
+      width: '250px'
+    },
 
-  {
-    field: 'period_details',
-    header: 'Period Wise Details',
-    width: '350px'
-  },
+    {
+      field: 'period_details',
+      header: 'Period Wise Details',
+      width: '350px'
+    },
 
-  {
-    field: 'user_type_name',
-    header: 'User Type',
-    width: '150px',
-    align: 'center'
-  },
+    {
+      field: 'user_type_name',
+      header: 'User Type',
+      width: '150px',
+      align: 'center'
+    },
 
-  {
-    field: '_edit',
-    header: 'Action',
-    type: 'action',
-    actionIcon: 'pi pi-pencil',
-    actionName: 'edit',
-    width: '100px',
-    align: 'center',
-    tooltip: 'Edit'
-  },
-      { field: '_delete', header: '', type: 'action', actionIcon: 'pi pi-trash', actionName: 'delete', width: '50px', align: 'center', tooltip: 'Delete' },
-      { field: '_view', header: '', type: 'action', actionIcon: 'pi pi-eye', actionName: 'view', width: '50px', align: 'center', tooltip: 'View' }
+    {
+      field: '_edit',
+      header: 'Action',
+      type: 'action',
+      actionIcon: 'pi pi-pencil',
+      actionName: 'edit',
+      width: '100px',
+      align: 'center',
+      tooltip: 'Edit'
+    },
+    { field: '_delete', header: '', type: 'action', actionIcon: 'pi pi-trash', actionName: 'delete', width: '50px', align: 'center', tooltip: 'Delete' },
+    { field: '_view', header: '', type: 'action', actionIcon: 'pi pi-eye', actionName: 'view', width: '50px', align: 'center', tooltip: 'View' }
 
-];
+  ];
 
   ngOnInit() {
     this.loadPeriodwiseQuestionsMasters();
-   
+
   }
 
   loadPeriodwiseQuestionsMasters() {
@@ -112,41 +112,41 @@ columns: TableColumn[] = [
     });
   }
 
-private getPeriodwiseQuestionsMasterRows(res: any): any[] {
+  private getPeriodwiseQuestionsMasterRows(res: any): any[] {
 
-  const rows = Array.isArray(res)
-    ? res
-    : Array.isArray(res?.rows)
-    ? res.rows
-    : Array.isArray(res?.data)
-    ? res.data
-    : [];
+    const rows = Array.isArray(res)
+      ? res
+      : Array.isArray(res?.rows)
+        ? res.rows
+        : Array.isArray(res?.data)
+          ? res.data
+          : [];
 
-  return rows.map((item: any, index: number) => ({
+    return rows.map((item: any, index: number) => ({
 
-    ...item,
+      ...item,
 
-    sr_no: index + 1,
+      sr_no: index + 1,
 
-    audit_unit_name: item.audit_unit_name || '-',
+      audit_unit_name: item.audit_unit_name || '-',
 
-    period_details:
-      `Period: ${item.start_month_year} - ${item.end_month_year}
+      period_details:
+        `Period: ${item.start_month_year} - ${item.end_month_year}
 (F.Y. ${item.year || '-'})`,
 
-    user_type_name:
-      user_types.find(
-        (ut) => ut.value == item.user_type_id
-      )?.label || '-'
+      user_type_name:
+        user_types.find(
+          (ut) => ut.value == item.user_type_id
+        )?.label || '-'
 
-  }));
+    }));
 
-}
+  }
 
   async openForm(periodwiseQuestionsMaster?: any) {
     const res = await this.drawer.open(PeriodwiseQuestionsMasterFormComponent, {
-      header: periodwiseQuestionsMaster ? 'Edit Periodwise Questions Master' : 'Create New Periodwise Questions Master',
-      data: periodwiseQuestionsMaster   ,
+      header: periodwiseQuestionsMaster ? 'Edit Question Setup' : 'Create New Question Setup',
+      data: periodwiseQuestionsMaster,
       width: '620px'
     });
 
@@ -155,34 +155,34 @@ private getPeriodwiseQuestionsMasterRows(res: any): any[] {
       this.messageService.add({
         severity: 'success',
         summary: 'Success',
-        detail: `Periodwise Questions master ${periodwiseQuestionsMaster ? 'updated' : 'created'} successfully`
+        detail: `Question Setup master ${periodwiseQuestionsMaster ? 'updated' : 'created'} successfully`
       });
     }
   }
-   delete(row: any) {
-        this.confirmationService.confirm({
-            message: 'Are you sure you want to delete this periodwise questions master?',
-            header: 'Confirm Delete',
-            icon: 'pi pi-exclamation-triangle',
-            acceptLabel: 'Yes',
-            rejectLabel: 'No',
+  delete(row: any) {
+    this.confirmationService.confirm({
+      message: 'Are you sure you want to delete this question setup master?',
+      header: 'Confirm Delete',
+      icon: 'pi pi-exclamation-triangle',
+      acceptLabel: 'Yes',
+      rejectLabel: 'No',
 
-            accept: () => {
-                this.periodwiseQuestionsService.delete(row.id).subscribe(() => {
-                    this.loadPeriodwiseQuestionsMasters();
-                    this.messageService.add({
-                        severity: 'success',
-                        summary: 'Deleted',
-                        detail: 'Periodwise questions master deleted successfully'
-                    });
-                });
-            }
+      accept: () => {
+        this.periodwiseQuestionsService.delete(row.id).subscribe(() => {
+          this.loadPeriodwiseQuestionsMasters();
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Deleted',
+            detail: 'Question setup master deleted successfully'
+          });
         });
-    }
+      }
+    });
+  }
   async openView(periodwiseQuestionsMaster?: any) {
     const res = await this.drawer.open(PeriodwiseQuestionsMasterViewComponent, {
-      header: periodwiseQuestionsMaster ? 'Edit Periodwise Questions Master' : 'Create New Periodwise Questions Master',
-      data: periodwiseQuestionsMaster   ,
+      header: periodwiseQuestionsMaster ? 'Edit Question Setup Master' : 'Create New Question Setup Master',
+      data: periodwiseQuestionsMaster,
       width: '1020px'
     });
 
@@ -191,7 +191,7 @@ private getPeriodwiseQuestionsMasterRows(res: any): any[] {
       this.messageService.add({
         severity: 'success',
         summary: 'Success',
-        detail: `Periodwise Questions master ${periodwiseQuestionsMaster ? 'updated' : 'created'} successfully`
+        detail: `Question Setup master ${periodwiseQuestionsMaster ? 'updated' : 'created'} successfully`
       });
     }
   }
@@ -204,12 +204,12 @@ private getPeriodwiseQuestionsMasterRows(res: any): any[] {
       this.delete(event.row);
       return;
     }
-     if (event.name === 'view') {
+    if (event.name === 'view') {
       this.openView(event.row);
       return;
     }
-   
+
 
   }
-  
+
 }

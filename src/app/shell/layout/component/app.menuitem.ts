@@ -18,7 +18,16 @@ import { LayoutService } from '../service/layout.service';
             <a *ngIf="(!item.routerLink || item.items) && item.visible !== false" [attr.href]="item.url" (click)="itemClick($event)" [ngClass]="item.styleClass" [attr.target]="item.target" tabindex="0" pRipple>
                 <i [ngClass]="item.icon" class="layout-menuitem-icon"></i>
                 <span class="layout-menuitem-copy">
-                    <span class="layout-menuitem-text">{{ item.label }}</span>
+                    <span class="layout-menuitem-label-row">
+                        <span class="layout-menuitem-text">{{ item.label }}</span>
+                        <span
+                            *ngIf="item['badgeClass'] === 'live-compliance-pending'"
+                            class="live-compliance-indicator"
+                            [title]="item['livePendingLabel'] || 'Manager response pending with Auditor'"
+                        >
+                            {{ item['livePendingCount'] || '' }}
+                        </span>
+                    </span>
                     <small *ngIf="item['meta']" class="layout-menuitem-meta">{{ item['meta'] }}</small>
                 </span>
                 <i class="pi pi-fw pi-angle-down layout-submenu-toggler" *ngIf="item.items"></i>
@@ -43,7 +52,16 @@ import { LayoutService } from '../service/layout.service';
             >
                 <i [ngClass]="item.icon" class="layout-menuitem-icon"></i>
                 <span class="layout-menuitem-copy">
-                    <span class="layout-menuitem-text">{{ item.label }}</span>
+                    <span class="layout-menuitem-label-row">
+                        <span class="layout-menuitem-text">{{ item.label }}</span>
+                        <span
+                            *ngIf="item['badgeClass'] === 'live-compliance-pending'"
+                            class="live-compliance-indicator"
+                            [title]="item['livePendingLabel'] || 'Manager response pending with Auditor'"
+                        >
+                            {{ item['livePendingCount'] || '' }}
+                        </span>
+                    </span>
                     <small *ngIf="item['meta']" class="layout-menuitem-meta">{{ item['meta'] }}</small>
                 </span>
                 <i class="pi pi-fw pi-angle-down layout-submenu-toggler" *ngIf="item.items"></i>
@@ -79,6 +97,41 @@ import { LayoutService } from '../service/layout.service';
             min-width: 0;
             flex: 1;
             flex-direction: column;
+        }
+
+        .layout-menuitem-label-row {
+            display: flex;
+            min-width: 0;
+            align-items: center;
+            gap: .4rem;
+        }
+
+        .live-compliance-indicator {
+            display: inline-flex;
+            min-width: 1.1rem;
+            height: 1.1rem;
+            padding: 0 .28rem;
+            flex: 0 0 auto;
+            align-items: center;
+            justify-content: center;
+            border-radius: 999px;
+            background: var(--red-500, #ef4444);
+            color: #fff;
+            font-size: .62rem;
+            font-weight: 700;
+            line-height: 1;
+            animation: liveCompliancePulse 1.35s ease-in-out infinite;
+        }
+
+        @keyframes liveCompliancePulse {
+            0%, 100% {
+                opacity: 1;
+                box-shadow: 0 0 0 0 rgba(239, 68, 68, .35);
+            }
+            50% {
+                opacity: .72;
+                box-shadow: 0 0 0 4px rgba(239, 68, 68, 0);
+            }
         }
 
         .layout-menuitem-meta {

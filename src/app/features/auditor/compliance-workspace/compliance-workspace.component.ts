@@ -1475,6 +1475,15 @@ export class ComplianceWorkspaceComponent implements OnInit {
         overview: any,
     ) {
         if (
+            this.isLiveManagerComplianceFlow()
+            && Number(
+                observation?.compliance_status_id || 0,
+            ) === 12
+        ) {
+            return '';
+        }
+
+        if (
             Number(overview?.audit_status_id) === 6
             &&
             String(observation?.batch_key || '')
