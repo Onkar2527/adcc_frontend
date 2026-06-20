@@ -27,6 +27,8 @@ import { InputIconModule } from 'primeng/inputicon';
 import { FormsModule } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { KeyboardShortcutService } from '../../../core/services/keyboard-shortcut';
+import { AuthService } from '../../../core/services/auth/auth.service';
+import { APP_CONFIG } from '../../../core/services/config/config.token';
 
 interface SearchItem {
   label: string;
@@ -66,7 +68,7 @@ interface SearchItem {
         </button>
         <a class="layout-topbar-logo" routerLink="/">
           <!-- <img src="assets/images/logos/kredpool_logo.png" class="topbar-logo-img"> -->
-          <span class="bank-name">Kredpool Solution Pvt Ltd</span>
+          <span class="bank-name">{{ config.bank_name || 'The Kurla Nagrik Sahakari Bank Ltd' }}</span>
         </a>
       </div>
 
@@ -347,6 +349,8 @@ interface SearchItem {
 export class AppTopbar implements OnInit, OnDestroy {
   searchService = inject(SearchService);
   router = inject(Router);
+  authService = inject(AuthService);
+  config = inject(APP_CONFIG);
 
   @ViewChild('searchInput') searchInput!: AutoComplete;
   private searchSubscription?: Subscription;
@@ -366,7 +370,7 @@ export class AppTopbar implements OnInit, OnDestroy {
   constructor(
     public layoutService: LayoutService,
     private zone: NgZone,
-  ) {}
+  ) { }
 
   ngOnInit() {
     const user = JSON.parse(localStorage.getItem('user') || '{}');
@@ -453,7 +457,7 @@ export class AppTopbar implements OnInit, OnDestroy {
   }
 
   logout() {
-    this.router.navigate(['/login']);
+    this.authService.logout();
   }
 
   getAvatarInitial(): string {

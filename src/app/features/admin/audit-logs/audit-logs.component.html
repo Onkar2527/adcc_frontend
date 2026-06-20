@@ -1,0 +1,329 @@
+<div class="audit-logs-card card">
+  <!-- Header Section -->
+  <div class="flex align-items-center justify-content-between mb-4 border-bottom-1 pb-3 surface-border">
+    <div class="flex align-items-center gap-3">
+      <div class="header-icon bg-primary-100 text-primary-900 border-round-xl flex align-items-center justify-content-center" style="width: 3.5rem; height: 3.5rem;">
+        <i class="pi pi-history text-2xl"></i>
+      </div>
+      <div>
+        <h5 class="m-0 text-2xl font-bold tracking-tight">System Audit Trail Logs</h5>
+        <p class="text-sm text-color-secondary m-0">Track and monitor important system actions, assessment updates, and user logins</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filters Section -->
+  <div class="filters-panel p-4 mb-4 border-round-xl border-1 surface-border surface-ground">
+    <div class="flex align-items-center justify-content-between mb-4">
+      <span class="font-semibold text-lg flex align-items-center gap-2">
+        <i class="pi pi-filter text-primary"></i> Search & Filters
+      </span>
+      <button
+        pButton
+        pRipple
+        icon="pi pi-refresh"
+        label="Reset Filters"
+        class="p-button-outlined p-button-sm p-button-secondary border-round-lg font-medium"
+        (click)="resetFilters()"
+      ></button>
+    </div>
+    
+    <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
+      <!-- Event Type Filter -->
+      <div class="flex flex-column gap-2">
+        <label class="text-xs font-bold text-color-secondary uppercase tracking-wider">Event Type</label>
+        <p-select
+          [options]="eventTypesOptions()"
+          [ngModel]="selectedEventType()"
+          (ngModelChange)="selectedEventType.set($event); loadLogs()"
+          optionLabel="label"
+          optionValue="value"
+          placeholder="All Events"
+          [showClear]="true"
+          styleClass="w-full"
+          appendTo="body"
+        ></p-select>
+      </div>
+
+      <!-- Employee Filter -->
+      <div class="flex flex-column gap-2">
+        <label class="text-xs font-bold text-color-secondary uppercase tracking-wider">Employee</label>
+        <p-select
+          [options]="employeesOptions()"
+          [ngModel]="selectedEmployee()"
+          (ngModelChange)="selectedEmployee.set($event); loadLogs()"
+          optionLabel="label"
+          optionValue="value"
+          placeholder="All Employees"
+          [filter]="true"
+          filterBy="label"
+          [showClear]="true"
+          styleClass="w-full"
+          appendTo="body"
+        ></p-select>
+      </div>
+
+      <!-- Branch/Unit Filter -->
+      <div class="flex flex-column gap-2">
+        <label class="text-xs font-bold text-color-secondary uppercase tracking-wider">Branch / Unit</label>
+        <p-select
+          [options]="branchesOptions()"
+          [ngModel]="selectedBranch()"
+          (ngModelChange)="selectedBranch.set($event); loadLogs()"
+          optionLabel="label"
+          optionValue="value"
+          placeholder="All Branches"
+          [filter]="true"
+          filterBy="label"
+          [showClear]="true"
+          styleClass="w-full"
+          appendTo="body"
+        ></p-select>
+      </div>
+
+      <!-- Start Date Filter -->
+      <div class="flex flex-column gap-2">
+        <label class="text-xs font-bold text-color-secondary uppercase tracking-wider">Start Date</label>
+        <p-datepicker
+          [ngModel]="startDate()"
+          (ngModelChange)="startDate.set($event); loadLogs()"
+          dateFormat="dd-mm-yy"
+          [showIcon]="true"
+          [showButtonBar]="true"
+          placeholder="DD-MM-YYYY"
+          styleClass="w-full"
+          appendTo="body"
+        ></p-datepicker>
+      </div>
+
+      <!-- End Date Filter -->
+      <div class="flex flex-column gap-2">
+        <label class="text-xs font-bold text-color-secondary uppercase tracking-wider">End Date</label>
+        <p-datepicker
+          [ngModel]="endDate()"
+          (ngModelChange)="endDate.set($event); loadLogs()"
+          dateFormat="dd-mm-yy"
+          [showIcon]="true"
+          [showButtonBar]="true"
+          placeholder="DD-MM-YYYY"
+          styleClass="w-full"
+          appendTo="body"
+        ></p-datepicker>
+      </div>
+    </div>
+  </div>
+
+  <!-- Logs Table -->
+  <div class="table-container shadow-sm border-round-xl border-1 surface-border bg-card">
+    <app-table
+      [columns]="columns"
+      [data]="logs()"
+      [loading]="loading()"
+      [globalFilterFields]="globalFilterFields"
+      [showAddButton]="false"
+      [showRefreshButton]="true"
+      [showExportButton]="true"
+      exportFilename="system_audit_logs"
+      [bodyTemplate]="rowTemplate"
+      (onRefresh)="loadLogs()"
+      (onActionClick)="onActionClick($event)"
+    >
+      <ng-template #rowTemplate let-row let-rowIndex="rowIndex">
+        <!-- Action Cell (Left Side) -->
+        <td class="text-center" style="width: 70px;">
+          <button
+            pButton
+            pRipple
+            icon="pi pi-search-plus"
+            class="p-button-text p-button-rounded p-button-primary"
+            (click)="onActionClick({ name: 'view-details', row: row })"
+            pTooltip="View Log Details"
+            tooltipPosition="top"
+          ></button>
+        </td>
+
+        <!-- Serial Number Cell -->
+        <td style="text-align: center; width: 4rem;">{{ rowIndex + 1 }}</td>
+
+        <!-- Date & Time -->
+        <td class="text-center" style="width: 180px;">
+          {{ row.event_datetime | date: 'dd-MM-yyyy HH:mm:ss' }}
+        </td>
+
+        <!-- Event Type Badge -->
+        <td class="text-center" style="width: 160px;">
+          <span class="audit-badge badge-{{ row.event_type | lowercase }}">
+            {{ row.event_type }}
+          </span>
+        </td>
+
+        <!-- Employee Name with Initials Avatar -->
+        <td style="width: 220px;">
+          <div class="flex align-items-center gap-2">
+            <div class="employee-avatar">
+              {{ getAvatarInitial(row.employee_name) }}
+            </div>
+            <span class="font-semibold text-color-primary">{{ row.employee_name }}</span>
+          </div>
+        </td>
+
+        <!-- Employee Code -->
+        <td class="text-center" style="width: 110px;">
+          <code class="emp-code">{{ row.employee_code || '-' }}</code>
+        </td>
+
+        <!-- Employee Role -->
+        <td style="width: 140px;" class="text-color-secondary font-medium">
+          {{ row.employee_role || '-' }}
+        </td>
+
+        <!-- Branch / Unit Name -->
+        <td style="width: 180px;" class="text-color-primary font-medium">
+          {{ row.branch_name || '-' }}
+        </td>
+
+        <!-- Assessment ID -->
+        <td class="text-center" style="width: 120px;">
+          <span class="assessment-id" *ngIf="row.audit_assesment_id">#{{ row.audit_assesment_id }}</span>
+          <span class="text-secondary" *ngIf="!row.audit_assesment_id">-</span>
+        </td>
+
+        <!-- IP Address -->
+        <td class="text-center" style="width: 130px;">
+          <span class="ip-address">{{ row.ip_address || '-' }}</span>
+        </td>
+      </ng-template>
+    </app-table>
+  </div>
+</div>
+
+<!-- Details Drawer -->
+<p-drawer
+  header="Audit Log Entry Details"
+  [(visible)]="displayDetailsDialog"
+  position="right"
+  [style]="{ width: 'min(850px, 95vw)' }"
+  [modal]="true"
+  styleClass="audit-details-drawer"
+  appendTo="body"
+>
+  @if (selectedLog()) {
+    <div class="dialog-content flex flex-column gap-4 py-2">
+      <!-- Top info line: badge and datetime -->
+      <div class="flex align-items-center justify-content-between pb-3 border-bottom-1 surface-border">
+        <span class="audit-badge badge-lg badge-{{ selectedLog().event_type | lowercase }}">
+          {{ selectedLog().event_type }}
+        </span>
+        <span class="text-sm font-semibold text-color-secondary flex align-items-center gap-2">
+          <i class="pi pi-calendar"></i>
+          {{ selectedLog().event_datetime | date: 'dd-MM-yyyy HH:mm:ss' }}
+        </span>
+      </div>
+
+      <!-- Description Block -->
+      <div class="description-block p-3 border-round-xl flex gap-3 align-items-start">
+        <i class="pi pi-info-circle text-primary text-xl mt-1"></i>
+        <div class="flex-grow-1">
+          <span class="text-xs font-bold text-color-secondary uppercase tracking-wider">Event Description</span>
+          <p class="m-0 text-base font-semibold text-color-primary leading-normal mt-1">
+            {{ selectedLog().event_description || 'No description available for this event.' }}
+          </p>
+        </div>
+      </div>
+
+      <!-- Grid for Metadata details -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <!-- Employee Info Card -->
+        <div class="metadata-card border-round-xl border-1 surface-border p-3 flex flex-column gap-3">
+          <span class="card-title font-bold text-xs text-color-secondary uppercase tracking-wider border-bottom-1 surface-border pb-2 flex align-items-center gap-2">
+            <i class="pi pi-user text-primary"></i> Actor Details
+          </span>
+          <div class="flex align-items-center gap-3">
+            <div class="employee-avatar avatar-lg flex-shrink-0">
+              {{ getAvatarInitial(selectedLog().employee_name) }}
+            </div>
+            <div class="flex-grow-1 min-w-0">
+              <h6 class="m-0 text-base font-bold text-color-primary truncate">{{ selectedLog().employee_name }}</h6>
+              <span class="text-xs text-color-secondary font-semibold">{{ selectedLog().employee_role }}</span>
+            </div>
+          </div>
+          <div class="grid grid-cols-2 gap-2 mt-2 pt-2 border-top-1 surface-border">
+            <div>
+              <span class="text-xs text-color-secondary block mb-1">Code</span>
+              <code class="emp-code font-bold">{{ selectedLog().employee_code || '-' }}</code>
+            </div>
+            <div>
+              <span class="text-xs text-color-secondary block mb-1">IP Address</span>
+              <span class="font-bold text-sm text-color-primary">{{ selectedLog().ip_address || '-' }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Assessment Context Card -->
+        <div class="metadata-card border-round-xl border-1 surface-border p-3 flex flex-column gap-3">
+          <span class="card-title font-bold text-xs text-color-secondary uppercase tracking-wider border-bottom-1 surface-border pb-2 flex align-items-center gap-2">
+            <i class="pi pi-briefcase text-primary"></i> Context Details
+          </span>
+          <div class="flex flex-column gap-3 justify-content-center h-full">
+            <div class="flex align-items-center justify-content-between">
+              <span class="text-xs text-color-secondary font-semibold">Assessment ID</span>
+              <span class="font-bold text-sm text-primary" *ngIf="selectedLog().audit_assesment_id">#{{ selectedLog().audit_assesment_id }}</span>
+              <span class="text-sm text-color-secondary font-bold" *ngIf="!selectedLog().audit_assesment_id">-</span>
+            </div>
+            <div class="flex align-items-center justify-content-between">
+              <span class="text-xs text-color-secondary font-semibold">Branch Name</span>
+              <span class="font-bold text-sm text-color-primary truncate max-w-150px" [title]="selectedLog().branch_name">{{ selectedLog().branch_name || '-' }}</span>
+            </div>
+            <div class="flex align-items-center justify-content-between">
+              <span class="text-xs text-color-secondary font-semibold">Branch / Unit ID</span>
+              <span class="font-bold text-sm text-color-primary">{{ selectedLog().branch_id || selectedLog().audit_unit_id || '-' }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Status Transition Timeline (for workflow event updates) -->
+      @if (selectedLog().old_status || selectedLog().new_status) {
+        <div class="transition-timeline border-round-xl border-1 surface-border p-3 flex flex-column gap-2">
+          <span class="card-title font-bold text-xs text-color-secondary uppercase tracking-wider border-bottom-1 surface-border pb-2 flex align-items-center gap-2">
+            <i class="pi pi-sync text-primary"></i> Status Transition
+          </span>
+          <div class="flex align-items-center justify-content-center gap-5 py-3">
+            <div class="flex flex-column align-items-center gap-2">
+              <span class="text-xs text-color-secondary uppercase font-bold">Old Status</span>
+              <span class="transition-badge status-old">
+                {{ selectedLog().old_status || 'N/A' }}
+              </span>
+            </div>
+            
+            <div class="flex align-items-center justify-content-center">
+              <div class="arrow-container flex align-items-center justify-content-center">
+                <i class="pi pi-arrow-right text-lg text-primary animate-pulse"></i>
+              </div>
+            </div>
+
+            <div class="flex flex-column align-items-center gap-2">
+              <span class="text-xs text-color-secondary uppercase font-bold">New Status</span>
+              <span class="transition-badge status-new">
+                {{ selectedLog().new_status || 'N/A' }}
+              </span>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  }
+  
+  <ng-template pTemplate="footer">
+    <button
+      pButton
+      pRipple
+      label="Close Details"
+      icon="pi pi-times"
+      class="p-button-outlined p-button-secondary border-round-lg w-full"
+      (click)="displayDetailsDialog = false"
+    ></button>
+  </ng-template>
+</p-drawer>
+
+<p-toast></p-toast>

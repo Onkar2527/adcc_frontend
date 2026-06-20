@@ -1688,8 +1688,22 @@ export class AuditCalendarService {
     return this.http.delete<any>(`${this.apiUrl}/${id}`);
   }
 
-  getSchedulingData(): Observable<any> {
-    return this.http.get<any>(`${this.apiUrl}/scheduling`);
+  getSchedulingData(
+    userId?: number | string,
+    userTypeId?: number | string,
+    auditUnitAuthority?: string,
+  ): Observable<any> {
+    let params: any = {};
+    if (userId !== undefined) {
+      params['userId'] = String(userId);
+    }
+    if (userTypeId !== undefined) {
+      params['userTypeId'] = String(userTypeId);
+    }
+    if (auditUnitAuthority !== undefined) {
+      params['auditUnitAuthority'] = String(auditUnitAuthority);
+    }
+    return this.http.get<any>(`${this.apiUrl}/scheduling`, { params });
   }
 
   setFrequencies(frequencies: Record<string, number>): Observable<any> {

@@ -21,6 +21,13 @@ export class AuditDashboardService {
       payload,
     );
   }
+
+  getHomeStats(employeeId: number, auditUnitId?: number, assesPeriodId?: string) {
+    const params: any = { employee_id: employeeId };
+    if (auditUnitId) params.audit_unit_id = auditUnitId;
+    if (assesPeriodId) params.asses_period = assesPeriodId;
+    return this.http.get<any>(`${this.apiUrl}/home-stats`, { params });
+  }
   // service.ts (frontend)
 
   getExecutiveSummary(
@@ -83,10 +90,15 @@ export class AuditDashboardService {
   }
   getBranchFinancialPosition(
     branch_id: number,
+    assessmentId?: number,
   ) {
-
+    const params: any = {};
+    if (assessmentId) {
+      params.assessment_id = String(assessmentId);
+    }
     return this.http.get(
       `${this.apiUrl}/branch-financial-position/${branch_id}`,
+      { params },
     );
 
   }

@@ -114,7 +114,7 @@
 
   <div class="official-report-sheet" [class.risk-wise-report-sheet]="isRiskWiseReport()"
     *ngIf="definition() && rows().length">
-    <div class="official-report-header print-only">
+    <div class="official-report-header print-only" *ngIf="!isExecutiveSummary()">
       <div class="official-report-brand-row">
         <div class="official-report-logo" data-id="auditproLogo" aria-label="AuditPro">
           <img [src]="reportLogo()" alt="Logo" style="height: 10mm; display: block; margin: 1px auto 0" />
@@ -122,7 +122,7 @@
 
         <div class="official-report-bank">
           <p><strong>Report Date:</strong> {{ reportRunDate() }}</p>
-          <p *ngIf="reportBankName()"><strong>Bank:</strong> {{ reportBankName() }}</p>
+          <p *ngIf="config.bank_name || reportBankName()"><strong>Bank:</strong> {{ config.bank_name || reportBankName() }}</p>
         </div>
       </div>
 
@@ -133,6 +133,88 @@
           <strong>Assessment Period:</strong> {{ reportAssessmentPeriod() }}
         </p>
         <p *ngIf="reportAuditUnit()"><strong>Audit Unit:</strong> {{ reportAuditUnit() }}</p>
+      </div>
+    </div>
+
+    <!-- ===== PAGE 1: Cover Page ===== -->
+    <div class="report-cover-page" *ngIf="definition()?.slug === 'executive-summary-audit-report' && exeReportData()?.assessment">
+      <div class="logo-container">
+        <img *ngIf="reportLogo()" [src]="reportLogo()" alt="Bank Logo" class="bank-logo" />
+      </div>
+
+      <h1 class="bank-title">{{ config.bank_name || reportBankName() || 'The Kurla Nagrik Sahakari Bank Ltd' }}</h1>
+      <h2 class="dept-title">Internal Audit Department</h2>
+      <h3 class="report-title">Risk Based Internal Audit Report</h3>
+
+      <div class="audit-details-box">
+        <p>Period of Audit: {{ formatDmyDate(exeReportData()?.assessment?.assesment_period_from || exeReportData()?.assessment?.assessment_period_from) }} To {{ formatDmyDate(exeReportData()?.assessment?.assesment_period_to || exeReportData()?.assessment?.assessment_period_to) }}</p>
+        <p><strong>Name of Branch:</strong> {{ exeReportData()?.assessment?.branch_name }}</p>
+        <p><strong>Date:</strong> {{ formatDmyDate(exeReportData()?.assessment?.report_submitted_date || exeReportData()?.assessment?.audit_end_date) }}</p>
+      </div>
+    </div>
+
+    <!-- ===== PAGE 2: Cover Letter ===== -->
+    <div class="report-letter-page" *ngIf="definition()?.slug === 'executive-summary-audit-report' && exeReportData()?.assessment">
+      <div class="letter-header">
+        <h2 class="dept-title">Internal Audit Department</h2>
+        <h1 class="bank-title">{{ config.bank_name || reportBankName() || 'The Kurla Nagrik Sahakari Bank Ltd' }}</h1>
+      </div>
+
+      <hr class="letter-divider">
+
+      <div class="letter-meta">
+        <strong>Audit Ref. No:</strong> <br>
+        <strong>Date:</strong> {{ formatDmyDate(exeReportData()?.assessment?.report_submitted_date || exeReportData()?.assessment?.audit_end_date) }}
+      </div>
+
+      <div class="letter-recipient">
+        <strong>To,</strong><br><br>
+        The Branch Manager<br>
+        <strong>{{ exeReportData()?.assessment?.branch_name }}</strong><br>
+        {{ getBranchAddress(exeReportData()?.assessment?.branch_name) }}
+      </div>
+
+      <div class="letter-body">
+        <p>Dear Sir / Madam,</p>
+        
+        <p class="letter-subject">
+          <strong>Sub: Internal Audit of {{ exeReportData()?.assessment?.branch_name }} as on {{ formatDmyDate(exeReportData()?.assessment?.audit_end_date) }}</strong>
+        </p>
+
+        <p>
+          As you are aware, Internal Audit is conducted with the objective to ensure proper controls, governance and risk management processes in place and it's an independent activity to present objective findings and make recommendations for corrective measures.
+        </p>
+
+        <p>
+          To achieve this objective, for the period <strong>{{ formatDmyDate(exeReportData()?.assessment?.assesment_period_from || exeReportData()?.assessment?.assessment_period_from) }} To {{ formatDmyDate(exeReportData()?.assessment?.assesment_period_to || exeReportData()?.assessment?.assessment_period_to) }}</strong> the designated Internal Audit Team has reviewed all the areas of branch operations namely credit appraisal, approval, disbursement and account monitoring & reporting of new loans and advances including renewal of existing accounts, letter of credit and bank guarantees, account opening & KYC, deposits, cash management and other general banking operation.
+        </p>
+
+        <p>The enclosed Audit Report consists the following sections:</p>
+
+        <ol>
+          <li>Scope coverage and exclusion, if any</li>
+          <li>Branch performance highlights</li>
+          <li>Branch Composite Ratings</li>
+          <li>Audit observations – summary and detailed</li>
+        </ol>
+
+        <p>
+          The report has been finalized after detailed discussions with the stakeholders. It may be noted that compliance of high-risk observations is to be completed within 15 days and the overall report within 30 days of report issue.
+        </p>
+
+        <p>
+          We place on record our appreciation to the Branch team for their kind co-operation and earnest assistance during the audit. In case you need any further clarifications to any queries, please feel free to contact the undersigned.
+        </p>
+      </div>
+
+      <div class="letter-closing">
+        <p><strong>With best regards,</strong></p>
+      </div>
+
+      <div class="letter-signatures">
+        Signature<br>
+        Name<br>
+        Designation
       </div>
     </div>
 

@@ -11,6 +11,7 @@ export interface User {
   fullName: string;
   roleId: string | null;
   branchId: string | null;
+  user_type_id?: string | number | null;
 }
 
 export interface AuthResponse {
@@ -47,11 +48,23 @@ export class AuthService {
   }
 
   logout(): void {
+    const user = this.currentUser();
+    if (user && user.id) {
+      this.http.post(`${this.apiUrl}/logout`, { employee_id: Number(user.id) }).subscribe({
+        next: () => this.clearSessionAndRedirect(),
+        error: () => this.clearSessionAndRedirect()
+      });
+    } else {
+      this.clearSessionAndRedirect();
+    }
+  }
+
+  private clearSessionAndRedirect(): void {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     this.isLoggedIn.set(false);
     this.currentUser.set(null);
-     this.router.navigate(['/login']);
+    this.router.navigate(['/login']);
   }
 
   private checkToken(): boolean {

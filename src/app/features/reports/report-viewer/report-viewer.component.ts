@@ -14,6 +14,7 @@ import {
   ReportsService,
 } from '../services/reports.service';
 import { InternalAuditNavService } from '../../auditor/services/internal-audit-nav.service';
+import { APP_CONFIG } from '../../../core/services/config/config.token';
 
 @Component({
   selector: 'app-report-viewer',
@@ -29,6 +30,7 @@ export class ReportViewerComponent implements OnInit {
   private exportService = inject(ExportService);
   private auditNavService = inject(InternalAuditNavService);
   private dateTimeService = inject(DateTimeService);
+  public config = inject(APP_CONFIG);
   private readonly auditTypeFilter: ReportFilterDefinition = {
     key: 'audit_type_id',
     label: 'Audit Type',
@@ -850,6 +852,14 @@ export class ReportViewerComponent implements OnInit {
 
   formatDate(value: any) {
     return value ? String(value).slice(0, 10) : '-';
+  }
+
+  getBranchAddress(branchName: string): string {
+    const name = String(branchName || '').toUpperCase();
+    if (name.includes('GOVANDI')) {
+      return `Shop No. 3/4/5, Shilpshri Co. Op. Housing Society,\nN. G. Achary Marg,\nGovandi (East),\nMumbai - 400 043`;
+    }
+    return 'Address not available';
   }
 
   isLegacyData(): boolean {
