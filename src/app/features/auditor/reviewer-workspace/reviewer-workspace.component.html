@@ -114,7 +114,12 @@
           [label]="isComplianceReview() ? 'Submit Compliance Review' : 'Submit Review'"
           icon="pi pi-send"
           [loading]="submitting()"
-          [disabled]="submitting() || bulkSaving() || pendingReviewCount() > 0"
+          [disabled]="
+            submitting() ||
+            bulkSaving() ||
+            pendingReviewCount() > 0 ||
+            (isLiveManagerComplianceReview() && !hasLiveReviewerSubmissionScope())
+          "
           (click)="submitReview()"
         ></button>
       </div>
@@ -399,7 +404,11 @@
             pButton
             type="button"
             icon="pi pi-check"
-            label="Accept All Observations"
+            [label]="
+              isLiveManagerComplianceReview()
+                ? 'Accept All Pending Points'
+                : 'Accept All Observations'
+            "
             severity="success"
             [loading]="bulkSaving()"
             [disabled]="submitting() || bulkSaving()"
@@ -410,7 +419,11 @@
             pButton
             type="button"
             icon="pi pi-times"
-            label="Reject All Observations"
+            [label]="
+              isLiveManagerComplianceReview()
+                ? 'Send All Pending Points to Manager'
+                : 'Reject All Observations'
+            "
             severity="danger"
             [loading]="bulkSaving()"
             [disabled]="submitting() || bulkSaving()"
@@ -776,7 +789,12 @@
                 ></button>
               </div>
 
-              <ng-container *ngIf="answer.is_compliance == 1">
+              <ng-container
+                *ngIf="
+                  answer.is_compliance == 1 &&
+                  (!isLiveManagerComplianceReview() || canTakeLiveComplianceReviewerAction(answer))
+                "
+              >
                 <button
                   pButton
                   type="button"
@@ -791,7 +809,13 @@
                 <button
                   pButton
                   type="button"
-                  [label]="isComplianceReview() ? 'Re-Compliance' : 'Re-Audit'"
+                  [label]="
+                    isLiveManagerComplianceReview()
+                      ? 'Send To Manager'
+                      : isComplianceReview()
+                        ? 'Re-Compliance'
+                        : 'Re-Audit'
+                  "
                   icon="pi pi-times"
                   severity="danger"
                   [loading]="actionSaving()[actionKey('answer', answer.id)]"
@@ -994,15 +1018,26 @@
                       <select
                         class="answer-control"
                         [(ngModel)]="row.temp_action"
-                        [disabled]="reviewStatus(row) === 9"
+                        [disabled]="
+                          (isLiveManagerComplianceReview() && !canTakeLiveComplianceReviewerAction(row)) ||
+                          reviewStatus(row) === 9
+                        "
                         style="min-width: 140px; padding: 0.25rem"
                       >
                         <option value="">Select Action</option>
                         <option [value]="2">Accept</option>
                         <option [value]="3">
-                          {{ isComplianceReview() ? 'Re-Compliance' : 'Re-Audit' }}
+                          {{
+                            isLiveManagerComplianceReview()
+                              ? 'Send To Manager'
+                              : isComplianceReview()
+                                ? 'Re-Compliance'
+                                : 'Re-Audit'
+                          }}
                         </option>
-                        <option [value]="5" *ngIf="isComplianceReview()">Carry Forward</option>
+                        <option [value]="5" *ngIf="isComplianceReview()">
+                          Carry Forward
+                        </option>
                         <option [value]="7" *ngIf="isComplianceReview()">
                           Partially Pass
                         </option>

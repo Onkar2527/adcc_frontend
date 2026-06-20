@@ -315,7 +315,7 @@ export class ExecutiveSummaryComponent
     }
 
     isExecutiveAccountsReadOnly(row: any): boolean {
-        return !row?.isNpa || this.isExecutiveAmountReadOnly(row);
+        return this.isExecutiveAmountReadOnly(row);
     }
 
     getBranchFinancialPosition() {
@@ -384,6 +384,7 @@ export class ExecutiveSummaryComponent
                             type_id: item.scheme_code,
                             position_type_id: item.position_type_id,
                             fresh_type_ids: item.fresh_type_ids,
+                            scheme_type: type,
                             review_action: this.executiveReviewAction(savedLine, savedFreshLine),
                             reviewer_comment: this.executiveReviewComment(savedLine, savedFreshLine),
                         });
@@ -411,6 +412,7 @@ export class ExecutiveSummaryComponent
         this.service
             .getBranchFinancialPosition(
                 this.summary?.audit_unit_id,
+                this.assessmentId,
             )
             .subscribe({
 
@@ -505,6 +507,7 @@ export class ExecutiveSummaryComponent
                                                 march_position: marchPositionValue,
                                                 total_amount: amount,
                                                 type_id: item.scheme_code,
+                                                scheme_type: type,
                                                 review_action: this.executiveReviewAction(savedLine, savedFreshLine),
                                                 reviewer_comment: this.executiveReviewComment(savedLine, savedFreshLine),
                                             });
@@ -575,6 +578,7 @@ export class ExecutiveSummaryComponent
                                     account_input: accountInput,
                                     amount_input: amountInput,
                                     type_id: item.scheme_code + '_NPA',
+                                    scheme_type: 'NPA',
                                     march_position: marchPositionValue,
                                     review_action: this.executiveReviewAction(savedLine, savedFreshLine),
                                     reviewer_comment: this.executiveReviewComment(savedLine, savedFreshLine),
@@ -980,6 +984,30 @@ export class ExecutiveSummaryComponent
                     });
                 },
             });
+    }
+
+    getCategoryHeaderTotal(schemeType: string, column: 'accounts' | 'march' | 'current' | 'ytd'): number {
+        let total = 0;
+        this.financialPositionData.forEach((row: any) => {
+            if (row.isHeader) return;
+            const rowSchemeType = row.scheme_type || (row.isNpa ? 'NPA' : (row.category_id <= 2 ? 'DEPOSITS' : 'ADVANCES'));
+            if (rowSchemeType !== schemeType) return;
+
+            const accounts = Number(row.isNpa ? row.account_input : row.total_accounts) || 0;
+            const march = Number(row.march_position) || 0;
+            const current = Number(row.isNpa ? row.amount_input : row.total_amount) || 0;
+
+            if (column === 'accounts') {
+                total += accounts;
+            } else if (column === 'march') {
+                total += march;
+            } else if (column === 'current') {
+                total += current;
+            } else if (column === 'ytd') {
+                total += (current - march);
+            }
+        });
+        return total;
     }
 
 }

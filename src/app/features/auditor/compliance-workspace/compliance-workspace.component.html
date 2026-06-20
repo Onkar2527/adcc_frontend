@@ -615,7 +615,10 @@
             </tbody>
           </table>
 
-          <div *ngIf="responseRequired(answer)" class="response-panel">
+          <div
+            *ngIf="responseRequired(answer) && canUseAnswerLevelComplianceResponse(answer)"
+            class="response-panel"
+          >
             <div class="response-panel-head">
               <label>{{
                 isReCompliance() ? 'Corrected Compliance Response' : 'Compliance Response'
@@ -693,6 +696,13 @@
                 (click)="saveResponse('answer', answer)"
               ></button>
             </div>
+          </div>
+
+          <div
+            *ngIf="responseRequired(answer) && !canUseAnswerLevelComplianceResponse(answer)"
+            class="context-note"
+          >
+            Save manager responses for this observation through the annexure rows below.
           </div>
 
           <div *ngIf="isReCompliance() && !responseRequired(answer)" class="context-note">

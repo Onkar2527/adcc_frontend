@@ -432,13 +432,13 @@ export class ReviewerWorkspaceComponent implements OnInit {
         );
         this.loadingDetail.set(true);
         this.error.set('');
-
         const request =
             Number(assessment.audit_status_id) === 5
                 || assessment.live_manager_compliance === true
                 ? this.service.getReviewerComplianceAssessment(
                     Number(assessment.id),
                     this.employeeId(),
+                    assessment.live_manager_compliance === true,
                 )
                 : this.service.getReviewerAssessment(
                     Number(assessment.id),
@@ -557,6 +557,11 @@ export class ReviewerWorkspaceComponent implements OnInit {
             || this.detail()?.overview?.live_manager_compliance === true;
     }
 
+    isLiveManagerComplianceReview() {
+        return this.selected()?.live_manager_compliance === true
+            || this.detail()?.overview?.live_manager_compliance === true;
+    }
+
     isRegularComplianceReview() {
         return this.isComplianceReview()
             && this.selected()?.live_manager_compliance !== true
@@ -595,6 +600,43 @@ export class ReviewerWorkspaceComponent implements OnInit {
                     observation,
                 ) || 0,
             );
+
+        if (
+            this.isLiveManagerComplianceReview()
+            && this.isComplianceReview()
+        ) {
+            if (
+                !this.canTakeLiveComplianceReviewerAction(observation)
+            ) {
+                return true;
+            }
+
+            if (
+                action === 2
+            ) {
+                return status === 14;
+            }
+
+            if (
+                action === 3
+            ) {
+                return status === 12;
+            }
+
+            if (
+                action === 5
+            ) {
+                return status === 5;
+            }
+
+            if (
+                action === 7
+            ) {
+                return status === 9;
+            }
+
+            return false;
+        }
 
         if (
             status === 9
@@ -643,6 +685,31 @@ export class ReviewerWorkspaceComponent implements OnInit {
         status: number,
     ) {
         if (
+            this.isLiveManagerComplianceReview()
+            && this.isComplianceReview()
+        ) {
+            if (Number(status) === 10) {
+                return 'Pending With Auditor';
+            }
+
+            if (Number(status) === 11) {
+                return 'Pending With Reviewer';
+            }
+
+            if (Number(status) === 12) {
+                return 'Pending With Manager';
+            }
+
+            if (Number(status) === 13) {
+                return 'Accepted By Auditor';
+            }
+
+            if (Number(status) === 14) {
+                return 'Settled By Reviewer';
+            }
+        }
+
+        if (
             Number(status) === 2
         ) {
             return 'Accepted';
@@ -686,6 +753,29 @@ export class ReviewerWorkspaceComponent implements OnInit {
     statusSeverity(
         status: number,
     ): 'success' | 'danger' | 'secondary' | 'info' | 'warn' {
+        if (
+            this.isLiveManagerComplianceReview()
+            && this.isComplianceReview()
+        ) {
+            if ([13, 14].includes(Number(status))) {
+                return 'success';
+            }
+
+            if (Number(status) === 11) {
+                return 'danger';
+            }
+
+            if (Number(status) === 12) {
+                return 'warn';
+            }
+
+            if (Number(status) === 10) {
+                return 'info';
+            }
+
+            return 'secondary';
+        }
+
         if (
             Number(status) === 2
         ) {
@@ -753,7 +843,11 @@ export class ReviewerWorkspaceComponent implements OnInit {
                     (answer: any) =>
                         Number(
                             answer?.is_compliance || 0,
-                        ) === 1,
+                        ) === 1
+                        && (
+                            !this.isLiveManagerComplianceReview()
+                            || this.canTakeLiveComplianceReviewerAction(answer)
+                        ),
                 )
                 .map(
                     (answer: any) => ({
@@ -772,6 +866,11 @@ export class ReviewerWorkspaceComponent implements OnInit {
                             answer?.is_compliance || 0,
                         ) === 1
                             ? (answer.annexure_rows || [])
+                                .filter(
+                                    (row: any) =>
+                                        !this.isLiveManagerComplianceReview()
+                                        || this.canTakeLiveComplianceReviewerAction(row),
+                                )
                             : [],
                 )
                 .map(
@@ -790,6 +889,28 @@ export class ReviewerWorkspaceComponent implements OnInit {
     }
 
     pendingReviewCount() {
+        if (
+            this.isLiveManagerComplianceReview()
+            && this.isComplianceReview()
+        ) {
+            return this.allReviewAnswers()
+                .flatMap(
+                    (answer: any) => [
+                        answer,
+                        ...(answer?.annexure_rows || []),
+                    ],
+                )
+                .filter(
+                    (observation: any) =>
+                        [11, 12].includes(
+                            Number(
+                                this.reviewStatus(observation) || 0,
+                            ),
+                        ),
+                )
+                .length;
+        }
+
         return this.reviewTargets()
             .filter(
                 (target) =>
@@ -808,6 +929,31 @@ export class ReviewerWorkspaceComponent implements OnInit {
                     ),
             )
             .length;
+    }
+
+    hasLiveReviewerSubmissionScope() {
+        if (
+            !this.isLiveManagerComplianceReview()
+            || !this.isComplianceReview()
+        ) {
+            return true;
+        }
+
+        return this.allReviewAnswers()
+            .flatMap(
+                (answer: any) => [
+                    answer,
+                    ...(answer?.annexure_rows || []),
+                ],
+            )
+            .some(
+                (observation: any) =>
+                    [5, 9, 11, 12, 14].includes(
+                        Number(
+                            this.reviewStatus(observation) || 0,
+                        ),
+                    ),
+            );
     }
 
     allReviewAnswers() {
@@ -902,6 +1048,43 @@ export class ReviewerWorkspaceComponent implements OnInit {
                         ),
                 );
 
+        if (
+            this.isLiveManagerComplianceReview()
+            && this.isComplianceReview()
+        ) {
+            if (filter === 'pending') {
+                return [11, 12].includes(answerStatus)
+                    || hasAnnexureStatus(
+                        (status: number) =>
+                            [11, 12].includes(status),
+                    );
+            }
+
+            if (filter === 'rework') {
+                return answerStatus === 11
+                    || hasAnnexureStatus(
+                        (status: number) =>
+                            status === 11,
+                    );
+            }
+
+            if (filter === 'accepted') {
+                return [13, 14].includes(answerStatus)
+                    || hasAnnexureStatus(
+                        (status: number) =>
+                            [13, 14].includes(status),
+                    );
+            }
+
+            if (filter === 'partial') {
+                return [5, 9].includes(answerStatus)
+                    || hasAnnexureStatus(
+                        (status: number) =>
+                            [5, 9].includes(status),
+                    );
+            }
+        }
+
         if (filter === 'pending') {
             const pendingStatuses =
                 [
@@ -928,22 +1111,45 @@ export class ReviewerWorkspaceComponent implements OnInit {
         }
 
         if (filter === 'accepted') {
-            return [2, 9].includes(answerStatus)
+            return answerStatus === 2
                 || hasAnnexureStatus(
                     (status) =>
-                        [2, 9].includes(status),
+                        status === 2,
                 );
         }
 
         if (filter === 'partial') {
-            return [7, 8].includes(answerStatus)
+            return [7, 8, 9].includes(answerStatus)
                 || hasAnnexureStatus(
                     (status: number) =>
-                        [7, 8].includes(status),
+                        [7, 8, 9].includes(status),
                 );
         }
 
         return this.isHighRiskObservation(answer);
+    }
+
+    canTakeLiveComplianceReviewerAction(
+        observation: any,
+    ) {
+        const status = Number(
+            this.reviewStatus(observation) || 0,
+        );
+
+        if (
+            status === 11
+            || status === 8
+        ) {
+            return true;
+        }
+
+        return (observation?.annexure_rows || [])
+            .some(
+                (row: any) =>
+                    Number(
+                        this.reviewStatus(row) || 0,
+                    ) === 8,
+            );
     }
 
     private isHighRiskObservation(
@@ -1146,19 +1352,31 @@ export class ReviewerWorkspaceComponent implements OnInit {
 
         this.confirmation.confirm({
             header:
-                action === 2
-                    ? 'Accept All Observations'
-                    : 'Reject All Observations',
+                this.isLiveManagerComplianceReview()
+                    ? action === 2
+                        ? 'Accept All Pending Points'
+                        : 'Send All Pending Points to Manager'
+                    : action === 2
+                        ? 'Accept All Observations'
+                        : 'Reject All Observations',
             message:
-                `${action === 2 ? 'Accept' : 'Reject'} all ${targets.length} observation(s)?`,
+                this.isLiveManagerComplianceReview()
+                    ? action === 2
+                        ? `Accept all ${targets.length} pending point(s)?`
+                        : `Send all ${targets.length} pending point(s) to Manager?`
+                    : `${action === 2 ? 'Accept' : 'Reject'} all ${targets.length} observation(s)?`,
             icon:
                 action === 2
                     ? 'pi pi-check-circle'
                     : 'pi pi-exclamation-triangle',
             acceptLabel:
-                action === 2
-                    ? 'Accept All'
-                    : 'Reject All',
+                this.isLiveManagerComplianceReview()
+                    ? action === 2
+                        ? 'Accept All'
+                        : 'Send to Manager'
+                    : action === 2
+                        ? 'Accept All'
+                        : 'Reject All',
             rejectLabel:
                 'Cancel',
             accept:
@@ -1854,6 +2072,7 @@ export class ReviewerWorkspaceComponent implements OnInit {
                 ? this.service.getReviewerComplianceAssessment(
                     assessmentId,
                     this.employeeId(),
+                    this.isLiveManagerComplianceReview(),
                 )
                 : this.service.getReviewerAssessment(
                     assessmentId,

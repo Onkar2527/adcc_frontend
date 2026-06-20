@@ -234,20 +234,20 @@
             </td>
 
             <td class="text-center">
-              {{ row.total_accounts }}
+              {{ getCategoryHeaderTotal(row.scheme_type, 'accounts') | number }}
             </td>
 
             <td class="text-right">
-              {{ row.march_position | number: '1.2-2' }}
+              {{ getCategoryHeaderTotal(row.scheme_type, 'march') | number: '1.2-2' }}
             </td>
 
             <td class="text-right">
-              {{ row.total_amount / 100000 | number: '1.2-2' }}
+              {{ getCategoryHeaderTotal(row.scheme_type, 'current') / 100000 | number: '1.2-2' }}
               <div class="text-xs text-500 mt-1">In Lakhs</div>
             </td>
 
             <td class="text-right">
-              {{ (row.total_amount - row.march_position) / 100000 | number: '1.2-2' }}
+              {{ getCategoryHeaderTotal(row.scheme_type, 'ytd') / 100000 | number: '1.2-2' }}
               <div class="text-xs text-500 mt-1">In Lakhs</div>
             </td>
 
@@ -274,7 +274,7 @@
                 pInputText
                 type="number"
                 [(ngModel)]="row.total_accounts"
-                [disabled]="true"
+                [disabled]="isExecutiveAccountsReadOnly(row)"
                 class="w-6rem text-center"
               />
             </td>

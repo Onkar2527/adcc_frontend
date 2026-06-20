@@ -23,6 +23,7 @@ import { NotificationService } from '../../../core/services/notification/notific
 import { AuditDashboardService } from '../services/auditor-main.service';
 import { InternalAuditNavService } from '../services/internal-audit-nav.service';
 import { AuditUnitDashboardComponent } from '../../../shared/components/audit-unit-dashboard/audit-unit-dashboard.component';
+import { audit_flow_config } from '../../admin/services/required-data';
 
 @Component({
     selector: 'app-compliance-workspace',
@@ -532,6 +533,24 @@ export class ComplianceWorkspaceComponent implements OnInit {
         return observation?.response_required !== false;
     }
 
+    isLiveManagerComplianceFlow() {
+        return audit_flow_config.liveManagerCompliance === true;
+    }
+
+    canUseAnswerLevelComplianceResponse(
+        answer: any,
+    ) {
+        if (
+            this.isLiveManagerComplianceFlow()
+            && Array.isArray(answer?.annexure_rows)
+            && answer.annexure_rows.length > 0
+        ) {
+            return false;
+        }
+
+        return true;
+    }
+
     isPartiallyPass(
         observation: any,
     ) {
@@ -887,6 +906,10 @@ export class ComplianceWorkspaceComponent implements OnInit {
             String(
                 observation?.compliance_response || '',
             ).trim();
+        const previousStatus =
+            Number(
+                observation?.compliance_status_id || 0,
+            );
 
         if (
             !response
@@ -922,12 +945,26 @@ export class ComplianceWorkspaceComponent implements OnInit {
                         response;
                     observation._savedComplianceResponse =
                         response;
-                    this.refreshCounts();
                     this.clearSaving(key);
                     this.notification.success(
-                        res?.message
-                        || 'Compliance response saved.',
+                        this.isLiveManagerComplianceFlow()
+                            ? previousStatus === 12
+                                ? 'Response saved and returned to Reviewer.'
+                                : 'Response saved and sent to Auditor.'
+                            : res?.message
+                                || 'Compliance response saved.',
                     );
+
+                    if (
+                        this.isLiveManagerComplianceFlow()
+                    ) {
+                        this.loadDetail(
+                            assessmentId,
+                        );
+                        return;
+                    }
+
+                    this.refreshCounts();
                     this.checkCompletion();
                 },
                 error: (err) => {

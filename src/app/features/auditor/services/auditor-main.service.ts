@@ -116,10 +116,15 @@ export class AuditDashboardService {
   }
   getBranchFinancialPosition(
     branch_id: number,
+    assessmentId?: number,
   ) {
-
+    const params: any = {};
+    if (assessmentId) {
+      params.assessment_id = String(assessmentId);
+    }
     return this.http.get(
       `${this.apiUrl}/branch-financial-position/${branch_id}`,
+      { params },
     );
 
   }
@@ -273,18 +278,14 @@ export class AuditDashboardService {
   getReviewerComplianceAssessment(
     assessmentId: number,
     employeeId: number,
+    liveManagerCompliance = false,
   ) {
-
     return this.http.get<any>(
-
       `${this.config.apiUrl}/internal-audit/reviewer/compliance/${assessmentId}`,
-
       {
         params: {
-          employee_id:
-            employeeId,
-          live_manager_compliance:
-            audit_flow_config.liveManagerCompliance,
+          employee_id: String(employeeId),
+          live_manager_compliance: liveManagerCompliance ? 'true' : 'false',
         },
       },
     );
@@ -473,6 +474,26 @@ export class AuditDashboardService {
         response,
         live_manager_compliance:
           audit_flow_config.liveManagerCompliance,
+      },
+    );
+  }
+
+  saveAuditorLiveComplianceAction(
+    assessmentId: number,
+    targetType: 'answer' | 'annexure',
+    observationId: number,
+    employeeId: number,
+    action: number,
+  ) {
+
+    return this.http.post<any>(
+
+      `${this.config.apiUrl}/internal-audit/${assessmentId}/live-compliance/observation/${targetType}/${observationId}/action`,
+
+      {
+        employee_id:
+          employeeId,
+        action,
       },
     );
   }
