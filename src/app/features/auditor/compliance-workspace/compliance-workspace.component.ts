@@ -9,7 +9,7 @@ import {
     inject,
     signal,
 } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { forkJoin } from 'rxjs';
 import { ConfirmationService } from 'primeng/api';
@@ -58,6 +58,9 @@ export class ComplianceWorkspaceComponent implements OnInit {
 
     private router =
         inject(Router);
+
+    private route =
+        inject(ActivatedRoute);
 
     loadingQueue =
         signal(false);
@@ -329,6 +332,17 @@ export class ComplianceWorkspaceComponent implements OnInit {
                         res?.assessments || [],
                     );
                     this.loadingQueue.set(false);
+
+                    // Auto-open assessment if query param exists
+                    const assessmentId = Number(this.route.snapshot.queryParamMap.get('assessmentId') || 0);
+                    if (assessmentId) {
+                        const matched = (res?.assessments || []).find(
+                            (a: any) => Number(a.id) === assessmentId
+                        );
+                        if (matched) {
+                            this.openAssessment(matched);
+                        }
+                    }
                 },
                 error: (err) => {
                     this.error.set(

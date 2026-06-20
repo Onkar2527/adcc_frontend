@@ -50,8 +50,8 @@ export class AppMenu implements OnInit, OnDestroy {
   private baseModel: MenuItem[] = [
     {
       label: 'Home',
-      authority: ['1'],
-      items: [{ label: 'Dashboard', icon: 'pi pi-fw pi-home', routerLink: ['/admin'] }],
+      authority: ['1', '3', '5', '9'],
+      items: [{ label: 'Dashboard', icon: 'pi pi-fw pi-home', routerLink: ['/home'] }],
     },
     {
       label: 'Audit Management',
