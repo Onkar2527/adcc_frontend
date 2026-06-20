@@ -207,6 +207,18 @@ export class ReportsComponent implements OnInit {
       route: '/reports/rbia-performance-risk-weightage-report-all-units',
       category: '3_advanced',
     },
+    {
+      srNo: 46,
+      name: 'Risk & NPA Wise Audit Units Report',
+      route: '/reports/risk-npa-wise-audit-units-report',
+      category: '3_advanced',
+    },
+    {
+      srNo: 47,
+      name: 'Question Wise Scoring Report',
+      route: '/reports/question-wise-scoring-report',
+      category: '3_advanced',
+    },
   ];
 
   goBack() {

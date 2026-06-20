@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, effect, inject, signal } from '@angular/core';
+import { Component, OnInit, computed, effect, inject, signal } from '@angular/core';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ButtonModule } from 'primeng/button';
@@ -30,6 +31,7 @@ export class ReportViewerComponent implements OnInit {
   private exportService = inject(ExportService);
   private auditNavService = inject(InternalAuditNavService);
   private dateTimeService = inject(DateTimeService);
+  private sanitizer = inject(DomSanitizer);
   public config = inject(APP_CONFIG);
   private readonly auditTypeFilter: ReportFilterDefinition = {
     key: 'audit_type_id',
@@ -131,6 +133,10 @@ export class ReportViewerComponent implements OnInit {
   error = signal('');
   reportDateRange = signal<Date[] | null>(null);
 
+  // Question Wise Scoring Report — pre-rendered HTML string for zero-flicker DOM insertion
+  qwsTableHtml = signal<SafeHtml | null>(null);
+  qwsTotals = signal<{ riskScore: number; weightedScore: number; maxScore: number } | null>(null);
+
   filters: Record<string, any> = {};
 
   isAdvancedLayout(): boolean {
@@ -178,7 +184,7 @@ export class ReportViewerComponent implements OnInit {
   shouldShowFilter(filter: ReportFilterDefinition): boolean {
     const slug = this.definition()?.slug;
 
-    if (slug === 'risk-wise-audit-units-report' && filter.key === 'endDate') {
+    if (this.isRiskWiseAuditUnitsReport() && filter.key === 'endDate') {
       return false;
     }
 
@@ -401,17 +407,24 @@ export class ReportViewerComponent implements OnInit {
     this.reportsService.getReportData(definition.slug, this.filters).subscribe({
       next: (res) => {
         const isHeaderMultiple = !!res?.header?.isMultipleAuditors;
-        const processedRows = (res?.rows || []).map((row: any) => {
-          const isMultiple = isHeaderMultiple || !!row.is_multiple_auditors;
-          if (isMultiple && row.question && row.auditor_emp_code && row.auditor_emp_code !== '-') {
-            return {
-              ...row,
-              question: `[${row.auditor_emp_code}] ${row.question}`
-            };
-          }
-          return row;
-        });
-        this.rows.set(processedRows);
+        const isQWReport = definition.slug === 'question-wise-scoring-report';
+
+        if (isQWReport) {
+          // Build entire table body as an HTML string to avoid Angular *ngFor DOM overhead
+          this.qwsTableHtml.set(this.buildQwsTableHtml(res?.rows || []));
+          this.qwsTotals.set(this.calcQwsTotals(res?.rows || []));
+          this.rows.set([{ _placeholder: true }]); // non-empty so the sheet shows
+        } else {
+          const processedRows = (res?.rows || []).map((row: any) => {
+            const isMultiple = isHeaderMultiple || !!row.is_multiple_auditors;
+            if (isMultiple && row.question && row.auditor_emp_code && row.auditor_emp_code !== '-') {
+              return { ...row, question: `[${row.auditor_emp_code}] ${row.question}` };
+            }
+            return row;
+          });
+          this.rows.set(processedRows);
+        }
+
         this.summary.set(res?.summary || null);
         this.reportHeader.set(res?.header || null);
         this.reportMeta.set(res?.meta || null);
@@ -421,6 +434,8 @@ export class ReportViewerComponent implements OnInit {
       },
       error: (err) => {
         this.rows.set([]);
+        this.qwsTableHtml.set(null);
+        this.qwsTotals.set(null);
         this.summary.set(null);
         this.reportHeader.set(null);
         this.reportMeta.set(null);
@@ -603,13 +618,14 @@ export class ReportViewerComponent implements OnInit {
   }
 
   isRiskWiseAuditUnitsReport() {
-    return this.definition()?.slug === 'risk-wise-audit-units-report';
+    return false;
   }
 
   isRiskWiseReport() {
     const slug = this.definition()?.slug;
     return (
       slug === 'risk-wise-audit-units-report' ||
+      slug === 'risk-npa-wise-audit-units-report' ||
       slug === 'rbia-performance-risk-weightage-report-all-units'
     );
   }
@@ -620,6 +636,107 @@ export class ReportViewerComponent implements OnInit {
       slug === 'performance-risk-weightage-report' ||
       slug === 'performance-risk-weightage-report-category-wise'
     );
+  }
+
+  formatDecimal(value: any, decimals: number = 2): string {
+    const num = Number(value);
+    if (isNaN(num)) return '0.00';
+    return num.toFixed(decimals);
+  }
+
+  isQuestionWiseScoringReport() {
+    const slug = this.definition()?.slug;
+    return slug === 'question-wise-scoring-report';
+  }
+
+  /** Escape text so it is safe to inject into innerHTML */
+  private esc(text: any): string {
+    return String(text ?? '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
+  /** Build the full <tbody> HTML string for Question Wise Scoring Report */
+  buildQwsTableHtml(rows: any[]): SafeHtml {
+    let html = '';
+    for (const menu of rows) {
+      const risks: any[] = menu.risk_category_wise || [];
+      let menuTotal = 0;
+      risks.forEach((r: any) => { menuTotal += (r.questions || []).length; });
+
+      let firstRow = true;
+      for (let rIdx = 0; rIdx < risks.length; rIdx++) {
+        const risk = risks[rIdx];
+        const questions: any[] = risk.questions || [];
+        const weightage = Number(risk?.risk_category_master?.risk_weightage || 0).toFixed(0);
+        const riskLabel = this.esc(risk?.risk_category_master?.risk_category ?? '');
+
+        for (let qIdx = 0; qIdx < questions.length; qIdx++) {
+          const q = questions[qIdx];
+          const riskScore    = Number(q.risk_score || 0).toFixed(2);
+          const weightedScore = Number(q.weighted_risk_score || 0).toFixed(2);
+          const maxScore     = Number(q.highest_weightage_risk || 0).toFixed(2);
+          const notApplicable = q.answer_given === 'NOT APPLICABLE';
+
+          html += '<tr>';
+
+          // Menu name cell — only on very first row of this menu
+          if (firstRow) {
+            html += `<td rowspan="${menuTotal}" style="vertical-align:middle;font-weight:500;">${this.esc(menu.menu_name)}</td>`;
+            firstRow = false;
+          }
+
+          // Risk category cell — only on first row of this risk group
+          if (qIdx === 0) {
+            html += `<td rowspan="${questions.length}" style="vertical-align:middle;font-weight:500;">${riskLabel} (${weightage})</td>`;
+          }
+
+          // Category name
+          html += `<td>${this.esc(q.category_name)}</td>`;
+
+          // Account info
+          if (q.account_no) {
+            html += `<td><strong>Acc:</strong> ${this.esc(q.account_no)}<br><small>${this.esc(q.account_holder_name)}</small></td>`;
+          } else {
+            html += '<td>-</td>';
+          }
+
+          // Question
+          html += `<td>${this.esc(q.question)}</td>`;
+
+          // Answer
+          const badgeClass = notApplicable ? ' class="badge-na"' : '';
+          html += `<td><span${badgeClass}>${this.esc(q.answer_given) || '-'}</span></td>`;
+
+          // Audit comment
+          html += `<td>${this.esc(q.audit_comment) || '-'}</td>`;
+
+          // Scores
+          html += `<td class="text-right">${riskScore}</td>`;
+          html += `<td class="text-right">${weightedScore}</td>`;
+          html += `<td class="text-right">${maxScore}</td>`;
+          html += '</tr>';
+        }
+      }
+    }
+    return this.sanitizer.bypassSecurityTrustHtml(html);
+  }
+
+  /** Calculate totals from raw API rows for the QWS footer */
+  calcQwsTotals(rows: any[]): { riskScore: number; weightedScore: number; maxScore: number } {
+    let riskScore = 0, weightedScore = 0, maxScore = 0;
+    for (const menu of rows) {
+      for (const risk of (menu.risk_category_wise || [])) {
+        for (const q of (risk.questions || [])) {
+          riskScore    += Number(q.risk_score || 0);
+          weightedScore += Number(q.weighted_risk_score || 0);
+          maxScore     += Number(q.highest_weightage_risk || 0);
+        }
+      }
+    }
+    return { riskScore, weightedScore, maxScore };
   }
 
   riskWiseLeadingColumns() {
@@ -681,9 +798,10 @@ export class ReportViewerComponent implements OnInit {
       definition.slug === 'broader-areawise-scoring-report' ||
       definition.slug === 'questionwsie-broader-areawise-report' ||
       definition.slug === 'executive-summary-audit-report' ||
-      definition.slug === 'executive-summary-compliance-report'
+      definition.slug === 'executive-summary-compliance-report' ||
+      definition.slug === 'question-wise-scoring-report'
     ) {
-      const tableElement = document.querySelector('.official-report-table');
+      const tableElement = document.querySelector('.official-report-table.question-wise-scoring-table') || document.querySelector('.official-report-table');
       if (tableElement) {
         this.exportService.exportTableToExcel(tableElement, definition.fileName || definition.slug);
         return;
