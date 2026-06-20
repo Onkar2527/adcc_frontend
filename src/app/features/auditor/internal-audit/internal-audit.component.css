@@ -2493,3 +2493,172 @@ textarea.answer-control1 {
     font-size: 0.75rem;
 }
 
+.dashboard-grid-5-7 {
+    display: grid;
+    grid-template-columns: 5fr 7fr;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+@media (max-width: 991px) {
+    .dashboard-grid-5-7 {
+        grid-template-columns: 1fr;
+    }
+}
+
+.dashboard-grid-7-5 {
+    display: grid;
+    grid-template-columns: 7fr 5fr;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+@media (max-width: 991px) {
+    .dashboard-grid-7-5 {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Modern Risk Heatmap styles */
+.modern-heatmap-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+}
+
+.modern-heatmap-table {
+    border-collapse: separate;
+    border-spacing: 10px;
+    width: 100%;
+    max-width: 300px;
+    margin: 0.5rem auto;
+}
+
+.heatmap-axis-label {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    padding: 0.25rem;
+    opacity: 0.8;
+}
+
+.heatmap-row-header {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    text-align: right;
+    padding-right: 0.5rem;
+    vertical-align: middle;
+    white-space: nowrap;
+    opacity: 0.8;
+}
+
+.heatmap-cell {
+    position: relative;
+    font-weight: 800;
+    border-radius: 10px;
+    height: 48px;
+    font-size: 1.1rem;
+    transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    display: table-cell;
+    vertical-align: middle;
+    text-align: center;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.03);
+}
+
+.heatmap-cell:hover {
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.15) !important;
+    cursor: default;
+    z-index: 5;
+}
+
+.heatmap-cell.empty-cell {
+    background: rgba(0, 0, 0, 0.02) !important;
+    color: var(--text-secondary) !important;
+    opacity: 0.35;
+    box-shadow: none !important;
+    border: 1px dashed rgba(0, 0, 0, 0.12) !important;
+}
+
+:host-context(.layout-theme-dark) .heatmap-cell.empty-cell {
+    background: rgba(255, 255, 255, 0.02) !important;
+    border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Gradients and specific colors */
+.cell-critical {
+    background: linear-gradient(135deg, #f43f5e, #be123c) !important;
+    color: #ffffff !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 4px 12px rgba(244, 63, 94, 0.25) !important;
+}
+
+.cell-high {
+    background: linear-gradient(135deg, #fb7185, #e11d48) !important;
+    color: #ffffff !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 4px 12px rgba(251, 113, 133, 0.22) !important;
+}
+
+.cell-medium {
+    background: linear-gradient(135deg, #fb923c, #ea580c) !important;
+    color: #ffffff !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 4px 12px rgba(251, 146, 60, 0.22) !important;
+}
+
+.cell-medlow {
+    background: linear-gradient(135deg, #a3e635, #65a30d) !important;
+    color: #ffffff !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 12px rgba(163, 230, 53, 0.22) !important;
+}
+
+.cell-low {
+    background: linear-gradient(135deg, #4ade80, #16a34a) !important;
+    color: #ffffff !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 12px rgba(74, 222, 128, 0.22) !important;
+}
+
+.modern-legend {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-top: 1.25rem;
+    justify-content: center;
+}
+
+.legend-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.65rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    background: rgba(0, 0, 0, 0.02);
+    padding: 0.25rem 0.5rem;
+    border-radius: 20px;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+:host-context(.layout-theme-dark) .legend-badge {
+    background: rgba(255, 255, 255, 0.02);
+    border-color: rgba(255, 255, 255, 0.05);
+    color: #f8fafc;
+}
+
+.legend-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+}
+

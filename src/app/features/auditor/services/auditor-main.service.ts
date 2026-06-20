@@ -28,6 +28,32 @@ export class AuditDashboardService {
     if (assesPeriodId) params.asses_period = assesPeriodId;
     return this.http.get<any>(`${this.apiUrl}/home-stats`, { params });
   }
+
+  getAdminDashboardData(): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/admin`);
+  }
+
+  getUnitDashboardDetails(auditUnitId: number, employeeId: number, userTypeId: number): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/unit-details/${auditUnitId}`, {
+      params: { employeeId: String(employeeId), userTypeId: String(userTypeId) }
+    });
+  }
+
+  getUnitChartsData(auditUnitId: number, assessmentId: string): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/unit-charts/${auditUnitId}`, {
+      params: { assessmentId }
+    });
+  }
+
+  getManagementDashboardData(employeeId: number): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/management`, {
+      params: { employeeId: String(employeeId) }
+    });
+  }
+
+  getBranchDaysTakenData(auditUnitId: number): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/days-taken/${auditUnitId}`);
+  }
   // service.ts (frontend)
 
   getExecutiveSummary(

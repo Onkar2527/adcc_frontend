@@ -50,49 +50,230 @@
                     <strong>{{ unit.last_audit_date ? (unit.last_audit_date | date: 'dd MMM yyyy') : '-' }}</strong>
                 </div>
             </div>
-
-            <div class="unit-metrics">
-                <article>
-                    <span>Total</span>
-                    <strong>{{ metrics()?.total || 0 }}</strong>
-                </article>
-
-                <article>
-                    <span>Audit</span>
-                    <strong class="text-warn">{{ metrics()?.audit_pending || 0 }}</strong>
-                </article>
-
-                <article>
-                    <span>Review</span>
-                    <strong class="text-info">{{ metrics()?.review_pending || 0 }}</strong>
-                </article>
-
-                <article>
-                    <span>Completed</span>
-                    <strong class="text-success">{{ metrics()?.completed || 0 }}</strong>
-                </article>
-            </div>
         </section>
+
+        <!-- Status Metrics Grid -->
+        <div class="metrics-grid" *ngIf="unitSummary() as summary" style="margin-top: 1.5rem;">
+          <!-- 1. Total Weighted Risk -->
+          <div class="metric-card theme-purple">
+            <div class="card-glow"></div>
+            <div class="card-icon"><i class="pi pi-chart-bar"></i></div>
+            <div class="card-details">
+              <span class="card-title">Total Weighted Risk</span>
+              <span class="card-value">{{ computedWeightedRisk() }}</span>
+            </div>
+          </div>
+
+          <!-- 2. Assessment Not Started -->
+          <div class="metric-card theme-amber">
+            <div class="card-glow"></div>
+            <div class="card-icon"><i class="pi pi-play"></i></div>
+            <div class="card-details">
+              <span class="card-title">Assessment Not Started</span>
+              <span class="card-value">{{ computedAssessmentNotStartedCount() }}</span>
+            </div>
+          </div>
+
+          <!-- 3. Assessment Expired -->
+          <div class="metric-card theme-red">
+            <div class="card-glow"></div>
+            <div class="card-icon"><i class="pi pi-exclamation-triangle"></i></div>
+            <div class="card-details">
+              <span class="card-title">Assessment Expired</span>
+              <span class="card-value">{{ computedAssessmentExpiredCount() }}</span>
+            </div>
+          </div>
+
+          <!-- 4. Assessment Pending -->
+          <div class="metric-card theme-blue">
+            <div class="card-glow"></div>
+            <div class="card-icon"><i class="pi pi-clock"></i></div>
+            <div class="card-details">
+              <span class="card-title">Assessment Pending</span>
+              <span class="card-value">{{ computedAssessmentPendingCount() }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Filter Toolbar -->
+        <div class="dashboard-toolbar" style="margin-top: 2rem; margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: center; background: var(--surface-card); padding: 1.25rem 1.5rem; border-radius: 8px; border: 1px solid var(--border-color);">
+          <div class="toolbar-title">
+            <h3 style="margin: 0; font-size: 1.25rem; font-weight: 600; color: var(--text-primary);">Visual Risk & Score Analytics</h3>
+            <span style="font-size: 0.875rem; color: var(--text-secondary);">Filtered charts for detailed risk category investigation</span>
+          </div>
+          <div class="select-wrapper" style="display: flex; gap: 1.25rem; align-items: center; flex-wrap: wrap;">
+            <div class="filter-item" style="display: flex; flex-direction: column; gap: 0.35rem;">
+              <span style="font-size: 0.75rem; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em;">Financial Year</span>
+              <p-select
+                [options]="yearFilterOptions()"
+                [ngModel]="selectedYearId()"
+                (ngModelChange)="onYearChange($event)"
+                optionLabel="label"
+                optionValue="value"
+                placeholder="All Years"
+                [showClear]="true"
+                styleClass="dashboard-select"
+              ></p-select>
+            </div>
+            <div class="filter-item" style="display: flex; flex-direction: column; gap: 0.35rem;">
+              <span style="font-size: 0.75rem; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em;">Assessment Period</span>
+              <p-select
+                [options]="filteredAssessmentPeriods()"
+                [ngModel]="selectedAssessmentPeriodId()"
+                (ngModelChange)="onPeriodChange($event)"
+                optionLabel="label"
+                optionValue="value"
+                placeholder="Select Period"
+                styleClass="dashboard-select"
+              ></p-select>
+            </div>
+          </div>
+        </div>
+
+        <div *ngIf="!chartsLoading() && !detailsLoading()">
+          <!-- Top Row: Pie and Bar Chart in 5-7 grid -->
+          <div class="dashboard-grid-5-7">
+            <!-- 1. Category Count Share (Pie Chart) -->
+            <div class="dashboard-panel chart-panel">
+              <div class="panel-header">
+                <h3>Category Count Share</h3>
+                <span class="panel-subtitle">Risk classification count distribution</span>
+              </div>
+              <div class="panel-body chart-wrapper">
+                <p-chart type="pie" [data]="unitPieData()" [options]="unitPieOptions()" height="280px"></p-chart>
+              </div>
+            </div>
+
+            <!-- 2. Risk Type Wise Scores (Bar Chart) -->
+            <div class="dashboard-panel chart-panel">
+              <div class="panel-header">
+                <h3>Risk Type Wise Scores</h3>
+                <span class="panel-subtitle">Weighted risk categories scores list</span>
+              </div>
+              <div class="panel-body chart-wrapper">
+                <p-chart type="bar" [data]="unitBarData()" [options]="unitBarOptions()" height="280px"></p-chart>
+              </div>
+            </div>
+          </div>
+
+          <!-- Trend Chart & Risk Heatmap Row -->
+          <div class="dashboard-grid-7-5">
+            <!-- 1. Assessment Wise Score Trend -->
+            <div class="dashboard-panel chart-panel">
+              <div class="panel-header">
+                <h3>Assessment Wise Score Trend</h3>
+                <span class="panel-subtitle">Overall score progression over assessment periods</span>
+              </div>
+              <div class="panel-body chart-wrapper">
+                <p-chart type="bar" [data]="unitStackedData()" [options]="unitStackedOptions()" height="320px"></p-chart>
+              </div>
+            </div>
+
+            <!-- 2. Risk Assessment Heatmap -->
+            <div class="dashboard-panel chart-panel">
+              <div class="panel-header">
+                <h3>Risk Assessment Heatmap</h3>
+                <span class="panel-subtitle">Inherent Business Risk vs Control Effectiveness</span>
+              </div>
+              <div class="panel-body chart-wrapper">
+                <div class="modern-heatmap-card">
+                  <table class="modern-heatmap-table">
+                    <thead>
+                      <tr>
+                        <th style="border: none; background: transparent; width: 60px;"></th>
+                        <th class="heatmap-axis-label">Low CR</th>
+                        <th class="heatmap-axis-label">Med CR</th>
+                        <th class="heatmap-axis-label">High CR</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td class="heatmap-row-header">High BR</td>
+                        <td class="heatmap-cell cell-medium" [class.empty-cell]="unitHeatmap()[0][0] === 0">{{ unitHeatmap()[0][0] > 0 ? unitHeatmap()[0][0] : '' }}</td>
+                        <td class="heatmap-cell cell-high" [class.empty-cell]="unitHeatmap()[0][1] === 0">{{ unitHeatmap()[0][1] > 0 ? unitHeatmap()[0][1] : '' }}</td>
+                        <td class="heatmap-cell cell-critical" [class.empty-cell]="unitHeatmap()[0][2] === 0">{{ unitHeatmap()[0][2] > 0 ? unitHeatmap()[0][2] : '' }}</td>
+                      </tr>
+                      <tr>
+                        <td class="heatmap-row-header">Med BR</td>
+                        <td class="heatmap-cell cell-medlow" [class.empty-cell]="unitHeatmap()[1][0] === 0">{{ unitHeatmap()[1][0] > 0 ? unitHeatmap()[1][0] : '' }}</td>
+                        <td class="heatmap-cell cell-medium" [class.empty-cell]="unitHeatmap()[1][1] === 0">{{ unitHeatmap()[1][1] > 0 ? unitHeatmap()[1][1] : '' }}</td>
+                        <td class="heatmap-cell cell-high" [class.empty-cell]="unitHeatmap()[1][2] === 0">{{ unitHeatmap()[1][2] > 0 ? unitHeatmap()[1][2] : '' }}</td>
+                      </tr>
+                      <tr>
+                        <td class="heatmap-row-header">Low BR</td>
+                        <td class="heatmap-cell cell-low" [class.empty-cell]="unitHeatmap()[2][0] === 0">{{ unitHeatmap()[2][0] > 0 ? unitHeatmap()[2][0] : '' }}</td>
+                        <td class="heatmap-cell cell-medlow" [class.empty-cell]="unitHeatmap()[2][1] === 0">{{ unitHeatmap()[2][1] > 0 ? unitHeatmap()[2][1] : '' }}</td>
+                        <td class="heatmap-cell cell-medium" [class.empty-cell]="unitHeatmap()[2][2] === 0">{{ unitHeatmap()[2][2] > 0 ? unitHeatmap()[2][2] : '' }}</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                  <div class="modern-legend">
+                    <span class="legend-badge"><span class="legend-dot" style="background: #4ade80;"></span> Low</span>
+                    <span class="legend-badge"><span class="legend-dot" style="background: #a3e635;"></span> Med-Low</span>
+                    <span class="legend-badge"><span class="legend-dot" style="background: #fb923c;"></span> Medium</span>
+                    <span class="legend-badge"><span class="legend-dot" style="background: #fb7185;"></span> High</span>
+                    <span class="legend-badge"><span class="legend-dot" style="background: #f43f5e;"></span> Critical</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Full Width: Assessment Wise Score Summary Table -->
+          <div class="dashboard-panel" style="margin-bottom: 2.5rem;" *ngIf="unitSummary() as summary">
+            <div class="panel-header">
+              <h3>Assessment Wise Score Summary</h3>
+              <span class="panel-subtitle">Weighted risk scores and trends per period</span>
+            </div>
+            <div class="panel-body">
+              <div class="table-responsive">
+                <table class="dashboard-table">
+                  <thead>
+                    <tr>
+                      <th>Sr. No.</th>
+                      <th>Assessment Period</th>
+                      <th>Assessment Frequency</th>
+                      <th>Weighted Score</th>
+                      <th>Trend</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr *ngFor="let item of summary.assessmentList; let i = index">
+                      <td style="font-weight: 600;">{{ i + 1 }}</td>
+                      <td>{{ item.assesment_period }}</td>
+                      <td>{{ item.frequency }} Months</td>
+                      <td>
+                        <span class="score-pill" style="font-weight: 700;">{{ item.weighted_score }}</span>
+                      </td>
+                      <td>
+                        <p-tag 
+                          [value]="item.trend" 
+                          [severity]="item.trend === 'Increasing' ? 'danger' : (item.trend === 'Decreasing' ? 'success' : 'secondary')"
+                        ></p-tag>
+                      </td>
+                    </tr>
+                    <tr *ngIf="!summary.assessmentList?.length">
+                      <td colspan="5" style="text-align: center; color: var(--text-color-secondary); padding: 2rem;">
+                        No assessment period summary available.
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="loading-overlay" *ngIf="chartsLoading() || detailsLoading()" style="padding: 3rem; text-align: center; background: var(--surface-card); border-radius: 8px; border: 1px solid var(--border-color); margin-bottom: 2.5rem;">
+          <i class="pi pi-spin pi-spinner" style="font-size: 2.5rem; color: var(--primary-color); margin-bottom: 1rem; display: block;"></i>
+          <span style="font-size: 1.125rem; font-weight: 500; color: var(--text-primary);">Loading risk dashboard charts...</span>
+        </div>
 
         <section class="assessment-list-panel">
             <div class="assessment-list-toolbar">
                 <div>
                     <h2>Financial Year Wise Assessment Details</h2>
                     <span>{{ assessmentRows().length }} record{{ assessmentRows().length === 1 ? '' : 's' }} shown</span>
-                </div>
-
-                <div class="year-filter">
-                    <label>Financial Year</label>
-                    <p-select
-                        [options]="yearFilterOptions()"
-                        [ngModel]="selectedYearId()"
-                        (ngModelChange)="selectedYearId.set($event)"
-                        optionLabel="label"
-                        optionValue="value"
-                        placeholder="All Years"
-                        [showClear]="true"
-                        styleClass="assessment-year-select"
-                    ></p-select>
                 </div>
             </div>
 
@@ -172,6 +353,12 @@
 
                             <td>
                                 {{ row.assessment?.compliance_status_label || '-' }}
+                                <span
+                                    *ngIf="row.assessment?.compliance_reviewer_status_label"
+                                    class="reviewer-note"
+                                >
+                                    Reviewer: {{ row.assessment.compliance_reviewer_status_label }}
+                                </span>
                             </td>
 
                             <td>
