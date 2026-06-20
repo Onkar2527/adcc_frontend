@@ -100,11 +100,6 @@ export class AppMenu implements OnInit, OnDestroy {
           icon: 'pi pi-fw pi-clipboard',
           routerLink: ['/auditor/compliance'],
         },
-        {
-          label: 'Audit Calendar',
-          icon: 'pi pi-fw pi-calendar',
-          routerLink: ['/admin/audit-calendar'],
-        },
       ],
     },
     {
