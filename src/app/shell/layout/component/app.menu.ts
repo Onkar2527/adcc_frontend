@@ -106,6 +106,12 @@ export class AppMenu implements OnInit, OnDestroy {
       authority: ['1', '2', '3', '4', '6', '5'],
       items: [{ label: 'Reports', icon: 'pi pi-fw pi-file', routerLink: ['/reports'] }],
     },
+
+    {
+      label: 'System Audit',
+      authority: ['1'],
+      items: [{ label: 'Audit Trail Logs', icon: 'pi pi-fw pi-history', routerLink: ['/admin/audit-logs'] }],
+    },
     {
       label: 'Masters',
       authority: ['1'],
@@ -184,7 +190,7 @@ export class AppMenu implements OnInit, OnDestroy {
           routerLink: ['/admin/broader-area-master'],
         },
         {
-          label: 'Periodwise Questions Master',
+          label: 'Question Setup',
           icon: 'pi pi-fw pi-list',
           routerLink: ['/admin/periodwise-questions-master'],
         },
@@ -316,7 +322,7 @@ export class AppMenu implements OnInit, OnDestroy {
         name: menu?.name,
         categories: (menu?.categories || []).map(
           (category: any) =>
-            `${category?.id}:${category?.name}:${category?.carry_forward}:${category?.account_based}:${category?.completed_account_count}:${category?.account_count}:${category?.answered_count}:${category?.question_count}`,
+            `${category?.id}:${category?.name}:${category?.carry_forward}:${category?.account_based}:${category?.completed_account_count}:${category?.account_count}:${category?.answered_count}:${category?.question_count}:${category?.live_pending_count}`,
         ),
       })),
     });
@@ -380,21 +386,29 @@ export class AppMenu implements OnInit, OnDestroy {
           return {
             label: category.name,
             meta: this.categoryProgressText(category),
+            badgeClass:
+              Number(category?.live_pending_count || 0) > 0
+                ? 'live-compliance-pending'
+                : '',
+            livePendingCount:
+              Number(category?.live_pending_count || 0),
+            livePendingLabel:
+              `${Number(category?.live_pending_count || 0)} manager response${Number(category?.live_pending_count || 0) === 1 ? '' : 's'} pending with Auditor`,
             icon: isCarryForward ? 'pi pi-fw pi-forward' : 'pi pi-fw pi-angle-right',
             routerLink: ['/auditor/internal-audit', assessmentId],
             queryParams: isCarryForward
               ? {
-                  view: 'carry-forward',
-                  categoryId: null,
-                  dumpId: null,
-                  pending: null,
-                }
+                view: 'carry-forward',
+                categoryId: null,
+                dumpId: null,
+                pending: null,
+              }
               : {
-                  view: 'category',
-                  categoryId: Number(category.id),
-                  dumpId: null,
-                  pending: null,
-                },
+                view: 'category',
+                categoryId: Number(category.id),
+                dumpId: null,
+                pending: null,
+              },
             routerLinkActiveOptions: {
               paths: 'exact',
               queryParams: 'exact',

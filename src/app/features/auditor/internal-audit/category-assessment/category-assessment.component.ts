@@ -1788,6 +1788,29 @@ export class CategoryAssessmentComponent
                     this.notification.success(
                         res?.message || 'Live compliance action saved.',
                     );
+                    this.auditNavService.updateCategoryProgress(
+                        Number(detail.overview.id),
+                        Number(detail.category.id),
+                        {
+                            live_pending_count:
+                                Math.max(
+                                    Number(
+                                        this.auditNavService.menus()
+                                            .flatMap(
+                                                (menu: any) =>
+                                                    menu?.categories || [],
+                                            )
+                                            .find(
+                                                (category: any) =>
+                                                    Number(category?.id)
+                                                    === Number(detail.category.id),
+                                            )
+                                            ?.live_pending_count || 0,
+                                    ) - 1,
+                                    0,
+                                ),
+                        },
+                    );
                     this.clearLiveComplianceActionSaving(key);
                     this.loadCategory(
                         Number(detail.overview.id),

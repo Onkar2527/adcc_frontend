@@ -42,6 +42,7 @@ export class InternalAuditNavService {
             question_count?: number;
             completed_account_count?: number;
             account_count?: number;
+            live_pending_count?: number;
         },
     ) {
         if (
