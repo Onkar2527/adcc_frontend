@@ -51,7 +51,13 @@ export class AppMenu implements OnInit, OnDestroy {
     {
       label: 'Home',
       authority: ['1', '3', '5', '9'],
-      items: [{ label: 'Dashboard', icon: 'pi pi-fw pi-home', routerLink: ['/home'] }],
+      items: [{ label: 'Dashboard', icon: 'pi pi-fw pi-home', routerLink: ['/home'] },
+      {
+        label: 'Audit Calendar',
+        // authority: ['5'],
+        icon: 'pi pi-fw pi-calendar',
+        routerLink: ['/admin/audit-calendar'],
+      },],
     },
     {
       label: 'Audit Management',
