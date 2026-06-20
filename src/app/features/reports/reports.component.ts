@@ -259,7 +259,7 @@ export class ReportsComponent implements OnInit {
     const userTypeId = String(user.user_type_id || '');
 
     let rawList = [...this.reports];
-    if (userTypeId !== '1') {
+    if (userTypeId !== '1' && userTypeId !== '9' && userTypeId !== '5') {
       // Filter out master reports for non-admin users
       rawList = rawList.filter((r) => r.category !== '1_master');
     }
