@@ -106,6 +106,12 @@ export class AppMenu implements OnInit, OnDestroy {
       authority: ['1', '2', '3', '4', '6'],
       items: [{ label: 'Reports', icon: 'pi pi-fw pi-file', routerLink: ['/reports'] }],
     },
+
+    {
+      label: 'System Audit',
+      authority: ['1'],
+      items: [{ label: 'Audit Trail Logs', icon: 'pi pi-fw pi-history', routerLink: ['/admin/audit-logs'] }],
+    },
     {
       label: 'Masters',
       authority: ['1'],
@@ -384,17 +390,17 @@ export class AppMenu implements OnInit, OnDestroy {
             routerLink: ['/auditor/internal-audit', assessmentId],
             queryParams: isCarryForward
               ? {
-                  view: 'carry-forward',
-                  categoryId: null,
-                  dumpId: null,
-                  pending: null,
-                }
+                view: 'carry-forward',
+                categoryId: null,
+                dumpId: null,
+                pending: null,
+              }
               : {
-                  view: 'category',
-                  categoryId: Number(category.id),
-                  dumpId: null,
-                  pending: null,
-                },
+                view: 'category',
+                categoryId: Number(category.id),
+                dumpId: null,
+                pending: null,
+              },
             routerLinkActiveOptions: {
               paths: 'exact',
               queryParams: 'exact',
