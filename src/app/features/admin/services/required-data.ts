@@ -48,7 +48,7 @@ export const carry_forward_array = [{ label: 'CARRY FORWARD POINTS', value: 'CF'
 
 export const audit_flow_config = {
     liveManagerCompliance:
-        false,
+        true,
 };
 
 export const assesment_timeline_array = [

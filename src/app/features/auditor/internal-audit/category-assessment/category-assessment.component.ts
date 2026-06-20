@@ -46,6 +46,7 @@ import {
 import {
     InternalAuditNavService,
 } from '../../services/internal-audit-nav.service';
+import { audit_flow_config } from '../../../admin/services/required-data';
 import { TableModule } from 'primeng/table';
 import { AccordionModule } from 'primeng/accordion';
 
@@ -148,6 +149,9 @@ export class CategoryAssessmentComponent
 
     uploadingEvidenceKey =
         signal('');
+
+    liveComplianceActionSaving =
+        signal<Record<string, boolean>>({});
 
     drawerMode =
         signal(false);
@@ -1651,6 +1655,171 @@ export class CategoryAssessmentComponent
     ) {
 
         return question?.answer?.compliance_reviewer_comment || '';
+    }
+
+    isLiveManagerComplianceFlow() {
+        return audit_flow_config.liveManagerCompliance === true;
+    }
+
+    liveComplianceActionKey(
+        targetType: 'answer' | 'annexure',
+        observationId: number,
+    ) {
+        return `${targetType}:${observationId}`;
+    }
+
+    liveComplianceStatus(
+        answer: any,
+    ) {
+        return Number(
+            answer?.compliance_status_id || 0,
+        );
+    }
+
+    hasLiveManagerFeedback(
+        question: any,
+    ) {
+        const answer =
+            question?.answer;
+
+        if (!answer) {
+            return false;
+        }
+
+        if (
+            this.managerComplianceComment(question)
+            || this.evidenceList(answer, 'compliance_evidence').length
+        ) {
+            return true;
+        }
+
+        return (answer?.annexure_rows || []).some(
+            (row: any) =>
+                this.cleanText(row?.compliance_response || row?.audit_commpliance)
+                || this.evidenceList(row, 'compliance_evidence').length,
+        );
+    }
+
+    canShowLiveComplianceAuditorActions(
+        question: any,
+    ) {
+        const isComplianceQuestion =
+            question?.is_compliance === true
+            || Number(question?.is_compliance || 0) === 1
+            || Number(question?.answer?.is_compliance || 0) === 1;
+
+        return this.isLiveManagerComplianceFlow()
+            && isComplianceQuestion
+            && this.liveComplianceStatus(question?.answer) === 10;
+    }
+
+    liveComplianceStatusLabel(
+        question: any,
+    ) {
+        const status =
+            this.liveComplianceStatus(
+                question?.answer,
+            );
+
+        if (status === 10) {
+            return 'Pending With Auditor';
+        }
+
+        if (status === 11) {
+            return 'Pending With Reviewer';
+        }
+
+        if (status === 12) {
+            return 'Pending With Manager';
+        }
+
+        if (status === 13) {
+            return 'Accepted By Auditor';
+        }
+
+        if (status === 14) {
+            return 'Settled By Reviewer';
+        }
+
+        return '';
+    }
+
+    saveLiveComplianceAction(
+        question: any,
+        action: 2 | 3,
+    ) {
+        const detail =
+            this.categoryDetail();
+
+        const answerId =
+            Number(
+                question?.answer?.id || 0,
+            );
+
+        if (
+            !detail?.overview?.id
+            || !detail?.category?.id
+            || !answerId
+        ) {
+            return;
+        }
+
+        const key =
+            this.liveComplianceActionKey(
+                'answer',
+                answerId,
+            );
+
+        this.liveComplianceActionSaving.set({
+            ...this.liveComplianceActionSaving(),
+            [key]: true,
+        });
+
+        this.service
+            .saveAuditorLiveComplianceAction(
+                Number(detail.overview.id),
+                'answer',
+                answerId,
+                this.employeeId,
+                action,
+            )
+            .subscribe({
+                next: (res: any) => {
+                    this.notification.success(
+                        res?.message || 'Live compliance action saved.',
+                    );
+                    this.clearLiveComplianceActionSaving(key);
+                    this.loadCategory(
+                        Number(detail.overview.id),
+                        Number(detail.category.id),
+                        false,
+                        this.selectedDumpId(),
+                    );
+                },
+                error: (err) => {
+                    this.clearLiveComplianceActionSaving(key);
+                    this.notification.error(
+                        err?.error?.message || 'Unable to save live compliance action.',
+                    );
+                },
+            });
+    }
+
+    private clearLiveComplianceActionSaving(
+        key: string,
+    ) {
+        const state = {
+            ...this.liveComplianceActionSaving(),
+        };
+
+        delete state[key];
+        this.liveComplianceActionSaving.set(state);
+    }
+
+    private cleanText(
+        value: any,
+    ) {
+        return String(value || '').trim();
     }
 
     defaultAnswerValue(

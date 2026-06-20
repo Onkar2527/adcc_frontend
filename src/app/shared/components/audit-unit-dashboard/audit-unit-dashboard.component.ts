@@ -1,7 +1,7 @@
 // src/app/shared/components/audit-unit-dashboard/audit-unit-dashboard.component.ts
 
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output, OnChanges, SimpleChanges } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
 import { ButtonModule } from 'primeng/button';
@@ -75,6 +75,36 @@ export class AuditUnitDashboardComponent {
 
     expandedGroupKey: string | null = null;
     selectedGroupAssessmentIds: Record<string, any> = {};
+
+    ngOnChanges(changes: SimpleChanges) {
+        if (changes['units']) {
+            const nextSelections: Record<string, any> = {};
+
+            for (const item of this.units || []) {
+                const assessments =
+                    this.assessmentItems(item);
+                const key =
+                    this.groupKey(item);
+
+                if (!key || !assessments.length) {
+                    continue;
+                }
+
+                nextSelections[key] =
+                    assessments[0]?.id;
+            }
+
+            this.selectedGroupAssessmentIds =
+                nextSelections;
+
+            if (
+                this.expandedGroupKey
+                && !nextSelections[this.expandedGroupKey]
+            ) {
+                this.expandedGroupKey = null;
+            }
+        }
+    }
 
     defaultSummaryItems() {
         return [

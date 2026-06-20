@@ -880,6 +880,55 @@
                   </div>
 
                   <div
+                    *ngIf="
+                      isLiveManagerComplianceFlow() &&
+                      question.answer?.is_compliance == 1 &&
+                      liveComplianceStatusLabel(question)
+                    "
+                    class="live-compliance-feedback"
+                  >
+                    <div class="live-feedback-box">
+                      <span>Live Compliance Status</span>
+                      {{ liveComplianceStatusLabel(question) }}
+                    </div>
+
+                    <div
+                      *ngIf="canShowLiveComplianceAuditorActions(question)"
+                      class="live-feedback-box live-feedback-actions"
+                    >
+                      <span>Auditor Action</span>
+                      <div class="flex gap-2 flex-wrap">
+                        <button
+                          pButton
+                          type="button"
+                          label="Accept"
+                          icon="pi pi-check"
+                          severity="success"
+                          [loading]="
+                            liveComplianceActionSaving()[
+                              liveComplianceActionKey('answer', question.answer.id)
+                            ]
+                          "
+                          (click)="saveLiveComplianceAction(question, 2)"
+                        ></button>
+                        <button
+                          pButton
+                          type="button"
+                          label="Send To Reviewer"
+                          icon="pi pi-arrow-right"
+                          severity="danger"
+                          [loading]="
+                            liveComplianceActionSaving()[
+                              liveComplianceActionKey('answer', question.answer.id)
+                            ]
+                          "
+                          (click)="saveLiveComplianceAction(question, 3)"
+                        ></button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div
                     *ngIf="isReAudit(detail) && question.re_audit_annexure_only"
                     class="reviewer-feedback"
                   >
@@ -1732,6 +1781,55 @@
                               ></button>
                             </span>
                           </span>
+                        </div>
+                      </div>
+
+                      <div
+                        *ngIf="
+                          isLiveManagerComplianceFlow() &&
+                          subsetQuestion.answer?.is_compliance == 1 &&
+                          liveComplianceStatusLabel(subsetQuestion)
+                        "
+                        class="live-compliance-feedback"
+                      >
+                        <div class="live-feedback-box">
+                          <span>Live Compliance Status</span>
+                          {{ liveComplianceStatusLabel(subsetQuestion) }}
+                        </div>
+
+                        <div
+                          *ngIf="canShowLiveComplianceAuditorActions(subsetQuestion)"
+                          class="live-feedback-box live-feedback-actions"
+                        >
+                          <span>Auditor Action</span>
+                          <div class="flex gap-2 flex-wrap">
+                            <button
+                              pButton
+                              type="button"
+                              label="Accept"
+                              icon="pi pi-check"
+                              severity="success"
+                              [loading]="
+                                liveComplianceActionSaving()[
+                                  liveComplianceActionKey('answer', subsetQuestion.answer.id)
+                                ]
+                              "
+                              (click)="saveLiveComplianceAction(subsetQuestion, 2)"
+                            ></button>
+                            <button
+                              pButton
+                              type="button"
+                              label="Send To Reviewer"
+                              icon="pi pi-arrow-right"
+                              severity="danger"
+                              [loading]="
+                                liveComplianceActionSaving()[
+                                  liveComplianceActionKey('answer', subsetQuestion.answer.id)
+                                ]
+                              "
+                              (click)="saveLiveComplianceAction(subsetQuestion, 3)"
+                            ></button>
+                          </div>
                         </div>
                       </div>
 
