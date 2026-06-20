@@ -2,13 +2,19 @@
   "name": "auditPro",
   "version": "0.0.0",
   "scripts": {
-    "ng": "ng",
-    "test": "ng test",
-    "lint": "ng lint",
-    "e2e": "ng e2e",
-    "start": "ng serve",
-    "serve": "ng serve",
-    "build": "ng build --configuration production --output-path ./out/ng --base-href ./"
+  "ng": "ng",
+  "test": "ng test",
+  "lint": "ng lint",
+  "e2e": "ng e2e",
+
+  "config:local": "copy src\\assets\\config\\config.local.json src\\assets\\config\\config.json",
+  "config:prod": "copy src\\assets\\config\\config.prod.json src\\assets\\config\\config.json",
+
+  "start": "npm run config:local && ng serve",
+  "serve": "npm run config:local && ng serve",
+
+  "build": "npm run config:prod && ng build --configuration production --output-path ./out/ng --base-href ./",
+  "build:local": "npm run config:local && ng build --configuration production --output-path ./out/ng --base-href ./"
   },
   "prettier": {
     "printWidth": 100,
