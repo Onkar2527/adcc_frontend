@@ -258,7 +258,7 @@
         </tbody>
       </table>
 
-      <table class="official-report-table" *ngIf="!isExecutiveSummary() && !isInternalAssessmentReport()"
+      <table class="official-report-table" *ngIf="!isExecutiveSummary() && !isInternalAssessmentReport() && !isQuestionWiseScoringReport()"
         [class.risk-wise-report-table]="isRiskWiseReport()"
         [class.performance-risk-report-table]="isPerformanceRiskWeightageReport()">
         <thead *ngIf="isRiskWiseReport(); else defaultReportHeader">
@@ -487,6 +487,34 @@
             </tr>
           </ng-container>
         </tbody>
+      </table>
+
+      <!-- Question Wise Scoring Report Table -->
+      <table class="official-report-table question-wise-scoring-table" *ngIf="isQuestionWiseScoringReport() && qwsTableHtml()">
+        <thead>
+          <tr class="bg-light-gray" style="background-color: #f4f6f9;">
+            <th style="width: 15%">Menu Name</th>
+            <th style="width: 15%">Risk Category (Weightage)</th>
+            <th style="width: 12%">Category Name</th>
+            <th style="width: 10%">Account Info</th>
+            <th>Question</th>
+            <th style="width: 12%">Answer</th>
+            <th style="width: 12%">Comment</th>
+            <th style="width: 8%" class="text-right">Risk Score</th>
+            <th style="width: 8%" class="text-right">Weighted Score</th>
+            <th style="width: 8%" class="text-right">Max Score</th>
+          </tr>
+        </thead>
+        <!-- All data rows injected as a single innerHTML string — no *ngFor overhead -->
+        <tbody [innerHTML]="qwsTableHtml()"></tbody>
+        <tfoot>
+          <tr class="bg-light-gray" style="font-weight: bold;">
+            <td colspan="7" class="text-center">Total</td>
+            <td class="text-right">{{ qwsTotals()?.riskScore | number:'1.2-2' }}</td>
+            <td class="text-right">{{ qwsTotals()?.weightedScore | number:'1.2-2' }}</td>
+            <td class="text-right">{{ qwsTotals()?.maxScore | number:'1.2-2' }}</td>
+          </tr>
+        </tfoot>
       </table>
 
       <!-- Internal Audit & Compliance Report Custom Cross-Tab Table -->

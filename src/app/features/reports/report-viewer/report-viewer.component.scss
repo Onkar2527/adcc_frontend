@@ -654,3 +654,35 @@
   }
 
 }
+
+.question-wise-scoring-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+  
+  th, td {
+    padding: 0.5rem 0.6rem;
+    border: 1px solid #cbd8e5;
+  }
+  
+  th {
+    background-color: #f4f6f9;
+    color: #102a43;
+    font-weight: 700;
+  }
+
+  td {
+    color: #102a43;
+  }
+  
+  .badge-na {
+    background-color: #f1f3f5;
+    color: #6c757d;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: bold;
+    border: 1px solid #dee2e6;
+  }
+}
+
