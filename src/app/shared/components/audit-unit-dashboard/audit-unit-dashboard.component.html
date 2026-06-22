@@ -90,7 +90,7 @@
         [class.unit-card--grouped]="hasAssessmentGroup(item)"
         tabindex="0"
         role="button"
-        *ngFor="let item of units"
+        *ngFor="let item of sortedUnits"
         (click)="toggleGroup(item)"
         (keydown.enter)="toggleGroup(item)"
         (keydown.space)="toggleGroup(item)"

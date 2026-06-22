@@ -300,4 +300,22 @@ export class AuditUnitDashboardComponent {
 
         this.onOpenUnit(firstAssessment || item);
     }
+
+    get sortedUnits(): any[] {
+        if (!this.units || this.units.length === 0) {
+            return [];
+        }
+        const utturItems: any[] = [];
+        const otherItems: any[] = [];
+        for (const item of this.units) {
+            const name = (item?.display_title || item?.audit_unit_name || '').toLowerCase();
+            const code = (item?.display_code || item?.audit_unit_code || '').toLowerCase();
+            if (name.includes('uttur') || code.includes('uttur')) {
+                utturItems.push(item);
+            } else {
+                otherItems.push(item);
+            }
+        }
+        return [...utturItems, ...otherItems];
+    }
 }

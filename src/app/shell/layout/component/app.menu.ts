@@ -51,13 +51,15 @@ export class AppMenu implements OnInit, OnDestroy {
     {
       label: 'Home',
       authority: ['1', '3', '5', '9'],
-      items: [{ label: 'Dashboard', icon: 'pi pi-fw pi-home', routerLink: ['/home'] },
-      {
-        label: 'Audit Calendar',
-        // authority: ['5'],
-        icon: 'pi pi-fw pi-calendar',
-        routerLink: ['/admin/audit-calendar'],
-      },],
+      items: [
+        { label: 'Dashboard', icon: 'pi pi-fw pi-home', routerLink: ['/home'] },
+        {
+          label: 'Audit Calendar',
+          // authority: ['5'],
+          icon: 'pi pi-fw pi-calendar',
+          routerLink: ['/admin/audit-calendar'],
+        },
+      ],
     },
     {
       label: 'Audit Management',
@@ -107,11 +109,28 @@ export class AppMenu implements OnInit, OnDestroy {
       authority: ['1', '2', '3', '4', '6', '5'],
       items: [{ label: 'Reports', icon: 'pi pi-fw pi-file', routerLink: ['/reports'] }],
     },
+    {
+      label: 'Policies',
+      authority: ['1', '2', '3', '4', '5', '6', '9'],
+      items: [
+        {
+          label: 'Policy Documents',
+          icon: 'pi pi-fw pi-file',
+          routerLink: ['/admin/policy-documents'],
+        },
+      ],
+    },
 
     {
       label: 'System Audit',
       authority: ['1'],
-      items: [{ label: 'Audit Trail Logs', icon: 'pi pi-fw pi-history', routerLink: ['/admin/audit-logs'] }],
+      items: [
+        {
+          label: 'Audit Trail Logs',
+          icon: 'pi pi-fw pi-history',
+          routerLink: ['/admin/audit-logs'],
+        },
+      ],
     },
     {
       label: 'Masters',
@@ -130,11 +149,6 @@ export class AppMenu implements OnInit, OnDestroy {
               label: 'Password Policy',
               icon: 'pi pi-fw pi-lock',
               routerLink: ['/admin/password-policy-master'],
-            },
-            {
-              label: 'Policy Documents',
-              icon: 'pi pi-fw pi-file',
-              routerLink: ['/admin/policy-documents'],
             },
           ],
         },
@@ -388,28 +402,24 @@ export class AppMenu implements OnInit, OnDestroy {
             label: category.name,
             meta: this.categoryProgressText(category),
             badgeClass:
-              Number(category?.live_pending_count || 0) > 0
-                ? 'live-compliance-pending'
-                : '',
-            livePendingCount:
-              Number(category?.live_pending_count || 0),
-            livePendingLabel:
-              `${Number(category?.live_pending_count || 0)} manager response${Number(category?.live_pending_count || 0) === 1 ? '' : 's'} pending with Auditor`,
+              Number(category?.live_pending_count || 0) > 0 ? 'live-compliance-pending' : '',
+            livePendingCount: Number(category?.live_pending_count || 0),
+            livePendingLabel: `${Number(category?.live_pending_count || 0)} manager response${Number(category?.live_pending_count || 0) === 1 ? '' : 's'} pending with Auditor`,
             icon: isCarryForward ? 'pi pi-fw pi-forward' : 'pi pi-fw pi-angle-right',
             routerLink: ['/auditor/internal-audit', assessmentId],
             queryParams: isCarryForward
               ? {
-                view: 'carry-forward',
-                categoryId: null,
-                dumpId: null,
-                pending: null,
-              }
+                  view: 'carry-forward',
+                  categoryId: null,
+                  dumpId: null,
+                  pending: null,
+                }
               : {
-                view: 'category',
-                categoryId: Number(category.id),
-                dumpId: null,
-                pending: null,
-              },
+                  view: 'category',
+                  categoryId: Number(category.id),
+                  dumpId: null,
+                  pending: null,
+                },
             routerLinkActiveOptions: {
               paths: 'exact',
               queryParams: 'exact',

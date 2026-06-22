@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ButtonModule } from 'primeng/button';
 import { FormDrawerRef } from '../../../core/services/drawer/form-drawer.ref';
@@ -8,9 +8,11 @@ import {
   CheckboxFieldComponent,
   DateFieldComponent,
   MultiSelectFieldComponent,
+  SelectFieldComponent,
   FormActionsComponent 
 } from '../../../shared/components/form';
-import { PolicyDocumentsService } from '../services/masters.service';
+import { PolicyDocumentsService, RoleService } from '../services/masters.service';
+import { approvedByOptions } from '../services/required-data';
 
 @Component({
   selector: 'app-policy-document-form',
@@ -23,6 +25,7 @@ import { PolicyDocumentsService } from '../services/masters.service';
     CheckboxFieldComponent,
     DateFieldComponent,
     MultiSelectFieldComponent,
+    SelectFieldComponent,
     FormActionsComponent
   ],
   template: `
@@ -68,7 +71,7 @@ import { PolicyDocumentsService } from '../services/masters.service';
             <app-multi-select-field
               label="User Access"
               [field]="selectedRoles"
-              [options]="roleOptions"
+              [options]="roleOptions()"
               optionLabel="label"
               optionValue="value"
               [filter]="false"
@@ -102,7 +105,7 @@ import { PolicyDocumentsService } from '../services/masters.service';
 
           <div class="col-12 md:col-6 mb-3">
             <app-date-field
-              label="Review Date"
+              label="Renewal Date"
               [field]="reviewDate"
             ></app-date-field>
           </div>
@@ -116,11 +119,15 @@ import { PolicyDocumentsService } from '../services/masters.service';
 
           <!-- Approval Section -->
           <div class="col-12 md:col-6 mb-3">
-            <app-text-field
+            <app-select-field
               label="Approved By"
               [field]="approvedBy"
-              placeholder="Approver name"
-            ></app-text-field>
+              [options]="approvedByOptions"
+              optionLabel="label"
+              optionValue="value"
+              placeholder="Select approver..."
+              [filter]="true"
+            ></app-select-field>
           </div>
 
           <div class="col-12 md:col-6 mb-3">
@@ -204,9 +211,10 @@ import { PolicyDocumentsService } from '../services/masters.service';
     </div>
   `
 })
-export class PolicyDocumentFormComponent {
+export class PolicyDocumentFormComponent implements OnInit {
   private ref = inject(FormDrawerRef);
   private policyService = inject(PolicyDocumentsService);
+  private roleService = inject(RoleService);
 
   documentCode = signal('');
   documentTitle = signal('');
@@ -217,7 +225,7 @@ export class PolicyDocumentFormComponent {
   effectiveDate = signal<Date | null>(null);
   reviewDate = signal<Date | null>(null);
   expiryDate = signal<Date | null>(null);
-  approvedBy = signal('');
+  approvedBy = signal<string | null>('');
   approvedDate = signal<Date | null>(null);
   certifiedAuthority = signal('');
   certifiedDate = signal<Date | null>(null);
@@ -232,12 +240,28 @@ export class PolicyDocumentFormComponent {
   saving = signal(false);
   isEdit = false;
 
-  roleOptions = [
-    { label: 'Admin', value: '1' },
-    { label: 'Auditor', value: '2' },
-    { label: 'Compliance', value: '3' },
-    { label: 'Reviewer', value: '4' }
-  ];
+  roleOptions = signal<any[]>([]);
+  approvedByOptions = approvedByOptions;
+
+  ngOnInit() {
+    this.loadRoles();
+  }
+
+  loadRoles() {
+    this.roleService.findAll().subscribe({
+      next: (res: any) => {
+        if (res && res.data) {
+          this.roleOptions.set(res.data.map((r: any) => ({
+            label: r.role_name,
+            value: String(r.id)
+          })));
+        }
+      },
+      error: (err) => {
+        console.error('Failed to load roles', err);
+      }
+    });
+  }
 
   constructor() {
     const data = this.ref.data;
@@ -303,18 +327,18 @@ export class PolicyDocumentFormComponent {
     formData.append('description', this.description().trim());
     formData.append('version_no', this.versionNo().trim());
     
-    if (this.issueDate()) formData.append('issue_date', this.issueDate()!.toISOString());
-    if (this.effectiveDate()) formData.append('effective_date', this.effectiveDate()!.toISOString());
-    if (this.reviewDate()) formData.append('review_date', this.reviewDate()!.toISOString());
-    if (this.expiryDate()) formData.append('expiry_date', this.expiryDate()!.toISOString());
+    formData.append('issue_date', this.issueDate() ? this.issueDate()!.toISOString() : '');
+    formData.append('effective_date', this.effectiveDate() ? this.effectiveDate()!.toISOString() : '');
+    formData.append('review_date', this.reviewDate() ? this.reviewDate()!.toISOString() : '');
+    formData.append('expiry_date', this.expiryDate() ? this.expiryDate()!.toISOString() : '');
     
-    formData.append('approved_by', this.approvedBy().trim());
-    if (this.approvedDate()) formData.append('approved_date', this.approvedDate()!.toISOString());
+    formData.append('approved_by', (this.approvedBy() || '').trim());
+    formData.append('approved_date', this.approvedDate() ? this.approvedDate()!.toISOString() : '');
     
-    formData.append('certified_authority', this.certifiedAuthority().trim());
-    if (this.certifiedDate()) formData.append('certified_date', this.certifiedDate()!.toISOString());
+    formData.append('certified_authority', (this.certifiedAuthority() || '').trim());
+    formData.append('certified_date', this.certifiedDate() ? this.certifiedDate()!.toISOString() : '');
     
-    formData.append('certification_remarks', this.certificationRemarks().trim());
+    formData.append('certification_remarks', (this.certificationRemarks() || '').trim());
     formData.append('user_access', this.selectedRoles().join(','));
     formData.append('is_active', this.isActive() ? '1' : '0');
 

@@ -176,3 +176,18 @@ export const branch_fresh_accounts_npa = [
 
 export const FREE_AUDIT_FLOW = false;
 
+export const approvedByOptions = [
+    { label: 'Chairman', value: 'Chairman' },
+    { label: 'BOD (Board of Directors)', value: 'BOD' },
+    { label: 'Board of Management', value: 'Board of Management' },
+    { label: 'IT Committee Board', value: 'IT Committee Board' },
+    { label: 'Audit Committee Board', value: 'Audit Committee Board' },
+    { label: 'Statutory Board', value: 'Statutory Board' },
+    { label: 'Loan Committee of Board', value: 'Loan Committee of Board' },
+    { label: 'Consultant', value: 'Consultant' },
+    { label: 'Managing Director & CEO', value: 'Managing Director & CEO' },
+    { label: 'Executive Committee', value: 'Executive Committee' },
+    { label: 'Risk Management Committee', value: 'Risk Management Committee' },
+    { label: 'Compliance Committee', value: 'Compliance Committee' }
+];
+
