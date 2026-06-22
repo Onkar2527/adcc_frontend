@@ -37,6 +37,8 @@ import { AuditCalendarComponent } from './audit-calendar/audit-calendar.componen
 import { AuditFrequencyMasterComponent } from './audit-frequency-master/audit-frequency-master.component';
 import { SpecialAuditComponent } from './special-audit/special-audit.component';
 import { MultipleAuditorAssignmentComponent } from './multiple-auditor-assignment/multiple-auditor-assignment.component';
+import { IncidentManagementComponent } from './incident-management/incident-management.component';
+
 
 
 export const ADMIN_ROUTES: Routes = [
@@ -79,5 +81,6 @@ export const ADMIN_ROUTES: Routes = [
     { path: 'audit-frequency-master', component: AuditFrequencyMasterComponent },
     { path: 'special-audit', component: SpecialAuditComponent },
     { path: 'multiple-auditor-assignment', component: MultipleAuditorAssignmentComponent },
+    { path: 'incidents', component: IncidentManagementComponent },
     { path: 'audit-logs', loadComponent: () => import('./audit-logs/audit-logs.component').then(mod => mod.AuditLogsComponent) },
 ]; // Routes configuration for admin master features

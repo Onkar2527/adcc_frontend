@@ -120,6 +120,17 @@ export class AppMenu implements OnInit, OnDestroy {
         },
       ],
     },
+    {
+      label: 'Incident Management',
+      authority: ['1', '2', '3', '4', '5', '9'],
+      items: [
+        {
+          label: 'Incidents',
+          icon: 'pi pi-fw pi-exclamation-triangle',
+          routerLink: ['/admin/incidents'],
+        },
+      ],
+    },
 
     {
       label: 'System Audit',
