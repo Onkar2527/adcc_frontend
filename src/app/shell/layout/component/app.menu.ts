@@ -194,6 +194,11 @@ export class AppMenu implements OnInit, OnDestroy {
           icon: 'pi pi-fw pi-question-circle',
           items: [
             {
+              label: 'Quick Question Setup',
+              icon: 'pi pi-fw pi-bolt',
+              routerLink: ['/admin/quick-question-mapper'],
+            },
+            {
               label: 'Manage Question ',
               icon: 'pi pi-fw pi-question-circle',
               routerLink: ['/admin/question-set-master'],

@@ -1,0 +1,546 @@
+<div class="quick-mapper-container p-4">
+  <!-- Toast & Confirm Dialog -->
+  <p-toast></p-toast>
+  <p-confirmDialog></p-confirmDialog>
+
+  <!-- Premium Header Toolbar -->
+  <div class="header-card flex flex-column md:flex-row md:align-items-center justify-content-between p-4 mb-4 bg-white border-1 border-gray-200 border-round-xl shadow-1 gap-3">
+    <div class="flex align-items-center gap-3">
+      <div class="logo-box flex align-items-center justify-content-center">
+        <i class="pi pi-bolt text-2xl text-primary"></i>
+      </div>
+      <div>
+        <h4 class="m-0 text-xl font-bold text-900">Quick Question & Score Setup</h4>
+        <p class="m-0 text-sm text-500 mt-1">Configure sets, headers, questions, risk parameters, and scoring mappings on a single unified screen.</p>
+      </div>
+    </div>
+
+    <div class="flex align-items-center gap-2">
+      <button pButton 
+              type="button" 
+              label="Download Template" 
+              icon="pi pi-download" 
+              class="p-button-outlined p-button-secondary p-button-sm"
+              pTooltip="Download CSV sample format" 
+              tooltipPosition="left"
+              (click)="downloadSampleCSV()">
+      </button>
+
+      <button pButton 
+              type="button" 
+              label="Bulk Upload" 
+              icon="pi pi-upload" 
+              class="p-button-outlined p-button-info p-button-sm"
+              pTooltip="Import questions via CSV"
+              tooltipPosition="left"
+              (click)="csvFileInput.click()">
+      </button>
+      <input #csvFileInput 
+             type="file" 
+             accept=".csv" 
+             style="display: none" 
+             (change)="onCSVFileSelected($event)" />
+
+      <button pButton 
+              type="button" 
+              label="Clear Form" 
+              icon="pi pi-refresh" 
+              class="p-button-text p-button-secondary p-button-sm"
+              (click)="clearQuestionForm()">
+      </button>
+    </div>
+  </div>
+
+  <!-- 2-Panel Spacious Editor Layout -->
+  <div class="grid align-items-stretch mb-4">
+    <!-- Panel 1: Question Setup Form (8 Cols) -->
+    <div class="col-12 lg:col-8 flex">
+      <div class="editor-card flex-grow-1 p-4 shadow-1 border-round-xl bg-white border-1 border-gray-200 flex flex-column justify-content-between gap-4">
+        <div>
+          <!-- Panel Header -->
+          <div class="font-bold text-800 text-lg border-bottom-1 border-gray-100 pb-3 mb-4 flex align-items-center gap-2">
+            <i class="pi pi-question-circle text-primary"></i>
+            <span>1. Question & Parameters Setup</span>
+          </div>
+
+          <div class="grid">
+            <!-- Left Side: Structure & Question details -->
+            <div class="col-12 md:col-6 flex flex-column gap-3">
+              
+              <!-- Question Set Selection -->
+              <app-select-field
+                label="Question Set *"
+                [field]="selectedSetId"
+                [options]="sets()"
+                optionLabel="name"
+                optionValue="id"
+                [showAddButton]="true"
+                addTooltip="Add New Set"
+                (add)="openAddSet()"
+                (onChange)="onSetChange($event)"
+                class="w-full">
+              </app-select-field>
+
+              <!-- Header Selection -->
+              <app-select-field
+                label="Category/Menu Header *"
+                [field]="selectedHeaderId"
+                [options]="headers()"
+                optionLabel="name"
+                optionValue="id"
+                [disabled]="!selectedSetId()"
+                [showAddButton]="true"
+                addTooltip="Add New Header"
+                (add)="openAddHeader()"
+                (onChange)="onHeaderChange()"
+                class="w-full">
+              </app-select-field>
+
+              <!-- Question Description Text Area -->
+              <app-textarea-field
+                label="Question Description *"
+                [field]="questionText"
+                [rows]="4"
+                class="w-full">
+              </app-textarea-field>
+
+              <!-- Question Type & Input Method -->
+              <div class="grid">
+                <div class="col-6">
+                  <app-select-field
+                    label="Type *"
+                    [field]="questionTypeId"
+                    [options]="questionTypes()"
+                    optionLabel="label"
+                    optionValue="value"
+                    class="w-full">
+                  </app-select-field>
+                </div>
+
+                <div class="col-6">
+                  <app-select-field
+                    label="Input Method *"
+                    [field]="optionId"
+                    [options]="inputMethods()"
+                    optionLabel="label"
+                    optionValue="value"
+                    class="w-full">
+                  </app-select-field>
+                </div>
+              </div>
+
+              <!-- Annexure Sub-selection -->
+              <div *ngIf="optionId() === 4" class="pl-2 border-left-3 border-primary">
+                <app-select-field
+                  label="Select Annexure *"
+                  [field]="selectedAnnexureId"
+                  [options]="annexures()"
+                  optionLabel="label"
+                  optionValue="value"
+                  class="w-full">
+                </app-select-field>
+              </div>
+
+              <!-- Subset Sub-selection -->
+              <div *ngIf="optionId() === 5" class="pl-2 border-left-3 border-primary flex flex-column gap-2">
+                <span class="text-xs font-semibold text-500 uppercase tracking-wider block">Select Subsets *</span>
+                <div class="flex flex-column gap-2 max-h-8rem overflow-y-auto pr-1 border-1 border-gray-100 p-2 border-round-lg">
+                  <div *ngFor="let s of subsets()" class="flex align-items-center gap-2">
+                    <p-checkbox [binary]="true" 
+                                [ngModel]="selectedSubsetIds().includes(s.value)"
+                                (onChange)="onSubsetChange(s.value, $event.checked)"
+                                [inputId]="'subset-' + s.value">
+                    </p-checkbox>
+                    <label [for]="'subset-' + s.value" class="text-sm text-700 cursor-pointer select-none">{{ s.label }}</label>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Right Side: scoring parameter dropdowns -->
+            <div class="col-12 md:col-6 flex flex-column gap-3 pl-0 md:pl-4">
+              <!-- Applicable To -->
+              <app-select-field
+                label="Applicable To *"
+                [field]="applicableId"
+                [options]="applicableToOptions()"
+                optionLabel="label"
+                optionValue="value"
+                class="w-full">
+              </app-select-field>
+
+              <!-- Broader Area of Audit -->
+              <app-select-field
+                label="Broader Area of Audit"
+                [field]="auditAreaId"
+                [options]="auditAreas()"
+                optionLabel="label"
+                optionValue="value"
+                [filter]="true"
+                class="w-full">
+              </app-select-field>
+
+              <!-- Business Risk Category -->
+              <app-select-field
+                label="Business Risk Category"
+                [field]="businessRiskCategoryId"
+                [options]="businessRiskCategories()"
+                optionLabel="label"
+                optionValue="value"
+                class="w-full">
+              </app-select-field>
+
+              <!-- Control Risk Category -->
+              <app-select-field
+                label="Control Risk Category"
+                [field]="controlRiskCategoryId"
+                [options]="controlRiskCategories()"
+                optionLabel="label"
+                optionValue="value"
+                class="w-full">
+              </app-select-field>
+
+              <!-- Key Aspect -->
+              <app-select-field
+                label="Key Aspect"
+                [field]="keyAspectId"
+                [options]="keyAspects()"
+                optionLabel="label"
+                optionValue="value"
+                [disabled]="!controlRiskCategoryId()"
+                class="w-full">
+              </app-select-field>
+
+              <!-- Residual Risk -->
+              <app-select-field
+                label="Residual Risk"
+                [field]="residualRiskId"
+                [options]="residualRisks()"
+                optionLabel="label"
+                optionValue="value"
+                class="w-full">
+              </app-select-field>
+
+              <div class="grid">
+                <!-- Show Instances -->
+                <div class="col-6">
+                  <app-number-field
+                    label="Show Instances"
+                    [field]="showInstances"
+                    class="w-full">
+                  </app-number-field>
+                </div>
+                
+                <!-- Flags Group -->
+                <div class="col-6 flex flex-column gap-2 justify-content-center">
+                  <app-checkbox-field
+                    label="Auditor Upload"
+                    [field]="auditEvidenceUpload">
+                  </app-checkbox-field>
+
+                  <app-checkbox-field
+                    label="Compliance Upload"
+                    [field]="complianceEvidenceUpload">
+                  </app-checkbox-field>
+
+                  <app-checkbox-field
+                    label="Active Status"
+                    [field]="isActive">
+                  </app-checkbox-field>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="flex justify-content-end gap-2 pt-3 border-top-1 border-gray-100">
+          <button pButton 
+                  type="button" 
+                  [label]="editingQuestionId() ? 'Update Question' : 'Save Question'" 
+                  icon="pi pi-check" 
+                  class="p-button-primary px-4 border-round-lg shadow-1"
+                  [loading]="saving()"
+                  (click)="saveQuestion()">
+          </button>
+          <button pButton 
+                  type="button" 
+                  label="Cancel" 
+                  class="p-button-secondary p-button-outlined px-4 border-round-lg"
+                  (click)="clearQuestionForm()">
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Panel 2: Risk Scoring Mapping (4 Cols) -->
+    <div class="col-12 lg:col-4 flex">
+      <div class="editor-card flex-grow-1 p-4 shadow-1 border-round-xl bg-white border-1 border-gray-200 flex flex-column justify-content-between gap-4">
+        <div class="flex flex-column gap-3 w-full">
+          <!-- Panel Header -->
+          <div class="font-bold text-800 text-lg border-bottom-1 border-gray-100 pb-3 mb-3 flex align-items-center gap-2">
+            <i class="pi pi-shield text-orange-500"></i>
+            <span>2. Risk Scoring Mapping</span>
+          </div>
+
+          <!-- Add Mapping Form -->
+          <div class="mapping-box p-3 border-round-xl bg-gray-50 border-1 border-gray-200 flex flex-column gap-3">
+            <app-text-field
+              label="Risk Type"
+              [field]="newRiskType"
+              placeholder="e.g. Counter Theft Risk"
+              class="w-full">
+            </app-text-field>
+
+            <div class="grid">
+              <div class="col-6">
+                <app-select-field
+                  label="Business Risk"
+                  [field]="newBusinessRisk"
+                  [options]="riskOptions"
+                  optionLabel="label"
+                  optionValue="value"
+                  class="w-full">
+                </app-select-field>
+              </div>
+
+              <div class="col-6">
+                <app-select-field
+                  label="Control Risk"
+                  [field]="newControlRisk"
+                  [options]="riskOptions"
+                  optionLabel="label"
+                  optionValue="value"
+                  class="w-full">
+                </app-select-field>
+              </div>
+            </div>
+
+            <div class="flex justify-content-end">
+              <button pButton 
+                      type="button" 
+                      label="Add Mapping" 
+                      icon="pi pi-plus" 
+                      class="p-button-sm p-button-outlined p-button-orange border-round-lg"
+                      (click)="addRiskMapping()">
+              </button>
+            </div>
+          </div>
+
+          <!-- Table mappings listing -->
+          <div class="table-container border-1 border-gray-200 border-round-xl overflow-hidden max-h-15rem overflow-y-auto">
+            <table class="w-full border-collapse text-left text-xs bg-white">
+              <thead>
+                <tr class="bg-gray-100 text-600 font-semibold border-bottom-1 border-gray-200">
+                  <th class="p-3">Risk Type</th>
+                  <th class="p-3">Biz Risk</th>
+                  <th class="p-3">Ctrl Risk</th>
+                  <th class="p-3 text-center" style="width: 40px;"></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let m of currentRiskMappings(); let idx = index" class="border-bottom-1 border-gray-100 hover:bg-gray-50">
+                  <td class="p-3 max-w-10rem overflow-hidden text-overflow-ellipsis white-space-nowrap font-medium text-700">{{ m.risk_type }}</td>
+                  <td class="p-3">
+                    <span class="risk-badge" [class]="m.business_risk | lowercase">{{ m.business_risk }}</span>
+                  </td>
+                  <td class="p-3">
+                    <span class="risk-badge" [class]="m.control_risk | lowercase">{{ m.control_risk }}</span>
+                  </td>
+                  <td class="p-3 text-center">
+                    <button pButton 
+                            type="button" 
+                            icon="pi pi-trash" 
+                            class="p-button-danger p-button-text p-button-rounded p-button-icon-only w-2rem h-2rem"
+                            (click)="removeRiskMapping(m, idx)">
+                    </button>
+                  </td>
+                </tr>
+                <tr *ngIf="currentRiskMappings().length === 0">
+                  <td colspan="4" class="p-4 text-center text-500 italic">No risk mappings added yet.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="text-xs text-500 italic text-center w-full">
+          Mappings are saved to database with the Question.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom Panel: Question List Datatable -->
+  <div class="card border-round-xl shadow-1 p-4 bg-white border-1 border-gray-200">
+    <div class="flex align-items-center justify-content-between mb-4">
+      <div class="flex align-items-center gap-2">
+        <h5 class="m-0 text-lg font-bold text-800">Questions Master Directory</h5>
+        <span *ngIf="questions().length > 0" class="badge-count">{{ questions().length }} questions</span>
+      </div>
+      <div class="text-xs font-semibold text-500 uppercase tracking-wider">
+        <span *ngIf="selectedSetId()">Filtering Set questions</span>
+        <span *ngIf="selectedHeaderId()"> / Header questions</span>
+      </div>
+    </div>
+
+    <!-- p-table for clean list -->
+    <p-table [value]="questions()" 
+             [loading]="loading()" 
+             [paginator]="true" 
+             [rows]="10" 
+             [rowsPerPageOptions]="[10, 25, 50]"
+             [rowHover]="true"
+             styleClass="p-datatable-sm"
+             responsiveLayout="scroll">
+      <ng-template pTemplate="header">
+        <tr>
+          <th style="width: 80px;" class="text-center">Edit</th>
+          <th>Question</th>
+          <th style="width: 140px;">Type</th>
+          <th style="width: 160px;">Input Method</th>
+          <th style="width: 220px;">Area of Audit</th>
+          <th style="width: 150px;">Business Risk</th>
+          <th style="width: 100px;" class="text-center">Status</th>
+          <th style="width: 100px;" class="text-center">Actions</th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-q>
+        <tr>
+          <td class="text-center">
+            <button pButton 
+                    type="button" 
+                    icon="pi pi-pencil" 
+                    class="p-button-text p-button-rounded p-button-icon-only"
+                    pTooltip="Edit question details"
+                    (click)="editQuestion(q)">
+            </button>
+          </td>
+          <td>
+            <div class="font-medium text-800 text-sm line-height-3 max-w-30rem overflow-hidden text-overflow-ellipsis" [pTooltip]="q.question" tooltipPosition="top">
+              {{ q.question }}
+            </div>
+          </td>
+          <td>
+            <span class="badge-type" [class]="q.question_type_name | lowercase">{{ q.question_type_name }}</span>
+          </td>
+          <td>{{ q.option_name }}</td>
+          <td>{{ q.audit_area_name || '-' }}</td>
+          <td>
+            <span *ngIf="q.risk_category_name" class="risk-badge" [class]="q.risk_category_name | lowercase">{{ q.risk_category_name }}</span>
+            <span *ngIf="!q.risk_category_name">-</span>
+          </td>
+          <td class="text-center">
+            <span class="status-indicator" [class.active]="Number(q.is_active) === 1" [class.inactive]="Number(q.is_active) === 0">
+              {{ Number(q.is_active) === 1 ? 'Active' : 'Inactive' }}
+            </span>
+          </td>
+          <td class="text-center">
+            <div class="flex justify-content-center gap-2">
+              <button pButton 
+                      type="button" 
+                      icon="pi pi-sync" 
+                      class="p-button-text p-button-secondary p-button-rounded p-button-icon-only w-2rem h-2rem"
+                      pTooltip="Toggle status"
+                      (click)="toggleQuestionStatus(q)">
+              </button>
+              <button pButton 
+                      type="button" 
+                      icon="pi pi-trash" 
+                      class="p-button-text p-button-danger p-button-rounded p-button-icon-only w-2rem h-2rem"
+                      pTooltip="Delete question"
+                      (click)="deleteQuestion(q)">
+              </button>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="8" class="text-center p-5 text-500 italic bg-gray-50 border-round-lg">
+            No questions loaded. Please select a Question Set or Header to list saved items, or use the setup panels to create a new one.
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </div>
+
+  <!-- Dialog: Add Set -->
+  <p-dialog header="Create Question Set" 
+            [(visible)]="showAddSetDialog" 
+            [modal]="true" 
+            [style]="{ width: '420px' }" 
+            [draggable]="false" 
+            [resizable]="false"
+            styleClass="custom-dialog">
+    <div class="flex flex-column gap-4 py-3">
+      <app-text-field
+        label="Set Name"
+        [field]="newSetName"
+        class="w-full">
+      </app-text-field>
+
+      <app-select-field
+        label="Set Type"
+        [field]="newSetTypeId"
+        [options]="setTypes"
+        optionLabel="label"
+        optionValue="value"
+        class="w-full">
+      </app-select-field>
+    </div>
+    <ng-template pTemplate="footer">
+      <button pButton type="button" label="Cancel" class="p-button-text p-button-secondary px-3" (click)="showAddSetDialog.set(false)"></button>
+      <button pButton type="button" label="Create Set" class="p-button-primary px-3" (click)="saveNewSet()"></button>
+    </ng-template>
+  </p-dialog>
+
+  <!-- Dialog: Add Header -->
+  <p-dialog header="Create Category/Menu Header" 
+            [(visible)]="showAddHeaderDialog" 
+            [modal]="true" 
+            [style]="{ width: '420px' }" 
+            [draggable]="false" 
+            [resizable]="false"
+            styleClass="custom-dialog">
+    <div class="flex flex-column gap-3 py-3">
+      <app-text-field
+        label="Header Name"
+        [field]="newHeaderName"
+        class="w-full">
+      </app-text-field>
+    </div>
+    <ng-template pTemplate="footer">
+      <button pButton type="button" label="Cancel" class="p-button-text p-button-secondary px-3" (click)="showAddHeaderDialog.set(false)"></button>
+      <button pButton type="button" label="Create Header" class="p-button-primary px-3" (click)="saveNewHeader()"></button>
+    </ng-template>
+  </p-dialog>
+
+  <!-- Bulk Import Process Dialog -->
+  <p-dialog header="Bulk Upload Questions" 
+            [(visible)]="showImportDialog" 
+            [modal]="true" 
+            [style]="{ width: '550px' }" 
+            [closable]="!importing()" 
+            [draggable]="false" 
+            [resizable]="false"
+            styleClass="custom-dialog">
+    <div class="flex flex-column gap-3 py-3">
+      <div class="text-sm font-semibold text-700">{{ importStatusText() }}</div>
+      
+      <p-progressBar [value]="importProgress()" [showValue]="true"></p-progressBar>
+      
+      <div *ngIf="importErrors().length > 0" class="flex flex-column gap-2 mt-3">
+        <span class="text-sm font-bold text-red-500">Errors & Warnings:</span>
+        <div class="bg-red-50 border-round-lg p-3 max-h-12rem overflow-y-auto border-1 border-red-200">
+          <div *ngFor="let err of importErrors()" class="text-xs text-red-600 border-bottom-1 border-red-100 py-1 line-height-3">
+            {{ err }}
+          </div>
+        </div>
+      </div>
+    </div>
+    <ng-template pTemplate="footer">
+      <button pButton type="button" label="Close" [disabled]="importing()" class="p-button-primary px-4" (click)="showImportDialog.set(false)"></button>
+    </ng-template>
+  </p-dialog>
+</div>

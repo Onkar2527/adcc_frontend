@@ -38,11 +38,13 @@ import { AuditFrequencyMasterComponent } from './audit-frequency-master/audit-fr
 import { SpecialAuditComponent } from './special-audit/special-audit.component';
 import { MultipleAuditorAssignmentComponent } from './multiple-auditor-assignment/multiple-auditor-assignment.component';
 import { IncidentManagementComponent } from './incident-management/incident-management.component';
+import { QuickQuestionMapperComponent } from './quick-question-mapper/quick-question-mapper.component';
 
 
 
 export const ADMIN_ROUTES: Routes = [
     { path: '', component: AdminDashboardPlaceholderComponent },
+    { path: 'quick-question-mapper', component: QuickQuestionMapperComponent },
     { path: 'branch-master', component: BranchMasterComponent },
     { path: 'role-master', component: RoleMasterComponent },
     { path: 'user-master', component: UserMasterComponent },
