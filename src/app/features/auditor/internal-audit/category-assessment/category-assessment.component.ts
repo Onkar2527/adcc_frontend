@@ -1406,6 +1406,11 @@ export class CategoryAssessmentComponent
 
         let count = 0;
         for (const q of questions) {
+            if (this.isTextAnswer(q)) {
+                count++;
+                continue;
+            }
+
             const value =
                 this.answerValueForSave(
                     q,
@@ -2206,7 +2211,7 @@ export class CategoryAssessmentComponent
                         || 'All header answers saved successfully',
                     );
 
-                    this.markSavedLocalOnly();
+                    this.markSaved();
 
                     this.loadCategory(
                         Number(detail.overview.id),
@@ -2229,17 +2234,9 @@ export class CategoryAssessmentComponent
     }
 
     private questionNeedsTextAnswer(
-        question: any,
+        _question: any,
     ) {
-        return this.isTextAnswer(
-            question,
-        )
-            &&
-            !String(
-                this.answerValueForSave(
-                    question,
-                ) || '',
-            ).trim();
+        return false;
     }
 
     private headerHasPendingTextAnswer(

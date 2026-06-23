@@ -105,10 +105,19 @@ export class AuditSectionService {
   findAll(): Observable<{ data: any[] } | any[]> {
     return this.http.get<{ data: any[] } | any[]>(this.apiUrl);
   }
-  create(data: { name: string }) {
+  create(data: {
+    name: string;
+    audit_type_id?: string;
+  }) {
     return this.http.post<any>(this.apiUrl, data);
   }
-  update(id: string | number, data: { name: string }) {
+  update(
+    id: string | number,
+    data: {
+      name: string;
+      audit_type_id?: string;
+    },
+  ) {
     return this.http.put<any>(`${this.apiUrl}/${id}`, data);
   }
   toggleStatus(id: string | number) {
@@ -116,6 +125,50 @@ export class AuditSectionService {
   }
   remove(id: string | number) {
     return this.http.delete<any>(`${this.apiUrl}/${id}`);
+  }
+}
+
+export interface AuditTypePayload {
+  code: string;
+  name: string;
+  description?: string | null;
+  is_system: number;
+  is_active: number;
+}
+
+@Injectable({ providedIn: 'root' })
+export class AuditTypeService {
+  private http = inject(HttpClient);
+  private config = inject(APP_CONFIG);
+  private apiUrl = `${this.config.apiUrl}/audit-types`;
+
+  findAll(): Observable<{ data: any[] } | any[]> {
+    return this.http.get<{ data: any[] } | any[]>(this.apiUrl);
+  }
+
+  create(data: AuditTypePayload) {
+    return this.http.post<any>(this.apiUrl, data);
+  }
+
+  update(id: string | number, data: AuditTypePayload) {
+    return this.http.put<any>(`${this.apiUrl}/${id}`, data);
+  }
+
+  toggleStatus(id: string | number) {
+    return this.http.put<any>(`${this.apiUrl}/${id}/toggle-status`, {});
+  }
+
+  getQuestionSetups(id: string | number) {
+    return this.http.get<any>(`${this.apiUrl}/${id}/question-setups`);
+  }
+
+  saveQuestionSetups(
+    id: string | number,
+    controlMasterIds: number[],
+  ) {
+    return this.http.put<any>(`${this.apiUrl}/${id}/question-setups`, {
+      control_master_ids: controlMasterIds,
+    });
   }
 }
 
@@ -1183,6 +1236,7 @@ export interface PeriodwiseQuestionsMaster {
 }
 
 export interface CreatePeriodwiseQuestionsMasterDto {
+  audit_type_ids: number[];
   year_id: number;
   section_type_id: number;
   user_type_id: number;
@@ -1790,6 +1844,7 @@ export class MasterBulkUploadApiService {
 }
 
 export interface SpecialAuditPayload {
+  audit_type_id: number;
   title: string;
   year_id: number;
   audit_unit_id: number;

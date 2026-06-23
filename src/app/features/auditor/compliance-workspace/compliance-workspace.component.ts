@@ -160,13 +160,13 @@ export class ComplianceWorkspaceComponent implements OnInit {
 
     regularAssessments = computed(() =>
         this.assessments().filter(
-            (assessment: any) => Number(assessment.audit_type_id || 1) !== 2,
+            (assessment: any) => Number(assessment.audit_type_id || 1) === 1,
         ),
     );
 
     specialAssessments = computed(() =>
         this.assessments().filter(
-            (assessment: any) => Number(assessment.audit_type_id || 1) === 2,
+            (assessment: any) => Number(assessment.audit_type_id || 1) !== 1,
         ),
     );
 
@@ -182,13 +182,20 @@ export class ComplianceWorkspaceComponent implements OnInit {
                 .map((assessment: any) => ({
                     ...assessment,
                     display_title:
-                        Number(assessment.audit_type_id || 1) === 2
+                        Number(assessment.audit_type_id || 1) !== 1
                             ? (assessment.special_audit_title || assessment.audit_unit_name)
                             : assessment.audit_unit_name,
                     display_code:
-                        Number(assessment.audit_type_id || 1) === 2
+                        Number(assessment.audit_type_id || 1) !== 1
                             ? `Branch: ${assessment.audit_unit_name}${assessment.audit_unit_code ? ` (${assessment.audit_unit_code})` : ''}`
                             : `Code: ${assessment.audit_unit_code}`,
+                    audit_type_label:
+                        assessment.audit_type_name
+                        || (
+                            Number(assessment.audit_type_id || 1) === 1
+                                ? 'Internal Audit'
+                                : 'Special Audit'
+                        ),
                     latest_status:
                         assessment.compliance_stage || 'Compliance Required Points',
                     assessment_period_label:
@@ -297,6 +304,10 @@ export class ComplianceWorkspaceComponent implements OnInit {
     ];
 
     complianceCardMetaItems = [
+        {
+            label: 'Audit Type',
+            key: 'audit_type_label',
+        },
         {
             label: 'Assessment Period',
             key: 'assessment_period_label',
@@ -436,8 +447,8 @@ export class ComplianceWorkspaceComponent implements OnInit {
             this.detail()?.overview
             || this.selected();
 
-        return Number(item?.audit_type_id || 1) === 2
-            ? (item?.special_audit_title || item?.audit_unit_name || 'Special Audit')
+        return Number(item?.audit_type_id || 1) !== 1
+            ? (item?.special_audit_title || item?.audit_unit_name || item?.audit_type_name || 'Audit')
             : item?.audit_unit_name;
     }
 
@@ -447,8 +458,8 @@ export class ComplianceWorkspaceComponent implements OnInit {
             || this.selected();
 
         const prefix =
-            Number(item?.audit_type_id || 1) === 2
-                ? 'Special Audit'
+            Number(item?.audit_type_id || 1) !== 1
+                ? (item?.audit_type_name || 'Special Audit')
                 : (item?.audit_unit_code || '');
 
         const stage =

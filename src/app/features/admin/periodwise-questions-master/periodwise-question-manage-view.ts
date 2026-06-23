@@ -455,8 +455,33 @@ export class PeriodwiseQuestionsMasterViewComponent
               ?.split(',')
               ?.map(Number) || [];
 
+          const selectedAuditTypeIds =
+            (Array.isArray(this.data?.audit_type_ids)
+              ? this.data.audit_type_ids
+              : String(this.data?.audit_type_ids || '')
+                  .split(',')
+            )
+              .map(Number)
+              .filter(Boolean);
+
           const menus =
-            rows.map((item: any) => ({
+            rows
+              .filter((item: any) => {
+                const sectionAuditTypeIds =
+                  String(item?.section_audit_type_ids || '')
+                    .split(',')
+                    .map((id) => Number(id.trim()))
+                    .filter(Boolean);
+
+                const belongsToAuditType =
+                  !selectedAuditTypeIds.length
+                  || selectedAuditTypeIds.some((auditTypeId: number) =>
+                    sectionAuditTypeIds.includes(auditTypeId),
+                  );
+
+                return belongsToAuditType;
+              })
+              .map((item: any) => ({
 
               ...item,
 
@@ -465,7 +490,7 @@ export class PeriodwiseQuestionsMasterViewComponent
                   Number(item.id)
                 )
 
-            }));
+              }));
 
           this.allMenus.set(
             menus

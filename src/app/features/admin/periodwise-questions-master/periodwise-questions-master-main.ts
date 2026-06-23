@@ -6,11 +6,13 @@ import {
     TextFieldComponent,
     FormActionsComponent,
     SelectFieldComponent,
-    CheckboxFieldComponent
+    CheckboxFieldComponent,
+    MultiSelectFieldComponent
 } from '../../../shared/components/form';
 
 import {
     AuditSectionService,
+    AuditTypeService,
     AuditUnitService,
     MenuMasterService,
     PeriodwiseQuestionsMasterService
@@ -25,6 +27,7 @@ import { MessageService } from 'primeng/api';
         TextFieldComponent,
         SelectFieldComponent,
         CheckboxFieldComponent,
+        MultiSelectFieldComponent,
         FormActionsComponent
     ],
     template: `
@@ -34,6 +37,20 @@ import { MessageService } from 'primeng/api';
   <div class="border-1 border-gray-300 border-round-lg p-4 shadow-1 bg-white flex-1">
 
     <div class="grid">
+
+      <div class="col-12">
+        <app-multi-select-field
+          label="Audit Types"
+          [field]="audit_type_ids"
+          [options]="auditTypeOptions()"
+          optionLabel="label"
+          optionValue="value"
+          display="chip"
+          [required]="true"
+          [virtualScroll]="false"
+          scrollHeight="240px"
+        ></app-multi-select-field>
+      </div>
 
       <!-- Section Type -->
       <div class="col-12 ">
@@ -119,10 +136,12 @@ export class PeriodwiseQuestionsMasterFormComponent {
 
     private ref = inject(FormDrawerRef);
     private PeriodwiseQuestionsMasterService = inject(PeriodwiseQuestionsMasterService);
+    private auditTypeService = inject(AuditTypeService);
     private auditUnitService = inject(AuditUnitService);
     private messageService = inject(MessageService);
 
     audit_unit_id = signal<number | null>(0);
+    audit_type_ids = signal<number[]>([]);
     user_type_id = signal<string | null>('0');
     start_month_year = signal('');
     end_month_year = signal('');
@@ -133,6 +152,7 @@ export class PeriodwiseQuestionsMasterFormComponent {
     isEdit = false;
 
     sectionTypeOptions = signal<any[]>([]);
+    auditTypeOptions = signal<any[]>([]);
     userTypeOptions = signal<any[]>([]);
     years = signal<any[]>([]);
     constructor() {
@@ -140,6 +160,7 @@ export class PeriodwiseQuestionsMasterFormComponent {
         const data = this.ref.data;
 
         this.getuserTypeOptions();
+        this.loadAuditTypes(data);
 
         this.loadBranches(data);
 
@@ -347,6 +368,7 @@ ${fyEnd}-01 to ${fyEnd}-03`
         this.saving.set(true);
 
         const payload = {
+            audit_type_ids: this.audit_type_ids(),
             start_month_year: this.start_month_year(),
             end_month_year: this.end_month_year(),
             year_id: Number(this.year_id()) ?? 0,
@@ -407,6 +429,51 @@ ${fyEnd}-01 to ${fyEnd}-03`
     getuserTypeOptions() {
         this.userTypeOptions.set(user_types.filter((ut) => ut.value === '2') || []);
     }
+
+    private loadAuditTypes(data?: any) {
+        this.auditTypeService.findAll().subscribe({
+            next: (res: any) => {
+                const rows = Array.isArray(res)
+                    ? res
+                    : Array.isArray(res?.rows)
+                        ? res.rows
+                        : Array.isArray(res?.data)
+                            ? res.data
+                            : [];
+
+                const activeRows = rows.filter(
+                    (item: any) => Number(item.is_active) === 1,
+                );
+
+                this.auditTypeOptions.set(
+                    activeRows.map((item: any) => ({
+                        label: item.name,
+                        value: Number(item.id),
+                        code: item.code,
+                    })),
+                );
+
+                const mappedIds = Array.isArray(data?.audit_type_ids)
+                    ? data.audit_type_ids.map(Number)
+                    : [];
+
+                if (mappedIds.length) {
+                    this.audit_type_ids.set(mappedIds);
+                    return;
+                }
+
+                const internalAudit = activeRows.find(
+                    (item: any) => item.code === 'INTERNAL_AUDIT',
+                );
+
+                if (internalAudit) {
+                    this.audit_type_ids.set([Number(internalAudit.id)]);
+                }
+            },
+        });
+    }
+
+
     private loadYears() {
         this.auditUnitService.getYears().subscribe({
             next: (res: any) => {

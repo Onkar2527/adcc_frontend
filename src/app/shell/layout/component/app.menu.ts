@@ -185,6 +185,11 @@ export class AppMenu implements OnInit, OnDestroy {
           routerLink: ['/admin/audit-frequency-master'],
         },
         {
+          label: 'Audit Type Master',
+          icon: 'pi pi-fw pi-bookmark',
+          routerLink: ['/admin/audit-type-master'],
+        },
+        {
           label: 'Scheme Master',
           icon: 'pi pi-fw pi-sitemap',
           routerLink: ['/admin/audit-scheme-master'],

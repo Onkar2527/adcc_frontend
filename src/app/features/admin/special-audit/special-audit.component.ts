@@ -60,6 +60,7 @@ export class SpecialAuditComponent implements OnInit {
         'audit_unit_name',
         'audit_unit_code',
         'title',
+        'audit_type_name',
         'auditor_name',
         'assessment_period',
         'audit_due_date_display',
@@ -81,6 +82,11 @@ export class SpecialAuditComponent implements OnInit {
             field: 'title',
             header: 'Title',
             width: '240px',
+        },
+        {
+            field: 'audit_type_name',
+            header: 'Audit Type',
+            width: '220px',
         },
         {
             field: 'audit_unit_display',
