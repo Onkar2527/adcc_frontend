@@ -37,6 +37,7 @@ import { AuditCalendarComponent } from './audit-calendar/audit-calendar.componen
 import { AuditFrequencyMasterComponent } from './audit-frequency-master/audit-frequency-master.component';
 import { SpecialAuditComponent } from './special-audit/special-audit.component';
 import { MultipleAuditorAssignmentComponent } from './multiple-auditor-assignment/multiple-auditor-assignment.component';
+import { AuditTypeMasterComponent } from './audit-type-master/audit-type-master.component';
 
 
 export const ADMIN_ROUTES: Routes = [
@@ -77,6 +78,7 @@ export const ADMIN_ROUTES: Routes = [
     { path: 'policy-documents', component: PolicyDocumentsComponent },
     { path: 'audit-calendar', component: AuditCalendarComponent },
     { path: 'audit-frequency-master', component: AuditFrequencyMasterComponent },
+    { path: 'audit-type-master', component: AuditTypeMasterComponent },
     { path: 'special-audit', component: SpecialAuditComponent },
     { path: 'multiple-auditor-assignment', component: MultipleAuditorAssignmentComponent },
     { path: 'audit-logs', loadComponent: () => import('./audit-logs/audit-logs.component').then(mod => mod.AuditLogsComponent) },

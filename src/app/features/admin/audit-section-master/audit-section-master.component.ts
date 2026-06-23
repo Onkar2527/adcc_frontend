@@ -53,11 +53,12 @@ export class AuditSectionMasterComponent implements OnInit {
 
   auditSections = signal<any[]>([]);
   loading = signal(false);
-  globalFilterFields = ['name'];
+  globalFilterFields = ['name', 'audit_type_names'];
 
   columns: TableColumn[] = [
     { field: '_edit', header: '', type: 'action', actionIcon: 'pi pi-pencil', actionName: 'edit', width: '50px', align: 'center', tooltip: 'Edit' },
     { field: 'name', header: 'Section Name', width: '300px' },
+    { field: 'audit_type_names', header: 'Audit Types', width: '320px' },
     { field: 'is_active', header: 'Status', type: 'status', width: '120px', align: 'center' },
     { field: '_status', header: '', type: 'action', actionIcon: 'pi pi-sync', actionName: 'toggle-status', width: '50px', align: 'center', tooltip: 'Toggle Status' },
   ];

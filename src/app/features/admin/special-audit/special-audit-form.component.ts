@@ -40,6 +40,21 @@ type Option = {
                 <div class="flex flex-column gap-3">
                     <div class="grid">
                         <div class="col-12 md:col-6">
+                            <app-select-field
+                                label="Audit Type"
+                                [field]="auditTypeId"
+                                [options]="lookups().audit_types"
+                                optionLabel="label"
+                                optionValue="id"
+                                [required]="true"
+                                [filter]="true"
+                                filterBy="label"
+                                [virtualScroll]="false"
+                                (onChange)="onAuditTypeChange()"
+                            ></app-select-field>
+                        </div>
+
+                        <div class="col-12 md:col-6">
                             <app-text-field
                                 label="Title"
                                 [field]="title"
@@ -151,6 +166,7 @@ export class SpecialAuditFormComponent implements OnInit {
     private messageService = inject(MessageService);
 
     saving = signal(false);
+    auditTypeId = signal<number | null>(null);
     title = signal('');
     yearId = signal<number | null>(null);
     auditUnitId = signal<number | null>(null);
@@ -164,11 +180,13 @@ export class SpecialAuditFormComponent implements OnInit {
         years: Option[];
         audit_units: Option[];
         auditors: Option[];
+        audit_types: Option[];
         periodwise_questions: Option[];
     }>({
         years: [],
         audit_units: [],
         auditors: [],
+        audit_types: [],
         periodwise_questions: [],
     });
 
@@ -183,6 +201,7 @@ export class SpecialAuditFormComponent implements OnInit {
                     years: this.asArray(lookups.years),
                     audit_units: this.asArray(lookups.audit_units),
                     auditors: this.asArray(lookups.auditors),
+                    audit_types: this.asArray(lookups.audit_types),
                     periodwise_questions: this.asArray(lookups.periodwise_questions),
                 });
                 this.patchForm(this.ref.data);
@@ -192,19 +211,37 @@ export class SpecialAuditFormComponent implements OnInit {
     }
 
     filteredQuestionSetups() {
+        const auditTypeId = Number(this.auditTypeId() || 0);
+        if (!auditTypeId) return [];
+
         const unitId = Number(this.auditUnitId() || 0);
         const yearId = Number(this.yearId() || 0);
         const setups = this.lookups().periodwise_questions;
 
         const filtered = setups.filter((item) => {
+            const itemAuditTypeId = Number(item['audit_type_id'] || 0);
             const itemUnitId = Number(item['audit_unit_id'] || 0);
             const itemYearId = Number(item['year_id'] || 0);
 
-            return (!unitId || !itemUnitId || itemUnitId === unitId)
+            return itemAuditTypeId === auditTypeId
+                && (!unitId || !itemUnitId || itemUnitId === unitId)
                 && (!yearId || !itemYearId || itemYearId === yearId);
         });
 
-        return filtered.length ? filtered : setups;
+        return filtered;
+    }
+
+    onAuditTypeChange() {
+        const selectedSetup = this.lookups().periodwise_questions.find(
+            (item) => Number(item.id) === Number(this.controlMasterId()),
+        );
+
+        if (
+            selectedSetup
+            && Number(selectedSetup['audit_type_id']) !== Number(this.auditTypeId())
+        ) {
+            this.controlMasterId.set(null);
+        }
     }
 
     save() {
@@ -239,6 +276,7 @@ export class SpecialAuditFormComponent implements OnInit {
 
     private validationMessage() {
         if (!this.title().trim()) return 'Special audit title is required.';
+        if (!this.auditTypeId()) return 'Audit type is required.';
         if (!this.auditUnitId()) return 'Audit unit is required.';
         if (!this.auditorId()) return 'Auditor is required.';
         if (!this.yearId()) return 'Year is required.';
@@ -259,6 +297,7 @@ export class SpecialAuditFormComponent implements OnInit {
         }
 
         this.title.set(data.title || '');
+        this.auditTypeId.set(Number(data.audit_type_id || 0) || null);
         this.yearId.set(Number(data.year_id || 0) || null);
         this.auditUnitId.set(Number(data.audit_unit_id || 0) || null);
         this.controlMasterId.set(Number(data.control_master_id || 0) || null);
@@ -294,6 +333,7 @@ export class SpecialAuditFormComponent implements OnInit {
 
     private payload(): SpecialAuditPayload {
         return {
+            audit_type_id: Number(this.auditTypeId()),
             title: this.title().trim(),
             year_id: Number(this.yearId()),
             audit_unit_id: Number(this.auditUnitId()),

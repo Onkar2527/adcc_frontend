@@ -1,19 +1,23 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ToastModule } from 'primeng/toast';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { TableComponent, TableColumn } from '../../../shared/components/table/table.component';
 import { FormDrawerService } from '../../../core/services/drawer/form-drawer.service';
-import { PeriodwiseQuestionsMasterService } from '../services/masters.service';
+import {
+  AuditTypeService,
+  PeriodwiseQuestionsMasterService,
+} from '../services/masters.service';
 import { MenuMasterFormComponent } from './../menu-master/menu-master-main.component';
 import { PeriodwiseQuestionsMasterFormComponent } from './periodwise-questions-master-main';
 import { user_types } from '../services/required-data';
 import { PeriodwiseQuestionsMasterViewComponent } from './periodwise-question-manage-view';
+import { SelectFieldComponent } from '../../../shared/components/form';
 
 @Component({
   selector: 'app-periodwise-questions-master',
   standalone: true,
-  imports: [CommonModule, TableComponent, ToastModule],
+  imports: [CommonModule, TableComponent, ToastModule, SelectFieldComponent],
   providers: [MessageService],
   styles: [`
     :host ::ng-deep td {
@@ -32,9 +36,24 @@ import { PeriodwiseQuestionsMasterViewComponent } from './periodwise-question-ma
         <h5 class="m-0 text-xl font-semibold">Question Setup</h5>
       </div>
 
+      <div class="grid mb-3">
+        <div class="col-12 md:col-4">
+          <app-select-field
+            label="Filter by Audit Type"
+            [field]="selectedAuditTypeId"
+            [options]="auditTypeOptions()"
+            optionLabel="label"
+            optionValue="value"
+            [filter]="true"
+            filterBy="label"
+            [virtualScroll]="false"
+          ></app-select-field>
+        </div>
+      </div>
+
       <app-table
         [columns]="columns"
-        [data]="periodwiseQuestionsMasters()"
+        [data]="filteredQuestionSetups()"
         [loading]="loading()"
         [actionDisplayMode]="'buttons'"
         (onAdd)="openForm()"
@@ -47,11 +66,26 @@ import { PeriodwiseQuestionsMasterViewComponent } from './periodwise-question-ma
 })
 export class PeriodwiseQuestionsMasterComponent implements OnInit {
   private periodwiseQuestionsService = inject(PeriodwiseQuestionsMasterService);
+  private auditTypeService = inject(AuditTypeService);
   private drawer = inject(FormDrawerService);
   private messageService = inject(MessageService);
   private confirmationService = inject(ConfirmationService);
   periodwiseQuestionsMasters = signal<any[]>([]);
+  auditTypeOptions = signal<any[]>([
+    { label: 'All Audit Types', value: 0 },
+  ]);
+  selectedAuditTypeId = signal<number | null>(0);
   loading = signal(false);
+
+  filteredQuestionSetups = computed(() => {
+    const auditTypeId = Number(this.selectedAuditTypeId() || 0);
+    if (!auditTypeId) return this.periodwiseQuestionsMasters();
+
+    return this.periodwiseQuestionsMasters().filter((item: any) =>
+      Array.isArray(item.audit_type_ids)
+      && item.audit_type_ids.map(Number).includes(auditTypeId),
+    );
+  });
 
   columns: TableColumn[] = [
 
@@ -59,6 +93,12 @@ export class PeriodwiseQuestionsMasterComponent implements OnInit {
       field: 'audit_unit_name',
       header: 'Audit Unit Name',
       width: '250px'
+    },
+
+    {
+      field: 'audit_type_names',
+      header: 'Audit Types',
+      width: '240px'
     },
 
     {
@@ -91,7 +131,32 @@ export class PeriodwiseQuestionsMasterComponent implements OnInit {
 
   ngOnInit() {
     this.loadPeriodwiseQuestionsMasters();
+    this.loadAuditTypes();
 
+  }
+
+  private loadAuditTypes() {
+    this.auditTypeService.findAll().subscribe({
+      next: (res: any) => {
+        const rows = Array.isArray(res)
+          ? res
+          : Array.isArray(res?.rows)
+            ? res.rows
+            : Array.isArray(res?.data)
+              ? res.data
+              : [];
+
+        this.auditTypeOptions.set([
+          { label: 'All Audit Types', value: 0 },
+          ...rows
+            .filter((item: any) => Number(item.is_active) === 1)
+            .map((item: any) => ({
+              label: item.name,
+              value: Number(item.id),
+            })),
+        ]);
+      },
+    });
   }
 
   loadPeriodwiseQuestionsMasters() {

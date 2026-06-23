@@ -3,9 +3,13 @@ import { CommonModule } from '@angular/common';
 import { FormDrawerRef } from '../../../core/services/drawer/form-drawer.ref';
 import {
   TextFieldComponent,
-  FormActionsComponent
+  FormActionsComponent,
+  MultiSelectFieldComponent,
 } from '../../../shared/components/form';
-import { AuditSectionService } from '../services/masters.service';
+import {
+  AuditSectionService,
+  AuditTypeService,
+} from '../services/masters.service';
 
 @Component({
   selector: 'app-audit-section-form',
@@ -13,6 +17,7 @@ import { AuditSectionService } from '../services/masters.service';
   imports: [
     CommonModule,
     TextFieldComponent,
+    MultiSelectFieldComponent,
     FormActionsComponent
   ],
   template: `
@@ -32,6 +37,21 @@ import { AuditSectionService } from '../services/masters.service';
             [field]="name"
             placeholder="Enter section name"
           ></app-text-field>
+        </div>
+
+        <div class="col-12">
+          <app-multi-select-field
+            label="Audit Types"
+            [field]="auditTypeIds"
+            [options]="auditTypes()"
+            optionLabel="label"
+            optionValue="value"
+            display="chip"
+            [filter]="true"
+            filterBy="label"
+            [required]="true"
+            [virtualScroll]="false"
+          ></app-multi-select-field>
         </div>
 
       </div>
@@ -57,8 +77,11 @@ import { AuditSectionService } from '../services/masters.service';
 export class AuditSectionFormComponent {
   private ref = inject(FormDrawerRef);
   private auditSectionService = inject(AuditSectionService);
+  private auditTypeService = inject(AuditTypeService);
 
   name = signal('');
+  auditTypes = signal<any[]>([]);
+  auditTypeIds = signal<number[]>([]);
   saving = signal(false);
   isEdit = false;
 
@@ -67,15 +90,26 @@ export class AuditSectionFormComponent {
     if (data) {
       this.isEdit = true;
       this.name.set(data.name || '');
+      this.auditTypeIds.set(
+        String(data.audit_type_id || '')
+          .split(',')
+          .map((id) => Number(id.trim()))
+          .filter(Boolean),
+      );
     }
+
+    this.loadAuditTypes();
   }
 
   save() {
     const name = this.name().trim().toUpperCase();
-    if (!name) return;
+    if (!name || !this.auditTypeIds().length) return;
 
     this.saving.set(true);
-    const payload = { name };
+    const payload = {
+      name,
+      audit_type_id: this.auditTypeIds().join(','),
+    };
 
     const obs = this.isEdit
       ? this.auditSectionService.update(this.ref.data.id, payload)
@@ -92,5 +126,28 @@ export class AuditSectionFormComponent {
 
   cancel() {
     this.ref.close();
+  }
+
+  private loadAuditTypes() {
+    this.auditTypeService.findAll().subscribe({
+      next: (response: any) => {
+        const rows = Array.isArray(response)
+          ? response
+          : Array.isArray(response?.data)
+            ? response.data
+            : Array.isArray(response?.rows)
+              ? response.rows
+              : [];
+
+        this.auditTypes.set(
+          rows
+            .filter((row: any) => Number(row.is_active) === 1)
+            .map((row: any) => ({
+              label: row.name,
+              value: Number(row.id),
+            })),
+        );
+      },
+    });
   }
 }

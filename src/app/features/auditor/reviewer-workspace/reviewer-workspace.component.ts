@@ -144,13 +144,13 @@ export class ReviewerWorkspaceComponent implements OnInit {
 
     regularAssessments = computed(() =>
         this.assessments().filter(
-            (assessment: any) => Number(assessment.audit_type_id || 1) !== 2,
+            (assessment: any) => Number(assessment.audit_type_id || 1) === 1,
         ),
     );
 
     specialAssessments = computed(() =>
         this.assessments().filter(
-            (assessment: any) => Number(assessment.audit_type_id || 1) === 2,
+            (assessment: any) => Number(assessment.audit_type_id || 1) !== 1,
         ),
     );
 
@@ -177,16 +177,16 @@ export class ReviewerWorkspaceComponent implements OnInit {
                         audit_unit_code:
                             assessment.audit_unit_code,
                         display_title:
-                            Number(assessment.audit_type_id || 1) === 2
+                            Number(assessment.audit_type_id || 1) !== 1
                                 ? (assessment.special_audit_title || assessment.audit_unit_name)
                                 : assessment.audit_unit_name,
                         display_code:
-                            Number(assessment.audit_type_id || 1) === 2
+                            Number(assessment.audit_type_id || 1) !== 1
                                 ? `Branch: ${assessment.audit_unit_name}${assessment.audit_unit_code ? ` (${assessment.audit_unit_code})` : ''}`
                                 : `Code: ${assessment.audit_unit_code}`,
                         audit_type_label:
-                            Number(assessment.audit_type_id || 1) === 2
-                                ? 'Special Audit'
+                            Number(assessment.audit_type_id || 1) !== 1
+                                ? (assessment.audit_type_name || 'Special Audit')
                                 : 'Internal Audit',
                         latest_status:
                             isCompliance ? 'Compliance Review' : 'Audit Review',
@@ -323,6 +323,10 @@ export class ReviewerWorkspaceComponent implements OnInit {
     ];
 
     reviewerCardMetaItems = [
+        {
+            label: 'Audit Type',
+            key: 'audit_type_label',
+        },
         {
             label: 'Assessment Period',
             key: 'assessment_period_label',
@@ -1205,16 +1209,16 @@ export class ReviewerWorkspaceComponent implements OnInit {
 
     selectedTitle() {
         const item = this.selected();
-        return Number(item?.audit_type_id || 1) === 2
-            ? (item?.special_audit_title || item?.audit_unit_name || 'Special Audit')
+        return Number(item?.audit_type_id || 1) !== 1
+            ? (item?.special_audit_title || item?.audit_unit_name || item?.audit_type_name || 'Audit')
             : item?.audit_unit_name;
     }
 
     selectedSubtitle() {
         const item = this.selected();
         const prefix =
-            Number(item?.audit_type_id || 1) === 2
-                ? 'Special Audit'
+            Number(item?.audit_type_id || 1) !== 1
+                ? (item?.audit_type_name || 'Special Audit')
                 : (item?.audit_unit_code || '');
 
         const stage =

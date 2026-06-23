@@ -9,6 +9,7 @@
   </button>
 
   <button
+    *ngIf="specialRows().length > 0"
     type="button"
     [class.active]="auditMode() === 'special'"
     (click)="selectMode('special')"
@@ -33,6 +34,7 @@
   [totalReviewPending]="totalReviewPending()"
   [totalCompliancePending]="totalCompliancePending()"
   [totalCompleted]="totalCompleted()"
+  [cardMetaItems]="auditCardMetaItems"
   (searchChange)="search.set($event)"
   (selectedStatusChange)="selectedStatus.set($event)"
   (refresh)="loadData()"

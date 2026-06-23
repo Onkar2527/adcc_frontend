@@ -32,6 +32,7 @@
     </button>
 
     <button
+      *ngIf="specialAssessments().length > 0"
       type="button"
       [class.active]="complianceMode() === 'special'"
       (click)="selectComplianceMode('special')"

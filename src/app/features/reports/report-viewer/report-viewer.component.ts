@@ -16,6 +16,7 @@ import {
 } from '../services/reports.service';
 import { InternalAuditNavService } from '../../auditor/services/internal-audit-nav.service';
 import { APP_CONFIG } from '../../../core/services/config/config.token';
+import { AuditTypeService } from '../../admin/services/masters.service';
 
 @Component({
   selector: 'app-report-viewer',
@@ -32,15 +33,14 @@ export class ReportViewerComponent implements OnInit {
   private auditNavService = inject(InternalAuditNavService);
   private dateTimeService = inject(DateTimeService);
   private sanitizer = inject(DomSanitizer);
+  private auditTypeService = inject(AuditTypeService);
   public config = inject(APP_CONFIG);
-  private readonly auditTypeFilter: ReportFilterDefinition = {
+  private auditTypeFilter: ReportFilterDefinition = {
     key: 'audit_type_id',
     label: 'Audit Type',
     type: 'select',
     options: [
       { value: 'all', label: 'All Audit Types' },
-      { value: '1', label: 'Internal Audit' },
-      { value: '2', label: 'Special Audit' },
     ],
   };
 
@@ -289,10 +289,42 @@ export class ReportViewerComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.route.paramMap.subscribe((params) => {
-      const slug = params.get('reportSlug') || '';
-      this.reportSlug.set(slug);
-      this.loadDefinition(slug);
+    this.loadAuditTypes(() => {
+      this.route.paramMap.subscribe((params) => {
+        const slug = params.get('reportSlug') || '';
+        this.reportSlug.set(slug);
+        this.loadDefinition(slug);
+      });
+    });
+  }
+
+  private loadAuditTypes(done: () => void) {
+    this.auditTypeService.findAll().subscribe({
+      next: (response: any) => {
+        const rows = Array.isArray(response)
+          ? response
+          : Array.isArray(response?.rows)
+            ? response.rows
+            : Array.isArray(response?.data)
+              ? response.data
+              : [];
+
+        this.auditTypeFilter = {
+          ...this.auditTypeFilter,
+          options: [
+            { value: 'all', label: 'All Audit Types' },
+            ...rows
+              .filter((item: any) => Number(item.is_active) === 1)
+              .map((item: any) => ({
+                value: String(item.id),
+                label: String(item.name),
+              })),
+          ],
+        };
+
+        done();
+      },
+      error: () => done(),
     });
   }
 
@@ -368,7 +400,17 @@ export class ReportViewerComponent implements OnInit {
     const alreadyExists = definition.filters.some((filter) => filter.key === 'audit_type_id');
 
     if (alreadyExists) {
-      return definition;
+      return {
+        ...definition,
+        filters: definition.filters.map((filter) =>
+          filter.key === 'audit_type_id'
+            ? {
+                ...filter,
+                options: this.auditTypeFilter.options,
+              }
+            : filter,
+        ),
+      };
     }
 
     return {

@@ -177,6 +177,13 @@ export class AuditDashboardComponent
                 : 'Assigned Branches',
         );
 
+    auditCardMetaItems = [
+        {
+            label: 'Audit Type',
+            key: 'audit_type_label',
+        },
+    ];
+
     totalAuditPending =
         computed(() =>
 
@@ -315,7 +322,11 @@ export class AuditDashboardComponent
                     const rows =
                         this.parseRows(
                             res.regular,
-                        );
+                        ).map((row: any) => ({
+                            ...row,
+                            audit_type_label:
+                                row.audit_type_name || 'Internal Audit',
+                        }));
 
                     const specialRows =
                         this.parseRows(
@@ -396,11 +407,11 @@ export class AuditDashboardComponent
             audit_unit_id:
                 row.audit_unit_id,
             audit_unit_name:
-                row.audit_unit_name || row.title || 'Special Audit',
+                row.audit_unit_name || row.title || row.audit_type_name || 'Audit',
             audit_unit_code:
                 row.audit_unit_code || 'SPECIAL',
             display_title:
-                row.title || row.audit_unit_name || 'Special Audit',
+                row.title || row.audit_unit_name || row.audit_type_name || 'Audit',
             display_code:
                 `Branch: ${row.audit_unit_name || '-'}${row.audit_unit_code ? ` (${row.audit_unit_code})` : ''}`,
             latest_status:
@@ -423,6 +434,8 @@ export class AuditDashboardComponent
                     : 0,
             is_special_audit:
                 true,
+            audit_type_label:
+                row.audit_type_name || 'Special Audit',
             assessment_id:
                 row.assessment_id || row.assesment_id || row.id,
         };
