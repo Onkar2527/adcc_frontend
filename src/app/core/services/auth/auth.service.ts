@@ -36,8 +36,21 @@ export class AuthService {
 
   constructor() {}
 
-  login(credentials: any): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>(`${this.apiUrl}/login`, credentials).pipe(
+  login(credentials: any): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/login`, credentials).pipe(
+      tap(res => {
+        if (res && !res.requires2fa) {
+          localStorage.setItem('token', res.access_token);
+          localStorage.setItem('user', JSON.stringify(res.user));
+          this.isLoggedIn.set(true);
+          this.currentUser.set(res.user);
+        }
+      })
+    );
+  }
+
+  verify2fa(username: string, code: string): Observable<AuthResponse> {
+    return this.http.post<AuthResponse>(`${this.apiUrl}/verify-2fa`, { username, code }).pipe(
       tap(res => {
         localStorage.setItem('token', res.access_token);
         localStorage.setItem('user', JSON.stringify(res.user));

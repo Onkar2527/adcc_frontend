@@ -30,88 +30,140 @@
 
         <div class="divider"></div>
 
-        <p class="login-text">Login to start your session!</p>
+        <div *ngIf="!showOtpScreen">
+          <p class="login-text">Login to start your session!</p>
 
-        <form #loginForm="ngForm" (ngSubmit)="onLogin()" autocomplete="off">
-          <!-- Username -->
-          <div class="input-group animate-item delay-2">
-            <label for="username">Employee Code</label>
+          <form #loginForm="ngForm" (ngSubmit)="onLogin()" autocomplete="off">
+            <!-- Username -->
+            <div class="input-group animate-item delay-2">
+              <label for="username">Employee Code</label>
 
-            <input
-              id="username"
-              pInputText
-              type="text"
-              [(ngModel)]="username"
-              name="username"
-              placeholder="Enter Employee Code"
-              class="w-full custom-input"
-              required
-              autocomplete="username"
-            />
-          </div>
+              <input
+                id="username"
+                pInputText
+                type="text"
+                [(ngModel)]="username"
+                name="username"
+                placeholder="Enter Employee Code"
+                class="w-full custom-input"
+                required
+                autocomplete="username"
+              />
+            </div>
 
-          <!-- Password -->
-          <div class="input-group animate-item delay-3">
-            <label for="password">Password</label>
+            <!-- Password -->
+            <div class="input-group animate-item delay-3">
+              <label for="password">Password</label>
 
-            <p-password
-              inputId="password"
-              [(ngModel)]="password"
-              name="password"
-              [toggleMask]="true"
-              [feedback]="false"
-              placeholder="Enter Password"
-              styleClass="w-full"
-              inputStyleClass="w-full custom-input"
-              autocomplete="current-password"
-              required
-            >
-            </p-password>
-          </div>
+              <p-password
+                inputId="password"
+                [(ngModel)]="password"
+                name="password"
+                [toggleMask]="true"
+                [feedback]="false"
+                placeholder="Enter Password"
+                styleClass="w-full"
+                inputStyleClass="w-full custom-input"
+                autocomplete="current-password"
+                required
+              >
+              </p-password>
+            </div>
 
-          <!-- Login Button -->
-          <button
-            pButton
-            type="submit"
-            [label]="loading() ? 'Logging in...' : 'Login'"
-            [loading]="loading()"
-            [disabled]="loading() || !username || !password"
-            class="login-btn animate-item delay-4"
-          ></button>
-
-          <!-- Roles -->
-          <div class="user-types animate-item delay-5">
+            <!-- Login Button -->
             <button
-              type="button"
-              class="user-btn"
-              [class.active]="selectedRole === 'auditor'"
-              [disabled]="loading()"
-              (click)="setCredentials('auditor')"
-            >
-              Auditor
-            </button>
+              pButton
+              type="submit"
+              [label]="loading() ? 'Logging in...' : 'Login'"
+              [loading]="loading()"
+              [disabled]="loading() || !username || !password"
+              class="login-btn animate-item delay-4"
+            ></button>
 
-            <button
-              type="button"
-              class="user-btn"
-              [class.active]="selectedRole === 'reviewer'"
-              [disabled]="loading()"
-              (click)="setCredentials('reviewer')"
-            >
-              Reviewer
-            </button>
+            <!-- Roles -->
+            <div class="user-types animate-item delay-5">
+              <button
+                type="button"
+                class="user-btn"
+                [class.active]="selectedRole === 'auditor'"
+                [disabled]="loading()"
+                (click)="setCredentials('auditor')"
+              >
+                Auditor
+              </button>
 
-            <button
-              type="button"
-              class="user-btn"
-              [class.active]="selectedRole === 'manager'"
-              [disabled]="loading()"
-              (click)="setCredentials('manager')"
-            >
-              Employee
-            </button>
-          </div>
-        </form>
+              <button
+                type="button"
+                class="user-btn"
+                [class.active]="selectedRole === 'reviewer'"
+                [disabled]="loading()"
+                (click)="setCredentials('reviewer')"
+              >
+                Reviewer
+              </button>
+
+              <button
+                type="button"
+                class="user-btn"
+                [class.active]="selectedRole === 'manager'"
+                [disabled]="loading()"
+                (click)="setCredentials('manager')"
+              >
+                Employee
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <div *ngIf="showOtpScreen" class="animate-item">
+          <p class="login-text">
+            A 6-digit verification code has been sent to your registered email address:
+            <strong>{{ maskedEmail }}</strong>
+          </p>
+
+          <form #otpForm="ngForm" (ngSubmit)="onVerifyOtp()" autocomplete="off">
+            <!-- OTP Code -->
+            <div class="input-group animate-item delay-2">
+              <label for="otpCode">Verification Code</label>
+
+              <input
+                id="otpCode"
+                pInputText
+                type="text"
+                [(ngModel)]="otpCode"
+                name="otpCode"
+                placeholder="Enter 6-digit OTP"
+                class="w-full custom-input"
+                required
+                maxlength="6"
+                pattern="[0-9]{6}"
+                autocomplete="one-time-code"
+              />
+            </div>
+
+            <!-- OTP Buttons -->
+            <div style="display: flex; gap: 1rem; margin-top: 1.5rem">
+              <button
+                pButton
+                type="button"
+                label="Cancel"
+                class="p-button-outlined w-full animate-item delay-3"
+                style="border-color: #cbd5e1"
+                [disabled]="loadingOtp()"
+                (click)="cancelOtp()"
+              ></button>
+              <button
+                pButton
+                type="submit"
+                [label]="loadingOtp() ? 'Verifying...' : 'Verify'"
+                [loading]="loadingOtp()"
+                [disabled]="loadingOtp() || !otpCode || otpCode.length !== 6"
+                class="login-btn w-full animate-item delay-3"
+                style="margin: 0"
+              ></button>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
   </div>

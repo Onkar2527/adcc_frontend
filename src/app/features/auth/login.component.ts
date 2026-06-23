@@ -9,6 +9,7 @@ import { ButtonModule } from 'primeng/button';
 import { AuthService } from '../../core/services/auth/auth.service';
 import { MessageService } from 'primeng/api';
 import { Toast } from 'primeng/toast';
+import { ENABLE_2FA } from '../admin/services/required-data';
 
 @Component({
   selector: 'app-login',
@@ -34,6 +35,12 @@ export class LoginComponent {
   password = '';
   rememberMe = false;
   selectedRole: 'auditor' | 'reviewer' | 'manager' | undefined;
+
+  showOtpScreen = false;
+  otpCode = '';
+  maskedEmail = '';
+  loadingOtp = signal(false);
+  enable2fa = ENABLE_2FA;
 
   loading = signal(false);
   error = signal<string | undefined>(undefined);
@@ -68,40 +75,92 @@ export class LoginComponent {
 
     this.authService.login({
       username: this.username,
-      password: this.password
+      password: this.password,
+      enable_2fa: this.enable2fa
     }).subscribe({
       next: (res: any) => {
         this.loading.set(false);
         console.log('Login response:', res);
-        console.log('User from localStorage:', localStorage.getItem('user'));
 
-        this.messageService.add({
-          severity: 'success',
-          summary: 'Success',
-          detail: 'Login successful'
-        });
+        if (res && res.requires2fa) {
+          this.maskedEmail = res.emailMasked;
+          this.showOtpScreen = true;
+          this.otpCode = '';
+          this.messageService.add({
+            severity: 'info',
+            summary: 'Verification Required',
+            detail: 'A verification code has been sent to your email.'
+          });
+          return;
+        }
 
-        setTimeout(() => {
-          const returnUrl = this.route.snapshot.queryParams['returnUrl'];
-
-          if (returnUrl) {
-            this.router.navigate([returnUrl]);
-            return;
-          }
-
-          this.router.navigate([this.getDashboardRoute()]);
-        }, 700);
+        this.handleSuccessfulLogin();
       },
       error: (err) => {
         this.loading.set(false);
-
+        const errorMessage = err?.error?.message || 'Invalid employee code or password. Please check your details and try again.';
         this.messageService.add({
           severity: 'error',
           summary: 'Error',
-          detail: 'Invalid employee code or password. Please check your details and try again.'
+          detail: errorMessage
         });
       }
     });
+  }
+
+  onVerifyOtp() {
+    if (this.loadingOtp()) return;
+
+    if (!this.otpCode || this.otpCode.length !== 6) {
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Required',
+        detail: 'Please enter the 6-digit verification code'
+      });
+      return;
+    }
+
+    this.loadingOtp.set(true);
+
+    this.authService.verify2fa(this.username, this.otpCode).subscribe({
+      next: (res: any) => {
+        this.loadingOtp.set(false);
+        this.handleSuccessfulLogin();
+      },
+      error: (err) => {
+        this.loadingOtp.set(false);
+        const errorMessage = err?.error?.message || 'Invalid or expired verification code. Please try again.';
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Verification Failed',
+          detail: errorMessage
+        });
+      }
+    });
+  }
+
+  cancelOtp() {
+    this.showOtpScreen = false;
+    this.otpCode = '';
+  }
+
+  private handleSuccessfulLogin() {
+    this.messageService.add({
+      severity: 'success',
+      summary: 'Success',
+      detail: 'Login successful'
+    });
+
+    setTimeout(() => {
+      const returnUrl = this.route.snapshot.queryParams['returnUrl'];
+
+      if (returnUrl) {
+        this.router.navigate([returnUrl]);
+        return;
+      }
+
+      this.router.navigate([this.getDashboardRoute()]);
+    }, 700);
   }
 
   private getDashboardRoute(): string {
