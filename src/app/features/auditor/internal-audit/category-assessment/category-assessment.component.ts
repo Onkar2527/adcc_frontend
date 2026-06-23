@@ -3096,6 +3096,11 @@ export class CategoryAssessmentComponent
         this.loadSampling();
     }
 
+    onFilterTypeChange() {
+        this.samplingPrimaryValue = '';
+        this.samplingSecondaryValue = '';
+    }
+
     loadSampling() {
         const detail =
             this.categoryDetail();

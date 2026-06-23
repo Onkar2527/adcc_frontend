@@ -1418,6 +1418,8 @@ export interface CreateDepositAccountDto {
   assesment_period_id: number;
 
   admin_id?: number;
+
+  kyc?: string;
 }
 
 export interface AdvancesAccountFilters {
@@ -1490,6 +1492,10 @@ export interface CreateAdvanceAccountDto {
   assesment_period_id: number;
 
   admin_id?: number;
+
+  npa_classification?: string;
+
+  kyc?: string;
 }
 
 @Injectable({

@@ -117,7 +117,7 @@
         <div class="sampling-filters">
           <label class="sampling-field">
             <span>Filter Type</span>
-            <select class="answer-control" [(ngModel)]="samplingFilterType">
+            <select class="answer-control" [(ngModel)]="samplingFilterType" (ngModelChange)="onFilterTypeChange()">
               <option [ngValue]="0">All Available Accounts</option>
               <option
                 *ngFor="let filter of samplingData()?.filter_types || []"
@@ -128,7 +128,30 @@
             </select>
           </label>
 
-          <label *ngIf="samplingFilterType" class="sampling-field">
+          <!-- NPA Classification dropdown for filterType 6 -->
+          <label *ngIf="samplingFilterType === 6" class="sampling-field">
+            <span>NPA Classification</span>
+            <select class="answer-control" [(ngModel)]="samplingPrimaryValue">
+              <option value="">Select NPA Classification</option>
+              <option *ngFor="let opt of samplingData()?.npa_options || []" [value]="opt">
+                {{ opt }}
+              </option>
+            </select>
+          </label>
+
+          <!-- KYC Status dropdown for filterType 7 -->
+          <label *ngIf="samplingFilterType === 7" class="sampling-field">
+            <span>KYC Status</span>
+            <select class="answer-control" [(ngModel)]="samplingPrimaryValue">
+              <option value="">Select KYC Status</option>
+              <option *ngFor="let opt of samplingData()?.kyc_options || []" [value]="opt">
+                {{ opt }}
+              </option>
+            </select>
+          </label>
+
+          <!-- Standard inputs for other filter types -->
+          <label *ngIf="samplingFilterType && samplingFilterType !== 6 && samplingFilterType !== 7" class="sampling-field">
             <span>
               {{ samplingFilterType === 1 ? 'From Account' : 'Percentage' }}
             </span>
@@ -181,6 +204,8 @@
                   <th>Account Details</th>
                   <th>Open Date</th>
                   <th>Amount</th>
+                  <th *ngIf="detail.category?.linked_table_id === 2">NPA Classification</th>
+                  <th>KYC Status</th>
                 </tr>
               </thead>
               <tbody>
@@ -216,6 +241,8 @@
                   <td>
                     {{ account.principal_amount || account.sanction_amount || 0 | number: '1.2-2' }}
                   </td>
+                  <td *ngIf="detail.category?.linked_table_id === 2">{{ account.npa_classification || '-' }}</td>
+                  <td>{{ account.kyc || '-' }}</td>
                 </tr>
               </tbody>
             </table>
@@ -264,6 +291,8 @@
                 <th>Account Details</th>
                 <th>Open Date</th>
                 <th>Amount</th>
+                <th *ngIf="detail.category?.linked_table_id === 2">NPA Classification</th>
+                <th>KYC Status</th>
                 <th>Status</th>
                 <th>Action</th>
               </tr>
@@ -294,6 +323,8 @@
                 <td>
                   {{ account.principal_amount || account.sanction_amount || 0 | number: '1.2-2' }}
                 </td>
+                <td *ngIf="detail.category?.linked_table_id === 2">{{ account.npa_classification || '-' }}</td>
+                <td>{{ account.kyc || '-' }}</td>
                 <td>
                   <span class="account-status" *ngIf="account.is_completed; else accountOpen">
                     Completed
@@ -436,6 +467,14 @@
                 <td>
                   {{ account.principal_amount || account.sanction_amount || 0 | number: '1.2-2' }}
                 </td>
+              </tr>
+              <tr>
+                <th>KYC Status</th>
+                <td>{{ account.kyc || '-' }}</td>
+                <th *ngIf="detail.category?.linked_table_id === 2">NPA Classification</th>
+                <td *ngIf="detail.category?.linked_table_id === 2">{{ account.npa_classification || '-' }}</td>
+                <th *ngIf="detail.category?.linked_table_id !== 2"></th>
+                <td *ngIf="detail.category?.linked_table_id !== 2"></td>
               </tr>
             </tbody>
           </table>

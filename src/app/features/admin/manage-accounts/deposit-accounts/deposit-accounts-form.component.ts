@@ -238,6 +238,16 @@ import {
 
             </div>
 
+          <div class="col-12 md:col-4">
+
+            <app-text-field
+                label="KYC"
+
+                [field]="kyc"
+            ></app-text-field>
+
+            </div>
+
         </div>
 
         <!-- DATES -->
@@ -434,6 +444,8 @@ export class DepositAccountFormComponent {
 
     accountStatus =
         signal<string>('');
+
+    kyc = signal('');
 
     accountOpeningDate =
         signal<Date | null>(null);
@@ -648,6 +660,10 @@ export class DepositAccountFormComponent {
             this.row
                 .account_status
             ?? 'ACTIVE',
+        );
+
+        this.kyc.set(
+            this.row.kyc ?? '',
         );
 
         this.accountOpeningDate.set(
@@ -894,6 +910,9 @@ export class DepositAccountFormComponent {
 
             account_status:
                 this.accountStatus(),
+
+            kyc:
+                this.kyc(),
 
             account_opening_date:
                 this.formatDate(

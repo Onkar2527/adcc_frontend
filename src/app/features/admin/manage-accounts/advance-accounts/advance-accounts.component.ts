@@ -383,6 +383,18 @@ export class AdvanceAccountsComponent
         // },
 
         {
+            field: 'npa_classification',
+            header: 'NPA Classification',
+            width: '180px',
+        },
+
+        {
+            field: 'kyc',
+            header: 'KYC',
+            width: '160px',
+        },
+
+        {
             field: 'account_status',
             header: 'Status',
             width: '160px',

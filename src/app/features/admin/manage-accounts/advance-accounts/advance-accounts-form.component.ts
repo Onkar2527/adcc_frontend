@@ -226,6 +226,24 @@ import {
 
   </div>
 
+  <div class="col-12 md:col-4">
+
+    <app-text-field
+      label="NPA Classification"
+      [field]="npaClassification"
+    ></app-text-field>
+
+  </div>
+
+  <div class="col-12 md:col-4">
+
+    <app-text-field
+      label="KYC"
+      [field]="kyc"
+    ></app-text-field>
+
+  </div>
+
 </div>
 
 <!-- DATES -->
@@ -425,6 +443,12 @@ export class AdvanceAccountFormComponent {
         signal<string>('');
 
     npaStatus =
+        signal<string>('');
+
+    npaClassification =
+        signal<string>('');
+
+    kyc =
         signal<string>('');
 
     accountOpeningDate =
@@ -669,6 +693,14 @@ export class AdvanceAccountFormComponent {
             ?? '',
         );
 
+        this.npaClassification.set(
+            this.row.npa_classification ?? '',
+        );
+
+        this.kyc.set(
+            this.row.kyc ?? '',
+        );
+
         this.accountOpeningDate.set(
             this.row.account_opening_date
                 ? new Date(
@@ -897,6 +929,12 @@ export class AdvanceAccountFormComponent {
 
             npa_status:
                 this.npaStatus(),
+
+            npa_classification:
+                this.npaClassification(),
+
+            kyc:
+                this.kyc(),
 
             account_opening_date:
                 this.formatDate(

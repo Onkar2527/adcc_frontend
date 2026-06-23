@@ -383,6 +383,12 @@ export class DepositAccountsComponent
         },
 
         {
+            field: 'kyc',
+            header: 'KYC',
+            width: '160px',
+        },
+
+        {
             field: 'account_status',
             header: 'Status',
             width: '160px',
