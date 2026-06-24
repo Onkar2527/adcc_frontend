@@ -211,16 +211,15 @@
     grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr));
     gap: 1rem;
     padding: 1rem;
-    align-items: start;
 }
 
 /* Unit Card */
 .unit-card {
     display: flex;
-    min-height: 14rem;
+    height: 17.5rem;
     flex-direction: column;
     justify-content: space-between;
-    gap: 1.35rem;
+    gap: 1rem;
     padding: 1.35rem;
     background: linear-gradient(180deg, #ffffff 0%, #fbfdff 100%);
     border: 1px solid #d8e2ec;
@@ -228,18 +227,23 @@
     border-radius: 8px;
     box-shadow: 0 3px 10px rgba(24, 47, 69, 0.08);
     cursor: pointer;
-    align-self: start;
     transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
 }
 
 .unit-card--compact {
-    min-height: 12.4rem;
+    height: 17.5rem;
     gap: 1rem;
     padding: 1.1rem;
 }
 
 .unit-card--grouped {
-    min-height: auto;
+    min-height: 17.5rem;
+    height: auto;
+}
+
+.unit-card--compact.unit-card--grouped {
+    min-height: 17.5rem;
+    height: auto;
 }
 
 .unit-card:hover {
@@ -262,6 +266,7 @@
     align-items: flex-start;
     justify-content: space-between;
     gap: 0.75rem;
+    flex-shrink: 0;
 }
 
 .unit-card__title {
@@ -283,10 +288,9 @@
     font-size: 1.08rem;
     font-weight: 800;
     line-height: 1.28;
-    white-space: normal;
-    overflow: visible;
-    text-overflow: unset;
-    word-break: break-word;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .unit-card__title small {
@@ -321,6 +325,7 @@
     border-radius: 6px;
     background: #f8fafc;
     overflow: hidden;
+    flex-shrink: 0;
 }
 
 .unit-card__metrics div {
@@ -365,6 +370,7 @@
     justify-content: space-between;
     gap: 0.75rem;
     padding-top: 0.1rem;
+    flex-shrink: 0;
 }
 
 .unit-card__footer > span {
@@ -435,6 +441,7 @@
     }
 
     .unit-card {
+        height: auto;
         min-height: auto;
     }
 }
@@ -454,4 +461,5 @@
     grid-template-columns: minmax(0, 1fr) auto;
     gap: 0.5rem;
     align-items: center;
+    flex-shrink: 0;
 }

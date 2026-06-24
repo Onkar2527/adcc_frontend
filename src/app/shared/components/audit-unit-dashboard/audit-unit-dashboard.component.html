@@ -98,7 +98,7 @@
         <div class="unit-card__top">
           <div class="unit-card__title">
             <span>Audit Unit</span>
-            <h3>{{ item.display_title || item.audit_unit_name }}</h3>
+            <h3 [title]="item.display_title || item.audit_unit_name">{{ item.display_title || item.audit_unit_name }}</h3>
             <small>{{ item.display_code || ('Code: ' + item.audit_unit_code) }}</small>
 
             <div class="unit-card__meta" *ngIf="cardMetaItems?.length">
