@@ -1,0 +1,28 @@
+:80 {
+    # Set the root folder for static files
+    root * /usr/share/caddy
+
+    # Enable gzip and zstd compression
+    encode gzip zstd
+
+    # Serve static files
+    file_server
+
+    # Handle SPA routing (try files, then fallback to index.html)
+    try_files {path} {path}/ /index.html
+
+    # Cache control headers for static assets
+    @static {
+        file
+        path *.ico *.css *.js *.gif *.jpg *.jpeg *.png *.woff2 *.eot *.ttf *.svg *.json
+    }
+    header @static Cache-Control "public, max-age=15552000, immutable"
+
+    # Disable cache specifically for config.json to ensure runtime config updates are instant
+    @config {
+        path *config.json
+    }
+    header @config {
+        Cache-Control "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0"
+    }
+}
