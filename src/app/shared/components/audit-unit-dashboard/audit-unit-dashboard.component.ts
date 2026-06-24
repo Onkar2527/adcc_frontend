@@ -113,22 +113,22 @@ export class AuditUnitDashboardComponent {
                 value: this.totalUnits,
             },
             {
-                label: 'Audit Pending',
+                label: 'Total Audit Pending',
                 value: this.totalAuditPending,
                 className: 'text-warn',
             },
             {
-                label: 'Review Pending',
+                label: 'Total Review Pending',
                 value: this.totalReviewPending,
                 className: 'text-info',
             },
             {
-                label: 'Compliance Pending',
+                label: 'Total Compliance Pending',
                 value: this.totalCompliancePending,
                 className: 'text-danger',
             },
             {
-                label: 'Completed',
+                label: 'Completed Assessments',
                 value: this.totalCompleted,
                 className: 'text-success',
             },
@@ -159,7 +159,7 @@ export class AuditUnitDashboardComponent {
                 className: 'text-danger',
             },
             {
-                label: 'Done',
+                label: 'Completed',
                 key: 'audit_completed',
                 className: 'text-success',
             },
