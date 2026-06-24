@@ -120,7 +120,13 @@
         <button
           pButton
           type="button"
-          [label]="isReCompliance() ? 'Resubmit to Reviewer' : 'Submit to Reviewer'"
+          [label]="
+            isLiveManagerComplianceFlow()
+              ? 'Submit Responses'
+              : isReCompliance()
+                ? 'Resubmit to Reviewer'
+                : 'Submit to Reviewer'
+          "
           icon="pi pi-send"
           [disabled]="!submissionPreview()?.can_submit || hasUnsavedChanges()"
           [loading]="submitting()"

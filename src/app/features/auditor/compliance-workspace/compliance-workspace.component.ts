@@ -1293,9 +1293,13 @@ export class ComplianceWorkspaceComponent implements OnInit {
 
         this.confirmation.confirm({
             header:
-                'Submit Compliance',
+                this.isLiveManagerComplianceFlow()
+                    ? 'Submit Responses'
+                    : 'Submit Compliance',
             message:
-                'Submit these compliance responses to Reviewer?',
+                this.isLiveManagerComplianceFlow()
+                    ? 'Submit all saved compliance responses to the next review stage?'
+                    : 'Submit these compliance responses to Reviewer?',
             icon:
                 'pi pi-send',
             acceptLabel:

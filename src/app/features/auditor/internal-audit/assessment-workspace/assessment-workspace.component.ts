@@ -916,20 +916,18 @@ export class AssessmentWorkspaceComponent implements OnInit {
                 Number(assessment.audit_status_id) === 3
                     ? 'Submit Re-Audit'
                     : this.isLiveManagerComplianceFlow()
-                        ? 'Complete Audit'
+                        ? this.liveSubmitHeading()
                         : 'Submit Audit',
             message:
                 Number(assessment.audit_status_id) === 3
                     ? 'Resubmit corrected audit points for reviewer action?'
                     : this.isLiveManagerComplianceFlow()
-                        ? 'Complete this audit assessment?'
+                        ? this.liveSubmitMessage()
                         : 'Submit this audit for reviewer action?',
             icon:
                 'pi pi-send',
             acceptLabel:
-                this.isLiveManagerComplianceFlow() && Number(assessment.audit_status_id) !== 3
-                    ? 'Complete'
-                    : 'Submit',
+                'Submit',
             rejectLabel:
                 'Cancel',
             accept:
@@ -1266,8 +1264,42 @@ export class AssessmentWorkspaceComponent implements OnInit {
         }
 
         return this.isLiveManagerComplianceFlow()
-            ? 'Complete Assessment'
+            ? this.liveSubmitHeading()
             : 'Submit for Review';
+    }
+
+    liveSubmitHeading() {
+        const nextStatus =
+            Number(
+                this.submissionPreview()?.live_next_status || 0,
+            );
+
+        if (nextStatus === 4) {
+            return 'Submit to Manager';
+        }
+
+        if (nextStatus === 5) {
+            return 'Submit to Reviewer';
+        }
+
+        return 'Complete Assessment';
+    }
+
+    private liveSubmitMessage() {
+        const nextStatus =
+            Number(
+                this.submissionPreview()?.live_next_status || 0,
+            );
+
+        if (nextStatus === 4) {
+            return 'Submit this audit to Manager for compliance responses?';
+        }
+
+        if (nextStatus === 5) {
+            return 'Submit the Auditor-reviewed compliance points to Reviewer?';
+        }
+
+        return 'Complete this audit assessment?';
     }
 
     financialYearLabel(
