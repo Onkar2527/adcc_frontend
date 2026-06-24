@@ -566,7 +566,7 @@
               ></p-tag>
 
               <p-tag
-                [value]="statusLabel(reviewStatus(answer))"
+                [value]="liveComplianceStatusLabel(answer)"
                 [severity]="statusSeverity(reviewStatus(answer))"
               ></p-tag>
             </div>
@@ -1011,7 +1011,7 @@
                     </td>
                     <td>
                       <p-tag
-                        [value]="statusLabel(reviewStatus(row))"
+                        [value]="liveComplianceStatusLabel(row)"
                         [severity]="statusSeverity(reviewStatus(row))"
                       ></p-tag>
                     </td>

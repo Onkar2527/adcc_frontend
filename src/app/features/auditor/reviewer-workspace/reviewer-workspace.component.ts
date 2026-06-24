@@ -23,6 +23,7 @@ import { NotificationService } from '../../../core/services/notification/notific
 import { AuditDashboardService } from '../services/auditor-main.service';
 import { AuditUnitDashboardComponent } from '../../../shared/components/audit-unit-dashboard/audit-unit-dashboard.component';
 import { InternalAuditNavService } from '../services/internal-audit-nav.service';
+import { audit_flow_config } from '../../admin/services/required-data';
 
 @Component({
     selector: 'app-reviewer-workspace',
@@ -436,13 +437,19 @@ export class ReviewerWorkspaceComponent implements OnInit {
         );
         this.loadingDetail.set(true);
         this.error.set('');
+        const isLiveComplianceAssessment =
+            assessment.live_manager_compliance === true
+            || (
+                audit_flow_config.liveManagerCompliance === true
+                && Number(assessment.audit_status_id) === 5
+            );
         const request =
             Number(assessment.audit_status_id) === 5
-                || assessment.live_manager_compliance === true
+                || isLiveComplianceAssessment
                 ? this.service.getReviewerComplianceAssessment(
                     Number(assessment.id),
                     this.employeeId(),
-                    assessment.live_manager_compliance === true,
+                    isLiveComplianceAssessment,
                 )
                 : this.service.getReviewerAssessment(
                     Number(assessment.id),
@@ -563,7 +570,15 @@ export class ReviewerWorkspaceComponent implements OnInit {
 
     isLiveManagerComplianceReview() {
         return this.selected()?.live_manager_compliance === true
-            || this.detail()?.overview?.live_manager_compliance === true;
+            || this.detail()?.overview?.live_manager_compliance === true
+            || (
+                audit_flow_config.liveManagerCompliance === true
+                && Number(
+                    this.selected()?.audit_status_id
+                    || this.detail()?.overview?.audit_status_id
+                    || 0,
+                ) === 5
+            );
     }
 
     isRegularComplianceReview() {
@@ -754,6 +769,32 @@ export class ReviewerWorkspaceComponent implements OnInit {
         return 'Pending';
     }
 
+    liveComplianceStatusLabel(
+        observation: any,
+    ) {
+        const status =
+            Number(
+                this.reviewStatus(observation) || 0,
+            );
+        const managerResponse =
+            String(
+                observation?.compliance_response
+                || observation?.audit_commpliance
+                || '',
+            ).trim();
+
+        if (
+            this.isLiveManagerComplianceReview()
+            && this.isComplianceReview()
+            && [0, 4, 11, 12].includes(status)
+            && !managerResponse
+        ) {
+            return 'Pending With Manager';
+        }
+
+        return this.statusLabel(status);
+    }
+
     statusSeverity(
         status: number,
     ): 'success' | 'danger' | 'secondary' | 'info' | 'warn' {
@@ -906,7 +947,7 @@ export class ReviewerWorkspaceComponent implements OnInit {
                 )
                 .filter(
                     (observation: any) =>
-                        [11, 12].includes(
+                        [0, 4, 10, 11, 12, 13].includes(
                             Number(
                                 this.reviewStatus(observation) || 0,
                             ),
@@ -1139,10 +1180,23 @@ export class ReviewerWorkspaceComponent implements OnInit {
         const status = Number(
             this.reviewStatus(observation) || 0,
         );
+        const managerResponse =
+            String(
+                observation?.compliance_response
+                || observation?.audit_commpliance
+                || '',
+            ).trim();
 
         if (
-            status === 11
+            status === 13
             || status === 8
+        ) {
+            return true;
+        }
+
+        if (
+            [11, 12].includes(status)
+            && managerResponse
         ) {
             return true;
         }
@@ -1150,9 +1204,7 @@ export class ReviewerWorkspaceComponent implements OnInit {
         return (observation?.annexure_rows || [])
             .some(
                 (row: any) =>
-                    Number(
-                        this.reviewStatus(row) || 0,
-                    ) === 8,
+                    this.canTakeLiveComplianceReviewerAction(row),
             );
     }
 

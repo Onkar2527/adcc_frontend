@@ -1282,7 +1282,9 @@ export class AssessmentWorkspaceComponent implements OnInit {
             return 'Submit to Reviewer';
         }
 
-        return 'Complete Assessment';
+        return this.isLiveManagerComplianceFlow()
+            ? 'Submit to Reviewer'
+            : 'Complete Assessment';
     }
 
     private liveSubmitMessage() {
@@ -1299,7 +1301,9 @@ export class AssessmentWorkspaceComponent implements OnInit {
             return 'Submit the Auditor-reviewed compliance points to Reviewer?';
         }
 
-        return 'Complete this audit assessment?';
+        return this.isLiveManagerComplianceFlow()
+            ? 'Submit the Auditor-reviewed compliance points to Reviewer?'
+            : 'Complete this audit assessment?';
     }
 
     financialYearLabel(
