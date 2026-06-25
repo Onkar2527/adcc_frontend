@@ -135,7 +135,6 @@ export class MasterBulkUploadService {
         'gender',
         'employee_type',
         'password',
-        'audit_units',
         'region_name',
         'is_active',
       ],
@@ -148,7 +147,6 @@ export class MasterBulkUploadService {
         'Female',
         'Auditor',
         'Audit@123',
-        'UPDATED BRANCH (1)|RADHA NAGARI BRANCH (10)',
         '',
         'Yes',
       ]],
@@ -161,7 +159,6 @@ export class MasterBulkUploadService {
       loadContext: () =>
         forkJoin({
           employees: this.employeeService.getEmployees(),
-          units: this.unitsService.getUnits(),
           regionNames: this.regionService.findUniqueNames(),
         }),
       createSession: (context) => ({
@@ -183,7 +180,6 @@ export class MasterBulkUploadService {
         const genderKey = this.normalizeValue(row['gender']);
         const employeeTypeKey = this.normalizeValue(row['employee_type']);
         const password = (row['password'] || '').trim();
-        const auditUnitsRaw = (row['audit_units'] || '').trim();
         const regionName = (row['region_name'] || '').trim();
         const isActive = this.parseBoolean(row['is_active'], true);
 
@@ -213,14 +209,6 @@ export class MasterBulkUploadService {
         }
         if (session.emails.has(normalizedEmail) || session.seenEmails.has(normalizedEmail)) {
           errors.push('Email already exists');
-        }
-
-        let unitIds: number[] = [];
-        if (userTypeId === 2 || userTypeId === 4) {
-          unitIds = this.parseNamedIds(auditUnitsRaw, context.units, 'name');
-          if (!unitIds.length) {
-            errors.push('Authorized audit units are required for Auditor/Reviewer');
-          }
         }
 
         if (userTypeId === 6) {
@@ -256,7 +244,6 @@ export class MasterBulkUploadService {
                 gender,
                 user_type_id: userTypeId,
                 password,
-                unit_ids: unitIds,
                 region_name: userTypeId === 6 ? regionName : undefined,
                 is_active: isActive ? 1 : 0,
               } satisfies CreateEmployeeDto),
