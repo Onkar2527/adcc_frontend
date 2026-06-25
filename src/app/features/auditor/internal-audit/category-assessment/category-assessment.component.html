@@ -543,7 +543,7 @@
       </div>
     </div>
 
-    <div class="question-set" *ngFor="let set of visibleQuestionSets(detail); let setIndex = index">
+    <div class="question-set" *ngFor="let set of visibleQuestionSets(detail); let setIndex = index; trackBy: trackBySet">
       <div class="question-set-title">
         {{ set.name }}
       </div>
@@ -553,7 +553,7 @@
         [value]="openedHeaderValues(set, setIndex)"
         (valueChange)="setOpenedHeaderValues(set, setIndex, $event)"
       >
-        <p-accordion-panel *ngFor="let header of set.headers; let i = index" [value]="i.toString()">
+        <p-accordion-panel *ngFor="let header of set.headers; let i = index; trackBy: trackByHeader" [value]="i.toString()">
           <p-accordion-header>
             <div
               class="flex flex-column md:flex-row md:align-items-center md:justify-content-between gap-3 w-full pr-3"
@@ -585,7 +585,7 @@
             </div>
           </p-accordion-header>
           <p-accordion-content>
-            <ng-container *ngFor="let question of header.questions; let i = index">
+            <ng-container *ngFor="let question of header.questions; let i = index; trackBy: trackByQuestion">
               <div
                 class="question-card"
                 [class.re-audit-question]="isReAudit(detail)"
@@ -652,7 +652,7 @@
                       >
                       <div class="timeline-container">
                         <div
-                          *ngFor="let item of getTimeline(question); let index = index"
+                          *ngFor="let item of getTimeline(question); let index = index; trackBy: trackByIndex"
                           class="timeline-item"
                         >
                           <div class="timeline-badge"></div>
@@ -698,25 +698,26 @@
                                 "
                               >
                                 <button
-                                  *ngFor="let evidence of evidenceList(item); let ei = index"
+                                  *ngFor="let evidence of evidenceList(item); let ei = index; trackBy: trackByEvidence"
                                   pButton
                                   type="button"
                                   icon="pi pi-paperclip"
                                   severity="secondary"
-                                  [title]="'View auditor evidence ' + (ei + 1)"
+                                  [title]="'View auditor supporting document ' + (ei + 1)"
                                   (click)="viewEvidence(evidence)"
                                   class="p-button-sm"
                                 ></button>
                                 <button
                                   *ngFor="
                                     let evidence of evidenceList(item, 'compliance_evidence');
-                                    let ei = index
+                                    let ei = index;
+                                    trackBy: trackByEvidence
                                   "
                                   pButton
                                   type="button"
                                   icon="pi pi-eye"
                                   severity="secondary"
-                                  [title]="'View compliance evidence ' + (ei + 1)"
+                                  [title]="'View compliance supporting document ' + (ei + 1)"
                                   (click)="viewComplianceEvidence(evidence)"
                                   class="p-button-sm"
                                 ></button>
@@ -751,7 +752,7 @@
                         >
                           <option value="">Please select</option>
 
-                          <option *ngFor="let option of question.options" [value]="option.value">
+                          <option *ngFor="let option of question.options; trackBy: trackByOption" [value]="option.value">
                             {{ option.label }}
                           </option>
                         </select>
@@ -791,7 +792,8 @@
                                 class="evidence-chip"
                                 *ngFor="
                                   let evidence of evidenceList(question.answer);
-                                  let ei = index
+                                  let ei = index;
+                                  trackBy: trackByEvidence
                                 "
                               >
                                 <button
@@ -808,8 +810,9 @@
                                   type="button"
                                   icon="pi pi-trash"
                                   severity="danger"
-                                  [title]="'Remove evidence ' + (ei + 1)"
-                                  [disabled]="question.is_editable === false"
+                                  [title]="'Remove supporting document ' + (ei + 1)"
+                                  [loading]="deletingEvidenceKey() === evidenceDeleteKey(evidence)"
+                                  [disabled]="question.is_editable === false || deletingEvidenceKey() === evidenceDeleteKey(evidence)"
                                   (click)="deleteEvidence(evidence)"
                                 ></button>
                               </span>
@@ -829,7 +832,7 @@
                               type="button"
                               icon="pi pi-upload"
                               severity="secondary"
-                              title="Upload evidence"
+                              title="Supporting document"
                               [disabled]="!question.answer?.id || question.is_editable === false"
                               [loading]="uploadingEvidenceKey() === evidenceKey(question)"
                               (click)="questionEvidenceInput.click()"
@@ -864,7 +867,7 @@
                         >
                           <button
                             type="button"
-                            *ngFor="let sug of getFilteredSuggestions(question)"
+                            *ngFor="let sug of getFilteredSuggestions(question); trackBy: trackByIndex"
                             class="audit-comment-suggestion-item"
                             role="option"
                             (mousedown)="selectSuggestion(question, sug, $event)"
@@ -904,7 +907,8 @@
                           class="evidence-chip"
                           *ngFor="
                             let evidence of evidenceList(question.answer, 'compliance_evidence');
-                            let ei = index
+                            let ei = index;
+                            trackBy: trackByEvidence
                           "
                         >
                           <button
@@ -912,7 +916,7 @@
                             type="button"
                             icon="pi pi-eye"
                             severity="secondary"
-                            [title]="'View manager evidence ' + (ei + 1)"
+                            [title]="'View manager supporting document ' + (ei + 1)"
                             (click)="viewComplianceEvidence(evidence)"
                           ></button>
                         </span>
@@ -988,7 +992,7 @@
 
                           <div
                             class="annexure-field"
-                            *ngFor="let column of question.annexure.columns; let ci = index"
+                            *ngFor="let column of question.annexure.columns; let ci = index; trackBy: trackByColumn"
                           >
                             <label class="answer-label">
                               {{ column.name }}
@@ -1016,7 +1020,7 @@
                                 <option value="">Please select</option>
 
                                 <option
-                                  *ngFor="let option of annexureColumnOptions(column)"
+                                  *ngFor="let option of annexureColumnOptions(column); trackBy: trackByOption"
                                   [value]="option.option_label"
                                 >
                                   {{ option.option_label }}
@@ -1051,7 +1055,7 @@
                               <option value="">Please select</option>
 
                               <option
-                                *ngFor="let risk of annexureRiskOptions().business_risks"
+                                *ngFor="let risk of annexureRiskOptions().business_risks; trackBy: trackBySet"
                                 [value]="risk.id"
                               >
                                 {{ risk.label }}
@@ -1074,7 +1078,7 @@
                               <option value="">Please select</option>
 
                               <option
-                                *ngFor="let risk of annexureRiskOptions().control_risks"
+                                *ngFor="let risk of annexureRiskOptions().control_risks; trackBy: trackBySet"
                                 [value]="risk.id"
                               >
                                 {{ risk.label }}
@@ -1097,7 +1101,7 @@
                               <option value="">Please select</option>
 
                               <option
-                                *ngFor="let risk of annexureRiskOptions().risk_categories"
+                                *ngFor="let risk of annexureRiskOptions().risk_categories; trackBy: trackBySet"
                                 [value]="risk.id"
                               >
                                 {{ risk.risk_category }}
@@ -1182,7 +1186,7 @@
                         >
                           <thead>
                             <tr>
-                              <th *ngFor="let column of question.annexure.columns">
+                              <th *ngFor="let column of question.annexure.columns; trackBy: trackByColumn">
                                 {{ column.name }}
                               </th>
                               <th>Business Risk</th>
@@ -1203,8 +1207,8 @@
                           </thead>
 
                           <tbody>
-                            <tr *ngFor="let row of question.annexure_rows">
-                              <td *ngFor="let column of question.annexure.columns; let ci = index">
+                            <tr *ngFor="let row of question.annexure_rows; trackBy: trackByRow">
+                              <td *ngFor="let column of question.annexure.columns; let ci = index; trackBy: trackByColumn">
                                 {{ row.values?.[ci] || '-' }}
                               </td>
 
@@ -1226,7 +1230,7 @@
                                 <!-- Inline tiny timeline for annexure row -->
                                 <div *ngIf="getTimeline(row).length" class="row-timeline-inline">
                                   <div
-                                    *ngFor="let item of getTimeline(row); let index = index"
+                                    *ngFor="let item of getTimeline(row); let index = index; trackBy: trackByIndex"
                                     class="row-timeline-item"
                                   >
                                     <div class="row-timeline-header">
@@ -1275,23 +1279,24 @@
                                           "
                                         >
                                           <button
-                                            *ngFor="let e of evidenceList(item); let ei = index"
+                                            *ngFor="let e of evidenceList(item); let ei = index; trackBy: trackByEvidence"
                                             type="button"
                                             class="btn-link"
                                             (click)="viewEvidence(e)"
-                                            title="View auditor evidence"
+                                            title="View auditor supporting document"
                                           >
                                             <i class="pi pi-paperclip"></i>
                                           </button>
                                           <button
                                             *ngFor="
                                               let e of evidenceList(item, 'compliance_evidence');
-                                              let ei = index
+                                              let ei = index;
+                                              trackBy: trackByEvidence
                                             "
                                             type="button"
                                             class="btn-link"
                                             (click)="viewComplianceEvidence(e)"
-                                            title="View manager evidence"
+                                            title="View manager supporting document"
                                           >
                                             <i class="pi pi-eye"></i>
                                           </button>
@@ -1307,7 +1312,7 @@
                                   <span class="evidence-chip-list" *ngIf="evidenceList(row).length">
                                     <span
                                       class="evidence-chip"
-                                      *ngFor="let evidence of evidenceList(row); let ei = index"
+                                      *ngFor="let evidence of evidenceList(row); let ei = index; trackBy: trackByEvidence"
                                     >
                                       <button
                                         pButton
@@ -1323,7 +1328,9 @@
                                         type="button"
                                         icon="pi pi-trash"
                                         severity="danger"
-                                        [title]="'Remove evidence ' + (ei + 1)"
+                                        [title]="'Remove supporting document ' + (ei + 1)"
+                                        [loading]="deletingEvidenceKey() === evidenceDeleteKey(evidence)"
+                                        [disabled]="deletingEvidenceKey() === evidenceDeleteKey(evidence)"
                                         (click)="deleteEvidence(evidence)"
                                       ></button>
                                     </span>
@@ -1337,7 +1344,8 @@
                                       class="evidence-chip"
                                       *ngFor="
                                         let evidence of evidenceList(row, 'compliance_evidence');
-                                        let ei = index
+                                        let ei = index;
+                                        trackBy: trackByEvidence
                                       "
                                     >
                                       <button
@@ -1345,7 +1353,7 @@
                                         type="button"
                                         icon="pi pi-eye"
                                         severity="secondary"
-                                        [title]="'View manager evidence ' + (ei + 1)"
+                                        [title]="'View manager supporting document ' + (ei + 1)"
                                         (click)="viewComplianceEvidence(evidence)"
                                       ></button>
                                     </span>
@@ -1417,12 +1425,12 @@
                 </div>
               </div>
 
-              <div *ngFor="let subsetSet of question.selectedSubsetSets || []" class="subset-panel">
+              <div *ngFor="let subsetSet of question.selectedSubsetSets || []; trackBy: trackBySet" class="subset-panel">
                 <div class="question-set-title">
                   {{ subsetSet.name }}
                 </div>
 
-                <section class="question-header" *ngFor="let subsetHeader of subsetSet.headers">
+                <section class="question-header" *ngFor="let subsetHeader of subsetSet.headers; trackBy: trackByHeader">
                   <div
                     class="flex flex-column md:flex-row md:align-items-center md:justify-content-between gap-3 mb-3"
                   >
@@ -1458,7 +1466,7 @@
                     class="question-card"
                     [class.re-audit-question]="isReAudit(detail)"
                     [class.annexure-question]="buildIsAnnexureSelected(subsetQuestion)"
-                    *ngFor="let subsetQuestion of subsetHeader.questions; let si = index"
+                    *ngFor="let subsetQuestion of subsetHeader.questions; let si = index; trackBy: trackByQuestion"
                   >
                     <div class="question-main">
                       <div class="question-number">
@@ -1532,7 +1540,7 @@
                           >
                           <div class="timeline-container">
                             <div
-                              *ngFor="let item of getTimeline(subsetQuestion); let index = index"
+                              *ngFor="let item of getTimeline(subsetQuestion); let index = index; trackBy: trackByIndex"
                               class="timeline-item"
                             >
                               <div class="timeline-badge"></div>
@@ -1582,25 +1590,26 @@
                                     "
                                   >
                                     <button
-                                      *ngFor="let evidence of evidenceList(item); let ei = index"
+                                      *ngFor="let evidence of evidenceList(item); let ei = index; trackBy: trackByEvidence"
                                       pButton
                                       type="button"
                                       icon="pi pi-paperclip"
                                       severity="secondary"
-                                      [title]="'View auditor evidence ' + (ei + 1)"
+                                      [title]="'View auditor supporting document ' + (ei + 1)"
                                       (click)="viewEvidence(evidence)"
                                       class="p-button-sm"
                                     ></button>
                                     <button
                                       *ngFor="
                                         let evidence of evidenceList(item, 'compliance_evidence');
-                                        let ei = index
+                                        let ei = index;
+                                        trackBy: trackByEvidence
                                       "
                                       pButton
                                       type="button"
                                       icon="pi pi-eye"
                                       severity="secondary"
-                                      [title]="'View compliance evidence ' + (ei + 1)"
+                                      [title]="'View compliance supporting document ' + (ei + 1)"
                                       (click)="viewComplianceEvidence(evidence)"
                                       class="p-button-sm"
                                     ></button>
@@ -1638,7 +1647,7 @@
                               <option value="">Please select</option>
 
                               <option
-                                *ngFor="let option of subsetQuestion.options"
+                                *ngFor="let option of subsetQuestion.options; trackBy: trackByOption"
                                 [value]="option.value"
                               >
                                 {{ option.label }}
@@ -1680,7 +1689,8 @@
                                     class="evidence-chip"
                                     *ngFor="
                                       let evidence of evidenceList(subsetQuestion.answer);
-                                      let ei = index
+                                      let ei = index;
+                                      trackBy: trackByEvidence
                                     "
                                   >
                                     <button
@@ -1697,8 +1707,9 @@
                                       type="button"
                                       icon="pi pi-trash"
                                       severity="danger"
-                                      [title]="'Remove evidence ' + (ei + 1)"
-                                      [disabled]="subsetQuestion.is_editable === false"
+                                      [title]="'Remove supporting document ' + (ei + 1)"
+                                      [loading]="deletingEvidenceKey() === evidenceDeleteKey(evidence)"
+                                      [disabled]="subsetQuestion.is_editable === false || deletingEvidenceKey() === evidenceDeleteKey(evidence)"
                                       (click)="deleteEvidence(evidence)"
                                     ></button>
                                   </span>
@@ -1718,7 +1729,7 @@
                                   type="button"
                                   icon="pi pi-upload"
                                   severity="secondary"
-                                  title="Upload evidence"
+                                  title="Supporting document"
                                   [disabled]="
                                     !subsetQuestion.answer?.id ||
                                     subsetQuestion.is_editable === false
@@ -1760,7 +1771,7 @@
                             >
                               <button
                                 type="button"
-                                *ngFor="let sug of getFilteredSuggestions(subsetQuestion)"
+                                *ngFor="let sug of getFilteredSuggestions(subsetQuestion); trackBy: trackByIndex"
                                 class="audit-comment-suggestion-item"
                                 role="option"
                                 (mousedown)="selectSuggestion(subsetQuestion, sug, $event)"
@@ -1809,7 +1820,8 @@
                                   subsetQuestion.answer,
                                   'compliance_evidence'
                                 );
-                                let ei = index
+                                let ei = index;
+                                trackBy: trackByEvidence
                               "
                             >
                               <button
@@ -1817,7 +1829,7 @@
                                 type="button"
                                 icon="pi pi-eye"
                                 severity="secondary"
-                                [title]="'View manager evidence ' + (ei + 1)"
+                                [title]="'View manager supporting document ' + (ei + 1)"
                                 (click)="viewComplianceEvidence(evidence)"
                               ></button>
                             </span>
@@ -1889,7 +1901,7 @@
                         "
                         class="evidence-hint"
                       >
-                        Save the answer first to upload evidence.
+                        Save the answer first to Supporting document.
                       </div>
 
                       <div
@@ -1899,7 +1911,7 @@
                         "
                         class="evidence-panel evidence-hint"
                       >
-                        Upload evidence from the annexure row after adding the row.
+                        Supporting document from the annexure row after adding the row.
                       </div>
 
                       <div *ngIf="buildIsAnnexureSelected(subsetQuestion)" class="annexure-preview">
@@ -1914,7 +1926,7 @@
                           "
                           class="annexure-column-list"
                         >
-                          <span *ngFor="let column of subsetQuestion.annexure.columns">
+                          <span *ngFor="let column of subsetQuestion.annexure.columns; trackBy: trackByColumn">
                             {{ column.name }}
                           </span>
                         </div>
@@ -1930,7 +1942,7 @@
                           <div class="annexure-grid">
                             <div
                               class="annexure-field"
-                              *ngFor="let column of subsetQuestion.annexure.columns; let ci = index"
+                              *ngFor="let column of subsetQuestion.annexure.columns; let ci = index; trackBy: trackByColumn"
                             >
                               <label class="answer-label">
                                 {{ column.name }}
@@ -1954,7 +1966,7 @@
                                   <option value="">Please select</option>
 
                                   <option
-                                    *ngFor="let option of annexureColumnOptions(column)"
+                                    *ngFor="let option of annexureColumnOptions(column); trackBy: trackByOption"
                                     [value]="option.option_label"
                                   >
                                     {{ option.option_label }}
@@ -1986,7 +1998,7 @@
                                 <option value="">Please select</option>
 
                                 <option
-                                  *ngFor="let risk of annexureRiskOptions().business_risks"
+                                  *ngFor="let risk of annexureRiskOptions().business_risks; trackBy: trackBySet"
                                   [value]="risk.id"
                                 >
                                   {{ risk.label }}
@@ -2008,7 +2020,7 @@
                                 <option value="">Please select</option>
 
                                 <option
-                                  *ngFor="let risk of annexureRiskOptions().control_risks"
+                                  *ngFor="let risk of annexureRiskOptions().control_risks; trackBy: trackBySet"
                                   [value]="risk.id"
                                 >
                                   {{ risk.label }}
@@ -2030,7 +2042,7 @@
                                 <option value="">Please select</option>
 
                                 <option
-                                  *ngFor="let risk of annexureRiskOptions().risk_categories"
+                                  *ngFor="let risk of annexureRiskOptions().risk_categories; trackBy: trackBySet"
                                   [value]="risk.id"
                                 >
                                   {{ risk.risk_category }}
@@ -2110,7 +2122,7 @@
                             >
                               <thead>
                                 <tr>
-                                  <th *ngFor="let column of subsetQuestion.annexure.columns">
+                                  <th *ngFor="let column of subsetQuestion.annexure.columns; trackBy: trackByColumn">
                                     {{ column.name }}
                                   </th>
                                   <th>Business Risk</th>
@@ -2131,11 +2143,12 @@
                               </thead>
 
                               <tbody>
-                                <tr *ngFor="let row of subsetQuestion.annexure_rows">
+                                <tr *ngFor="let row of subsetQuestion.annexure_rows; trackBy: trackByRow">
                                   <td
                                     *ngFor="
                                       let column of subsetQuestion.annexure.columns;
-                                      let ci = index
+                                      let ci = index;
+                                      trackBy: trackByColumn
                                     "
                                   >
                                     {{ row.values?.[ci] || '-' }}
@@ -2153,7 +2166,7 @@
                                       class="row-timeline-inline"
                                     >
                                       <div
-                                        *ngFor="let item of getTimeline(row); let index = index"
+                                        *ngFor="let item of getTimeline(row); let index = index; trackBy: trackByIndex"
                                         class="row-timeline-item"
                                       >
                                         <div class="row-timeline-header">
@@ -2202,11 +2215,11 @@
                                               "
                                             >
                                               <button
-                                                *ngFor="let e of evidenceList(item); let ei = index"
+                                                *ngFor="let e of evidenceList(item); let ei = index; trackBy: trackByEvidence"
                                                 type="button"
                                                 class="btn-link"
                                                 (click)="viewEvidence(e)"
-                                                title="View auditor evidence"
+                                                title="View auditor supporting document"
                                               >
                                                 <i class="pi pi-paperclip"></i>
                                               </button>
@@ -2216,12 +2229,13 @@
                                                     item,
                                                     'compliance_evidence'
                                                   );
-                                                  let ei = index
+                                                  let ei = index;
+                                                  trackBy: trackByEvidence
                                                 "
                                                 type="button"
                                                 class="btn-link"
                                                 (click)="viewComplianceEvidence(e)"
-                                                title="View manager evidence"
+                                                title="View manager supporting document"
                                               >
                                                 <i class="pi pi-eye"></i>
                                               </button>
@@ -2240,7 +2254,7 @@
                                       >
                                         <span
                                           class="evidence-chip"
-                                          *ngFor="let evidence of evidenceList(row); let ei = index"
+                                          *ngFor="let evidence of evidenceList(row); let ei = index; trackBy: trackByEvidence"
                                         >
                                           <button
                                             pButton
@@ -2256,7 +2270,9 @@
                                             type="button"
                                             icon="pi pi-trash"
                                             severity="danger"
-                                            [title]="'Remove evidence ' + (ei + 1)"
+                                            [title]="'Remove supporting document ' + (ei + 1)"
+                                            [loading]="deletingEvidenceKey() === evidenceDeleteKey(evidence)"
+                                            [disabled]="deletingEvidenceKey() === evidenceDeleteKey(evidence)"
                                             (click)="deleteEvidence(evidence)"
                                           ></button>
                                         </span>
@@ -2273,7 +2289,8 @@
                                               row,
                                               'compliance_evidence'
                                             );
-                                            let ei = index
+                                            let ei = index;
+                                            trackBy: trackByEvidence
                                           "
                                         >
                                           <button
@@ -2281,7 +2298,7 @@
                                             type="button"
                                             icon="pi pi-eye"
                                             severity="secondary"
-                                            [title]="'View manager evidence ' + (ei + 1)"
+                                            [title]="'View manager supporting document ' + (ei + 1)"
                                             (click)="viewComplianceEvidence(evidence)"
                                           ></button>
                                         </span>
@@ -2301,7 +2318,7 @@
                                         type="button"
                                         icon="pi pi-upload"
                                         severity="secondary"
-                                        title="Upload evidence"
+                                        title="Supporting document"
                                         [loading]="
                                           uploadingEvidenceKey() ===
                                           evidenceKey(subsetQuestion, row)

@@ -963,7 +963,7 @@ export class ComplianceWorkspaceComponent implements OnInit {
                                 ? 'Response saved and returned to Reviewer.'
                                 : 'Response saved and sent to Auditor.'
                             : res?.message
-                                || 'Compliance response saved.',
+                            || 'Compliance response saved.',
                     );
 
                     if (
@@ -1235,7 +1235,7 @@ export class ComplianceWorkspaceComponent implements OnInit {
 
                         this.notification.error(
                             res?.message
-                            || 'Unable to upload compliance evidence.',
+                            || 'Unable to Upload compliance supporting document.',
                         );
                         return;
                     }
@@ -1257,7 +1257,7 @@ export class ComplianceWorkspaceComponent implements OnInit {
                     this.uploadingEvidenceKey.set('');
                     this.notification.error(
                         err?.error?.message
-                        || 'Unable to upload compliance evidence.',
+                        || 'Unable to Upload compliance supporting document.',
                     );
                 },
             });

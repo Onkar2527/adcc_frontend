@@ -25,6 +25,9 @@ import {
     Router,
 } from '@angular/router';
 import {
+    ConfirmationService,
+} from 'primeng/api';
+import {
     ButtonModule,
 } from 'primeng/button';
 
@@ -79,6 +82,9 @@ export class CategoryAssessmentComponent
 
     private router =
         inject(Router);
+
+    private confirmationService =
+        inject(ConfirmationService);
 
     private cdr =
         inject(ChangeDetectorRef);
@@ -148,6 +154,9 @@ export class CategoryAssessmentComponent
         signal('');
 
     uploadingEvidenceKey =
+        signal('');
+
+    deletingEvidenceKey =
         signal('');
 
     liveComplianceActionSaving =
@@ -1388,7 +1397,7 @@ export class CategoryAssessmentComponent
         if (!currentText) {
             return suggestions;
         }
-        const filtered = suggestions.filter((s: string) => 
+        const filtered = suggestions.filter((s: string) =>
             s.toLowerCase().includes(currentText)
         );
         return filtered.length > 0 ? filtered : suggestions;
@@ -2030,6 +2039,43 @@ export class CategoryAssessmentComponent
         return question.answer_value || '';
     }
 
+    private applySavedAnswersLocally(
+        headers: any[],
+    ) {
+        for (
+            const header
+            of headers || []
+        ) {
+            for (
+                const question
+                of this.collectHeaderQuestionsForSave(header)
+            ) {
+                question.answer = {
+                    ...(question.answer || {}),
+                    answer_given:
+                        this.answerValueForSave(question),
+                    audit_comment:
+                        question.audit_comment || '',
+                    is_compliance:
+                        question.is_compliance === true ? 1 : 0,
+                    audit_compulsary_ev_upload:
+                        question.audit_compulsary_ev_upload === true ? 1 : 0,
+                };
+            }
+        }
+
+        const detail =
+            this.categoryDetail();
+
+        if (detail) {
+            this.categoryDetail.set({
+                ...detail,
+            });
+        }
+
+        this.syncSidebarCategoryCounts();
+    }
+
     saveHeader(
         header: any,
     ) {
@@ -2101,13 +2147,11 @@ export class CategoryAssessmentComponent
                         || 'Answers saved successfully',
                     );
 
-                    this.markSaved();
+                    this.applySavedAnswersLocally([
+                        header,
+                    ]);
 
-                    this.loadCategory(
-                        Number(detail.overview.id),
-                        Number(detail.category.id),
-                        false,
-                    );
+                    this.markSavedLocalOnly();
                 },
 
                 error: (err) => {
@@ -2211,13 +2255,11 @@ export class CategoryAssessmentComponent
                         || 'All header answers saved successfully',
                     );
 
-                    this.markSaved();
-
-                    this.loadCategory(
-                        Number(detail.overview.id),
-                        Number(detail.category.id),
-                        false,
+                    this.applySavedAnswersLocally(
+                        headers,
                     );
+
+                    this.markSavedLocalOnly();
                 },
 
                 error: (err) => {
@@ -2802,6 +2844,37 @@ export class CategoryAssessmentComponent
             return;
         }
 
+        this.confirmationService.confirm({
+            header:
+                'Delete Annexure Row',
+            message:
+                'Do you want to delete this annexure row?',
+            icon:
+                'pi pi-exclamation-triangle',
+            acceptLabel:
+                'Yes',
+            rejectLabel:
+                'No',
+            acceptButtonStyleClass:
+                'p-button-danger',
+            rejectButtonStyleClass:
+                'p-button-text',
+            accept: () =>
+                this.deleteAnnexureRowConfirmed(
+                    question,
+                    row,
+                    detail,
+                    rowKey,
+                ),
+        });
+    }
+
+    private deleteAnnexureRowConfirmed(
+        question: any,
+        row: any,
+        detail: any,
+        rowKey: string,
+    ) {
         this.deletingAnnexureRowKey.set(
             rowKey,
         );
@@ -2833,7 +2906,7 @@ export class CategoryAssessmentComponent
                     this.notification.success(
                         res?.message || 'Annexure row deleted successfully',
                     );
-                    this.markSaved();
+                    this.markSavedLocalOnly();
                     question.annexure_rows =
                         (question.annexure_rows || [])
                             .filter(
@@ -3135,16 +3208,16 @@ export class CategoryAssessmentComponent
                     );
                     if (res?.candidates) {
                         const candidateIds = new Set(res.candidates.map((c: any) => Number(c.id)));
-                        
+
                         // Keep current selections that are not in the new candidates list
                         const nonCandidateSelections = this.samplingSelection
                             .filter(id => !candidateIds.has(id));
-                            
+
                         // Get selections from the candidate list that are sampled
                         const sampledCandidateIds = res.candidates
                             .filter((c: any) => Number(c.sampling_filter) === 1)
                             .map((c: any) => Number(c.id));
-                            
+
                         this.samplingSelection = [...nonCandidateSelections, ...sampledCandidateIds];
                     }
                     this.samplingLoading.set(false);
@@ -3767,6 +3840,15 @@ export class CategoryAssessmentComponent
         return `${Number(question?.id || 0)}:${Number(row?.id || 0)}`;
     }
 
+    evidenceDeleteKey(
+        evidence: any,
+    ) {
+
+        return String(
+            Number(evidence?.id || 0),
+        );
+    }
+
     evidenceList(
         source: any,
         field = 'evidence',
@@ -3947,7 +4029,7 @@ export class CategoryAssessmentComponent
             }
 
             this.categoryDetail.set({ ...detail });
-            this.markSaved();
+            this.markSavedLocalOnly();
             return;
         }
 
@@ -3969,7 +4051,7 @@ export class CategoryAssessmentComponent
                         this.uploadingEvidenceKey.set('');
 
                         this.notification.error(
-                            res?.message || 'Unable to upload evidence.',
+                            res?.message || 'Unable to Supporting document.',
                         );
 
                         return;
@@ -3991,7 +4073,7 @@ export class CategoryAssessmentComponent
                     this.uploadingEvidenceKey.set('');
                     this.notification.error(
                         err?.error?.message
-                        || 'Unable to upload evidence.',
+                        || 'Unable to Supporting document.',
                     );
                 },
             });
@@ -4111,21 +4193,66 @@ export class CategoryAssessmentComponent
             return;
         }
 
+        this.confirmationService.confirm({
+            header:
+                'Remove Supporting Document',
+            message:
+                'Do you want to remove this supporting document?',
+            icon:
+                'pi pi-exclamation-triangle',
+            acceptLabel:
+                'Yes',
+            rejectLabel:
+                'No',
+            acceptButtonStyleClass:
+                'p-button-danger',
+            rejectButtonStyleClass:
+                'p-button-text',
+            accept: () =>
+                this.deleteEvidenceConfirmed(
+                    evidence,
+                    detail,
+                ),
+        });
+    }
+
+    private deleteEvidenceConfirmed(
+        evidence: any,
+        detail: any,
+    ) {
+        const evidenceId =
+            Number(evidence.id);
+
+        const deleteKey =
+            String(evidenceId || '');
+
+        if (
+            this.deletingEvidenceKey() === deleteKey
+        ) {
+            return;
+        }
+
+        this.deletingEvidenceKey.set(
+            deleteKey,
+        );
+
         this.service
             .deleteInternalAuditEvidence(
                 Number(detail.overview.id),
                 Number(detail.category.id),
-                Number(evidence.id),
+                evidenceId,
                 this.employeeId,
                 this.selectedDumpId(),
             )
             .subscribe({
                 next: (res: any) => {
+                    this.deletingEvidenceKey.set('');
+
                     if (
                         !res?.success
                     ) {
                         this.notification.error(
-                            res?.message || 'Unable to remove evidence.',
+                            res?.message || 'Unable to Remove supporting document.',
                         );
                         return;
                     }
@@ -4133,13 +4260,15 @@ export class CategoryAssessmentComponent
                     this.notification.success(
                         res.message || 'Evidence removed successfully.',
                     );
-                    this.removeEvidenceFromLocal(Number(evidence.id));
-                    this.markSaved();
+                    this.removeEvidenceFromLocal(evidenceId);
+                    this.markSavedLocalOnly();
                 },
                 error: (err) => {
+                    this.deletingEvidenceKey.set('');
+
                     this.notification.error(
                         err?.error?.message
-                        || 'Unable to remove evidence.',
+                        || 'Unable to Remove supporting document.',
                     );
                 },
             });
@@ -4219,4 +4348,37 @@ export class CategoryAssessmentComponent
                 this.savedAny(),
         });
     }
+
+    trackBySet(index: number, set: any): any {
+        return set.id || index;
+    }
+
+    trackByHeader(index: number, header: any): any {
+        return header.id || index;
+    }
+
+    trackByQuestion(index: number, question: any): any {
+        return question.id || index;
+    }
+
+    trackByEvidence(index: number, evidence: any): any {
+        return evidence.id || index;
+    }
+
+    trackByRow(index: number, row: any): any {
+        return row.id || index;
+    }
+
+    trackByColumn(index: number, column: any): any {
+        return column.id || index;
+    }
+
+    trackByOption(index: number, option: any): any {
+        return option.value || index;
+    }
+
+    trackByIndex(index: number): number {
+        return index;
+    }
 }
+

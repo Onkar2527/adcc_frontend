@@ -542,25 +542,41 @@
 .review-account-table {
     width: 100%;
     margin-bottom: .55rem;
-    border-collapse: collapse;
+    border-collapse: separate;
+    border-spacing: 0;
+    border: 1px solid #d8e2ef;
+    border-radius: 6px;
+    overflow: hidden;
     font-size: .8rem;
+    background: #ffffff;
 }
 
 .review-account-table th,
 .review-account-table td {
     padding: .36rem .45rem;
-    border: 1px solid var(--surface-border);
+    border-bottom: 1px solid #d8e2ef;
+    border-right: 1px solid #d8e2ef;
     text-align: left;
     vertical-align: top;
 }
 
 .review-account-table th {
     width: 8rem;
-    background: var(--surface-50);
+    background: #f8fafd;
     color: var(--text-color-secondary);
     font-size: .66rem;
     font-weight: 800;
     text-transform: uppercase;
+}
+
+.review-account-table th:last-child,
+.review-account-table td:last-child {
+    border-right: none;
+}
+
+.review-account-table tr:last-child th,
+.review-account-table tr:last-child td {
+    border-bottom: none;
 }
 
 .answer-body {

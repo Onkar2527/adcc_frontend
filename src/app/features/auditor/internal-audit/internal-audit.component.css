@@ -1992,7 +1992,7 @@ textarea.answer-control1 {
 }
 
 .annexure-table-frame {
-    border: 1px solid var(--surface-200);
+    border: 1px solid var(--surface-300);
     border-radius: .35rem;
     background: var(--surface-0);
 }
@@ -2007,17 +2007,16 @@ textarea.answer-control1 {
     table-layout: auto;
     background: var(--surface-0);
     color: var(--text-color);
-    font-size: .78rem;
-    line-height: 1.2;
+    font-size: .86rem;
+    line-height: 1.3;
 }
 
 .annexure-data-table th,
 .annexure-data-table td {
     min-width: 3rem;
     max-width: 7.5rem;
-    padding: .2rem .3rem;
-    border-bottom: 1px solid var(--surface-200);
-    border-right: 1px solid var(--surface-200);
+    padding: .32rem .42rem;
+    border: 1px solid var(--surface-200);
     text-align: left;
     vertical-align: middle;
     overflow-wrap: anywhere;
@@ -2025,7 +2024,7 @@ textarea.answer-control1 {
 
 .annexure-data-table th:last-child,
 .annexure-data-table td:last-child {
-    border-right: 0;
+    border-right: 1px solid var(--surface-200);
 }
 
 .annexure-data-table th {
@@ -2034,7 +2033,7 @@ textarea.answer-control1 {
     z-index: 1;
     background: #eaf0f7;
     color: var(--text-color);
-    font-size: .64rem;
+    font-size: .72rem;
     font-weight: 800;
     text-transform: uppercase;
     white-space: pre-wrap;

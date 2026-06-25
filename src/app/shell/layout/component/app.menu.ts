@@ -339,13 +339,29 @@ export class AppMenu implements OnInit, OnDestroy {
 
     this.userTypeId = String(user.user_type_id || '');
 
-    const filtered = this.baseModel.filter(
-      (menu: any) => !menu.authority || menu.authority.includes(this.userTypeId),
-    );
+    let filtered = this.baseModel
+      .filter((menu: any) => !menu.authority || menu.authority.includes(this.userTypeId))
+      .map((menu: any) => ({
+        ...menu,
+        items: menu.items ? [...menu.items] : undefined
+      }));
 
     let currentAssessmentId = this.currentAssessmentIdFromRoute();
     if (!currentAssessmentId && isReportsRoute) {
       currentAssessmentId = Number(this.auditNavService.assessmentId() || 0);
+    }
+
+    if (currentAssessmentId && this.userTypeId === '2') {
+      filtered = filtered.filter(
+        (menu: any) => !['reports', 'policies', 'incident management'].includes(menu.label?.toLowerCase() || '')
+      );
+      filtered.forEach((menu: any) => {
+        if (menu.items) {
+          menu.items = menu.items.filter(
+            (item: any) => item.label?.toLowerCase() !== 'audit calendar'
+          );
+        }
+      });
     }
 
     const shouldShowAssessmentMenu = this.shouldShowCurrentAssessmentMenu(currentAssessmentId);

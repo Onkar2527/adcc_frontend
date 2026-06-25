@@ -7,7 +7,6 @@
         {{ overview()?.audit_type_name || 'Internal Audit' }}
       </h2>
 
-      <p class="text-600 mt-2 mb-0">Assessment workspace</p>
     </div>
 
     <button
@@ -96,21 +95,21 @@
         <div class="grid h-full">
           <div class="col-12 md:col-4">
             <div class="metric-card">
-              <span>Menus</span>
+              <span>Active Menus</span>
               <strong>{{ menus().length }}</strong>
             </div>
           </div>
 
           <div class="col-12 md:col-4">
             <div class="metric-card">
-              <span>Categories</span>
+              <span>Active Categories</span>
               <strong>{{ totalCategories() }}</strong>
             </div>
           </div>
 
           <div class="col-12 md:col-4">
             <div class="metric-card">
-              <span>Questions</span>
+              <span>Active Questions</span>
               <strong>{{ totalQuestions() }}</strong>
             </div>
           </div>

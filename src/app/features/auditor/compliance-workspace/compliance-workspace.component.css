@@ -434,6 +434,31 @@
     flex-wrap: wrap;
 }
 
+.supporting-docs-box {
+    justify-content: flex-start;
+    padding: .35rem .45rem;
+    border: 1px solid var(--surface-border);
+    border-radius: .4rem;
+    background: var(--surface-0);
+}
+
+.supporting-docs-box--table {
+    display: inline-flex;
+    align-items: center;
+    gap: .35rem;
+    flex-wrap: wrap;
+    min-width: 11rem;
+}
+
+.supporting-docs-label {
+    width: 100%;
+    color: var(--text-color-secondary);
+    font-size: .68rem;
+    font-weight: 800;
+    line-height: 1;
+    text-transform: uppercase;
+}
+
 :host ::ng-deep .response-tools .p-button {
     width: 1.9rem;
     min-width: 1.9rem;

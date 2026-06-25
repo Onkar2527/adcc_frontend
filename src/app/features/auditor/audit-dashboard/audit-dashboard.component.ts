@@ -66,23 +66,23 @@ export class AuditDashboardComponent
 
     statusOptions = [
         {
-            label: 'Not Started',
+            label: 'Audit Not Started',
             value: 'NOT STARTED',
         },
         {
-            label: 'Audit Pending',
+            label: 'Audits Pending',
             value: 'AUDIT PENDING',
         },
         {
-            label: 'Review Pending',
+            label: 'Reviews Pending',
             value: 'REVIEW PENDING',
         },
         {
-            label: 'Compliance Pending',
+            label: 'Compliances Pending',
             value: 'COMPLIANCE PENDING',
         },
         {
-            label: 'Completed',
+            label: 'Completed Assessments',
             value: 'ASSESMENT COMPLETED',
         },
     ];
@@ -317,53 +317,53 @@ export class AuditDashboardComponent
                 .pipe(catchError(() => of([]))),
         }).subscribe({
 
-                next: (res: any) => {
+            next: (res: any) => {
 
-                    const rows =
-                        this.parseRows(
-                            res.regular,
-                        ).map((row: any) => ({
-                            ...row,
-                            audit_type_label:
-                                row.audit_type_name || 'Internal Audit',
-                        }));
+                const rows =
+                    this.parseRows(
+                        res.regular,
+                    ).map((row: any) => ({
+                        ...row,
+                        audit_type_label:
+                            row.audit_type_name || 'Internal Audit',
+                    }));
 
-                    const specialRows =
-                        this.parseRows(
-                            res.special,
+                const specialRows =
+                    this.parseRows(
+                        res.special,
+                    )
+                        .filter((row: any) =>
+                            !row.auditor_id
+                            ||
+                            Number(row.auditor_id) === this.employee_id(),
                         )
-                            .filter((row: any) =>
-                                !row.auditor_id
-                                ||
-                                Number(row.auditor_id) === this.employee_id(),
-                            )
-                            .map((row: any) =>
-                                this.mapSpecialAuditRow(row),
-                            );
+                        .map((row: any) =>
+                            this.mapSpecialAuditRow(row),
+                        );
 
-                    this.dashboardData.set(
-                        [
-                            ...rows,
-                            ...specialRows,
-                        ],
-                    );
+                this.dashboardData.set(
+                    [
+                        ...rows,
+                        ...specialRows,
+                    ],
+                );
 
-                    this.loading.set(
-                        false,
-                    );
-                },
+                this.loading.set(
+                    false,
+                );
+            },
 
-                error: () => {
+            error: () => {
 
-                    this.dashboardData.set(
-                        [],
-                    );
+                this.dashboardData.set(
+                    [],
+                );
 
-                    this.loading.set(
-                        false,
-                    );
-                },
-            });
+                this.loading.set(
+                    false,
+                );
+            },
+        });
     }
 
     /* ===================================================== */

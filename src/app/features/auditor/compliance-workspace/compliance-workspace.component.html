@@ -316,15 +316,15 @@
 
       <div class="compliance-metrics">
         <div>
-          <span>{{ isReCompliance() ? 'Returned Points' : 'Compliance Points' }}</span
+          <span>{{ isReCompliance() ? 'Returned Points' : 'Total Compliance Points' }}</span
           ><strong>{{ compliance.counts.total }}</strong>
         </div>
         <div>
-          <span>{{ isReCompliance() ? 'Corrections Saved' : 'Responses Saved' }}</span
+          <span>{{ isReCompliance() ? 'Corrections Saved' : 'Total Responses Saved' }}</span
           ><strong>{{ compliance.counts.completed }}</strong>
         </div>
         <div>
-          <span>Pending</span><strong class="red">{{ compliance.counts.pending }}</strong>
+          <span>Pending Points</span><strong class="red">{{ compliance.counts.pending }}</strong>
         </div>
       </div>
 
@@ -532,7 +532,7 @@
                         type="button"
                         icon="pi pi-paperclip"
                         severity="secondary"
-                        [title]="'View auditor evidence ' + (ei + 1)"
+                        [title]="'View auditor supporting document ' + (ei + 1)"
                         (click)="viewEvidence(evidence)"
                         class="p-button-sm"
                       ></button>
@@ -545,7 +545,7 @@
                         type="button"
                         icon="pi pi-eye"
                         severity="secondary"
-                        [title]="'View compliance evidence ' + (ei + 1)"
+                        [title]="'View compliance supporting document ' + (ei + 1)"
                         (click)="viewComplianceEvidence(evidence)"
                         class="p-button-sm"
                       ></button>
@@ -631,14 +631,15 @@
                 isReCompliance() ? 'Corrected Compliance Response' : 'Compliance Response'
               }}</label>
 
-              <div class="response-tools">
+              <div class="response-tools supporting-docs-box">
+                <span class="supporting-docs-label">Supporting Documents</span>
                 <button
                   *ngFor="let evidence of evidenceList(answer); let ei = index"
                   pButton
                   type="button"
                   icon="pi pi-paperclip"
                   severity="secondary"
-                  [title]="'View auditor evidence ' + (ei + 1)"
+                  [title]="'View auditor supporting document ' + (ei + 1)"
                   (click)="viewEvidence(evidence)"
                 ></button>
 
@@ -651,7 +652,7 @@
                   type="button"
                   icon="pi pi-eye"
                   severity="secondary"
-                  [title]="'View compliance evidence ' + (ei + 1)"
+                  [title]="'View compliance supporting document ' + (ei + 1)"
                   (click)="viewComplianceEvidence(evidence)"
                 ></button>
 
@@ -670,7 +671,7 @@
                     type="button"
                     icon="pi pi-upload"
                     severity="secondary"
-                    title="Upload compliance evidence"
+                    title="Upload compliance supporting document"
                     [loading]="uploadingEvidenceKey() === evidenceKey('answer', answer.id)"
                     (click)="answerEvidenceInput.click()"
                   ></button>
@@ -811,7 +812,7 @@
                                   type="button"
                                   class="btn-link"
                                   (click)="viewEvidence(e)"
-                                  title="View auditor evidence"
+                                  title="View auditor supporting document"
                                 >
                                   <i class="pi pi-paperclip"></i>
                                 </button>
@@ -823,7 +824,7 @@
                                   type="button"
                                   class="btn-link"
                                   (click)="viewComplianceEvidence(e)"
-                                  title="View manager evidence"
+                                  title="View manager supporting document"
                                 >
                                   <i class="pi pi-eye"></i>
                                 </button>
@@ -841,14 +842,15 @@
                         type="button"
                         icon="pi pi-paperclip"
                         severity="secondary"
-                        [title]="'View auditor evidence ' + (ei + 1)"
+                        [title]="'View auditor supporting document ' + (ei + 1)"
                         (click)="viewEvidence(evidence)"
                       ></button>
                       <span *ngIf="!evidenceList(row).length">-</span>
                     </td>
 
                     <td>
-                      <ng-container *ngIf="responseRequired(row)">
+                      <div *ngIf="responseRequired(row)" class="supporting-docs-box supporting-docs-box--table">
+                        <span class="supporting-docs-label">Supporting Documents</span>
                         <button
                           *ngFor="
                             let evidence of evidenceList(row, 'compliance_evidence');
@@ -858,7 +860,7 @@
                           type="button"
                           icon="pi pi-eye"
                           severity="secondary"
-                          [title]="'View compliance evidence ' + (ei + 1)"
+                          [title]="'View compliance supporting document ' + (ei + 1)"
                           (click)="viewComplianceEvidence(evidence)"
                         ></button>
 
@@ -876,11 +878,11 @@
                           type="button"
                           icon="pi pi-upload"
                           severity="secondary"
-                          title="Upload compliance evidence"
+                          title="Upload compliance supporting document"
                           [loading]="uploadingEvidenceKey() === evidenceKey('annexure', row.id)"
                           (click)="rowEvidenceInput.click()"
                         ></button>
-                      </ng-container>
+                      </div>
                       <span *ngIf="!responseRequired(row)">-</span>
                     </td>
 

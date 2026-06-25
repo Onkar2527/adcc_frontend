@@ -2162,4 +2162,31 @@ export class ReviewerWorkspaceComponent implements OnInit {
         delete state[key];
         this.actionSaving.set(state);
     }
+
+    trackByGroup(index: number, group: any): any {
+        if (group.isAccountGroup && group.account) {
+            return `${group.account.category_id}:${group.account.dump_id}:${group.account.account_no}`;
+        }
+        return group.answers?.[0]?.id || index;
+    }
+
+    trackByAnswer(index: number, answer: any): any {
+        return answer.id || index;
+    }
+
+    trackByEvidence(index: number, evidence: any): any {
+        return evidence.id || index;
+    }
+
+    trackByRow(index: number, row: any): any {
+        return row.id || index;
+    }
+
+    trackByColumn(index: number, column: any): any {
+        return column.id || index;
+    }
+
+    trackByIndex(index: number): number {
+        return index;
+    }
 }

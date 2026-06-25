@@ -236,7 +236,7 @@
         <div *ngIf="!remarksLoading() && remarkTab() === 'current'" class="remark-list">
           <div *ngIf="!remarks()?.current?.length" class="remark-empty">No remarks found.</div>
 
-          <article *ngFor="let remark of remarks()?.current || []" class="remark-item">
+          <article *ngFor="let remark of remarks()?.current || []; trackBy: trackByAnswer" class="remark-item">
             <button type="button" class="remark-heading" (click)="toggleRemark(remark)">
               <span class="remark-type">{{ remark.noti_type_label }}</span>
               <strong>{{ remark.subject }}</strong>
@@ -275,7 +275,7 @@
           <div *ngIf="!remarks()?.other?.length" class="remark-empty">No remarks found.</div>
 
           <article
-            *ngFor="let remark of remarks()?.other || []"
+            *ngFor="let remark of remarks()?.other || []; trackBy: trackByAnswer"
             class="remark-item"
             [class.remark-unread]="remark.is_unread"
           >
@@ -307,21 +307,21 @@
 
       <div class="review-metrics">
         <div>
-          <span>Total</span><strong>{{ review.counts.total }}</strong>
+          <span>Total Questions</span><strong>{{ review.counts.total }}</strong>
         </div>
         <div>
-          <span>Compliance Required</span
+          <span>Compliance Questions</span
           ><strong class="red">{{ review.counts.compliance }}</strong>
         </div>
         <div>
-          <span>Accepted</span><strong>{{ review.counts.accepted }}</strong>
+          <span>Accepted Questions</span><strong>{{ review.counts.accepted }}</strong>
         </div>
         <div>
-          <span>{{ isComplianceReview() ? 'Re-Compliance Needed' : 'Re-Audit Needed' }}</span
+          <span>{{ isComplianceReview() ? 'Re-Compliance Needed Questions' : 'Re-Audit Needed Questions' }}</span
           ><strong class="red">{{ review.counts.rejected }}</strong>
         </div>
         <div *ngIf="isComplianceReview()">
-          <span>Partially Pass</span><strong>{{ review.counts.partially_passed || 0 }}</strong>
+          <span>Partially Pass Questions</span><strong>{{ review.counts.partially_passed || 0 }}</strong>
         </div>
       </div>
 
@@ -453,7 +453,7 @@
         No questions found for this filter.
       </div>
 
-      <ng-container *ngFor="let group of reviewAnswerGroups()">
+      <ng-container *ngFor="let group of reviewAnswerGroups(); trackBy: trackByGroup">
         <div *ngIf="group.isAccountGroup" class="account-question-group">
           <div class="account-question-group__head">
             <div>
@@ -541,7 +541,7 @@
         </div>
 
         <article
-          *ngFor="let answer of group.answers"
+          *ngFor="let answer of group.answers; trackBy: trackByAnswer"
           class="answer-row"
           [class.compliance-answer]="answer.is_compliance == 1"
           [class.answer-row--account]="group.isAccountGroup"
@@ -652,7 +652,7 @@
             </div>
 
             <div *ngIf="isComplianceReview()">
-              <label>Manager Remark</label>
+              <label>Branch Remark</label>
               <p>{{ answer.compliance_response || '-' }}</p>
             </div>
           </div>
@@ -662,7 +662,7 @@
             <label class="timeline-title"><i class="pi pi-history"></i> Compliance History</label>
             <div class="timeline-container">
               <div
-                *ngFor="let item of getTimeline(answer); let index = index"
+                *ngFor="let item of getTimeline(answer); let index = index; trackBy: trackByIndex"
                 class="timeline-item"
               >
                 <div class="timeline-badge"></div>
@@ -708,25 +708,26 @@
                       "
                     >
                       <button
-                        *ngFor="let evidence of evidenceList(item); let ei = index"
+                        *ngFor="let evidence of evidenceList(item); let ei = index; trackBy: trackByEvidence"
                         pButton
                         type="button"
                         icon="pi pi-paperclip"
                         severity="secondary"
-                        [title]="'View auditor evidence ' + (ei + 1)"
+                        [title]="'View auditor supporting document ' + (ei + 1)"
                         (click)="viewEvidence(evidence)"
                         class="p-button-sm"
                       ></button>
                       <button
                         *ngFor="
                           let evidence of evidenceList(item, 'compliance_evidence');
-                          let ei = index
+                          let ei = index;
+                          trackBy: trackByEvidence
                         "
                         pButton
                         type="button"
                         icon="pi pi-eye"
                         severity="secondary"
-                        [title]="'View compliance evidence ' + (ei + 1)"
+                        [title]="'View compliance supporting document ' + (ei + 1)"
                         (click)="viewEvidence(evidence)"
                         class="p-button-sm"
                       ></button>
@@ -749,7 +750,7 @@
               *ngIf="isComplianceReview()"
               rows="1"
               [(ngModel)]="answer.compliance_reviewer_comment"
-              placeholder="Compliance review comment"
+              placeholder="Reviewer Remark"
             ></textarea>
 
             <div class="review-buttons">
@@ -761,14 +762,14 @@
                 class="evidence-actions"
               >
                 <button
-                  *ngFor="let evidence of evidenceList(answer); let ei = index"
+                  *ngFor="let evidence of evidenceList(answer); let ei = index; trackBy: trackByEvidence"
                   pButton
                   type="button"
                   class="evidence-link"
                   icon="pi pi-paperclip"
                   severity="secondary"
                   [title]="
-                    (isComplianceReview() ? 'View auditor evidence ' : 'View evidence ') + (ei + 1)
+                    (isComplianceReview() ? 'View auditor supporting document ' : 'View evidence ') + (ei + 1)
                   "
                   (click)="viewEvidence(evidence)"
                 ></button>
@@ -778,14 +779,15 @@
                     let evidence of isComplianceReview()
                       ? evidenceList(answer, 'compliance_evidence')
                       : [];
-                    let ei = index
+                    let ei = index;
+                    trackBy: trackByEvidence
                   "
                   pButton
                   type="button"
                   class="evidence-link"
                   icon="pi pi-eye"
                   severity="secondary"
-                  [title]="'View manager evidence ' + (ei + 1)"
+                  [title]="'View manager supporting document ' + (ei + 1)"
                   (click)="viewEvidence(evidence)"
                 ></button>
               </div>
@@ -872,10 +874,10 @@
               <table class="annexure-review-table">
                 <thead>
                   <tr>
-                    <th *ngFor="let column of annexureColumns(answer); let ci = index">
+                    <th *ngFor="let column of annexureColumns(answer); let ci = index; trackBy: trackByColumn">
                       {{ column.name || column.column_name || 'Column ' + (ci + 1) }}
                     </th>
-                    <th *ngIf="isComplianceReview()">Manager Remark</th>
+                    <th *ngIf="isComplianceReview()">Branch Remark</th>
                     <th>Evidence</th>
                     <th>Reviewer Comment</th>
                     <th>Status</th>
@@ -885,10 +887,10 @@
 
                 <tbody>
                   <tr
-                    *ngFor="let row of answer.annexure_rows"
+                    *ngFor="let row of answer.annexure_rows; trackBy: trackByRow"
                     [class.re-compliance-needed-tr]="reviewStatus(row) === 3"
                   >
-                    <td *ngFor="let column of annexureColumns(answer); let ci = index">
+                    <td *ngFor="let column of annexureColumns(answer); let ci = index; trackBy: trackByColumn">
                       {{ row.values?.[ci] || '-' }}
                     </td>
                     <td *ngIf="isComplianceReview()">
@@ -897,7 +899,7 @@
                       <!-- Inline tiny timeline for annexure row -->
                       <div *ngIf="getTimeline(row).length" class="row-timeline-inline">
                         <div
-                          *ngFor="let item of getTimeline(row); let index = index"
+                          *ngFor="let item of getTimeline(row); let index = index; trackBy: trackByIndex"
                           class="row-timeline-item"
                         >
                           <div class="row-timeline-header">
@@ -938,23 +940,24 @@
                                 "
                               >
                                 <button
-                                  *ngFor="let e of evidenceList(item); let ei = index"
+                                  *ngFor="let e of evidenceList(item); let ei = index; trackBy: trackByEvidence"
                                   type="button"
                                   class="btn-link"
                                   (click)="viewEvidence(e)"
-                                  title="View auditor evidence"
+                                  title="View auditor supporting document"
                                 >
                                   <i class="pi pi-paperclip"></i>
                                 </button>
                                 <button
                                   *ngFor="
                                     let e of evidenceList(item, 'compliance_evidence');
-                                    let ei = index
+                                    let ei = index;
+                                    trackBy: trackByEvidence
                                   "
                                   type="button"
                                   class="btn-link"
                                   (click)="viewEvidence(e)"
-                                  title="View manager evidence"
+                                  title="View manager supporting document"
                                 >
                                   <i class="pi pi-eye"></i>
                                 </button>
@@ -967,13 +970,13 @@
                     <td>
                       <div class="annexure-evidence-actions">
                         <button
-                          *ngFor="let evidence of evidenceList(row); let ei = index"
+                          *ngFor="let evidence of evidenceList(row); let ei = index; trackBy: trackByEvidence"
                           pButton
                           type="button"
                           icon="pi pi-paperclip"
                           severity="secondary"
                           [title]="
-                            (isComplianceReview() ? 'View auditor evidence ' : 'View evidence ') +
+                            (isComplianceReview() ? 'View auditor supporting document ' : 'View evidence ') +
                             (ei + 1)
                           "
                           (click)="viewEvidence(evidence)"
@@ -983,13 +986,14 @@
                             let evidence of isComplianceReview()
                               ? evidenceList(row, 'compliance_evidence')
                               : [];
-                            let ei = index
+                            let ei = index;
+                            trackBy: trackByEvidence
                           "
                           pButton
                           type="button"
                           icon="pi pi-eye"
                           severity="secondary"
-                          [title]="'View manager evidence ' + (ei + 1)"
+                          [title]="'View manager supporting document ' + (ei + 1)"
                           (click)="viewEvidence(evidence)"
                         ></button>
                       </div>
@@ -1006,7 +1010,7 @@
                         *ngIf="isComplianceReview()"
                         rows="1"
                         [(ngModel)]="row.compliance_reviewer_comment"
-                        placeholder="Compliance review comment"
+                        placeholder="Reviewer Remark"
                       ></textarea>
                     </td>
                     <td>
