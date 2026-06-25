@@ -18,6 +18,13 @@ async function loadRuntimeConfig(url = environment.config_path): Promise<Config>
       return DEFAULT_APP_CONFIG;
     }
     const cfg = (await res.json()) as Config;
+
+    // Dynamically replace localhost in the apiUrl with the browser's current hostname
+    if (cfg.apiUrl && cfg.apiUrl.includes('localhost')) {
+      const hostname = window.location.hostname;
+      cfg.apiUrl = cfg.apiUrl.replace('localhost', hostname);
+    }
+
     return { ...DEFAULT_APP_CONFIG, ...cfg }; // merge with defaults
   } catch (err) {
     console.warn('Error loading runtime config:', err);
