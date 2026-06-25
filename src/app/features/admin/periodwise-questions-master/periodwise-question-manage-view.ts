@@ -243,6 +243,10 @@ export class PeriodwiseQuestionsMasterViewComponent
       return res.rows;
     }
 
+    if (Array.isArray(res?.data?.rows)) {
+      return res.data.rows;
+    }
+
     return [];
 
   }
@@ -489,9 +493,10 @@ export class PeriodwiseQuestionsMasterViewComponent
             (Array.isArray(this.data?.audit_type_ids)
               ? this.data.audit_type_ids
               : String(this.data?.audit_type_ids || '')
+                  .replace(/[{}]/g, '')
                   .split(',')
             )
-              .map(Number)
+              .map((id: any) => Number(String(id).trim()))
               .filter(Boolean);
 
           const currentSectionTypeId = this.data?.section_type_id ? Number(this.data.section_type_id) : null;

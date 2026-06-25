@@ -49,6 +49,7 @@ import { MessageService } from 'primeng/api';
           [required]="true"
           [virtualScroll]="false"
           scrollHeight="240px"
+          (onChange)="onAuditTypesChange()"
         ></app-multi-select-field>
       </div>
 
@@ -138,6 +139,7 @@ export class PeriodwiseQuestionsMasterFormComponent {
     private PeriodwiseQuestionsMasterService = inject(PeriodwiseQuestionsMasterService);
     private auditTypeService = inject(AuditTypeService);
     private auditUnitService = inject(AuditUnitService);
+    private auditSectionService = inject(AuditSectionService);
     private messageService = inject(MessageService);
 
     audit_unit_id = signal<number | null>(0);
@@ -152,6 +154,7 @@ export class PeriodwiseQuestionsMasterFormComponent {
     isEdit = false;
 
     sectionTypeOptions = signal<any[]>([]);
+    auditSections = signal<any[]>([]);
     auditTypeOptions = signal<any[]>([]);
     userTypeOptions = signal<any[]>([]);
     years = signal<any[]>([]);
@@ -161,6 +164,7 @@ export class PeriodwiseQuestionsMasterFormComponent {
 
         this.getuserTypeOptions();
         this.loadAuditTypes(data);
+        this.loadAuditSections();
 
         this.loadBranches(data);
 
@@ -179,7 +183,7 @@ export class PeriodwiseQuestionsMasterFormComponent {
                 this.audit_unit_id.set(
                     Number(data.audit_unit_id) || 0
                 );
-                  this.onAuditUnitChange();
+                  this.setSectionTypeFromSelection();
                 this.start_month_year.set(
                     data.start_month_year || ''
                 );
@@ -347,6 +351,30 @@ ${fyEnd}-01 to ${fyEnd}-03`
 
     }
     onAuditUnitChange() {
+        this.setSectionTypeFromSelection();
+    }
+
+    onAuditTypesChange() {
+        this.setSectionTypeFromSelection();
+    }
+
+    private setSectionTypeFromSelection() {
+        const selectedAuditTypeIds = this.audit_type_ids().map(Number).filter(Boolean);
+        const matchingSection = this.auditSections().find((section: any) => {
+            const sectionAuditTypeIds = String(section.audit_type_id || '')
+                .split(',')
+                .map((id: string) => Number(id.trim()))
+                .filter(Boolean);
+
+            return selectedAuditTypeIds.some((auditTypeId: number) =>
+                sectionAuditTypeIds.includes(auditTypeId),
+            );
+        });
+
+        if (matchingSection) {
+            this.section_type_id.set(Number(matchingSection.id));
+            return;
+        }
 
         const selectedBranch = this.sectionTypeOptions().find(
             (o: any) => o.value == this.audit_unit_id()
@@ -356,9 +384,8 @@ ${fyEnd}-01 to ${fyEnd}-03`
             Number(selectedBranch?.section_type_id || 0)
         );
 
-
-
     }
+
 
     save() {
 
@@ -424,6 +451,25 @@ ${fyEnd}-01 to ${fyEnd}-03`
 
         });
 
+    }
+
+    private loadAuditSections() {
+        this.auditSectionService.findAll().subscribe({
+            next: (res: any) => {
+                const rows = Array.isArray(res)
+                    ? res
+                    : Array.isArray(res?.data)
+                        ? res.data
+                        : Array.isArray(res?.rows)
+                            ? res.rows
+                            : Array.isArray(res?.data?.rows)
+                                ? res.data.rows
+                                : [];
+
+                this.auditSections.set(rows);
+                this.setSectionTypeFromSelection();
+            },
+        });
     }
 
     getuserTypeOptions() {

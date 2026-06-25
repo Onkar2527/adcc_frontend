@@ -1269,10 +1269,22 @@ export class AssessmentWorkspaceComponent implements OnInit {
     }
 
     liveSubmitHeading() {
+        const currentStatus =
+            Number(
+                this.overview()?.audit_status_id || 0,
+            );
         const nextStatus =
             Number(
                 this.submissionPreview()?.live_next_status || 0,
             );
+
+        if (!nextStatus && currentStatus === 1) {
+            return 'Submit to Manager';
+        }
+
+        if (!nextStatus && currentStatus === 4) {
+            return 'Submit to Reviewer';
+        }
 
         if (nextStatus === 4) {
             return 'Submit to Manager';
@@ -1282,16 +1294,26 @@ export class AssessmentWorkspaceComponent implements OnInit {
             return 'Submit to Reviewer';
         }
 
-        return this.isLiveManagerComplianceFlow()
-            ? 'Submit to Reviewer'
-            : 'Complete Assessment';
+        return 'Complete Assessment';
     }
 
     private liveSubmitMessage() {
+        const currentStatus =
+            Number(
+                this.overview()?.audit_status_id || 0,
+            );
         const nextStatus =
             Number(
                 this.submissionPreview()?.live_next_status || 0,
             );
+
+        if (!nextStatus && currentStatus === 1) {
+            return 'Submit this audit to Manager for compliance responses?';
+        }
+
+        if (!nextStatus && currentStatus === 4) {
+            return 'Submit the Auditor-reviewed compliance points to Reviewer?';
+        }
 
         if (nextStatus === 4) {
             return 'Submit this audit to Manager for compliance responses?';
@@ -1301,9 +1323,7 @@ export class AssessmentWorkspaceComponent implements OnInit {
             return 'Submit the Auditor-reviewed compliance points to Reviewer?';
         }
 
-        return this.isLiveManagerComplianceFlow()
-            ? 'Submit the Auditor-reviewed compliance points to Reviewer?'
-            : 'Complete this audit assessment?';
+        return 'Complete this audit assessment?';
     }
 
     financialYearLabel(

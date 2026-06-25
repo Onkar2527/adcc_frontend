@@ -185,7 +185,9 @@ export class PeriodwiseQuestionsMasterComponent implements OnInit {
         ? res.rows
         : Array.isArray(res?.data)
           ? res.data
-          : [];
+          : Array.isArray(res?.data?.rows)
+            ? res.data.rows
+            : [];
 
     return rows.map((item: any, index: number) => ({
 

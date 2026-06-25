@@ -266,7 +266,9 @@ export class AuditUnitFormComponent {
             ? res.data
             : Array.isArray(res?.rows)
               ? res.rows
-              : [];
+              : Array.isArray(res?.data?.rows)
+                ? res.data.rows
+                : [];
 
         this.sections.set(
           rows.map((item: any) => ({

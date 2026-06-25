@@ -50,7 +50,7 @@ type Option = {
                                 [filter]="true"
                                 filterBy="label"
                                 [virtualScroll]="false"
-                                (onChange)="onAuditTypeChange()"
+                                (onChange)="onSetupFilterChange()"
                             ></app-select-field>
                         </div>
 
@@ -73,6 +73,7 @@ type Option = {
                                 [filter]="true"
                                 filterBy="label"
                                 [virtualScroll]="false"
+                                (onChange)="onSetupFilterChange()"
                             ></app-select-field>
                         </div>
                     </div>
@@ -101,6 +102,7 @@ type Option = {
                                 optionValue="id"
                                 [required]="true"
                                 [virtualScroll]="false"
+                                (onChange)="onSetupFilterChange()"
                             ></app-select-field>
                         </div>
                     </div>
@@ -231,15 +233,12 @@ export class SpecialAuditFormComponent implements OnInit {
         return filtered;
     }
 
-    onAuditTypeChange() {
+    onSetupFilterChange() {
         const selectedSetup = this.lookups().periodwise_questions.find(
             (item) => Number(item.id) === Number(this.controlMasterId()),
         );
 
-        if (
-            selectedSetup
-            && Number(selectedSetup['audit_type_id']) !== Number(this.auditTypeId())
-        ) {
+        if (selectedSetup && !this.isSetupAllowed(selectedSetup)) {
             this.controlMasterId.set(null);
         }
     }
@@ -281,6 +280,12 @@ export class SpecialAuditFormComponent implements OnInit {
         if (!this.auditorId()) return 'Auditor is required.';
         if (!this.yearId()) return 'Year is required.';
         if (!this.controlMasterId()) return 'Question setup is required.';
+        const selectedSetup = this.lookups().periodwise_questions.find(
+            (item) => Number(item.id) === Number(this.controlMasterId()),
+        );
+        if (!selectedSetup || !this.isSetupAllowed(selectedSetup)) {
+            return 'Selected question setup does not match audit type, unit and year.';
+        }
         if (!this.periodFrom() || !this.periodTo()) {
             return 'Assessment period dates are required.';
         }
@@ -329,6 +334,19 @@ export class SpecialAuditFormComponent implements OnInit {
                 ? Number(row.audit_unit_id)
                 : row.audit_unit_id,
         }));
+    }
+
+    private isSetupAllowed(item: Option) {
+        const auditTypeId = Number(this.auditTypeId() || 0);
+        const unitId = Number(this.auditUnitId() || 0);
+        const yearId = Number(this.yearId() || 0);
+        const itemAuditTypeId = Number(item['audit_type_id'] || 0);
+        const itemUnitId = Number(item['audit_unit_id'] || 0);
+        const itemYearId = Number(item['year_id'] || 0);
+
+        return itemAuditTypeId === auditTypeId
+            && (!unitId || !itemUnitId || itemUnitId === unitId)
+            && (!yearId || !itemYearId || itemYearId === yearId);
     }
 
     private payload(): SpecialAuditPayload {
