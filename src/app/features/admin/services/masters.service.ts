@@ -1351,6 +1351,10 @@ export class PeriodwiseQuestionsMasterService {
     return this.http.post<any>(`${this.apiUrl}/${id}/assign-categories`, { assignments });
   }
 
+  syncAllBranches(id: number): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/${id}/sync-all-branches`, {});
+  }
+
   delete(id: number): Observable<any> {
     return this.http.delete(`${this.apiUrl}/${id}`);
   }

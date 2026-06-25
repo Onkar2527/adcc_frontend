@@ -38,7 +38,15 @@
 
             </div>
 
-            <p-chip label="ACTIVE" styleClass="bg-green-100 text-green-700"></p-chip>
+            <div class="flex align-items-center gap-3">
+                <button *ngIf="data?.section_type_id == 1" pButton type="button" 
+                    label="Sync to All Branches" icon="pi pi-sync" 
+                    class="p-button-outlined p-button-primary"
+                    [disabled]="hasUnsavedChanges()"
+                    [title]="hasUnsavedChanges() ? 'Please save all unsaved changes first before syncing' : 'Sync this question setup to all other branches'"
+                    (click)="syncAllBranches()"></button>
+                <p-chip label="ACTIVE" styleClass="bg-green-100 text-green-700"></p-chip>
+            </div>
 
         </div>
 

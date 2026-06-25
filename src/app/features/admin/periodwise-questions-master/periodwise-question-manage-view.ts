@@ -31,7 +31,7 @@ import {
   MenuMasterService,
   PeriodwiseQuestionsMasterService
 } from '../services/masters.service';
-import { MessageService } from 'primeng/api';
+import { ConfirmationService, MessageService } from 'primeng/api';
 import { ToastModule } from 'primeng/toast';
 import { NotificationService } from '../../../core/services/notification/notification.service';
 
@@ -87,6 +87,8 @@ export class PeriodwiseQuestionsMasterViewComponent
 
   private messageService =
     inject(MessageService);
+  private confirmationService =
+    inject(ConfirmationService);
   private cdr =
     inject(ChangeDetectorRef);
   data = this.ref.data;
@@ -196,6 +198,34 @@ export class PeriodwiseQuestionsMasterViewComponent
     // Allow dirty tracking after all loads have been dispatched
     setTimeout(() => { this._dataLoaded = true; }, 300);
 
+  }
+
+  syncAllBranches() {
+    this.confirmationService.confirm({
+      message: 'Are you sure you want to sync this question setup configuration (Category, Scheme, Menu, Questions, and Audit Types) to all other branch master records for this period?',
+      header: 'Confirm Sync to All Branches',
+      icon: 'pi pi-exclamation-triangle',
+      acceptLabel: 'Yes',
+      rejectLabel: 'No',
+      accept: () => {
+        this.periodwiseQuestionsService.syncAllBranches(this.data.id).subscribe({
+          next: (res: any) => {
+            this.messageService.add({
+              severity: 'success',
+              summary: 'Sync Success',
+              detail: res.message || 'Question setup synced to all branches successfully'
+            });
+          },
+          error: (err: any) => {
+            this.messageService.add({
+              severity: 'error',
+              summary: 'Sync Error',
+              detail: err?.error?.message || 'Unable to sync question setup to all branches'
+            });
+          }
+        });
+      }
+    });
   }
 
 
@@ -464,9 +494,15 @@ export class PeriodwiseQuestionsMasterViewComponent
               .map(Number)
               .filter(Boolean);
 
+          const currentSectionTypeId = this.data?.section_type_id ? Number(this.data.section_type_id) : null;
+
           const menus =
             rows
               .filter((item: any) => {
+                if (currentSectionTypeId && Number(item.section_type_id) !== currentSectionTypeId) {
+                  return false;
+                }
+
                 const sectionAuditTypeIds =
                   String(item?.section_audit_type_ids || '')
                     .split(',')
