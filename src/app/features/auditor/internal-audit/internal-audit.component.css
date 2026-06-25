@@ -1674,6 +1674,8 @@ textarea.answer-control1 {
 
 .selected-account-detail .account-detail-table {
     table-layout: fixed;
+    border-collapse: separate;
+    border-spacing: 0;
     border: 1px solid #d8e2ec;
     border-radius: .35rem;
     overflow: hidden;
@@ -1682,8 +1684,19 @@ textarea.answer-control1 {
 .selected-account-detail .account-detail-table th,
 .selected-account-detail .account-detail-table td {
     padding: .48rem .6rem;
-    border-color: #d8e2ec;
+    border-bottom: 1px solid #d8e2ec;
+    border-right: 1px solid #d8e2ec;
     vertical-align: middle;
+}
+
+.selected-account-detail .account-detail-table th:last-child,
+.selected-account-detail .account-detail-table td:last-child {
+    border-right: none;
+}
+
+.selected-account-detail .account-detail-table tr:last-child th,
+.selected-account-detail .account-detail-table tr:last-child td {
+    border-bottom: none;
 }
 
 .selected-account-detail .account-detail-table th:nth-child(1),
@@ -1751,21 +1764,23 @@ textarea.answer-control1 {
 .sampling-table-wrap {
     max-height: 21rem;
     overflow: auto;
-    border: 1px solid var(--surface-200);
+    border: 1px solid #d8e2ec;
     border-radius: .5rem;
     background: var(--surface-0);
 }
 
 .sampling-table {
     width: 100%;
-    border-collapse: collapse;
+    border-collapse: separate;
+    border-spacing: 0;
     font-size: .9rem;
 }
 
 .sampling-table th,
 .sampling-table td {
     padding: .65rem .7rem;
-    border-bottom: 1px solid var(--surface-200);
+    border-bottom: 1px solid #d8e2ec;
+    border-right: 1px solid #d8e2ec;
     text-align: left;
     vertical-align: top;
 }
@@ -1777,6 +1792,16 @@ textarea.answer-control1 {
     background: var(--surface-100);
     color: var(--text-color-secondary);
     font-size: .78rem;
+}
+
+.sampling-table th:last-child,
+.sampling-table td:last-child {
+    border-right: none;
+}
+
+.sampling-table tr:last-child th,
+.sampling-table tr:last-child td {
+    border-bottom: none;
 }
 
 .sampling-table small {
