@@ -465,9 +465,9 @@
               <p>{{ answer.audit_comment || '-' }}</p>
             </div>
 
-            <div>
+            <div *ngIf="answer.audit_reviewer_comment && answer.audit_reviewer_comment.trim() && answer.audit_reviewer_comment.trim() !== '-'">
               <label>Audit Reviewer Comment</label>
-              <p>{{ answer.audit_reviewer_comment || '-' }}</p>
+              <p>{{ answer.audit_reviewer_comment }}</p>
             </div>
 
             <div *ngIf="isReCompliance() && answer.compliance_reviewer_comment">
