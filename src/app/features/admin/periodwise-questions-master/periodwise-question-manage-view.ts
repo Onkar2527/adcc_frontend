@@ -679,13 +679,14 @@ export class PeriodwiseQuestionsMasterViewComponent
           const filteredRows =
             rows.filter(
               (x: any) =>
-                x.scheme_type_id === 1 || x.scheme_type_id === '1'
+                x.scheme_type_id === 2 || x.scheme_type_id === '2'
             );
 
           const mappedIds =
-            this.data?.advances_scheme_ids
-              ?.split(',')
-              ?.map(Number) || [];
+            this.parseSchemeIds(
+              this.data?.advances_scheme_ids,
+              this.data?.deposits_scheme_ids,
+            );
 
           const schemes =
             filteredRows.map(
@@ -822,6 +823,20 @@ export class PeriodwiseQuestionsMasterViewComponent
 
   }
 
+  private parseSchemeIds(...values: any[]) {
+    return Array.from(
+      new Set(
+        values
+          .flatMap((value) =>
+            String(value || '')
+              .split(',')
+              .map((id) => Number(id.trim()))
+              .filter(Boolean),
+          ),
+      ),
+    );
+  }
+
   /* DEPOSIT */
 
   loadDepositSchemes() {
@@ -837,13 +852,14 @@ export class PeriodwiseQuestionsMasterViewComponent
           const filteredRows =
             rows.filter(
               (x: any) =>
-                x.scheme_type_id === 2 || x.scheme_type_id === '2'
+                x.scheme_type_id === 1 || x.scheme_type_id === '1'
             );
 
           const mappedIds =
-            this.data?.deposits_scheme_ids
-              ?.split(',')
-              ?.map(Number) || [];
+            this.parseSchemeIds(
+              this.data?.deposits_scheme_ids,
+              this.data?.advances_scheme_ids,
+            );
 
           const schemes =
             filteredRows.map(
