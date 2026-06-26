@@ -2033,7 +2033,7 @@ textarea.answer-control1 {
 }
 
 .annexure-table-frame {
-    border: 1px solid var(--surface-300);
+    border: 1px solid #d8e2ec;
     border-radius: .35rem;
     background: var(--surface-0);
 }
