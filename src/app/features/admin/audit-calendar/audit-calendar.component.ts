@@ -70,6 +70,7 @@ export interface CalendarDay {
             Monthly Audit Calendar
           </button>
           <button
+            *ngIf="isAdmin()"
             type="button"
             class="tab-btn p-3 font-semibold text-base border-round cursor-pointer flex align-items-center gap-2"
             [class.active-tab]="activeTab() === 'overrides'"
@@ -131,7 +132,7 @@ export interface CalendarDay {
       </div>
 
       <!-- Risk Matrix Panel -->
-      <div class="col-12" *ngIf="activeTab() === 'overrides'">
+      <div class="col-12" *ngIf="activeTab() === 'overrides' && isAdmin()">
         <div class="card shadow-2 p-4 apcard mb-4">
           <div class="flex align-items-center justify-content-between mb-3">
             <h6 class="text-lg font-semibold text-gray-800 m-0 flex align-items-center">
@@ -186,7 +187,7 @@ export interface CalendarDay {
       </div>
 
       <!-- Audit Units Frequency Overrides Grid -->
-      <div class="col-12" *ngIf="activeTab() === 'overrides'">
+      <div class="col-12" *ngIf="activeTab() === 'overrides' && isAdmin()">
         <div class="card shadow-2 p-4 apcard mb-4">
           <div class="flex align-items-center justify-content-between mb-3">
             <h6 class="text-lg font-semibold text-gray-800 m-0">
@@ -806,6 +807,7 @@ export class AuditCalendarComponent implements OnInit {
   projectedSchedules = signal<any[]>([]);
   filteredProjectedSchedules = signal<any[]>([]);
   loading = signal(false);
+  isAdmin = signal(false);
 
   // Filter properties
   selectedMonthVal = '';
@@ -852,8 +854,10 @@ export class AuditCalendarComponent implements OnInit {
     const userJson = localStorage.getItem('user');
     const user = userJson ? JSON.parse(userJson) : null;
     const userId = user ? (user.id || user.employee_id || user.emp_id) : undefined;
-    const userTypeId = user ? user.user_type_id : undefined;
+    const userTypeId = user ? String(user.user_type_id || '') : '';
     const auditUnitAuthority = user ? user.audit_unit_authority : undefined;
+
+    this.isAdmin.set(userTypeId !== '2' && userTypeId !== '3' && userTypeId !== '4');
 
     this.service.getSchedulingData(userId, userTypeId, auditUnitAuthority).subscribe({
       next: (res: any) => {

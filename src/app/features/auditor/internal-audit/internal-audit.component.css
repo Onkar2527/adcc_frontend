@@ -1681,6 +1681,14 @@ textarea.answer-control1 {
     overflow: hidden;
 }
 
+.selected-account-detail .account-detail-table th {
+    font-size: .85rem;
+}
+
+.selected-account-detail .account-detail-table td {
+    font-size: .95rem;
+}
+
 .selected-account-detail .account-detail-table th,
 .selected-account-detail .account-detail-table td {
     padding: .48rem .6rem;
@@ -1808,6 +1816,14 @@ textarea.answer-control1 {
     display: block;
     margin-top: .2rem;
     color: var(--text-color-secondary);
+}
+
+.sampling-table input[type="checkbox"] {
+    cursor: pointer;
+}
+
+.sampling-table input[type="checkbox"]:disabled {
+    cursor: not-allowed;
 }
 
 .compliance-check {
@@ -2028,7 +2044,8 @@ textarea.answer-control1 {
 
 .annexure-data-table {
     width: 100%;
-    border-collapse: collapse;
+    border-collapse: separate;
+    border-spacing: 0;
     table-layout: auto;
     background: var(--surface-0);
     color: var(--text-color);
@@ -2041,7 +2058,8 @@ textarea.answer-control1 {
     min-width: 3rem;
     max-width: 7.5rem;
     padding: .32rem .42rem;
-    border: 1px solid var(--surface-200);
+    border-bottom: 1px solid #d8e2ec;
+    border-right: 1px solid #d8e2ec;
     text-align: left;
     vertical-align: middle;
     overflow-wrap: anywhere;
@@ -2049,7 +2067,7 @@ textarea.answer-control1 {
 
 .annexure-data-table th:last-child,
 .annexure-data-table td:last-child {
-    border-right: 1px solid var(--surface-200);
+    border-right: none;
 }
 
 .annexure-data-table th {

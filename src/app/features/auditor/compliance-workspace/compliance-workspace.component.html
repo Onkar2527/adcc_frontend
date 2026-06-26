@@ -643,18 +643,32 @@
                   (click)="viewEvidence(evidence)"
                 ></button>
 
-                <button
+                <span
+                  class="evidence-chip"
                   *ngFor="
                     let evidence of evidenceList(answer, 'compliance_evidence');
                     let ei = index
                   "
-                  pButton
-                  type="button"
-                  icon="pi pi-eye"
-                  severity="secondary"
-                  [title]="'View compliance supporting document ' + (ei + 1)"
-                  (click)="viewComplianceEvidence(evidence)"
-                ></button>
+                >
+                  <button
+                    pButton
+                    type="button"
+                    icon="pi pi-eye"
+                    severity="secondary"
+                    [title]="'View compliance supporting document ' + (ei + 1)"
+                    (click)="viewComplianceEvidence(evidence)"
+                  ></button>
+                  <button
+                    pButton
+                    type="button"
+                    icon="pi pi-trash"
+                    severity="danger"
+                    [title]="'Remove compliance supporting document ' + (ei + 1)"
+                    [loading]="deletingEvidenceKey() === evidenceDeleteKey(evidence)"
+                    [disabled]="deletingEvidenceKey() === evidenceDeleteKey(evidence)"
+                    (click)="deleteEvidence(evidence)"
+                  ></button>
+                </span>
 
                 <ng-container>
                   <input
@@ -851,18 +865,32 @@
                     <td>
                       <div *ngIf="responseRequired(row)" class="supporting-docs-box supporting-docs-box--table">
                         <span class="supporting-docs-label">Supporting Documents</span>
-                        <button
+                        <span
+                          class="evidence-chip"
                           *ngFor="
                             let evidence of evidenceList(row, 'compliance_evidence');
                             let ei = index
                           "
-                          pButton
-                          type="button"
-                          icon="pi pi-eye"
-                          severity="secondary"
-                          [title]="'View compliance supporting document ' + (ei + 1)"
-                          (click)="viewComplianceEvidence(evidence)"
-                        ></button>
+                        >
+                          <button
+                            pButton
+                            type="button"
+                            icon="pi pi-eye"
+                            severity="secondary"
+                            [title]="'View compliance supporting document ' + (ei + 1)"
+                            (click)="viewComplianceEvidence(evidence)"
+                          ></button>
+                          <button
+                            pButton
+                            type="button"
+                            icon="pi pi-trash"
+                            severity="danger"
+                            [title]="'Remove compliance supporting document ' + (ei + 1)"
+                            [loading]="deletingEvidenceKey() === evidenceDeleteKey(evidence)"
+                            [disabled]="deletingEvidenceKey() === evidenceDeleteKey(evidence)"
+                            (click)="deleteEvidence(evidence)"
+                          ></button>
+                        </span>
 
                         <input
                           #rowEvidenceInput

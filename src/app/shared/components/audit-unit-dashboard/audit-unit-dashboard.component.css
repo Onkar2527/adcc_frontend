@@ -208,7 +208,7 @@
 /* Unit Grid */
 .unit-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 1rem;
     padding: 1rem;
 }
@@ -421,7 +421,7 @@
     }
 
     .unit-grid {
-        grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+        grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 }
 

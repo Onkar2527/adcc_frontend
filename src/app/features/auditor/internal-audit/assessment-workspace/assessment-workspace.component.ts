@@ -236,8 +236,13 @@ export class AssessmentWorkspaceComponent implements OnInit {
     loadMenu(
         assessmentId: number,
         refreshSubmission = false,
+        showLoader = true,
     ) {
-        this.loading.set(true);
+        if (
+            showLoader
+        ) {
+            this.loading.set(true);
+        }
         this.error.set('');
 
         if (

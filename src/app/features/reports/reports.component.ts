@@ -276,6 +276,18 @@ export class ReportsComponent implements OnInit {
       rawList = rawList.filter((r) => r.category !== '1_master');
     }
 
+    if (userTypeId === '3') {
+      const allowedRoutes = [
+        '/reports/audit-status-report',
+        '/reports/audit-status-expired-report',
+        '/reports/executive-summary-audit-report',
+        '/reports/executive-summary-compliance-report',
+        '/reports/audit-complete-report',
+        '/reports/compliance-report',
+      ];
+      rawList = rawList.filter((r) => allowedRoutes.includes(r.route));
+    }
+
     // Re-assign sequential SR. NO.
     this.filteredReports = rawList.map((r, index) => ({
       ...r,

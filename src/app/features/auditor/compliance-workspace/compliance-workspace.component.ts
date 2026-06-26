@@ -80,6 +80,15 @@ export class ComplianceWorkspaceComponent implements OnInit {
     uploadingEvidenceKey =
         signal('');
 
+    deletingEvidenceKey =
+        signal('');
+
+    evidenceDeleteKey(
+        evidence: any,
+    ) {
+        return `delete_${evidence?.id}`;
+    }
+
     annexureSavingQuestionId =
         signal<number | null>(null);
 
@@ -1116,6 +1125,125 @@ export class ComplianceWorkspaceComponent implements OnInit {
                     );
                 },
             });
+    }
+
+    deleteEvidence(
+        evidence: any,
+    ) {
+        if (
+            !evidence?.id
+        ) {
+            return;
+        }
+
+        this.confirmation.confirm({
+            message:
+                'Are you sure you want to remove this supporting document?',
+            header:
+                'Confirm Deletion',
+            icon:
+                'pi pi-exclamation-triangle',
+            accept: () =>
+                this.deleteEvidenceConfirmed(
+                    evidence,
+                ),
+        });
+    }
+
+    private deleteEvidenceConfirmed(
+        evidence: any,
+    ) {
+        const assessmentId =
+            Number(this.detail()?.overview?.id || 0);
+
+        const deleteKey =
+            this.evidenceDeleteKey(
+                evidence,
+            );
+
+        this.deletingEvidenceKey.set(
+            deleteKey,
+        );
+
+        this.service
+            .deleteComplianceEvidence(
+                assessmentId,
+                Number(evidence.id),
+                this.employeeId(),
+            )
+            .subscribe({
+                next: (res: any) => {
+                    this.deletingEvidenceKey.set(
+                        '',
+                    );
+
+                    if (!res?.success) {
+                        this.notification.error(
+                            res?.message
+                            || 'Unable to delete supporting document.',
+                        );
+                        return;
+                    }
+
+                    this.notification.success(
+                        res?.message
+                        || 'Supporting document deleted successfully.',
+                    );
+
+                    this.removeComplianceEvidenceFromLocalState(
+                        Number(evidence.id),
+                    );
+                    this.checkCompletion();
+                },
+                error: (err) => {
+                    this.deletingEvidenceKey.set(
+                        '',
+                    );
+                    this.notification.error(
+                        err?.error?.message
+                        || 'Unable to delete supporting document.',
+                    );
+                },
+            });
+    }
+
+    private removeComplianceEvidenceFromLocalState(
+        evidenceId: number,
+    ) {
+        const detailObj = this.detail();
+        if (!detailObj) return;
+
+        const removeFromFileList = (evidences: any[] | null | undefined): any[] => {
+            if (!Array.isArray(evidences)) return [];
+            return evidences.filter((e: any) => Number(e?.id) !== Number(evidenceId));
+        };
+
+        for (const ans of detailObj.answers || []) {
+            if (ans.compliance_evidences) {
+                ans.compliance_evidences = removeFromFileList(ans.compliance_evidences);
+            }
+            if (ans.compliance_evidence) {
+                if (Array.isArray(ans.compliance_evidence)) {
+                    ans.compliance_evidence = removeFromFileList(ans.compliance_evidence);
+                } else if (Number(ans.compliance_evidence.id) === Number(evidenceId)) {
+                    ans.compliance_evidence = null;
+                }
+            }
+            for (const row of ans.annexure_rows || []) {
+                if (row.compliance_evidences) {
+                    row.compliance_evidences = removeFromFileList(row.compliance_evidences);
+                }
+                if (row.compliance_evidence) {
+                    if (Array.isArray(row.compliance_evidence)) {
+                        row.compliance_evidence = removeFromFileList(row.compliance_evidence);
+                    } else if (Number(row.compliance_evidence.id) === Number(evidenceId)) {
+                        row.compliance_evidence = null;
+                    }
+                }
+            }
+        }
+
+        this.detail.set({ ...detailObj });
     }
 
     uploadEvidence(

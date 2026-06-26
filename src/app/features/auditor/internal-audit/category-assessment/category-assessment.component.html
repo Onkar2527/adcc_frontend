@@ -209,12 +209,17 @@
                 </tr>
               </thead>
               <tbody>
-                <tr *ngFor="let account of sampling.candidates">
+                <tr
+                  *ngFor="let account of sampling.candidates"
+                  [style.cursor]="(account.is_completed || account.has_answers) ? 'default' : 'pointer'"
+                  (click)="!(account.is_completed || account.has_answers) && toggleSamplingAccount(account.id, !samplingAccountSelected(account.id))"
+                >
                   <td>
                     <input
                       type="checkbox"
                       [checked]="samplingAccountSelected(account.id)"
                       [disabled]="account.is_completed || account.has_answers"
+                      (click)="$event.stopPropagation()"
                       (change)="toggleSamplingAccount(account.id, $any($event.target).checked)"
                     />
                   </td>

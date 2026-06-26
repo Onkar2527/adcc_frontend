@@ -589,6 +589,23 @@ export class AuditDashboardService {
     );
   }
 
+  deleteComplianceEvidence(
+    assessmentId: number,
+    evidenceId: number,
+    employeeId: number,
+  ) {
+
+    return this.http.post<any>(
+
+      `${this.config.apiUrl}/internal-audit/compliance/${assessmentId}/evidence/${evidenceId}/delete`,
+
+      {
+        employee_id:
+          employeeId,
+      },
+    );
+  }
+
   submitComplianceAssessment(
     assessmentId: number,
     employeeId: number,

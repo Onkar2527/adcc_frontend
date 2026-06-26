@@ -305,17 +305,50 @@ export class AuditUnitDashboardComponent {
         if (!this.units || this.units.length === 0) {
             return [];
         }
-        const utturItems: any[] = [];
-        const otherItems: any[] = [];
+
+        const isDept = (item: any): boolean => {
+            const name = (item?.display_title || item?.audit_unit_name || '').toLowerCase();
+            const code = (item?.display_code || item?.audit_unit_code || '').toLowerCase();
+            
+            const deptKeywords = [
+                'dept', 'department', 'ho', 'head office', 'cell', 'section', 'division',
+                'office', 'admin', 'hr', 'it', 'legal', 'compliance', 'credit', 'loan',
+                'accounts', 'audit', 'recovery', 'treasury', 'central', 'clearing'
+            ];
+
+            // If the name explicitly contains "branch" or "br", it's classified as a branch
+            if (name.includes('branch') || name.includes(' br ') || name.endsWith(' br')) {
+                return false;
+            }
+
+            return deptKeywords.some(keyword => name.includes(keyword) || code.includes(keyword));
+        };
+
+        const utturBranches: any[] = [];
+        const otherBranches: any[] = [];
+        const utturDepartments: any[] = [];
+        const otherDepartments: any[] = [];
+
         for (const item of this.units) {
             const name = (item?.display_title || item?.audit_unit_name || '').toLowerCase();
             const code = (item?.display_code || item?.audit_unit_code || '').toLowerCase();
-            if (name.includes('uttur') || code.includes('uttur')) {
-                utturItems.push(item);
+            const isUttur = name.includes('uttur') || code.includes('uttur');
+
+            if (isDept(item)) {
+                if (isUttur) {
+                    utturDepartments.push(item);
+                } else {
+                    otherDepartments.push(item);
+                }
             } else {
-                otherItems.push(item);
+                if (isUttur) {
+                    utturBranches.push(item);
+                } else {
+                    otherBranches.push(item);
+                }
             }
         }
-        return [...utturItems, ...otherItems];
+
+        return [...utturBranches, ...otherBranches, ...utturDepartments, ...otherDepartments];
     }
 }

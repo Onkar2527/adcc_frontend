@@ -307,14 +307,14 @@
 
       <div class="review-metrics">
         <div>
-          <span>Total Questions</span><strong>{{ review.counts.total }}</strong>
+          <span>Total Questions Applicable</span><strong>{{ review.counts.total }}</strong>
         </div>
         <div>
-          <span>Compliance Questions</span
+          <span>Branch Complied Points</span
           ><strong class="red">{{ review.counts.compliance }}</strong>
         </div>
         <div>
-          <span>Accepted Questions</span><strong>{{ review.counts.accepted }}</strong>
+          <span>Reviewer Accepted Questions</span><strong>{{ review.counts.accepted }}</strong>
         </div>
         <div>
           <span>{{ isComplianceReview() ? 'Re-Compliance Needed Questions' : 'Re-Audit Needed Questions' }}</span
