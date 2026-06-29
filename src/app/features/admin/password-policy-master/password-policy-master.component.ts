@@ -2,13 +2,13 @@ import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
-import { NumberFieldComponent, FormActionsComponent } from '../../../shared/components/form';
+import { NumberFieldComponent, FormActionsComponent, TextFieldComponent } from '../../../shared/components/form';
 import { PasswordPolicy, PasswordPolicyService } from '../services/masters.service';
 
 @Component({
   selector: 'app-password-policy-master',
   standalone: true,
-  imports: [CommonModule, ToastModule, NumberFieldComponent, FormActionsComponent],
+  imports: [CommonModule, ToastModule, NumberFieldComponent, FormActionsComponent, TextFieldComponent],
   providers: [MessageService],
   template: `
     <div class="card">
@@ -133,3 +133,4 @@ export class PasswordPolicyMasterComponent implements OnInit {
     return value !== null && value >= 0;
   }
 }
+

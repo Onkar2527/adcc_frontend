@@ -152,6 +152,14 @@ export class LoginComponent {
     });
 
     setTimeout(() => {
+      const userData = localStorage.getItem('user') || '{}';
+      const user = JSON.parse(userData);
+
+      if (user && user.password_policy === 1) {
+        this.router.navigate(['/auth/reset-password']);
+        return;
+      }
+
       const returnUrl = this.route.snapshot.queryParams['returnUrl'];
 
       if (returnUrl) {

@@ -33,5 +33,10 @@ export const routes: Routes = [
     path: 'login', 
     loadComponent: () => import('./features/auth/login.component').then(m => m.LoginComponent) 
   },
+  {
+    path: 'auth/reset-password',
+    loadComponent: () => import('./features/auth/reset-password.component').then(m => m.ResetPasswordComponent),
+    canActivate: [authGuard]
+  },
   { path: '**', redirectTo: '/home' },
 ];

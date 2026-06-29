@@ -12,6 +12,7 @@ export interface User {
   roleId: string | null;
   branchId: string | null;
   user_type_id?: string | number | null;
+  password_policy?: number;
 }
 
 export interface AuthResponse {
