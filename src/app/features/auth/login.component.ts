@@ -1,4 +1,4 @@
-import { Component, HostListener, inject, signal } from '@angular/core';
+import { Component, HostListener, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -10,6 +10,7 @@ import { AuthService } from '../../core/services/auth/auth.service';
 import { MessageService } from 'primeng/api';
 import { Toast } from 'primeng/toast';
 import { ENABLE_2FA } from '../admin/services/required-data';
+import { PasswordPolicyService } from '../admin/services/masters.service';
 
 @Component({
   selector: 'app-login',
@@ -44,6 +45,9 @@ export class LoginComponent {
 
   loading = signal(false);
   error = signal<string | undefined>(undefined);
+
+  // Reset password state
+  showResetScreen = signal(false);
 
   @HostListener('document:keydown', ['$event'])
   handleKeyboardEvent(event: KeyboardEvent) {
@@ -215,5 +219,9 @@ export class LoginComponent {
     }
 
     this.onLogin();
+  }
+
+  goToForgotPassword() {
+    this.router.navigate(['/forgot-password']);
   }
 }

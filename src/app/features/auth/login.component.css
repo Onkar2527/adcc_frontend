@@ -45,14 +45,20 @@
 .content-section {
     position: relative;
     z-index: 2;
-    height: calc(100vh - 90px);
-    overflow: hidden;
+    height: 100vh;
+    overflow-y: auto;
+    scrollbar-width: none;  /* Firefox */
+    -ms-overflow-style: none;  /* IE/Edge */
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
     align-items: center;
+    padding-top: 50px;
     padding-bottom: 24px;
-    margin-top: 90px;
+}
+
+.content-section::-webkit-scrollbar {
+    display: none; /* Safari and Chrome */
 }
 
 /* Brand */
@@ -87,15 +93,15 @@
     width: 100%;
     display: flex;
     justify-content: center;
-    margin-top: 30px;
-    padding: 0 16px 24px;
+    margin-top: 15px;
+    padding: 0 16px 20px;
 }
 
 /* Login Card */
 .login-card {
     width: 440px;
     background: rgba(255, 255, 255, 0.98);
-    padding: 28px 24px 30px;
+    padding: 20px 24px;
     border-radius: 12px;
     box-shadow: 0 18px 45px rgba(28, 35, 70, 0.16);
     backdrop-filter: blur(8px);
@@ -154,20 +160,20 @@
 
 /* Inputs */
 .input-group {
-    margin-bottom: 12px;
+    margin-bottom: 8px;
 }
 
 .input-group label {
     display: block;
-    margin-bottom: 4px;
-    font-size: 14px;
+    margin-bottom: 2px;
+    font-size: 13px;
     font-weight: 600;
     color: #333947;
 }
 
 .custom-input {
     width: 100%;
-    height: 46px;
+    height: 38px;
 }
 
 /* Login Button */
@@ -229,7 +235,7 @@
 :host ::ng-deep .p-inputtext,
 :host ::ng-deep .p-password-input {
     width: 100%;
-    height: 46px;
+    height: 38px;
     border-radius: 8px !important;
     border: 1px solid #cfd6e4;
     color: #1f2937;
@@ -267,7 +273,7 @@
 
 :host ::ng-deep .p-button {
     width: 100%;
-    height: 46px;
+    height: 38px;
     border: none;
     border-radius: 8px !important;
     background: 
@@ -570,3 +576,289 @@
         background-position: -200% 0;
     }
 }
+
+/* iOS Segment Control style for Tabs */
+.reset-tabs {
+    display: flex;
+    background: #f1f5f9;
+    padding: 4px;
+    border-radius: 10px;
+    margin-top: 12px;
+    border: 1px solid #e2e8f0;
+}
+
+.reset-tab-btn {
+    flex: 1;
+    height: 38px;
+    border-radius: 8px;
+    border: none;
+    background: transparent;
+    color: #64748b;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 14px;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.reset-tab-btn:hover:not(.active):not(:disabled) {
+    color: #1e293b;
+    background: rgba(255, 255, 255, 0.5);
+}
+
+.reset-tab-btn.active {
+    background: #ffffff;
+    color: #3f51b5;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.reset-tab-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.reset-pass-link:hover {
+    color: #303f9f !important;
+    text-decoration: underline !important;
+}
+
+/* Modern Guidelines checklist */
+.policy-guidelines-modern {
+    margin-top: 14px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 14px;
+    text-align: left;
+}
+
+.policy-guidelines-modern h4 {
+    margin: 0 0 10px 0;
+    font-size: 13px;
+    font-weight: 700;
+    color: #475569;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.guideline-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.guideline-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 10px;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #64748b;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+}
+
+.guideline-badge i {
+    font-size: 11px;
+    color: #cbd5e1;
+}
+
+.guideline-badge.valid {
+    background: #ecfdf5;
+    border-color: #a7f3d0;
+    color: #065f46;
+}
+
+.guideline-badge.valid i {
+    color: #10b981;
+}
+
+/* Custom Cancel / Back Button styling */
+.cancel-btn {
+    height: 38px;
+    border-radius: 8px;
+    border: 1px solid #cbd5e1;
+    background: #ffffff;
+    color: #475569;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 14px;
+    transition: all 0.2s ease;
+    width: 100%;
+}
+
+.cancel-btn:hover:not(:disabled) {
+    background: #f8fafc;
+    border-color: #94a3b8;
+    color: #1e293b;
+}
+
+.cancel-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* Inline Flex Layout for Employee Code and Send OTP */
+.inline-input-group {
+    display: flex;
+    gap: 8px;
+    align-items: stretch;
+    width: 100%;
+}
+
+.inline-input-group .input-icon-wrapper {
+    flex: 1;
+}
+
+.send-otp-btn {
+    height: 38px;
+    border-radius: 8px;
+    border: 1px solid #3f51b5;
+    background: #e8eaf6;
+    color: #3f51b5;
+    cursor: pointer;
+    font-weight: 700;
+    font-size: 14px;
+    padding: 0 16px;
+    white-space: nowrap;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.send-otp-btn:hover:not(:disabled) {
+    background: #c5cae9;
+    color: #303f9f;
+    border-color: #303f9f;
+}
+
+.send-otp-btn:disabled {
+    opacity: 0.65;
+    border-color: #e2e8f0;
+    background: #f8fafc;
+    color: #94a3b8;
+    cursor: not-allowed;
+}
+
+/* Layout container for Action buttons (Cancel / Submit) */
+.reset-actions-container {
+    display: flex;
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 12px;
+    margin-top: 20px;
+    width: 100%;
+}
+
+.reset-actions-container button,
+.reset-actions-container ::ng-deep .p-button {
+    flex: 1 1 0% !important;
+    width: calc(50% - 6px) !important;
+    max-width: 50% !important;
+    height: 38px !important;
+    padding: 0 16px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    box-sizing: border-box !important;
+    margin: 0 !important;
+    font-size: 14px !important;
+    font-weight: 600 !important;
+}
+
+/* Input Fields Prefix Icons styling */
+.input-icon-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+.input-icon {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #94a3b8;
+    z-index: 10;
+    font-size: 14px;
+    pointer-events: none;
+    transition: color 0.2s ease;
+}
+
+/* Add indentation so the text doesn't overlap the icon */
+:host ::ng-deep .custom-input.icon-indent {
+    padding-left: 40px !important;
+}
+
+:host ::ng-deep .p-password-input.icon-indent {
+    padding-left: 40px !important;
+}
+
+:host ::ng-deep .custom-input:focus + .input-icon,
+.input-icon-wrapper:focus-within .input-icon {
+    color: #3f51b5;
+}
+
+/* Step Summary Bar styles */
+.step-summary-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #e8eaf6;
+    border: 1px dashed #3f51b5;
+    border-radius: 8px;
+    padding: 8px 12px;
+    margin-bottom: 16px;
+    font-size: 13px;
+    color: #3f51b5;
+}
+
+.summary-text {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 500;
+}
+
+.summary-text i {
+    font-size: 14px;
+    color: #3f51b5;
+}
+
+.summary-action-btn {
+    color: #303f9f;
+    font-weight: 700;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    transition: color 0.2s ease;
+    font-size: 12px;
+}
+
+.summary-action-btn:hover {
+    color: #1e2b8c;
+    text-decoration: underline;
+}
+
+/* Stacked action buttons layout */
+.reset-actions-container-stacked {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 20px;
+    width: 100%;
+}
+
+.reset-actions-container-stacked button,
+.reset-actions-container-stacked ::ng-deep .p-button {
+    width: 100% !important;
+    height: 38px !important;
+}
+
+
+
+
