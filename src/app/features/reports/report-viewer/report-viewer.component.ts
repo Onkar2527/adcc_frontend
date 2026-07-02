@@ -132,13 +132,9 @@ export class ReportViewerComponent implements OnInit {
   searched = signal(false);
   error = signal('');
   reportDateRange = signal<Date[] | null>(null);
-
-  // Question Wise Scoring Report — pre-rendered HTML string for zero-flicker DOM insertion
   qwsTableHtml = signal<SafeHtml | null>(null);
   qwsTotals = signal<{ riskScore: number; weightedScore: number; maxScore: number } | null>(null);
-
   filters: Record<string, any> = {};
-
   isAdvancedLayout(): boolean {
     const slug = this.definition()?.slug;
     return (
@@ -195,7 +191,10 @@ export class ReportViewerComponent implements OnInit {
     if (this.isAdvancedLayout()) {
       const searchType = String(this.filters['selectSearchTypeFilter'] || '3');
       if (filter.key === 'startDate' || filter.key === 'endDate') {
-        return searchType === '5' || searchType === '6';
+        return searchType === '1' || searchType === '2' || searchType === '5' || searchType === '6';
+      }
+      if (filter.key === 'reportAuditUnit' || filter.key === 'financial_year') {
+        return searchType !== '1' && searchType !== '2';
       }
       if (filter.key === 'reportAuditAssesment') {
         return searchType === '3' || searchType === '4';
@@ -242,6 +241,10 @@ export class ReportViewerComponent implements OnInit {
       if (searchType === '3' || searchType === '4') {
         this.filters['startDate'] = '';
         this.filters['endDate'] = '';
+      } else if (searchType === '1' || searchType === '2') {
+        this.filters['reportAuditUnit'] = '';
+        this.filters['financial_year'] = 'all';
+        this.filters['reportAuditAssesment'] = '';
       } else {
         this.filters['reportAuditAssesment'] = '';
       }

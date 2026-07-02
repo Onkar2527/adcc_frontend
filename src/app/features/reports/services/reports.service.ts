@@ -55,7 +55,9 @@ export class ReportsService {
   private apiUrl = `${this.config.apiUrl}/reports`;
 
   getReportDefinition(reportSlug: string) {
-    let params = new HttpParams().set('freeFlow', FREE_AUDIT_FLOW ? 'true' : 'false');
+    let params = new HttpParams()
+      .set('freeFlow', FREE_AUDIT_FLOW ? 'true' : 'false')
+      .set('_t', String(Date.now()));
     return this.http.get<ReportDefinition>(
       `${this.apiUrl}/${reportSlug}/definition`,
       { params }
@@ -81,7 +83,8 @@ export class ReportsService {
       params = params.set('employee_id', String(user.id || user.employee_id || user.emp_id || ''));
     }
 
-    params = params.set('freeFlow', FREE_AUDIT_FLOW ? 'true' : 'false');
+    params = params.set('freeFlow', FREE_AUDIT_FLOW ? 'true' : 'false')
+      .set('_t', String(Date.now()));
 
     return this.http.get<any>(
       `${this.apiUrl}/${reportSlug}/data`,

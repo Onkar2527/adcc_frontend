@@ -310,7 +310,30 @@
           </ng-template>
         </ng-template>
 
-        <thead *ngIf="definition()?.slug === 'broader-areawise-scoring-report' || definition()?.slug === 'questionwsie-broader-areawise-report'" class="broader-report-thead">
+        <thead *ngIf="definition()?.slug === 'questionwsie-broader-areawise-report'" class="broader-report-thead">
+          <tr>
+            <th class="text-center" rowspan="2" style="vertical-align: middle;">Audit Unit Code</th>
+            <th class="text-center" rowspan="2" style="vertical-align: middle;">QCAT</th>
+            <th rowspan="2" style="vertical-align: middle;">Branch</th>
+            <th rowspan="2" style="vertical-align: middle;">Risk Type</th>
+            <th rowspan="2" style="vertical-align: middle; min-width: 180px;">
+              Broader Area of Audit Non-Compliance
+            </th>
+            <th rowspan="2" style="vertical-align: middle;">Menu & Category</th>
+            <th rowspan="2" style="vertical-align: middle; min-width: 250px;">Question</th>
+            <th colspan="6" class="text-center">TOTAL SCORE</th>
+          </tr>
+          <tr>
+            <th class="text-center">Total Avg Score</th>
+            <th class="text-center">No. of Audits</th>
+            <th class="text-center">Avg Score / Audit</th>
+            <th class="text-center">Risk Weight</th>
+            <th class="text-center">Weighted Score</th>
+            <th class="text-center">Total BA Weighted Score</th>
+          </tr>
+        </thead>
+
+        <thead *ngIf="definition()?.slug === 'broader-areawise-scoring-report'" class="broader-report-thead">
           <tr>
             <th class="vrt-header text-center" rowspan="3">Audit Unit Code</th>
             <th class="vrt-header" rowspan="3">Branch</th>
