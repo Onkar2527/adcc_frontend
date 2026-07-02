@@ -218,6 +218,11 @@ export class AppMenu implements OnInit, OnDestroy {
               icon: 'pi pi-fw pi-tags',
               routerLink: ['/admin/audit-category-master'],
             },
+            {
+              label: 'Download Questionnaire',
+              icon: 'pi pi-fw pi-download',
+              routerLink: ['/admin/download-questionnaire'],
+            },
           ],
         },
         {

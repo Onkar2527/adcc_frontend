@@ -735,6 +735,7 @@ export class QuickQuestionMapperComponent implements OnInit {
   // Trigger Client-side CSV Download
   downloadSampleCSV() {
     const headers = [
+      'Question ID',
       'Menu Name',
       'Category Name',
       'Set Name',
@@ -760,6 +761,7 @@ export class QuickQuestionMapperComponent implements OnInit {
     ];
 
     const sampleRow1 = [
+      '',
       'PART - A',
       'CASH MANAGEMENT',
       'Operational Audits Set',
@@ -785,6 +787,7 @@ export class QuickQuestionMapperComponent implements OnInit {
     ];
 
     const sampleRow2 = [
+      '',
       'PART - A',
       'CASH MANAGEMENT',
       'Operational Audits Set',
@@ -938,6 +941,8 @@ export class QuickQuestionMapperComponent implements OnInit {
     const newlyCreatedSetIds: number[] = [];
     const newlyCreatedHeaderIds: number[] = [];
     const newlyCreatedQuestionIds: number[] = [];
+    const processedHeaderIds = new Set<number>();
+    const processedQuestionIds = new Set<number>();
 
     // Cache lookup maps for fast lookups
     const typeMap = this.questionTypes().reduce((acc, t) => {
@@ -1183,8 +1188,55 @@ export class QuickQuestionMapperComponent implements OnInit {
           const complianceUpload = rowMap['compliance evidence upload'] || '';
           const compEv = complianceUpload.toLowerCase() === 'yes' || complianceUpload === '1' ? 1 : 0;
 
-          // 4. Create Question
-          const questionPayload: CreateQuestionDto = {
+          // 4. Resolve if Question Already Exists to Prevent Duplication (Supports single character edits)
+          const rawQuestionIdStr = rowMap['question id'] || '';
+          const rawQuestionId = Number(rawQuestionIdStr);
+
+          // Fetch current questions under this header
+          const existingQsList = await this.service.findQuestionsByHeader(headerId!).toPromise();
+          const existingQs = Array.isArray(existingQsList) ? existingQsList : (existingQsList?.data ?? []);
+
+          let matchedQuestion: any = null;
+          if (rawQuestionId && !isNaN(rawQuestionId)) {
+            matchedQuestion = existingQs.find((q: any) => Number(q.id) === rawQuestionId);
+          }
+          if (!matchedQuestion) {
+            // Fallback match: exact text search under this header
+            matchedQuestion = existingQs.find((q: any) => q.question.toLowerCase().trim() === rawQuestion.toLowerCase().trim());
+          }
+
+          // Build Parameters mapping array if provided
+          const riskTypeStr = rowMap['risk type'] || '';
+          const mBusinessRiskStr = rowMap['mapping business risk'] || '';
+          const mControlRiskStr = rowMap['mapping control risk'] || '';
+
+          let parametersJson: string | undefined = undefined;
+          if (riskTypeStr && mBusinessRiskStr && mControlRiskStr) {
+            const riskTypes = riskTypeStr.split(';').map(s => s.trim()).filter(Boolean);
+            const businessRisks = mBusinessRiskStr.split(';').map(s => s.trim()).filter(Boolean);
+            const controlRisks = mControlRiskStr.split(';').map(s => s.trim()).filter(Boolean);
+
+            const brMapInverse: Record<string, number> = { 'HIGH RISK': 1, 'MEDIUM RISK': 2, 'LOW RISK': 3, 'NO RISK': 4 };
+            const crMapInverse: Record<string, number> = { 'HIGH RISK': 1, 'MEDIUM RISK': 2, 'LOW RISK': 3, 'NO RISK': 4 };
+
+            const count = Math.max(riskTypes.length, businessRisks.length, controlRisks.length);
+            const paramsList = [];
+            for (let i = 0; i < count; i++) {
+              const rt = riskTypes[i] || '';
+              const br = businessRisks[i] || businessRisks[0] || 'NO RISK';
+              const cr = controlRisks[i] || controlRisks[0] || 'NO RISK';
+              if (rt) {
+                paramsList.push({
+                  rt: rt.trim(),
+                  br: String(brMapInverse[br.toUpperCase()] || 4),
+                  cr: String(crMapInverse[cr.toUpperCase()] || 4)
+                });
+              }
+            }
+            parametersJson = JSON.stringify(paramsList);
+          }
+
+          const questionPayload: any = {
             set_id: setId!,
             header_id: headerId!,
             annexure_id: annId,
@@ -1204,39 +1256,50 @@ export class QuickQuestionMapperComponent implements OnInit {
             is_active: 1
           };
 
-          const questionRes = await this.service.createQuestion(questionPayload).toPromise();
-          lastCreatedQuestionId = Number(questionRes.id);
-          newlyCreatedQuestionIds.push(lastCreatedQuestionId); // Track newly created question
+          if (matchedQuestion) {
+            // Update existing question
+            if (parametersJson !== undefined) {
+              questionPayload.parameters = parametersJson;
+            }
+            await this.service.updateQuestion(matchedQuestion.id, questionPayload).toPromise();
+            lastCreatedQuestionId = Number(matchedQuestion.id);
+          } else {
+            // Create new question
+            const questionRes = await this.service.createQuestion(questionPayload).toPromise();
+            lastCreatedQuestionId = Number(questionRes.id);
+            newlyCreatedQuestionIds.push(lastCreatedQuestionId); // Track newly created question for possible rollbacks
+
+            // For new questions, write parameter mapping separately (backend createQuestion does not map it)
+            if (parametersJson !== undefined) {
+              const riskTypes = riskTypeStr.split(';').map(s => s.trim()).filter(Boolean);
+              const businessRisks = mBusinessRiskStr.split(';').map(s => s.trim()).filter(Boolean);
+              const controlRisks = mControlRiskStr.split(';').map(s => s.trim()).filter(Boolean);
+
+              const count = Math.max(riskTypes.length, businessRisks.length, controlRisks.length);
+              for (let i = 0; i < count; i++) {
+                const rt = riskTypes[i] || '';
+                const br = businessRisks[i] || businessRisks[0] || 'NO RISK';
+                const cr = controlRisks[i] || controlRisks[0] || 'NO RISK';
+                if (rt) {
+                  const mappingPayload: CreateQuestionRiskMappingDto = {
+                    question_id: lastCreatedQuestionId,
+                    risk_type: rt,
+                    business_risk: br.toUpperCase(),
+                    control_risk: cr.toUpperCase()
+                  };
+                  await this.service.createRiskMapping(mappingPayload).toPromise();
+                }
+              }
+            }
+          }
 
           // Update main selected set to ensure dashboard matches
           this.selectedSetId.set(setId);
           this.selectedHeaderId.set(headerId);
-        }
 
-        // 5. Create Risk Mapping if fields are provided (supports semicolon-separated values in one row)
-        const riskTypeStr = rowMap['risk type'] || '';
-        const mBusinessRiskStr = rowMap['mapping business risk'] || '';
-        const mControlRiskStr = rowMap['mapping control risk'] || '';
-
-        if (riskTypeStr && mBusinessRiskStr && mControlRiskStr && lastCreatedQuestionId != null) {
-          const riskTypes = riskTypeStr.split(';').map(s => s.trim()).filter(Boolean);
-          const businessRisks = mBusinessRiskStr.split(';').map(s => s.trim()).filter(Boolean);
-          const controlRisks = mControlRiskStr.split(';').map(s => s.trim()).filter(Boolean);
-
-          const count = Math.max(riskTypes.length, businessRisks.length, controlRisks.length);
-          for (let i = 0; i < count; i++) {
-            const rt = riskTypes[i] || '';
-            const br = businessRisks[i] || businessRisks[0] || 'NO RISK';
-            const cr = controlRisks[i] || controlRisks[0] || 'NO RISK';
-            if (rt) {
-              const mappingPayload: CreateQuestionRiskMappingDto = {
-                question_id: lastCreatedQuestionId,
-                risk_type: rt,
-                business_risk: br.toUpperCase(),
-                control_risk: cr.toUpperCase()
-              };
-              await this.service.createRiskMapping(mappingPayload).toPromise();
-            }
+          processedHeaderIds.add(headerId!);
+          if (lastCreatedQuestionId) {
+            processedQuestionIds.add(lastCreatedQuestionId);
           }
         }
 
@@ -1302,6 +1365,25 @@ export class QuickQuestionMapperComponent implements OnInit {
       // Throw to let the caller handle UI state reset in its finally block
       throw new Error(errorToReport);
     } else {
+      this.importStatusText.set('Reconciling questions with database...');
+      // Perform reconciliation: delete questions that were removed from the CSV
+      for (const hId of Array.from(processedHeaderIds)) {
+        try {
+          const dbQsList = await this.service.findQuestionsByHeader(hId).toPromise();
+          const dbQs = Array.isArray(dbQsList) ? dbQsList : (dbQsList?.data ?? []);
+          
+          for (const dbQ of dbQs) {
+            const dbQId = Number(dbQ.id);
+            if (!processedQuestionIds.has(dbQId)) {
+              // This question was in the DB but is not in the uploaded CSV -> delete/remove it
+              await this.service.removeQuestion(dbQId).toPromise();
+            }
+          }
+        } catch (err) {
+          console.error(`Failed to reconcile questions for header ${hId}:`, err);
+        }
+      }
+
       this.importStatusText.set('Bulk Upload Completed!');
       this.messageService.add({
         severity: 'success',

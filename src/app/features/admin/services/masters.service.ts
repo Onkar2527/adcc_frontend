@@ -582,6 +582,14 @@ export class AuditQuestionMasterService {
     return this.http.delete<any>(`${this.apiUrl}/headers/${id}`);
   }
 
+  getDownloadLookups() {
+    return this.http.get<any>(`${this.apiUrl}/download-lookups`);
+  }
+
+  getDownloadData(params: { section_id: number; risk_category_ids?: string; risk_levels?: string }) {
+    return this.http.get<any>(`${this.apiUrl}/download-data`, { params: params as any });
+  }
+
   // Question Master
 
   findQuestionsByHeader(headerId: string | number) {
