@@ -55,7 +55,7 @@ export class LoginComponent {
       event.preventDefault();
 
       this.username = 'ADMIN';
-      this.password = 'Emp@2024';
+      this.password = 'Emp@2025';
       this.selectedRole = undefined;
 
       this.onLogin();
@@ -209,13 +209,13 @@ export class LoginComponent {
 
     if (type === 'auditor') {
       this.username = '132';
-      this.password = 'Emp@2024';
+      this.password = 'Emp@2025';
     } else if (type === 'reviewer') {
       this.username = '139';
-      this.password = 'Emp@2024';
+      this.password = 'Emp@2025';
     } else if (type === 'manager') {
       this.username = '140';
-      this.password = 'Emp@2024';
+      this.password = 'Emp@2025';
     }
 
     this.onLogin();

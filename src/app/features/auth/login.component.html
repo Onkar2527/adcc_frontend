@@ -28,7 +28,7 @@
         <h2 *ngIf="!showOtpScreen">Login to Your Account</h2>
         <h2 *ngIf="showOtpScreen">Two-Factor Verification</h2>
 
-        <div class="company-name">Kredpool Co-Op Bank Ltd., Sangli</div>
+        <div class="company-name">Pune Cantonment Sahakari Bank</div>
 
         <div class="divider"></div>
 
@@ -42,17 +42,9 @@
               <label for="username">Employee Code</label>
               <div class="input-icon-wrapper">
                 <i class="pi pi-user input-icon"></i>
-                <input
-                  id="username"
-                  pInputText
-                  type="text"
-                  [(ngModel)]="username"
-                  name="username"
-                  placeholder="Enter Employee Code"
-                  class="w-full custom-input icon-indent"
-                  required
-                  autocomplete="username"
-                />
+                <input id="username" pInputText type="text" [(ngModel)]="username" name="username"
+                  placeholder="Enter Employee Code" class="w-full custom-input icon-indent" required
+                  autocomplete="username" />
               </div>
             </div>
 
@@ -61,70 +53,44 @@
               <label for="password">Password</label>
               <div class="input-icon-wrapper">
                 <i class="pi pi-lock input-icon"></i>
-                <p-password
-                  inputId="password"
-                  [(ngModel)]="password"
-                  name="password"
-                  [toggleMask]="true"
-                  [feedback]="false"
-                  placeholder="Enter Password"
-                  styleClass="w-full"
-                  inputStyleClass="w-full custom-input icon-indent"
-                  autocomplete="current-password"
-                  required
-                >
+                <p-password inputId="password" [(ngModel)]="password" name="password" [toggleMask]="true"
+                  [feedback]="false" placeholder="Enter Password" styleClass="w-full"
+                  inputStyleClass="w-full custom-input icon-indent" autocomplete="current-password" required>
                 </p-password>
               </div>
             </div>
 
             <!-- Forgot Password Link -->
-            <div class="reset-link-container animate-item delay-3" style="text-align: right; margin-bottom: 12px; margin-top: -6px;">
-              <a href="javascript:void(0)" (click)="goToForgotPassword()" class="reset-pass-link" style="font-size: 0.85rem; color: #3f51b5; text-decoration: none; font-weight: 600;">Forgot/Reset Password?</a>
+            <div class="reset-link-container animate-item delay-3"
+              style="text-align: right; margin-bottom: 12px; margin-top: -6px;">
+              <a href="javascript:void(0)" (click)="goToForgotPassword()" class="reset-pass-link"
+                style="font-size: 0.85rem; color: #3f51b5; text-decoration: none; font-weight: 600;">Forgot/Reset
+                Password?</a>
             </div>
 
             <!-- Login Button -->
-            <button
-              pButton
-              type="submit"
-              [loading]="loading()"
-              [disabled]="loading() || !username || !password"
-              class="login-btn animate-item delay-4"
-            >
+            <button pButton type="submit" [loading]="loading()" [disabled]="loading() || !username || !password"
+              class="login-btn animate-item delay-4">
               {{ loading() ? 'Logging in...' : 'Login' }}
             </button>
 
-            <!-- Roles -->
+            <!-- Roles
             <div class="user-types animate-item delay-5">
-              <button
-                type="button"
-                class="user-btn"
-                [class.active]="selectedRole === 'auditor'"
-                [disabled]="loading()"
-                (click)="setCredentials('auditor')"
-              >
+              <button type="button" class="user-btn" [class.active]="selectedRole === 'auditor'" [disabled]="loading()"
+                (click)="setCredentials('auditor')">
                 Auditor
               </button>
 
-              <button
-                type="button"
-                class="user-btn"
-                [class.active]="selectedRole === 'reviewer'"
-                [disabled]="loading()"
-                (click)="setCredentials('reviewer')"
-              >
+              <button type="button" class="user-btn" [class.active]="selectedRole === 'reviewer'" [disabled]="loading()"
+                (click)="setCredentials('reviewer')">
                 Reviewer
               </button>
 
-              <button
-                type="button"
-                class="user-btn"
-                [class.active]="selectedRole === 'manager'"
-                [disabled]="loading()"
-                (click)="setCredentials('manager')"
-              >
+              <button type="button" class="user-btn" [class.active]="selectedRole === 'manager'" [disabled]="loading()"
+                (click)="setCredentials('manager')">
                 Employee
               </button>
-            </div>
+            </div> -->
           </form>
         </div>
 
@@ -141,39 +107,19 @@
               <label for="otpCode">Verification Code</label>
               <div class="input-icon-wrapper">
                 <i class="pi pi-shield input-icon"></i>
-                <input
-                  id="otpCode"
-                  pInputText
-                  type="text"
-                  [(ngModel)]="otpCode"
-                  name="otpCode"
-                  placeholder="Enter 6-digit OTP"
-                  class="w-full custom-input icon-indent"
-                  required
-                  maxlength="6"
-                  pattern="[0-9]{6}"
-                  autocomplete="one-time-code"
-                />
+                <input id="otpCode" pInputText type="text" [(ngModel)]="otpCode" name="otpCode"
+                  placeholder="Enter 6-digit OTP" class="w-full custom-input icon-indent" required maxlength="6"
+                  pattern="[0-9]{6}" autocomplete="one-time-code" />
               </div>
             </div>
 
             <!-- OTP Buttons -->
             <div class="reset-actions-container animate-item delay-3">
-              <button
-                type="button"
-                class="cancel-btn"
-                [disabled]="loadingOtp()"
-                (click)="cancelOtp()"
-              >
+              <button type="button" class="cancel-btn" [disabled]="loadingOtp()" (click)="cancelOtp()">
                 Cancel
               </button>
-              <button
-                pButton
-                type="submit"
-                [loading]="loadingOtp()"
-                [disabled]="loadingOtp() || !otpCode || otpCode.length !== 6"
-                class="login-btn"
-              >
+              <button pButton type="submit" [loading]="loadingOtp()"
+                [disabled]="loadingOtp() || !otpCode || otpCode.length !== 6" class="login-btn">
                 {{ loadingOtp() ? 'Verifying...' : 'Verify' }}
               </button>
             </div>

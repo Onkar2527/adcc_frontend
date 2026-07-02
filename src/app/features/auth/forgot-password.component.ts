@@ -49,7 +49,7 @@ import { PasswordPolicyService } from '../admin/services/masters.service';
         <div class="login-wrapper">
           <div class="login-card animate-item delay-1">
             <h2>Reset Your Password</h2>
-            <div class="company-name">Kredpool Co-Op Bank Ltd., Sangli</div>
+            <div class="company-name">Pune Cantonment Sahakari Bank</div>
             <div class="divider"></div>
 
             <p class="login-text" style="margin-bottom: 12px; font-weight: 500;">Select Reset Password Method</p>
