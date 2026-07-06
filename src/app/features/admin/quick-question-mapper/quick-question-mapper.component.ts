@@ -40,7 +40,9 @@ import {
   CreateQuestionDto,
   CreateQuestionSetDto,
   CreateQuestionHeaderDto,
-  CreateQuestionRiskMappingDto
+  CreateQuestionRiskMappingDto,
+  MenuMasterService,
+  AuditCategoryMasterService
 } from '../services/masters.service';
 
 @Component({
@@ -75,6 +77,8 @@ import {
 export class QuickQuestionMapperComponent implements OnInit {
   protected readonly Number = Number;
   private service = inject(AuditQuestionMasterService);
+  private menuService = inject(MenuMasterService);
+  private categoryService = inject(AuditCategoryMasterService);
   private messageService = inject(MessageService);
   private confirmationService = inject(ConfirmationService);
 
@@ -731,6 +735,9 @@ export class QuickQuestionMapperComponent implements OnInit {
   // Trigger Client-side CSV Download
   downloadSampleCSV() {
     const headers = [
+      'Question ID',
+      'Menu Name',
+      'Category Name',
       'Set Name',
       'Set Type',
       'Header Name',
@@ -754,6 +761,9 @@ export class QuickQuestionMapperComponent implements OnInit {
     ];
 
     const sampleRow1 = [
+      '',
+      'PART - A',
+      'CASH MANAGEMENT',
       'Operational Audits Set',
       'Main Set',
       'Cash Counter Security',
@@ -771,35 +781,15 @@ export class QuickQuestionMapperComponent implements OnInit {
       '0',
       'Yes',
       'Yes',
-      'Cash Verification Failure Risk',
-      'HIGH RISK',
-      'MEDIUM RISK'
+      'Yes;No;Not Applicable',
+      'LOW RISK;HIGH RISK;MEDIUM RISK',
+      'LOW RISK;HIGH RISK;MEDIUM RISK'
     ];
 
     const sampleRow2 = [
-      '', // Empty to denote same question mapping
       '',
-      '',
-      '',
-      '',
-      '',
-      '',
-      '',
-      '',
-      '',
-      '',
-      '',
-      '',
-      '',
-      '',
-      '',
-      '',
-      'Unreconciled Cash Balances Risk',
-      'MEDIUM RISK',
-      'LOW RISK'
-    ];
-
-    const sampleRow3 = [
+      'PART - A',
+      'CASH MANAGEMENT',
       'Operational Audits Set',
       'Main Set',
       'Vault Security',
@@ -817,9 +807,9 @@ export class QuickQuestionMapperComponent implements OnInit {
       '0',
       'Yes',
       'Yes',
-      'Vault Security Failure',
-      'HIGH RISK',
-      'HIGH RISK'
+      'Yes;No',
+      'LOW RISK;HIGH RISK',
+      'LOW RISK;HIGH RISK'
     ];
 
     const escapeCSV = (val: string) => {
@@ -832,8 +822,7 @@ export class QuickQuestionMapperComponent implements OnInit {
     const csvContent = [
       headers.map(escapeCSV).join(','),
       sampleRow1.map(escapeCSV).join(','),
-      sampleRow2.map(escapeCSV).join(','),
-      sampleRow3.map(escapeCSV).join(',')
+      sampleRow2.map(escapeCSV).join(',')
     ].join('\n');
 
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
@@ -935,10 +924,25 @@ export class QuickQuestionMapperComponent implements OnInit {
     let lastHeaderId: number | null = null;
     let lastHeaderName = '';
 
+    // Fetch menus and categories for fast inline creation and mapping
+    let menusList: any[] = [];
+    let categoriesList: any[] = [];
+    try {
+      const menusRes: any = await this.menuService.getMenuMasters().toPromise();
+      menusList = (menusRes && Array.isArray(menusRes.rows)) ? menusRes.rows : (Array.isArray(menusRes) ? menusRes : []);
+
+      const cats: any = await this.categoryService.findAll().toPromise();
+      categoriesList = (cats && Array.isArray(cats.rows)) ? cats.rows : (Array.isArray(cats) ? cats : (cats?.data ?? []));
+    } catch (e) {
+      console.error('Failed to fetch menus or categories:', e);
+    }
+
     // Tracking arrays for rollback
     const newlyCreatedSetIds: number[] = [];
     const newlyCreatedHeaderIds: number[] = [];
     const newlyCreatedQuestionIds: number[] = [];
+    const processedHeaderIds = new Set<number>();
+    const processedQuestionIds = new Set<number>();
 
     // Cache lookup maps for fast lookups
     const typeMap = this.questionTypes().reduce((acc, t) => {
@@ -1023,6 +1027,63 @@ export class QuickQuestionMapperComponent implements OnInit {
             throw new Error('Missing Set Name, Header Name, or Question text');
           }
 
+          // 0. Resolve Menu & Category if provided in columns
+          const rawMenuName = rowMap['menu name'] || '';
+          const rawCategoryName = rowMap['category name'] || '';
+          let menuId: number | null = null;
+          let categoryId: number | null = null;
+
+          if (rawMenuName) {
+            const existingMenu = menusList.find(m => {
+              const mName = m.menu_name || m.name || '';
+              return mName.toLowerCase() === rawMenuName.toLowerCase();
+            });
+            if (existingMenu) {
+              menuId = Number(existingMenu.id);
+            } else {
+              // Create Menu
+              const createMenuPayload = {
+                section_type_id: 1, // Default section type
+                name: rawMenuName.trim().toUpperCase(),
+                linked_table_id: 0,
+                is_active: 1
+              };
+              const newMenuRes: any = await this.menuService.createMenuMaster(createMenuPayload).toPromise();
+              const newMenu = (newMenuRes && newMenuRes.rows) ? newMenuRes.rows[0] : newMenuRes;
+              if (newMenu) {
+                menuId = Number(newMenu.id);
+              }
+              // Refresh list
+              const menusRefresh: any = await this.menuService.getMenuMasters().toPromise();
+              menusList = (menusRefresh && Array.isArray(menusRefresh.rows)) ? menusRefresh.rows : (Array.isArray(menusRefresh) ? menusRefresh : []);
+            }
+          }
+
+          if (rawCategoryName && menuId) {
+            const existingCat = categoriesList.find(c => (c.name || '').toLowerCase() === rawCategoryName.toLowerCase() && Number(c.menu_id) === menuId);
+            if (existingCat) {
+              categoryId = Number(existingCat.id);
+            } else {
+              // Create Category
+              const createCatPayload = {
+                menu_id: menuId,
+                name: rawCategoryName.trim().toUpperCase(),
+                linked_table_id: 0,
+                question_set_ids: '',
+                is_cc_acc_category: 0,
+                is_active: 1
+              };
+              const newCatRes: any = await this.categoryService.create(createCatPayload).toPromise();
+              const newCat = (newCatRes && newCatRes.rows) ? newCatRes.rows[0] : newCatRes;
+              if (newCat) {
+                categoryId = Number(newCat.id);
+              }
+              // Refresh list
+              const cats: any = await this.categoryService.findAll().toPromise();
+              categoriesList = (cats && Array.isArray(cats.rows)) ? cats.rows : (Array.isArray(cats) ? cats : (cats?.data ?? []));
+            }
+          }
+
           // 1. Resolve Set
           let setId: number | null = lastSetName.toLowerCase() === rawSetName.toLowerCase() ? lastSetId : null;
           if (!setId) {
@@ -1045,6 +1106,22 @@ export class QuickQuestionMapperComponent implements OnInit {
             lastSetName = rawSetName;
             lastHeaderId = null;
             lastHeaderName = '';
+          }
+
+          // Link Question Set to Category
+          if (categoryId && setId) {
+            const currentCat = categoriesList.find(c => Number(c.id) === categoryId);
+            if (currentCat) {
+              const setIdsStr = currentCat.question_set_ids || '';
+              const setIdsArr = setIdsStr.split(',').map((s: string) => s.trim()).filter(Boolean);
+              if (!setIdsArr.includes(String(setId))) {
+                setIdsArr.push(String(setId));
+                const newSetIdsStr = setIdsArr.join(',');
+                await this.categoryService.updateQuestionMapping(categoryId, newSetIdsStr).toPromise();
+                // Update the cached category's question_set_ids to avoid repeating updates
+                currentCat.question_set_ids = newSetIdsStr;
+              }
+            }
           }
 
           // 2. Resolve Header
@@ -1111,8 +1188,55 @@ export class QuickQuestionMapperComponent implements OnInit {
           const complianceUpload = rowMap['compliance evidence upload'] || '';
           const compEv = complianceUpload.toLowerCase() === 'yes' || complianceUpload === '1' ? 1 : 0;
 
-          // 4. Create Question
-          const questionPayload: CreateQuestionDto = {
+          // 4. Resolve if Question Already Exists to Prevent Duplication (Supports single character edits)
+          const rawQuestionIdStr = rowMap['question id'] || '';
+          const rawQuestionId = Number(rawQuestionIdStr);
+
+          // Fetch current questions under this header
+          const existingQsList = await this.service.findQuestionsByHeader(headerId!).toPromise();
+          const existingQs = Array.isArray(existingQsList) ? existingQsList : (existingQsList?.data ?? []);
+
+          let matchedQuestion: any = null;
+          if (rawQuestionId && !isNaN(rawQuestionId)) {
+            matchedQuestion = existingQs.find((q: any) => Number(q.id) === rawQuestionId);
+          }
+          if (!matchedQuestion) {
+            // Fallback match: exact text search under this header
+            matchedQuestion = existingQs.find((q: any) => q.question.toLowerCase().trim() === rawQuestion.toLowerCase().trim());
+          }
+
+          // Build Parameters mapping array if provided
+          const riskTypeStr = rowMap['risk type'] || '';
+          const mBusinessRiskStr = rowMap['mapping business risk'] || '';
+          const mControlRiskStr = rowMap['mapping control risk'] || '';
+
+          let parametersJson: string | undefined = undefined;
+          if (riskTypeStr && mBusinessRiskStr && mControlRiskStr) {
+            const riskTypes = riskTypeStr.split(';').map(s => s.trim()).filter(Boolean);
+            const businessRisks = mBusinessRiskStr.split(';').map(s => s.trim()).filter(Boolean);
+            const controlRisks = mControlRiskStr.split(';').map(s => s.trim()).filter(Boolean);
+
+            const brMapInverse: Record<string, number> = { 'HIGH RISK': 1, 'MEDIUM RISK': 2, 'LOW RISK': 3, 'NO RISK': 4 };
+            const crMapInverse: Record<string, number> = { 'HIGH RISK': 1, 'MEDIUM RISK': 2, 'LOW RISK': 3, 'NO RISK': 4 };
+
+            const count = Math.max(riskTypes.length, businessRisks.length, controlRisks.length);
+            const paramsList = [];
+            for (let i = 0; i < count; i++) {
+              const rt = riskTypes[i] || '';
+              const br = businessRisks[i] || businessRisks[0] || 'NO RISK';
+              const cr = controlRisks[i] || controlRisks[0] || 'NO RISK';
+              if (rt) {
+                paramsList.push({
+                  rt: rt.trim(),
+                  br: String(brMapInverse[br.toUpperCase()] || 4),
+                  cr: String(crMapInverse[cr.toUpperCase()] || 4)
+                });
+              }
+            }
+            parametersJson = JSON.stringify(paramsList);
+          }
+
+          const questionPayload: any = {
             set_id: setId!,
             header_id: headerId!,
             annexure_id: annId,
@@ -1132,33 +1256,69 @@ export class QuickQuestionMapperComponent implements OnInit {
             is_active: 1
           };
 
-          const questionRes = await this.service.createQuestion(questionPayload).toPromise();
-          lastCreatedQuestionId = Number(questionRes.id);
-          newlyCreatedQuestionIds.push(lastCreatedQuestionId); // Track newly created question
+          if (matchedQuestion) {
+            // Update existing question
+            if (parametersJson !== undefined) {
+              questionPayload.parameters = parametersJson;
+            }
+            await this.service.updateQuestion(matchedQuestion.id, questionPayload).toPromise();
+            lastCreatedQuestionId = Number(matchedQuestion.id);
+          } else {
+            // Create new question
+            const questionRes = await this.service.createQuestion(questionPayload).toPromise();
+            lastCreatedQuestionId = Number(questionRes.id);
+            newlyCreatedQuestionIds.push(lastCreatedQuestionId); // Track newly created question for possible rollbacks
+
+            // For new questions, write parameter mapping separately (backend createQuestion does not map it)
+            if (parametersJson !== undefined) {
+              const riskTypes = riskTypeStr.split(';').map(s => s.trim()).filter(Boolean);
+              const businessRisks = mBusinessRiskStr.split(';').map(s => s.trim()).filter(Boolean);
+              const controlRisks = mControlRiskStr.split(';').map(s => s.trim()).filter(Boolean);
+
+              const count = Math.max(riskTypes.length, businessRisks.length, controlRisks.length);
+              for (let i = 0; i < count; i++) {
+                const rt = riskTypes[i] || '';
+                const br = businessRisks[i] || businessRisks[0] || 'NO RISK';
+                const cr = controlRisks[i] || controlRisks[0] || 'NO RISK';
+                if (rt) {
+                  const mappingPayload: CreateQuestionRiskMappingDto = {
+                    question_id: lastCreatedQuestionId,
+                    risk_type: rt,
+                    business_risk: br.toUpperCase(),
+                    control_risk: cr.toUpperCase()
+                  };
+                  await this.service.createRiskMapping(mappingPayload).toPromise();
+                }
+              }
+            }
+          }
 
           // Update main selected set to ensure dashboard matches
           this.selectedSetId.set(setId);
           this.selectedHeaderId.set(headerId);
-        }
 
-        // 5. Create Risk Mapping if fields are provided
-        const riskType = rowMap['risk type'] || '';
-        const mBusinessRisk = rowMap['mapping business risk'] || '';
-        const mControlRisk = rowMap['mapping control risk'] || '';
-
-        if (riskType && mBusinessRisk && mControlRisk && lastCreatedQuestionId != null) {
-          const mappingPayload: CreateQuestionRiskMappingDto = {
-            question_id: lastCreatedQuestionId,
-            risk_type: riskType,
-            business_risk: mBusinessRisk.toUpperCase(),
-            control_risk: mControlRisk.toUpperCase()
-          };
-          await this.service.createRiskMapping(mappingPayload).toPromise();
+          processedHeaderIds.add(headerId!);
+          if (lastCreatedQuestionId) {
+            processedQuestionIds.add(lastCreatedQuestionId);
+          }
         }
 
       } catch (err: any) {
         hasError = true;
-        errorToReport = `Row ${index + 2}: ${err?.error?.message || err?.message || err}`;
+        let errMsg = '';
+        if (err?.error) {
+          if (Array.isArray(err.error.message)) {
+            errMsg = err.error.message.join(', ');
+          } else if (typeof err.error.message === 'string') {
+            errMsg = err.error.message;
+          } else if (typeof err.error === 'string') {
+            errMsg = err.error;
+          }
+        }
+        if (!errMsg) {
+          errMsg = err?.message || err || 'Unknown error';
+        }
+        errorToReport = `Row ${index + 2}: ${errMsg}`;
         break; // Stop loop execution immediately on error
       }
     }
@@ -1205,6 +1365,25 @@ export class QuickQuestionMapperComponent implements OnInit {
       // Throw to let the caller handle UI state reset in its finally block
       throw new Error(errorToReport);
     } else {
+      this.importStatusText.set('Reconciling questions with database...');
+      // Perform reconciliation: delete questions that were removed from the CSV
+      for (const hId of Array.from(processedHeaderIds)) {
+        try {
+          const dbQsList = await this.service.findQuestionsByHeader(hId).toPromise();
+          const dbQs = Array.isArray(dbQsList) ? dbQsList : (dbQsList?.data ?? []);
+          
+          for (const dbQ of dbQs) {
+            const dbQId = Number(dbQ.id);
+            if (!processedQuestionIds.has(dbQId)) {
+              // This question was in the DB but is not in the uploaded CSV -> delete/remove it
+              await this.service.removeQuestion(dbQId).toPromise();
+            }
+          }
+        } catch (err) {
+          console.error(`Failed to reconcile questions for header ${hId}:`, err);
+        }
+      }
+
       this.importStatusText.set('Bulk Upload Completed!');
       this.messageService.add({
         severity: 'success',

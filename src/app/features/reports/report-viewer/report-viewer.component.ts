@@ -180,6 +180,10 @@ export class ReportViewerComponent implements OnInit {
   shouldShowFilter(filter: ReportFilterDefinition): boolean {
     const slug = this.definition()?.slug;
 
+    if (filter.key === 'reportAuditAssesment' && this.filters['reportAuditUnit'] === 'all_branches') {
+      return false;
+    }
+
     if (this.isRiskWiseAuditUnitsReport() && filter.key === 'endDate') {
       return false;
     }
@@ -436,9 +440,15 @@ export class ReportViewerComponent implements OnInit {
       return;
     }
 
-    const missingFilter = definition.filters.find(
-      (filter) => filter.required && !this.filters[filter.key],
-    );
+    const missingFilter = definition.filters.find((filter) => {
+      if (!filter.required) {
+        return false;
+      }
+      if (filter.dependsOn && this.filters[filter.dependsOn] === 'all_branches') {
+        return false;
+      }
+      return !this.filters[filter.key];
+    });
 
     if (missingFilter) {
       this.error.set(`${missingFilter.label} is required.`);
