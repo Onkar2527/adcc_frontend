@@ -29,6 +29,7 @@ import { Subscription } from 'rxjs';
 import { KeyboardShortcutService } from '../../../core/services/keyboard-shortcut';
 import { AuthService } from '../../../core/services/auth/auth.service';
 import { APP_CONFIG } from '../../../core/services/config/config.token';
+import { OfflineTranslationService } from '../../../core/services/offline-translation.service';
 
 interface SearchItem {
   label: string;
@@ -113,6 +114,8 @@ interface SearchItem {
           optionLabel="label"
           optionValue="value"
           appendTo="body"
+          styleClass="language-select-dropdown"
+          (onChange)="onLanguageChange($event)"
         >
           <ng-template pTemplate="selectedItem">
             <div class="flex align-items-center gap-2" *ngIf="selectedLanguage">
@@ -351,6 +354,7 @@ export class AppTopbar implements OnInit, OnDestroy {
   router = inject(Router);
   authService = inject(AuthService);
   config = inject(APP_CONFIG);
+  offlineTranslationService = inject(OfflineTranslationService);
 
   @ViewChild('searchInput') searchInput!: AutoComplete;
   private searchSubscription?: Subscription;
@@ -359,9 +363,12 @@ export class AppTopbar implements OnInit, OnDestroy {
   userDesignation = '';
 
   // Role and Language Data
-  languages = [{ label: 'English', value: 'en' }];
+  languages = [
+    { label: 'English', value: 'en' },
+    { label: 'मराठी (Marathi)', value: 'mr' }
+  ];
 
-  selectedLanguage = 'en';
+  selectedLanguage = this.offlineTranslationService.getCurrentLanguage();
 
   suggestions: SearchItem[] = [];
   selectedItem: any;
@@ -393,6 +400,10 @@ export class AppTopbar implements OnInit, OnDestroy {
     if (this.searchSubscription) {
       this.searchSubscription.unsubscribe();
     }
+  }
+
+  onLanguageChange(event: any) {
+    this.offlineTranslationService.setLanguage(event.value);
   }
 
   // Search Methods

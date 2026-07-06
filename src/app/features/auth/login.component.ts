@@ -11,6 +11,8 @@ import { MessageService } from 'primeng/api';
 import { Toast } from 'primeng/toast';
 import { ENABLE_2FA } from '../admin/services/required-data';
 import { PasswordPolicyService } from '../admin/services/masters.service';
+import { SelectModule } from 'primeng/select';
+import { OfflineTranslationService } from '../../core/services/offline-translation.service';
 
 @Component({
   selector: 'app-login',
@@ -21,13 +23,22 @@ import { PasswordPolicyService } from '../admin/services/masters.service';
     InputTextModule,
     PasswordModule,
     ButtonModule,
-    Toast
+    Toast,
+    SelectModule
   ],
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.css']
 })
 export class LoginComponent {
   private authService = inject(AuthService);
+  offlineTranslationService = inject(OfflineTranslationService);
+
+  selectedLanguage = this.offlineTranslationService.getCurrentLanguage();
+
+  onLanguageChange(lang: string) {
+    this.selectedLanguage = lang;
+    this.offlineTranslationService.setLanguage(lang);
+  }
   private router = inject(Router);
   private route = inject(ActivatedRoute);
   private messageService = inject(MessageService);

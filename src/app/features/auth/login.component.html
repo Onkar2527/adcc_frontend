@@ -74,6 +74,17 @@
               {{ loading() ? 'Logging in...' : 'Login' }}
             </button>
 
+            <!-- Language Selector -->
+            <div class="login-language-selector animate-item delay-4" style="margin-top: 15px;">
+              <div class="segmented-control">
+                <input type="radio" id="lang-en" name="lang" value="en" [(ngModel)]="selectedLanguage" (change)="onLanguageChange('en')" />
+                <label for="lang-en">English</label>
+
+                <input type="radio" id="lang-mr" name="lang" value="mr" [(ngModel)]="selectedLanguage" (change)="onLanguageChange('mr')" />
+                <label for="lang-mr">मराठी</label>
+              </div>
+            </div>
+
             <!-- Roles
             <div class="user-types animate-item delay-5">
               <button type="button" class="user-btn" [class.active]="selectedRole === 'auditor'" [disabled]="loading()"

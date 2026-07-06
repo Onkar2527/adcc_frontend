@@ -1,5 +1,5 @@
 {
   "company_uuid4": "from_config",
-  "apiUrl": "http://localhost:3577",
+  "apiUrl": "http://192.168.31.148:3577",
   "bank_name": "Pune Cantonment Sahakari Bank"
 }
