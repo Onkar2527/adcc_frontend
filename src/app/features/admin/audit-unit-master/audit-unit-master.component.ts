@@ -22,7 +22,7 @@ import { MasterBulkUploadService } from '../services/master-bulk-upload.service'
 
     <div class="flex align-items-center justify-content-between mb-4">
       <h5 class="m-0 text-xl font-semibold">
-        Audit Unit Master
+        Unit Master
       </h5>
     </div>
 

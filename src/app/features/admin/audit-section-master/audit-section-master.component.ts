@@ -18,7 +18,7 @@ import { MasterBulkUploadService } from '../services/master-bulk-upload.service'
   template: `
     <div class="card">
       <div class="flex align-items-center justify-content-between mb-4">
-        <h5 class="m-0 text-xl font-semibold">Audit Section Master</h5>
+        <h5 class="m-0 text-xl font-semibold">Section Master</h5>
       </div>
 
       <app-table
