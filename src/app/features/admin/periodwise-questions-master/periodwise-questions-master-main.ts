@@ -360,16 +360,26 @@ ${fyEnd}-01 to ${fyEnd}-03`
 
     private setSectionTypeFromSelection() {
         const selectedAuditTypeIds = this.audit_type_ids().map(Number).filter(Boolean);
-        const matchingSection = this.auditSections().find((section: any) => {
+        const selectedAuditTypes = this.auditTypeOptions().filter((option: any) =>
+            selectedAuditTypeIds.includes(Number(option.value)),
+        );
+        const nonInternalAuditTypeIds = selectedAuditTypes
+            .filter((option: any) => option.code !== 'INTERNAL_AUDIT')
+            .map((option: any) => Number(option.value))
+            .filter(Boolean);
+
+        const matchingSection = nonInternalAuditTypeIds.length
+            ? this.auditSections().find((section: any) => {
             const sectionAuditTypeIds = String(section.audit_type_id || '')
                 .split(',')
                 .map((id: string) => Number(id.trim()))
                 .filter(Boolean);
 
-            return selectedAuditTypeIds.some((auditTypeId: number) =>
+            return nonInternalAuditTypeIds.some((auditTypeId: number) =>
                 sectionAuditTypeIds.includes(auditTypeId),
             );
-        });
+        })
+            : null;
 
         if (matchingSection) {
             this.section_type_id.set(Number(matchingSection.id));
@@ -505,6 +515,7 @@ ${fyEnd}-01 to ${fyEnd}-03`
 
                 if (mappedIds.length) {
                     this.audit_type_ids.set(mappedIds);
+                    this.setSectionTypeFromSelection();
                     return;
                 }
 
@@ -514,6 +525,7 @@ ${fyEnd}-01 to ${fyEnd}-03`
 
                 if (internalAudit) {
                     this.audit_type_ids.set([Number(internalAudit.id)]);
+                    this.setSectionTypeFromSelection();
                 }
             },
         });

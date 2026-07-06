@@ -516,6 +516,7 @@ export class PeriodwiseQuestionsMasterViewComponent
 
                 const belongsToAuditType =
                   !selectedAuditTypeIds.length
+                  || !sectionAuditTypeIds.length
                   || selectedAuditTypeIds.some((auditTypeId: number) =>
                     sectionAuditTypeIds.includes(auditTypeId),
                   );
