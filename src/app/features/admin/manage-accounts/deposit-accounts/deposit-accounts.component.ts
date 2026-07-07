@@ -95,7 +95,7 @@ import { DepositUploadDumpsComponent } from './deposit-upload-dumps.component';
         pButton
         type="button"
         icon="pi pi-eye"
-        label="View Upload Dumps"
+        label="View Uploaded Dumps"
         severity="info"
         (click)="openUploadDumps()"
         ></button>
