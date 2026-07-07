@@ -40,7 +40,7 @@ import { APP_CONFIG } from '../../core/services/config/config.token';
       <!-- Content -->
       <div class="content-section">
         <div class="brand-section animate-item">
-          <h1>AuditPro</h1>
+          <h1>AssurePro</h1>
           <p>RISK BASED INTERNAL AUDIT</p>
         </div>
 
@@ -212,7 +212,7 @@ export class ResetPasswordComponent implements OnInit {
     this.hasUppercase.set((password.match(/[A-Z]/g) || []).length >= this.uppercaseCnt);
     this.hasLowercase.set((password.match(/[a-z]/g) || []).length >= this.lowercaseCnt);
     this.hasNumbers.set((password.match(/[0-9]/g) || []).length >= this.numCnt);
-    
+
     const symbolMatches = password.match(/[!@#$%^&*(),.?":{}|<>_\-+=/\\[\];'`~]/g) || [];
     this.hasSymbols.set(symbolMatches.length >= this.symbolCnt);
   }

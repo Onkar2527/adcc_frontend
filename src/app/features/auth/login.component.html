@@ -17,7 +17,7 @@
   <div class="content-section">
     <!-- Brand -->
     <div class="brand-section animate-item">
-      <h1>AuditPro</h1>
+      <h1>AssurePro</h1>
       <p>RISK BASED INTERNAL AUDIT</p>
     </div>
 
@@ -77,15 +77,17 @@
             <!-- Language Selector -->
             <div class="login-language-selector animate-item delay-4" style="margin-top: 15px;">
               <div class="segmented-control">
-                <input type="radio" id="lang-en" name="lang" value="en" [(ngModel)]="selectedLanguage" (change)="onLanguageChange('en')" />
+                <input type="radio" id="lang-en" name="lang" value="en" [(ngModel)]="selectedLanguage"
+                  (change)="onLanguageChange('en')" />
                 <label for="lang-en">English</label>
 
-                <input type="radio" id="lang-mr" name="lang" value="mr" [(ngModel)]="selectedLanguage" (change)="onLanguageChange('mr')" />
+                <input type="radio" id="lang-mr" name="lang" value="mr" [(ngModel)]="selectedLanguage"
+                  (change)="onLanguageChange('mr')" />
                 <label for="lang-mr">मराठी</label>
               </div>
             </div>
 
-            <!-- Roles
+            <!-- Roles -->
             <div class="user-types animate-item delay-5">
               <button type="button" class="user-btn" [class.active]="selectedRole === 'auditor'" [disabled]="loading()"
                 (click)="setCredentials('auditor')">
@@ -106,37 +108,38 @@
         </div>
 
         <!-- 2FA OTP Screen -->
-        <div *ngIf="showOtpScreen" class="animate-item">
-          <p class="login-text">
-            A 6-digit verification code has been sent to your registered email address:
-            <strong>{{ maskedEmail }}</strong>
-          </p>
+            <div *ngIf="showOtpScreen" class="animate-item">
+              <p class="login-text">
+                A 6-digit verification code has been sent to your registered email address:
+                <strong>{{ maskedEmail }}</strong>
+              </p>
 
-          <form #otpForm="ngForm" (ngSubmit)="onVerifyOtp()" autocomplete="off">
-            <!-- OTP Code -->
-            <div class="input-group animate-item delay-2">
-              <label for="otpCode">Verification Code</label>
-              <div class="input-icon-wrapper">
-                <i class="pi pi-shield input-icon"></i>
-                <input id="otpCode" pInputText type="text" [(ngModel)]="otpCode" name="otpCode"
-                  placeholder="Enter 6-digit OTP" class="w-full custom-input icon-indent" required maxlength="6"
-                  pattern="[0-9]{6}" autocomplete="one-time-code" />
-              </div>
+              <form #otpForm="ngForm" (ngSubmit)="onVerifyOtp()" autocomplete="off">
+                <!-- OTP Code -->
+                <div class="input-group animate-item delay-2">
+                  <label for="otpCode">Verification Code</label>
+                  <div class="input-icon-wrapper">
+                    <i class="pi pi-shield input-icon"></i>
+                    <input id="otpCode" pInputText type="text" [(ngModel)]="otpCode" name="otpCode"
+                      placeholder="Enter 6-digit OTP" class="w-full custom-input icon-indent" required maxlength="6"
+                      pattern="[0-9]{6}" autocomplete="one-time-code" />
+                  </div>
+                </div>
+
+                <!-- OTP Buttons -->
+                <div class="reset-actions-container animate-item delay-3">
+                  <button type="button" class="cancel-btn" [disabled]="loadingOtp()" (click)="cancelOtp()">
+                    Cancel
+                  </button>
+                  <button pButton type="submit" [loading]="loadingOtp()"
+                    [disabled]="loadingOtp() || !otpCode || otpCode.length !== 6" class="login-btn">
+                    {{ loadingOtp() ? 'Verifying...' : 'Verify' }}
+                  </button>
+                </div>
+              </form>
             </div>
 
-            <!-- OTP Buttons -->
-            <div class="reset-actions-container animate-item delay-3">
-              <button type="button" class="cancel-btn" [disabled]="loadingOtp()" (click)="cancelOtp()">
-                Cancel
-              </button>
-              <button pButton type="submit" [loading]="loadingOtp()"
-                [disabled]="loadingOtp() || !otpCode || otpCode.length !== 6" class="login-btn">
-                {{ loadingOtp() ? 'Verifying...' : 'Verify' }}
-              </button>
-            </div>
-          </form>
         </div>
       </div>
     </div>
   </div>
-</div>

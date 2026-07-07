@@ -41,7 +41,7 @@ import { PasswordPolicyService } from '../admin/services/masters.service';
       <div class="content-section">
         <!-- Brand -->
         <div class="brand-section animate-item">
-          <h1>AuditPro</h1>
+          <h1>AssurePro</h1>
           <p>RISK BASED INTERNAL AUDIT</p>
         </div>
 
