@@ -380,7 +380,7 @@ export class ReportViewerComponent implements OnInit {
           }
         }
         // Programmatically preload logo image to ensure browser caching
-        const logoUrl = definition.brand?.logoUrl || '/assets/images/logos/auditpro-logo.png';
+        const logoUrl = definition.brand?.logoUrl || '/assets/images/logos/assurepro-logo.svg';
         const img = new Image();
         img.src = logoUrl;
 
@@ -944,7 +944,7 @@ export class ReportViewerComponent implements OnInit {
   }
 
   reportLogo() {
-    return this.definition()?.brand?.logoUrl || '/assets/images/logos/auditpro-logo.png';
+    return this.definition()?.brand?.logoUrl || '/assets/images/logos/assurepro-logo.svg';
   }
 
   reportBankName() {

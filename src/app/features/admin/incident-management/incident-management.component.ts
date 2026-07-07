@@ -1343,6 +1343,6 @@ export class IncidentManagementComponent implements OnInit {
   }
 
   logoUrl(): string {
-    return window.location.origin + '/assets/images/logos/auditpro-logo.png';
+    return window.location.origin + '/assets/images/logos/assurepro-logo.svg';
   }
 }

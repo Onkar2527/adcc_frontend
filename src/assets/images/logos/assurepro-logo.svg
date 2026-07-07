@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 250 70" width="250" height="70">
+  <style>
+    .logo-text {
+      font-family: 'Inter', 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-weight: 800;
+      font-size: 36px;
+      fill: #ffffff;
+      letter-spacing: -0.5px;
+    }
+  </style>
+  <text x="10" y="48" class="logo-text">AssurePro</text>
+</svg>
