@@ -176,24 +176,34 @@ export class AuditDashboardService {
     );
   }
 
+  private getLanguageId(): string | undefined {
+    const lang = localStorage.getItem('selected_lang') || 'en';
+    if (lang === 'mr') return '2';
+    if (lang === 'en') return '1';
+    return undefined;
+  }
+
   getInternalAuditCategory(
     assessmentId: number,
     categoryId: number,
     employeeId: number,
     dumpId = 0,
   ) {
+    const params: any = {
+      employee_id: employeeId,
+      dump_id: dumpId,
+    };
+    const langId = this.getLanguageId();
+    if (langId) {
+      params.language_id = langId;
+    }
 
     return this.http.get<any>(
 
       `${this.config.apiUrl}/internal-audit/${assessmentId}/category/${categoryId}`,
 
       {
-        params: {
-          employee_id:
-            employeeId,
-          dump_id:
-            dumpId,
-        },
+        params
       },
     );
   }
@@ -1109,16 +1119,19 @@ export class AuditDashboardService {
     employeeId: number,
     dumpId = 0,
   ) {
+    const params: any = {
+      employee_id: String(employeeId),
+      dump_id: String(dumpId || 0),
+    };
+    const langId = this.getLanguageId();
+    if (langId) {
+      params.language_id = langId;
+    }
+
     return this.http.get<any>(
       `${this.config.apiUrl}/internal-audit/${assessmentId}/category/${categoryId}/subset/${subsetSetId}`,
       {
-        params: {
-          employee_id:
-            String(employeeId),
-
-          dump_id:
-            String(dumpId || 0),
-        },
+        params
       },
     );
   }
