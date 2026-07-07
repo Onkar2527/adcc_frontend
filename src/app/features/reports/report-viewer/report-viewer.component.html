@@ -63,7 +63,8 @@
           }}</label>
 
         <select *ngIf="filter.type === 'select'" [(ngModel)]="filters[filter.key]"
-          (ngModelChange)="onFilterChange(filter)">
+          (ngModelChange)="onFilterChange(filter)"
+          [attr.data-no-translate]="(filter.key === 'audit_unit_id' || filter.key === 'reportAuditUnit' || filter.key === 'reportAuditAssesment' || filter.key === 'dept_id' || filter.key === 'audit_reviewer_emp_id') ? 'true' : null">
           <option *ngFor="let option of filterOptions(filter)" [value]="option.value">
             {{ option.label }}
           </option>

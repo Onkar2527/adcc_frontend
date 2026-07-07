@@ -258,6 +258,10 @@ export class OfflineTranslationService {
       '#assessmentQuestions'
     ];
 
+    if (parentEl.closest('[data-no-translate="true"]')) {
+      return true;
+    }
+
     for (const selector of excludedSelectors) {
       if (parentEl.closest(selector)) {
         return true;
