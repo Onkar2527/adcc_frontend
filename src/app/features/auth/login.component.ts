@@ -13,6 +13,7 @@ import { ENABLE_2FA } from '../admin/services/required-data';
 import { PasswordPolicyService } from '../admin/services/masters.service';
 import { SelectModule } from 'primeng/select';
 import { OfflineTranslationService } from '../../core/services/offline-translation.service';
+import { APP_CONFIG } from '../../core/services/config/config.token';
 
 @Component({
   selector: 'app-login',
@@ -32,6 +33,8 @@ import { OfflineTranslationService } from '../../core/services/offline-translati
 export class LoginComponent {
   private authService = inject(AuthService);
   offlineTranslationService = inject(OfflineTranslationService);
+  private config = inject(APP_CONFIG);
+  bankName = this.config.bank_name || 'KREDPOOL SOLUTIONS PVT LTD.';
 
   selectedLanguage = this.offlineTranslationService.getCurrentLanguage();
 

@@ -9,6 +9,7 @@ import { PasswordModule } from 'primeng/password';
 import { ButtonModule } from 'primeng/button';
 import { AuthService } from '../../core/services/auth/auth.service';
 import { PasswordPolicyService } from '../admin/services/masters.service';
+import { APP_CONFIG } from '../../core/services/config/config.token';
 
 @Component({
   selector: 'app-forgot-password',
@@ -49,7 +50,7 @@ import { PasswordPolicyService } from '../admin/services/masters.service';
         <div class="login-wrapper">
           <div class="login-card animate-item delay-1">
             <h2>Reset Your Password</h2>
-            <div class="company-name">Pune Cantonment Sahakari Bank</div>
+            <div class="company-name">{{ bankName }}</div>
             <div class="divider"></div>
 
             <p class="login-text" style="margin-bottom: 12px; font-weight: 500;">Select Reset Password Method</p>
@@ -398,6 +399,8 @@ export class ForgotPasswordComponent implements OnInit {
   private policyService = inject(PasswordPolicyService);
   private messageService = inject(MessageService);
   private router = inject(Router);
+  private config = inject(APP_CONFIG);
+  bankName = this.config.bank_name || 'Pune Cantonment Sahakari Bank';
 
   showResetScreen = signal(true);
   resetMethod = signal<'email' | 'last_password'>('email');
