@@ -18,7 +18,6 @@
     <!-- Brand -->
     <div class="brand-section animate-item">
       <h1>AssurePro</h1>
-      <h1>AssurePro</h1>
       <p>RISK BASED INTERNAL AUDIT</p>
     </div>
 
@@ -108,38 +107,38 @@
           </form>
         </div>
 
-            <div *ngIf="showOtpScreen" class="animate-item">
-              <p class="login-text">
-                A 6-digit verification code has been sent to your registered email address:
-                <strong>{{ maskedEmail }}</strong>
-              </p>
+        <div *ngIf="showOtpScreen" class="animate-item">
+          <p class="login-text">
+            A 6-digit verification code has been sent to your registered email address:
+            <strong>{{ maskedEmail }}</strong>
+          </p>
 
-              <form #otpForm="ngForm" (ngSubmit)="onVerifyOtp()" autocomplete="off">
-                <!-- OTP Code -->
-                <div class="input-group animate-item delay-2">
-                  <label for="otpCode">Verification Code</label>
-                  <div class="input-icon-wrapper">
-                    <i class="pi pi-shield input-icon"></i>
-                    <input id="otpCode" pInputText type="text" [(ngModel)]="otpCode" name="otpCode"
-                      placeholder="Enter 6-digit OTP" class="w-full custom-input icon-indent" required maxlength="6"
-                      pattern="[0-9]{6}" autocomplete="one-time-code" />
-                  </div>
-                </div>
-
-                <!-- OTP Buttons -->
-                <div class="reset-actions-container animate-item delay-3">
-                  <button type="button" class="cancel-btn" [disabled]="loadingOtp()" (click)="cancelOtp()">
-                    Cancel
-                  </button>
-                  <button pButton type="submit" [loading]="loadingOtp()"
-                    [disabled]="loadingOtp() || !otpCode || otpCode.length !== 6" class="login-btn">
-                    {{ loadingOtp() ? 'Verifying...' : 'Verify' }}
-                  </button>
-                </div>
-              </form>
+          <form #otpForm="ngForm" (ngSubmit)="onVerifyOtp()" autocomplete="off">
+            <!-- OTP Code -->
+            <div class="input-group animate-item delay-2">
+              <label for="otpCode">Verification Code</label>
+              <div class="input-icon-wrapper">
+                <i class="pi pi-shield input-icon"></i>
+                <input id="otpCode" pInputText type="text" [(ngModel)]="otpCode" name="otpCode"
+                  placeholder="Enter 6-digit OTP" class="w-full custom-input icon-indent" required maxlength="6"
+                  pattern="[0-9]{6}" autocomplete="one-time-code" />
+              </div>
             </div>
 
+            <!-- OTP Buttons -->
+            <div class="reset-actions-container animate-item delay-3">
+              <button type="button" class="cancel-btn" [disabled]="loadingOtp()" (click)="cancelOtp()">
+                Cancel
+              </button>
+              <button pButton type="submit" [loading]="loadingOtp()"
+                [disabled]="loadingOtp() || !otpCode || otpCode.length !== 6" class="login-btn">
+                {{ loadingOtp() ? 'Verifying...' : 'Verify' }}
+              </button>
+            </div>
+          </form>
         </div>
+
       </div>
     </div>
   </div>
+</div>
