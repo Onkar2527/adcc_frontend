@@ -1363,6 +1363,10 @@ export class PeriodwiseQuestionsMasterService {
     return this.http.post<any>(`${this.apiUrl}/${id}/sync-all-branches`, {});
   }
 
+  syncAllBranchesCurrentAssessment(id: number): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/${id}/sync-all-branches-current-assessment`, {});
+  }
+
   delete(id: number): Observable<any> {
     return this.http.delete(`${this.apiUrl}/${id}`);
   }

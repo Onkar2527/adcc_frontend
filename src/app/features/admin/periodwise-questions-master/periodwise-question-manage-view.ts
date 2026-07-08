@@ -228,6 +228,34 @@ export class PeriodwiseQuestionsMasterViewComponent
     });
   }
 
+  syncAllBranchesCurrentAssessment() {
+    this.confirmationService.confirm({
+      message: 'Are you sure you want to sync this question setup configuration (Category, Scheme, Menu, Questions, and Audit Types) to all branch active assessments for this period?',
+      header: 'Confirm Sync to All Branches Current Assessment',
+      icon: 'pi pi-exclamation-triangle',
+      acceptLabel: 'Yes',
+      rejectLabel: 'No',
+      accept: () => {
+        this.periodwiseQuestionsService.syncAllBranchesCurrentAssessment(this.data.id).subscribe({
+          next: (res: any) => {
+            this.messageService.add({
+              severity: 'success',
+              summary: 'Sync Success',
+              detail: res.message || 'Question setup synced to all branch current assessments successfully'
+            });
+          },
+          error: (err: any) => {
+            this.messageService.add({
+              severity: 'error',
+              summary: 'Sync Error',
+              detail: err?.error?.message || 'Unable to sync question setup to branch current assessments'
+            });
+          }
+        });
+      }
+    });
+  }
+
 
   parseRows(res: any): any[] {
 
