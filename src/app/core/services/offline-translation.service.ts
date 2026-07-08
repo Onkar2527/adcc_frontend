@@ -26,6 +26,7 @@ export class OfflineTranslationService {
     this.patchMessageService();
     this.patchConfirmationService();
     // Auto-apply initial language if stored and not English
+    this.updateBodyClass();
     if (this.currentLang !== 'en') {
       setTimeout(() => {
         this.applyInitialLanguage();
@@ -96,6 +97,7 @@ export class OfflineTranslationService {
     }
     this.currentLang = lang;
     localStorage.setItem('selected_lang', lang);
+    this.updateBodyClass();
 
     if (this.observer) {
       this.observer.disconnect();
@@ -269,5 +271,15 @@ export class OfflineTranslationService {
     }
 
     return false;
+  }
+
+  private updateBodyClass() {
+    if (typeof document !== 'undefined') {
+      if (this.currentLang === 'mr') {
+        document.body.classList.add('lang-mr');
+      } else {
+        document.body.classList.remove('lang-mr');
+      }
+    }
   }
 }
