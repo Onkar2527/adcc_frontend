@@ -223,7 +223,9 @@
                       (change)="toggleSamplingAccount(account.id, $any($event.target).checked)"
                     />
                   </td>
-                  <td>{{ account.scheme_code }}</td>
+                  <td>
+                    {{ account.scheme_name ? account.scheme_name + ' (' + account.scheme_code + ')' : (account.scheme_code || '-') }}
+                  </td>
                   <td>
                     <strong>{{ account.account_no }}</strong>
                     <div class="mt-1" *ngIf="account.is_completed || account.has_answers">
