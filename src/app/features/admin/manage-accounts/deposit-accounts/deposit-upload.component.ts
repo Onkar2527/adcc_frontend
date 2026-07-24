@@ -70,7 +70,7 @@ import { ManageAccountsDataService }
           </div>
 
           <div>
-            • Duplicate account numbers are not allowed
+            • Duplicate account details (same account number and UCIC) are not allowed
           </div>
 
           <div>

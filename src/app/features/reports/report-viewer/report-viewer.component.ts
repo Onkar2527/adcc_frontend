@@ -1038,10 +1038,11 @@ export class ReportViewerComponent implements OnInit {
   isLegacyData(): boolean {
     const data = this.exeReportData();
     if (!data) return false;
+    const legacyIds = new Set(['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16']);
     const hasLegacyBp = data.branchPositions?.some(
-      (r: any) => String(r.type_id).trim().length <= 2,
+      (r: any) => legacyIds.has(String(r.type_id).trim()),
     );
-    const hasLegacyFa = data.freshAccounts?.some((r: any) => String(r.type_id).trim().length <= 2);
+    const hasLegacyFa = data.freshAccounts?.some((r: any) => legacyIds.has(String(r.type_id).trim()));
     return !!(hasLegacyBp || hasLegacyFa);
   }
 

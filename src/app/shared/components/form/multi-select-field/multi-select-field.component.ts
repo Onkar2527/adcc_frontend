@@ -43,7 +43,7 @@ import { TooltipModule } from 'primeng/tooltip';
             [optionValue]="optionValue()"
             [disabled]="disabled()"
             [filter]="filter()"
-            [filterBy]="filterBy()"
+            [filterBy]="resolvedFilterBy()"
             [showClear]="showClear()"
             [maxSelectedLabels]="maxSelectedLabels()"
             [selectedItemsLabel]="selectedItemsLabel()"
@@ -234,6 +234,11 @@ export class MultiSelectFieldComponent<T = any> {
 
       return scoreA - scoreB;
     });
+  });
+
+  /** Resolved filter property to match configured optionLabel automatically */
+  resolvedFilterBy = computed(() => {
+    return this.filterBy() === 'label' ? this.optionLabel() : this.filterBy();
   });
 
   private _touched = false;

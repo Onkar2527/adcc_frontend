@@ -123,10 +123,16 @@ export class ExecutiveSummaryComponent
 
     /** Show review columns whenever this screen is opened in reviewer mode. */
     get shouldShowReviewColumns(): boolean {
+        if (Number(this.summary?.audit_status_id || 0) === 1) {
+            return false;
+        }
         return this.isReviewMode;
     }
 
     get shouldShowReviewerFeedback(): boolean {
+        if (Number(this.summary?.audit_status_id || 0) === 1) {
+            return false;
+        }
         return !this.viewOnlyModeFromRoute
             && !this.isReviewMode
             && this.financialPositionData.some(
@@ -216,9 +222,7 @@ export class ExecutiveSummaryComponent
     };
 
     isLegacyData(): boolean {
-        const hasLegacyBp = this.branchPositionLines?.some((r: any) => String(r.type_id).trim().length <= 2);
-        const hasLegacyFa = this.summary?.fresh_accounts?.some((r: any) => String(r.type_id).trim().length <= 2);
-        return !!(hasLegacyBp || hasLegacyFa);
+        return false;
     }
 
     financialPositionData: any[] = [];
@@ -339,7 +343,7 @@ export class ExecutiveSummaryComponent
                             (x: any) => String(x.type_id).trim() === String(item.position_type_id).trim()
                         );
                         
-                        let accounts = 0;
+                        let accounts: any = '';
                         let savedFreshLine: any = null;
                         if (item.fresh_type_ids.length > 0) {
                             for (const typeId of item.fresh_type_ids) {
@@ -347,6 +351,7 @@ export class ExecutiveSummaryComponent
                                     (x: any) => String(x.type_id).trim() === String(typeId).trim()
                                 );
                                 if (fl) {
+                                    if (accounts === '') accounts = 0;
                                     accounts += Number(fl.accounts || 0);
                                     if (!savedFreshLine || fl.review_action) {
                                         savedFreshLine = fl;
@@ -362,11 +367,11 @@ export class ExecutiveSummaryComponent
 
                         const amount = this.savedAmountOrDefault(
                             savedLine,
-                            0,
+                            type === 'NPA' ? '' : 0,
                         );
 
-                        totalAccounts += accounts;
-                        totalAmount += amount;
+                        totalAccounts += Number(accounts || 0);
+                        totalAmount += Number(amount || 0);
                         totalMarch += marchPositionValue;
 
                         rowItems.push({
@@ -381,7 +386,7 @@ export class ExecutiveSummaryComponent
                             march_position: marchPositionValue,
                             total_amount: amount,
                             amount_input: amount,
-                            type_id: item.scheme_code,
+                            type_id: type === 'NPA' ? item.position_type_id : item.scheme_code,
                             position_type_id: item.position_type_id,
                             fresh_type_ids: item.fresh_type_ids,
                             scheme_type: type,
@@ -473,13 +478,13 @@ export class ExecutiveSummaryComponent
                                             index: number,
                                         ) => {
                                             const savedLine = this.branchPositionLines.find(
-                                                (x: any) => String(x.type_id).trim() === String(item.scheme_code).trim()
+                                                (x: any) => String(x.type_id).trim() === String(item.position_type_id || item.scheme_code).trim()
                                             );
                                             const savedFreshLine = this.summary?.fresh_accounts?.find(
-                                                (x: any) => String(x.type_id).trim() === String(item.scheme_code).trim()
+                                                (x: any) => String(x.type_id).trim() === String(item.fresh_type_ids?.[0] || item.scheme_code).trim()
                                             );
                                             const categoryMarch = this.summary?.march_positions?.find(
-                                                (x: any) => x.gl_type_id === item.category_id
+                                                (x: any) => Number(x.gl_type_id) === Number(item.scheme_id)
                                             );
                                             const marchPositionValue = categoryMarch ? Number(categoryMarch.march_position || 0) : 0;
 
@@ -506,7 +511,7 @@ export class ExecutiveSummaryComponent
                                                 total_accounts: accounts,
                                                 march_position: marchPositionValue,
                                                 total_amount: amount,
-                                                type_id: item.scheme_code,
+                                                type_id: item.position_type_id || item.scheme_code,
                                                 scheme_type: type,
                                                 review_action: this.executiveReviewAction(savedLine, savedFreshLine),
                                                 reviewer_comment: this.executiveReviewComment(savedLine, savedFreshLine),
@@ -527,7 +532,7 @@ export class ExecutiveSummaryComponent
                                     prefixIndex++;
 
                                 },
-                            );
+                             );
 
                         // NPA SECTION
 
@@ -545,15 +550,12 @@ export class ExecutiveSummaryComponent
                                 index: number,
                             ) => {
                                 const savedLine = this.branchPositionLines.find(
-                                    (x: any) => String(x.type_id).trim() === String(item.scheme_code + '_NPA').trim()
+                                    (x: any) => String(x.type_id).trim() === (String(item.scheme_code).trim() + '_NPA')
                                 );
                                 const savedFreshLine = this.summary?.fresh_accounts?.find(
-                                    (x: any) => String(x.type_id).trim() === String(item.scheme_code + '_NPA').trim()
+                                    (x: any) => String(x.type_id).trim() === (String(item.scheme_code).trim() + '_NPA')
                                 );
-                                const categoryMarch = this.summary?.march_positions?.find(
-                                    (x: any) => x.gl_type_id === (item.category_id + 6)
-                                );
-                                const marchPositionValue = categoryMarch ? Number(categoryMarch.march_position || 0) : 0;
+                                const marchPositionValue = 0;
 
                                 const accountInput = this.savedAccountsOrDefault(
                                     savedFreshLine,

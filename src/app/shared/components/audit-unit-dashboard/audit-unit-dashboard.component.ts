@@ -311,9 +311,9 @@ export class AuditUnitDashboardComponent {
             const code = (item?.display_code || item?.audit_unit_code || '').toLowerCase();
             
             const deptKeywords = [
-                'dept', 'department', 'ho', 'head office', 'cell', 'section', 'division',
-                'office', 'admin', 'hr', 'it', 'legal', 'compliance', 'credit', 'loan',
-                'accounts', 'audit', 'recovery', 'treasury', 'central', 'clearing'
+                /\bdept\b/, /\bdepartment\b/, /\bho\b/, /\bhead office\b/, /\bcell\b/, /\bsection\b/, /\bdivision\b/,
+                /\boffice\b/, /\badmin\b/, /\bhr\b/, /\bit\b/, /\blegal\b/, /\bcompliance\b/, /\bcredit\b/, /\bloan\b/,
+                /\baccounts\b/, /\baudit\b/, /\brecovery\b/, /\btreasury\b/, /\bcentral\b/, /\bclearing\b/
             ];
 
             // If the name explicitly contains "branch" or "br", it's classified as a branch
@@ -321,7 +321,7 @@ export class AuditUnitDashboardComponent {
                 return false;
             }
 
-            return deptKeywords.some(keyword => name.includes(keyword) || code.includes(keyword));
+            return deptKeywords.some(pattern => pattern.test(name) || pattern.test(code));
         };
 
         const utturBranches: any[] = [];
@@ -348,6 +348,17 @@ export class AuditUnitDashboardComponent {
                 }
             }
         }
+
+        const numericSort = (a: any, b: any) => {
+            const codeA = Number(a?.audit_unit_code || 0);
+            const codeB = Number(b?.audit_unit_code || 0);
+            return codeA - codeB;
+        };
+
+        utturBranches.sort(numericSort);
+        otherBranches.sort(numericSort);
+        utturDepartments.sort(numericSort);
+        otherDepartments.sort(numericSort);
 
         return [...utturBranches, ...otherBranches, ...utturDepartments, ...otherDepartments];
     }

@@ -304,6 +304,11 @@ export class AppMenu implements OnInit, OnDestroy {
           icon: 'pi pi-fw pi-credit-card',
           routerLink: ['/admin/advance-accounts'],
         },
+        {
+          label: 'Executive Summary Bulk Upload',
+          icon: 'pi pi-fw pi-upload',
+          routerLink: ['/admin/executive-summary-upload'],
+        },
       ],
     },
   ];

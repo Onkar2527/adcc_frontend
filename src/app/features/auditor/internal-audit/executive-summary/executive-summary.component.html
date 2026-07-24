@@ -205,9 +205,9 @@
           <tr>
             <th>Particulars</th>
 
-            <th class="text-center">Accounts</th>
-
             <th class="text-right">Last March Position</th>
+
+            <th class="text-center">Accounts</th>
 
             <th class="text-right">Current Position</th>
 
@@ -233,12 +233,12 @@
               {{ row.scheme_type }}
             </td>
 
-            <td class="text-center">
-              {{ getCategoryHeaderTotal(row.scheme_type, 'accounts') | number }}
-            </td>
-
             <td class="text-right">
               {{ getCategoryHeaderTotal(row.scheme_type, 'march') | number: '1.2-2' }}
+            </td>
+
+            <td class="text-center">
+              {{ getCategoryHeaderTotal(row.scheme_type, 'accounts') | number }}
             </td>
 
             <td class="text-right">
@@ -269,6 +269,10 @@
               {{ row.scheme_name }}
             </td>
 
+            <td class="text-right">
+              {{ row.march_position | number: '1.2-2' }}
+            </td>
+
             <td class="text-center">
               <input
                 pInputText
@@ -277,10 +281,6 @@
                 [disabled]="isExecutiveAccountsReadOnly(row)"
                 class="w-6rem text-center"
               />
-            </td>
-
-            <td class="text-right">
-              {{ row.march_position | number: '1.2-2' }}
             </td>
 
             <td class="text-right">
@@ -354,6 +354,10 @@
               {{ row.scheme_name }}
             </td>
 
+            <td class="text-right">
+              {{ row.march_position | number: '1.2-2' }}
+            </td>
+
             <td class="text-center">
               <input
                 pInputText
@@ -362,10 +366,6 @@
                 [disabled]="isExecutiveAccountsReadOnly(row)"
                 class="w-6rem"
               />
-            </td>
-
-            <td class="text-right">
-              {{ row.march_position | number: '1.2-2' }}
             </td>
 
             <td class="text-right">

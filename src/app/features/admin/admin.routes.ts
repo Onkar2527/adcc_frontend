@@ -32,6 +32,7 @@ import { BranchRatingListComponent } from './risk-masters/branch-rating/branch-r
 import { PeriodwiseQuestionsMasterComponent } from './periodwise-questions-master/periodwise-questions-master';
 import { DepositAccountsComponent } from './manage-accounts/deposit-accounts/deposit-accounts.component';
 import { AdvanceAccountsComponent } from './manage-accounts/advance-accounts/advance-accounts.component';
+import { ExecutiveSummaryUploadComponent } from './manage-accounts/executive-summary-upload/executive-summary-upload.component';
 import { AdminDashboardPlaceholderComponent } from './admin-dashboard-placeholder.component';
 import { PolicyDocumentsComponent } from './policy-documents/policy-documents.component';
 import { AuditCalendarComponent } from './audit-calendar/audit-calendar.component';
@@ -81,6 +82,7 @@ export const ADMIN_ROUTES: Routes = [
     { path: 'branch-rating/:id', component: BranchRatingListComponent },
     { path: 'deposit-accounts', component: DepositAccountsComponent },
     { path: 'advance-accounts', component: AdvanceAccountsComponent },
+    { path: 'executive-summary-upload', component: ExecutiveSummaryUploadComponent },
     { path: 'policy-documents', component: PolicyDocumentsComponent },
     { path: 'audit-calendar', component: AuditCalendarComponent },
     { path: 'audit-frequency-master', component: AuditFrequencyMasterComponent },

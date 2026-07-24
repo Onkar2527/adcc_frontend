@@ -324,6 +324,9 @@ export class AuditDashboardComponent
                         res.regular,
                     ).map((row: any) => ({
                         ...row,
+                        display_title: row.audit_unit_code
+                            ? `(${row.audit_unit_code}) ${row.audit_unit_name}`
+                            : row.audit_unit_name,
                         audit_type_label:
                             row.audit_type_name || 'Internal Audit',
                     }));
@@ -411,7 +414,9 @@ export class AuditDashboardComponent
             audit_unit_code:
                 row.audit_unit_code || 'SPECIAL',
             display_title:
-                row.title || row.audit_unit_name || row.audit_type_name || 'Audit',
+                row.audit_unit_code && row.audit_unit_code !== 'SPECIAL'
+                    ? `(${row.audit_unit_code}) ${row.title || row.audit_unit_name || row.audit_type_name || 'Audit'}`
+                    : (row.title || row.audit_unit_name || row.audit_type_name || 'Audit'),
             display_code:
                 `Branch: ${row.audit_unit_name || '-'}${row.audit_unit_code ? ` (${row.audit_unit_code})` : ''}`,
             latest_status:

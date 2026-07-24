@@ -97,19 +97,23 @@ import { AssessmentDetailsFormComponent } from './assement-details.component';
 
     <div class="mt-4 w-full overflow-auto">
 
-     <app-table
-  [columns]="columns"
-  [data]="manageAssessments()"
-  [loading]="loading()"
-  [showToolbar]="false"
-  [actionDisplayMode]="'buttons'"
-  (onAdd)="openForm()"
-  (onActionClick)="onAction($event)"
->
+      <app-table
+        [columns]="columns"
+        [data]="manageAssessments()"
+        [loading]="loading()"
+        [showToolbar]="false"
+        [actionDisplayMode]="'buttons'"
+        (onAdd)="openForm()"
+        (onActionClick)="onAction($event)"
+      >
       </app-table>
 
     </div>
 
+  } @else if (searched() && !loading()) {
+    <div class="mt-4 p-4 text-center border-round border-1 border-gray-200 surface-100 text-600 font-medium">
+      <i class="pi pi-info-circle mr-2"></i>Assessment not started yet
+    </div>
   }
 
 </div>
@@ -134,6 +138,8 @@ export class ManageAssessmentMasterComponent implements OnInit {
     manageAssessments = signal<any[]>([]);
 
     loading = signal(false);
+
+    searched = signal(false);
 
     sectionTypeOptions = signal<any[]>([]);
 
@@ -204,10 +210,10 @@ export class ManageAssessmentMasterComponent implements OnInit {
 
                 this.sectionTypeOptions.set(
                     rows
-                    .filter((item: any) => item.section_type_id === '1')
+                    .filter((item: any) => String(item.section_type_id) === '1')
                     .map((item: any) => ({
                         label: item.audit_unit_code
-                            ? `${item.name} - (${item.audit_unit_code})`
+                            ? `(${item.audit_unit_code}) ${item.name}`
                             : item.name,
                         value: Number(item.id)
                     }))
@@ -226,14 +232,14 @@ export class ManageAssessmentMasterComponent implements OnInit {
         });
     }
     formatDate(date: Date | null): string {
-
         if (!date) {
             return '';
         }
-
-        return new Date(date)
-            .toISOString()
-            .split('T')[0];
+        const d = new Date(date);
+        const year = d.getFullYear();
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
     }
 
     loadManageAssessments() {
@@ -277,6 +283,7 @@ export class ManageAssessmentMasterComponent implements OnInit {
                     }));
 
                     this.manageAssessments.set(formattedRows);
+                    this.searched.set(true);
 
 
                     this.loading.set(false);
@@ -285,6 +292,7 @@ export class ManageAssessmentMasterComponent implements OnInit {
                 error: () => {
 
                     this.loading.set(false);
+                    this.searched.set(true);
 
                     this.messageService.add({
                         severity: 'error',

@@ -179,8 +179,8 @@ export class ReviewerWorkspaceComponent implements OnInit {
                             assessment.audit_unit_code,
                         display_title:
                             Number(assessment.audit_type_id || 1) !== 1
-                                ? (assessment.special_audit_title || assessment.audit_unit_name)
-                                : assessment.audit_unit_name,
+                                ? (assessment.audit_unit_code ? `(${assessment.audit_unit_code}) ${assessment.special_audit_title || assessment.audit_unit_name}` : (assessment.special_audit_title || assessment.audit_unit_name))
+                                : (assessment.audit_unit_code ? `(${assessment.audit_unit_code}) ${assessment.audit_unit_name}` : assessment.audit_unit_name),
                         display_code:
                             Number(assessment.audit_type_id || 1) !== 1
                                 ? `Branch: ${assessment.audit_unit_name}${assessment.audit_unit_code ? ` (${assessment.audit_unit_code})` : ''}`
@@ -1261,9 +1261,13 @@ export class ReviewerWorkspaceComponent implements OnInit {
 
     selectedTitle() {
         const item = this.selected();
-        return Number(item?.audit_type_id || 1) !== 1
+        const name = Number(item?.audit_type_id || 1) !== 1
             ? (item?.special_audit_title || item?.audit_unit_name || item?.audit_type_name || 'Audit')
             : item?.audit_unit_name;
+
+        return item?.audit_unit_code
+            ? `(${item.audit_unit_code}) ${name}`
+            : name;
     }
 
     selectedSubtitle() {

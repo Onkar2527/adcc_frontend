@@ -251,8 +251,28 @@ export class AuditUnitFormComponent {
           ? Number(data.frequency)
           : null
       );
+      let lastDate: Date | null = null;
+      if (data.last_audit_date) {
+        if (typeof data.last_audit_date === 'string') {
+          if (data.last_audit_date.includes('/')) {
+            const parts = data.last_audit_date.split('/');
+            if (parts.length === 3) {
+              const day = parseInt(parts[0], 10);
+              const month = parseInt(parts[1], 10) - 1;
+              const year = parseInt(parts[2], 10);
+              lastDate = new Date(year, month, day);
+            }
+          } else {
+            lastDate = new Date(data.last_audit_date);
+          }
+        } else if (data.last_audit_date instanceof Date) {
+          lastDate = data.last_audit_date;
+        } else {
+          lastDate = new Date(data.last_audit_date);
+        }
+      }
       this.lastAuditDate.set(
-        data.last_audit_date ? new Date(data.last_audit_date) : null
+        lastDate && !isNaN(lastDate.getTime()) ? lastDate : null
       );
       this.isActive.set(Number(data.is_active) !== 0);
     }

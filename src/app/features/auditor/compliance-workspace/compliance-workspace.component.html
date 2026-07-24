@@ -22,65 +22,34 @@
   </div>
 
   <div *ngIf="!selected()" class="audit-mode-switch" aria-label="Compliance type">
-    <button
-      type="button"
-      [class.active]="complianceMode() === 'regular'"
-      (click)="selectComplianceMode('regular')"
-    >
+    <button type="button" [class.active]="complianceMode() === 'regular'" (click)="selectComplianceMode('regular')">
       Internal Audits
       <span>{{ regularAssessments().length }}</span>
     </button>
 
-    <button
-      *ngIf="specialAssessments().length > 0"
-      type="button"
-      [class.active]="complianceMode() === 'special'"
-      (click)="selectComplianceMode('special')"
-    >
+    <button *ngIf="specialAssessments().length > 0" type="button" [class.active]="complianceMode() === 'special'"
+      (click)="selectComplianceMode('special')">
       Special Audits
       <span>{{ specialAssessments().length }}</span>
     </button>
   </div>
 
-  <app-audit-unit-dashboard
-    *ngIf="!selected()"
-    [eyebrow]="dashboardEyebrow()"
-    [title]="dashboardTitle()"
-    [subtitle]="dashboardSubtitle()"
-    [panelTitle]="dashboardPanelTitle()"
+  <app-audit-unit-dashboard *ngIf="!selected()" [eyebrow]="dashboardEyebrow()" [title]="dashboardTitle()"
+    [subtitle]="dashboardSubtitle()" [panelTitle]="dashboardPanelTitle()"
     emptyTitle="No assessment is pending for compliance"
     emptyMessage="Assigned compliance points will appear here once review moves observations forward."
-    refreshLabel="Refresh"
-    [units]="dashboardUnits()"
-    [loading]="loadingQueue()"
-    [search]="search()"
-    [selectedStatus]="selectedStatus()"
-    [statusOptions]="statusOptions"
-    [totalUnits]="modeAssessments().length"
-    [totalAuditPending]="0"
-    [totalReviewPending]="0"
-    [totalCompliancePending]="totalCompliancePending()"
-    [totalCompleted]="0"
-    [summaryItems]="complianceSummaryItems()"
-    [cardMetrics]="complianceCardMetrics"
-    [cardMetaItems]="complianceCardMetaItems"
-    [groupAssessments]="true"
-    (searchChange)="search.set($event)"
-    (selectedStatusChange)="selectedStatus.set($event)"
-    (refresh)="loadQueue()"
-    (openUnit)="openAssessment($event)"
-  ></app-audit-unit-dashboard>
+    refreshLabel="Refresh" [units]="dashboardUnits()" [loading]="loadingQueue()" [search]="search()"
+    [selectedStatus]="selectedStatus()" [statusOptions]="statusOptions" [totalUnits]="modeAssessments().length"
+    [totalAuditPending]="0" [totalReviewPending]="0" [totalCompliancePending]="totalCompliancePending()"
+    [totalCompleted]="0" [summaryItems]="complianceSummaryItems()" [cardMetrics]="complianceCardMetrics"
+    [cardMetaItems]="complianceCardMetaItems" [groupAssessments]="true" (searchChange)="search.set($event)"
+    (selectedStatusChange)="selectedStatus.set($event)" (refresh)="loadQueue()"
+    (openUnit)="openAssessment($event)"></app-audit-unit-dashboard>
 
   <section *ngIf="selected()" class="compliance-detail">
     <div class="detail-toolbar">
-      <button
-        pButton
-        type="button"
-        icon="pi pi-arrow-left"
-        severity="secondary"
-        aria-label="Back to pending compliance"
-        (click)="closeAssessment()"
-      ></button>
+      <button pButton type="button" icon="pi pi-arrow-left" severity="secondary" aria-label="Back to pending compliance"
+        (click)="closeAssessment()"></button>
 
       <div>
         <h3>{{ selectedTitle() }}</h3>
@@ -88,50 +57,25 @@
       </div>
 
       <div class="toolbar-actions">
-        <button
-          pButton
-          type="button"
-          label="View Executive Summary"
-          icon="pi pi-file-edit"
-          severity="info"
-          (click)="viewExecutiveSummary()"
-        ></button>
+        <button pButton type="button" label="View Executive Summary" icon="pi pi-file-edit" severity="info"
+          (click)="viewExecutiveSummary()"></button>
 
-        <button
-          pButton
-          type="button"
-          label="Check Completion"
-          icon="pi pi-check-square"
-          severity="secondary"
-          [loading]="checkingSubmission()"
-          (click)="checkCompletion()"
-        ></button>
+        <button pButton type="button" label="Check Completion" icon="pi pi-check-square" severity="secondary"
+          [loading]="checkingSubmission()" (click)="checkCompletion()"></button>
 
-        <button
-          *ngIf="canUseRemarks(detail()?.overview)"
-          pButton
-          type="button"
+        <button *ngIf="canUseRemarks(detail()?.overview)" pButton type="button"
           [label]="remarks()?.unread_count ? 'Remarks (' + remarks().unread_count + ')' : 'Remarks'"
           [icon]="remarks()?.unread_count ? 'pi pi-bell' : 'pi pi-comments'"
-          [severity]="remarks()?.unread_count ? 'danger' : 'secondary'"
-          (click)="toggleRemarksPanel()"
-        ></button>
+          [severity]="remarks()?.unread_count ? 'danger' : 'secondary'" (click)="toggleRemarksPanel()"></button>
 
-        <button
-          pButton
-          type="button"
-          [label]="
+        <button pButton type="button" [label]="
             isLiveManagerComplianceFlow()
               ? 'Submit Responses'
               : isReCompliance()
                 ? 'Resubmit to Reviewer'
                 : 'Submit to Reviewer'
-          "
-          icon="pi pi-send"
-          [disabled]="!submissionPreview()?.can_submit || hasUnsavedChanges()"
-          [loading]="submitting()"
-          (click)="submitCompliance()"
-        ></button>
+          " icon="pi pi-send" [disabled]="!submissionPreview()?.can_submit || hasUnsavedChanges()"
+          [loading]="submitting()" (click)="submitCompliance()"></button>
       </div>
     </div>
 
@@ -141,13 +85,9 @@
     </div>
 
     <ng-container *ngIf="!loadingDetail() && detail() as compliance">
-      <section
-        *ngIf="canUseRemarks(compliance.overview) && showRemarksPanel()"
-        class="remark-panel surface-card border-round-xl shadow-1 p-4 mb-4"
-      >
-        <div
-          class="flex flex-column md:flex-row md:align-items-center md:justify-content-between gap-3 mb-3"
-        >
+      <section *ngIf="canUseRemarks(compliance.overview) && showRemarksPanel()"
+        class="remark-panel surface-card border-round-xl shadow-1 p-4 mb-4">
+        <div class="flex flex-column md:flex-row md:align-items-center md:justify-content-between gap-3 mb-3">
           <div class="flex align-items-center gap-2">
             <h3 class="text-xl font-bold text-900 m-0">Assessment Remarks</h3>
 
@@ -157,29 +97,17 @@
           </div>
 
           <div class="remark-tabs" role="tablist">
-            <button
-              type="button"
-              [class.active]="remarkTab() === 'add'"
-              (click)="remarkTab.set('add')"
-            >
+            <button type="button" [class.active]="remarkTab() === 'add'" (click)="remarkTab.set('add')">
               <i class="pi pi-plus"></i>
               Add Remark
             </button>
 
-            <button
-              type="button"
-              [class.active]="remarkTab() === 'current'"
-              (click)="remarkTab.set('current')"
-            >
+            <button type="button" [class.active]="remarkTab() === 'current'" (click)="remarkTab.set('current')">
               <i class="pi pi-send"></i>
               Your Remarks
             </button>
 
-            <button
-              type="button"
-              [class.active]="remarkTab() === 'other'"
-              (click)="remarkTab.set('other')"
-            >
+            <button type="button" [class.active]="remarkTab() === 'other'" (click)="remarkTab.set('other')">
               <i class="pi pi-inbox"></i>
               For You
             </button>
@@ -188,58 +116,29 @@
 
         <div *ngIf="remarksLoading()" class="remark-loading">Loading remarks...</div>
 
-        <form
-          *ngIf="!remarksLoading() && remarkTab() === 'add'"
-          class="remark-form"
-          (ngSubmit)="saveRemark()"
-        >
+        <form *ngIf="!remarksLoading() && remarkTab() === 'add'" class="remark-form" (ngSubmit)="saveRemark()">
           <div class="remark-fields">
             <label>
               <span>Remark For</span>
-              <p-select
-                [options]="remarks()?.remark_types || []"
-                optionLabel="name"
-                optionValue="id"
-                placeholder="Select recipient"
-                name="remarkNotiType"
-                [(ngModel)]="remarkNotiType"
-                styleClass="w-full"
-              ></p-select>
+              <p-select [options]="remarks()?.remark_types || []" optionLabel="name" optionValue="id"
+                placeholder="Select recipient" name="remarkNotiType" [(ngModel)]="remarkNotiType"
+                styleClass="w-full"></p-select>
             </label>
 
             <label>
               <span>Subject</span>
-              <input
-                pInputText
-                class="w-full"
-                name="remarkSubject"
-                type="text"
-                [(ngModel)]="remarkSubject"
-                placeholder="Remark subject"
-              />
+              <input pInputText class="w-full" name="remarkSubject" type="text" [(ngModel)]="remarkSubject"
+                placeholder="Remark subject" />
             </label>
           </div>
 
           <label class="remark-message">
             <span>Message</span>
-            <textarea
-              pTextarea
-              [autoResize]="true"
-              class="w-full"
-              name="remarkMessage"
-              rows="4"
-              [(ngModel)]="remarkMessage"
-              placeholder="Write remark here"
-            ></textarea>
+            <textarea pTextarea [autoResize]="true" class="w-full" name="remarkMessage" rows="4"
+              [(ngModel)]="remarkMessage" placeholder="Write remark here"></textarea>
           </label>
 
-          <button
-            pButton
-            type="submit"
-            icon="pi pi-send"
-            label="Save Remark"
-            [loading]="savingRemark()"
-          ></button>
+          <button pButton type="submit" icon="pi pi-send" label="Save Remark" [loading]="savingRemark()"></button>
         </form>
 
         <div *ngIf="!remarksLoading() && remarkTab() === 'current'" class="remark-list">
@@ -252,26 +151,15 @@
               <small>
                 {{ remark.created_at | date: 'medium' }}
               </small>
-              <i
-                class="pi"
-                [class.pi-chevron-down]="!isRemarkExpanded(remark.id)"
-                [class.pi-chevron-up]="isRemarkExpanded(remark.id)"
-              ></i>
+              <i class="pi" [class.pi-chevron-down]="!isRemarkExpanded(remark.id)"
+                [class.pi-chevron-up]="isRemarkExpanded(remark.id)"></i>
             </button>
 
             <div *ngIf="isRemarkExpanded(remark.id)" class="remark-body">
               <p>{{ remark.message }}</p>
 
-              <button
-                *ngIf="remark.can_delete"
-                pButton
-                type="button"
-                icon="pi pi-trash"
-                label="Remove Remark"
-                severity="danger"
-                size="small"
-                (click)="removeRemark(remark)"
-              ></button>
+              <button *ngIf="remark.can_delete" pButton type="button" icon="pi pi-trash" label="Remove Remark"
+                severity="danger" size="small" (click)="removeRemark(remark)"></button>
 
               <span *ngIf="!remark.can_delete && remark.has_been_read" class="remark-read-note">
                 Read by recipient. This remark cannot be removed.
@@ -283,11 +171,8 @@
         <div *ngIf="!remarksLoading() && remarkTab() === 'other'" class="remark-list">
           <div *ngIf="!remarks()?.other?.length" class="remark-empty">No remarks found.</div>
 
-          <article
-            *ngFor="let remark of remarks()?.other || []"
-            class="remark-item"
-            [class.remark-unread]="remark.is_unread"
-          >
+          <article *ngFor="let remark of remarks()?.other || []" class="remark-item"
+            [class.remark-unread]="remark.is_unread">
             <button type="button" class="remark-heading" (click)="toggleRemark(remark, true)">
               <span class="remark-type">
                 {{ remark.noti_type_label }}
@@ -300,11 +185,8 @@
                 &nbsp;|&nbsp;
                 {{ remark.created_at | date: 'medium' }}
               </small>
-              <i
-                class="pi"
-                [class.pi-chevron-down]="!isRemarkExpanded(remark.id)"
-                [class.pi-chevron-up]="isRemarkExpanded(remark.id)"
-              ></i>
+              <i class="pi" [class.pi-chevron-down]="!isRemarkExpanded(remark.id)"
+                [class.pi-chevron-up]="isRemarkExpanded(remark.id)"></i>
             </button>
 
             <div *ngIf="isRemarkExpanded(remark.id)" class="remark-body">
@@ -316,32 +198,27 @@
 
       <div class="compliance-metrics">
         <div>
-          <span>{{ isReCompliance() ? 'Returned Points' : 'Total Compliance Points' }}</span
-          ><strong>{{ compliance.counts.total }}</strong>
+          <span>{{ isReCompliance() ? 'Returned Points' : 'Total Compliance Points' }}</span><strong>{{
+            compliance.counts.total }}</strong>
         </div>
         <div>
-          <span>{{ isReCompliance() ? 'Corrections Saved' : 'Total Responses Saved' }}</span
-          ><strong>{{ compliance.counts.completed }}</strong>
+          <span>{{ isReCompliance() ? 'Corrections Saved' : 'Total Responses Saved' }}</span><strong>{{
+            compliance.counts.completed }}</strong>
         </div>
         <div>
           <span>Pending Points</span><strong class="red">{{ compliance.counts.pending }}</strong>
         </div>
       </div>
 
-      <div
-        *ngIf="submissionPreview() as preview"
-        class="completion-message"
-        [class.ready]="preview.can_submit && !hasUnsavedChanges()"
-      >
-        <i
-          [class]="
+      <div *ngIf="submissionPreview() as preview" class="completion-message"
+        [class.ready]="preview.can_submit && !hasUnsavedChanges()">
+        <i [class]="
             preview.can_submit && !hasUnsavedChanges() ? 'pi pi-check-circle' : 'pi pi-info-circle'
-          "
-        ></i>
+          "></i>
         {{
-          hasUnsavedChanges()
-            ? 'Save edited compliance responses before submitting.'
-            : preview.message
+        hasUnsavedChanges()
+        ? 'Save edited compliance responses before submitting.'
+        : preview.message
         }}
       </div>
 
@@ -388,17 +265,17 @@
                 <th>Opening Date</th>
                 <td>
                   {{
-                    group.account.account_opening_date
-                      ? (group.account.account_opening_date | date: 'mediumDate')
-                      : '-'
+                  group.account.account_opening_date
+                  ? (group.account.account_opening_date | date: 'mediumDate')
+                  : '-'
                   }}
                 </td>
                 <th>Renewal Date</th>
                 <td>
                   {{
-                    group.account.renewal_date
-                      ? (group.account.renewal_date | date: 'mediumDate')
-                      : '-'
+                  group.account.renewal_date
+                  ? (group.account.renewal_date | date: 'mediumDate')
+                  : '-'
                   }}
                 </td>
               </tr>
@@ -412,9 +289,9 @@
                 <th>Balance As On</th>
                 <td>
                   {{
-                    group.account.balance_date
-                      ? (group.account.balance_date | date: 'mediumDate')
-                      : '-'
+                  group.account.balance_date
+                  ? (group.account.balance_date | date: 'mediumDate')
+                  : '-'
                   }}
                 </td>
                 <th>Due Date</th>
@@ -432,11 +309,8 @@
           </table>
         </div>
 
-        <article
-          *ngFor="let answer of group.answers"
-          class="observation-row"
-          [class.observation-row--account]="group.isAccountGroup"
-        >
+        <article *ngFor="let answer of group.answers" class="observation-row"
+          [class.observation-row--account]="group.isAccountGroup">
           <div class="observation-head">
             <div class="observation-title-wrap">
               <span class="observation-serial">{{ answer._displayIndex }}</span>
@@ -465,7 +339,8 @@
               <p>{{ answer.audit_comment || '-' }}</p>
             </div>
 
-            <div *ngIf="answer.audit_reviewer_comment && answer.audit_reviewer_comment.trim() && answer.audit_reviewer_comment.trim() !== '-'">
+            <div
+              *ngIf="answer.audit_reviewer_comment && answer.audit_reviewer_comment.trim() && answer.audit_reviewer_comment.trim() !== '-'">
               <label>Audit Reviewer Comment</label>
               <p>{{ answer.audit_reviewer_comment }}</p>
             </div>
@@ -480,75 +355,51 @@
           <div *ngIf="getTimeline(answer).length" class="answers-timeline">
             <label class="timeline-title"><i class="pi pi-history"></i> Compliance History</label>
             <div class="timeline-container">
-              <div
-                *ngFor="let item of getTimeline(answer); let index = index"
-                class="timeline-item"
-              >
+              <div *ngFor="let item of getTimeline(answer); let index = index" class="timeline-item">
                 <div class="timeline-badge"></div>
                 <div class="timeline-content">
                   <div class="timeline-header-meta">
                     <span class="round-badge">Round {{ index + 1 }}</span>
                     <span class="timeline-date" *ngIf="item.created_at">{{
                       item.created_at | date: 'medium'
-                    }}</span>
+                      }}</span>
                   </div>
-                  <div
-                    *ngIf="
+                  <div *ngIf="
                       item.compliance_reviewer_comment ||
                       item.audit_reviewer_comment ||
                       item.comment ||
                       item.reviewer_comment
-                    "
-                    class="timeline-entry reviewer-entry"
-                  >
+                    " class="timeline-entry reviewer-entry">
                     <span class="timeline-author">Reviewer Feedback</span>
                     <p class="timeline-text">
                       {{
-                        item.compliance_reviewer_comment ||
-                          item.audit_reviewer_comment ||
-                          item.comment ||
-                          item.reviewer_comment
+                      item.compliance_reviewer_comment ||
+                      item.audit_reviewer_comment ||
+                      item.comment ||
+                      item.reviewer_comment
                       }}
                     </p>
                   </div>
-                  <div
-                    *ngIf="item.compliance_response || item.response || item.answer_given"
-                    class="timeline-entry manager-entry"
-                  >
+                  <div *ngIf="item.compliance_response || item.response || item.answer_given"
+                    class="timeline-entry manager-entry">
                     <span class="timeline-author">Manager Response</span>
                     <p class="timeline-text">
                       {{ item.compliance_response || item.response || item.answer_given }}
                     </p>
-                    <div
-                      class="timeline-evidences"
-                      *ngIf="
+                    <div class="timeline-evidences" *ngIf="
                         evidenceList(item).length ||
                         evidenceList(item, 'compliance_evidence').length
-                      "
-                    >
-                      <button
-                        *ngFor="let evidence of evidenceList(item); let ei = index"
-                        pButton
-                        type="button"
-                        icon="pi pi-paperclip"
-                        severity="secondary"
-                        [title]="'View auditor supporting document ' + (ei + 1)"
-                        (click)="viewEvidence(evidence)"
-                        class="p-button-sm"
-                      ></button>
-                      <button
-                        *ngFor="
+                      ">
+                      <button *ngFor="let evidence of evidenceList(item); let ei = index" pButton type="button"
+                        icon="pi pi-paperclip" severity="secondary"
+                        [title]="'View auditor supporting document ' + (ei + 1)" (click)="viewEvidence(evidence)"
+                        class="p-button-sm"></button>
+                      <button *ngFor="
                           let evidence of evidenceList(item, 'compliance_evidence');
                           let ei = index
-                        "
-                        pButton
-                        type="button"
-                        icon="pi pi-eye"
-                        severity="secondary"
+                        " pButton type="button" icon="pi pi-eye" severity="secondary"
                         [title]="'View compliance supporting document ' + (ei + 1)"
-                        (click)="viewComplianceEvidence(evidence)"
-                        class="p-button-sm"
-                      ></button>
+                        (click)="viewComplianceEvidence(evidence)" class="p-button-sm"></button>
                     </div>
                   </div>
                 </div>
@@ -556,10 +407,7 @@
             </div>
           </div>
 
-          <table
-            *ngIf="hasAccountDetails(answer) && !group.isAccountGroup"
-            class="account-detail-table"
-          >
+          <table *ngIf="hasAccountDetails(answer) && !group.isAccountGroup" class="account-detail-table">
             <tbody>
               <tr>
                 <th>Branch Name</th>
@@ -589,9 +437,9 @@
                 <th>Opening Date</th>
                 <td>
                   {{
-                    answer.account_opening_date
-                      ? (answer.account_opening_date | date: 'mediumDate')
-                      : '-'
+                  answer.account_opening_date
+                  ? (answer.account_opening_date | date: 'mediumDate')
+                  : '-'
                   }}
                 </td>
                 <th>Renewal Date</th>
@@ -622,108 +470,63 @@
             </tbody>
           </table>
 
-          <div
-            *ngIf="responseRequired(answer) && canUseAnswerLevelComplianceResponse(answer)"
-            class="response-panel"
-          >
+          <div *ngIf="responseRequired(answer) && canUseAnswerLevelComplianceResponse(answer)" class="response-panel">
             <div class="response-panel-head">
-              <label>{{
-                isReCompliance() ? 'Corrected Compliance Response' : 'Compliance Response'
-              }}</label>
+              <div class="flex align-items-center gap-2">
+                <label>{{
+                  isReCompliance() ? 'Corrected Compliance Response' : 'Compliance Response'
+                  }}</label>
+                <p-tag [value]="isSaved(answer) ? 'Saved' : 'Pending'"
+                  [severity]="isSaved(answer) ? 'success' : 'warn'"></p-tag>
+              </div>
 
-              <div class="response-tools supporting-docs-box">
+              <div *ngIf="isComplianceEvidenceUploadRequired(answer) || evidenceList(answer).length || evidenceList(answer, 'compliance_evidence').length" class="response-tools supporting-docs-box">
                 <span class="supporting-docs-label">Supporting Documents</span>
-                <button
-                  *ngFor="let evidence of evidenceList(answer); let ei = index"
-                  pButton
-                  type="button"
-                  icon="pi pi-paperclip"
-                  severity="secondary"
-                  [title]="'View auditor supporting document ' + (ei + 1)"
-                  (click)="viewEvidence(evidence)"
-                ></button>
+                <button *ngFor="let evidence of evidenceList(answer); let ei = index" pButton type="button"
+                  icon="pi pi-paperclip" severity="secondary" [title]="'View auditor supporting document ' + (ei + 1)"
+                  (click)="viewEvidence(evidence)"></button>
 
-                <span
-                  class="evidence-chip"
-                  *ngFor="
+                <span class="evidence-chip" *ngFor="
                     let evidence of evidenceList(answer, 'compliance_evidence');
                     let ei = index
-                  "
-                >
-                  <button
-                    pButton
-                    type="button"
-                    icon="pi pi-eye"
-                    severity="secondary"
+                  ">
+                  <button pButton type="button" icon="pi pi-eye" severity="secondary"
                     [title]="'View compliance supporting document ' + (ei + 1)"
-                    (click)="viewComplianceEvidence(evidence)"
-                  ></button>
-                  <button
-                    pButton
-                    type="button"
-                    icon="pi pi-trash"
-                    severity="danger"
+                    (click)="viewComplianceEvidence(evidence)"></button>
+                  <button pButton type="button" icon="pi pi-trash" severity="danger"
                     [title]="'Remove compliance supporting document ' + (ei + 1)"
                     [loading]="deletingEvidenceKey() === evidenceDeleteKey(evidence)"
                     [disabled]="deletingEvidenceKey() === evidenceDeleteKey(evidence)"
-                    (click)="deleteEvidence(evidence)"
-                  ></button>
+                    (click)="deleteEvidence(evidence)"></button>
                 </span>
 
-                <ng-container>
-                  <input
-                    #answerEvidenceInput
-                    type="file"
-                    multiple
-                    accept=".jpg,.jpeg,.png,.pdf,image/jpeg,image/png,application/pdf"
-                    style="display: none"
-                    (change)="uploadEvidence('answer', answer, $event)"
-                  />
+                <ng-container *ngIf="isComplianceEvidenceUploadRequired(answer)">
+                  <input #answerEvidenceInput type="file" multiple
+                    accept=".jpg,.jpeg,.png,.pdf,image/jpeg,image/png,application/pdf" style="display: none"
+                    (change)="uploadEvidence('answer', answer, $event)" />
 
-                  <button
-                    pButton
-                    type="button"
-                    icon="pi pi-upload"
-                    severity="secondary"
+                  <button pButton type="button" icon="pi pi-upload" severity="secondary"
                     title="Upload compliance supporting document"
                     [loading]="uploadingEvidenceKey() === evidenceKey('answer', answer.id)"
-                    (click)="answerEvidenceInput.click()"
-                  ></button>
+                    (click)="answerEvidenceInput.click()"></button>
                 </ng-container>
-
-                <p-tag
-                  [value]="isSaved(answer) ? 'Saved' : 'Pending'"
-                  [severity]="isSaved(answer) ? 'success' : 'warn'"
-                ></p-tag>
               </div>
             </div>
 
-            <textarea
-              rows="2"
-              [(ngModel)]="answer.compliance_response"
-              [placeholder]="
+            <textarea rows="2" [(ngModel)]="answer.compliance_response" [placeholder]="
                 isReCompliance()
                   ? 'Enter corrected compliance response'
                   : 'Enter compliance response'
-              "
-            ></textarea>
+              "></textarea>
 
             <div class="response-actions">
-              <button
-                pButton
-                type="button"
-                [label]="isReCompliance() ? 'Save Correction' : 'Save Response'"
-                icon="pi pi-save"
-                [loading]="responseSaving()[actionKey('answer', answer.id)]"
-                (click)="saveResponse('answer', answer)"
-              ></button>
+              <button pButton type="button" [label]="isReCompliance() ? 'Save Correction' : 'Save Response'"
+                icon="pi pi-save" [loading]="responseSaving()[actionKey('answer', answer.id)]"
+                (click)="saveResponse('answer', answer)"></button>
             </div>
           </div>
 
-          <div
-            *ngIf="responseRequired(answer) && !canUseAnswerLevelComplianceResponse(answer)"
-            class="context-note"
-          >
+          <div *ngIf="responseRequired(answer) && !canUseAnswerLevelComplianceResponse(answer)" class="context-note">
             Save manager responses for this observation through the annexure rows below.
           </div>
 
@@ -737,15 +540,8 @@
                 <span>Annexure Rows</span>
                 <small>{{ answer.annexure_rows.length }} row(s)</small>
               </div>
-              <button
-                pButton
-                type="button"
-                label="Fill 'Complied' For All Rows"
-                icon="pi pi-check-square"
-                severity="secondary"
-                class="p-button-sm"
-                (click)="fillCompliedForAllAnnexureRows(answer)"
-              ></button>
+              <button pButton type="button" label="Fill 'Complied' For All Rows" icon="pi pi-check-square"
+                severity="secondary" class="p-button-sm" (click)="fillCompliedForAllAnnexureRows(answer)"></button>
             </div>
 
             <div class="annexure-table-wrap">
@@ -770,76 +566,50 @@
                     </td>
 
                     <td *ngIf="isReCompliance()" class="reviewer-feedback-cell">
-                      <p-tag
-                        *ngIf="isPartiallyPass(row)"
-                        value="Partially Pass"
-                        severity="warn"
-                        class="mr-2"
-                      ></p-tag>
+                      <p-tag *ngIf="isPartiallyPass(row)" value="Partially Pass" severity="warn" class="mr-2"></p-tag>
                       <div>{{ row.compliance_reviewer_comment || '-' }}</div>
 
                       <!-- Inline tiny timeline for annexure row -->
                       <div *ngIf="getTimeline(row).length" class="row-timeline-inline">
-                        <div
-                          *ngFor="let item of getTimeline(row); let index = index"
-                          class="row-timeline-item"
-                        >
+                        <div *ngFor="let item of getTimeline(row); let index = index" class="row-timeline-item">
                           <div class="row-timeline-header">
                             <span class="round-badge">R{{ index + 1 }}</span>
                             <span class="date" *ngIf="item.created_at">{{
                               item.created_at | date: 'dd/MM/yy'
-                            }}</span>
+                              }}</span>
                           </div>
                           <div class="row-timeline-body">
-                            <div
-                              *ngIf="
+                            <div *ngIf="
                                 item.compliance_reviewer_comment ||
                                 item.audit_reviewer_comment ||
                                 item.comment ||
                                 item.reviewer_comment
-                              "
-                              class="row-comment text-red"
-                            >
+                              " class="row-comment text-red">
                               <strong>Rev:</strong>
                               {{
-                                item.compliance_reviewer_comment ||
-                                  item.audit_reviewer_comment ||
-                                  item.comment ||
-                                  item.reviewer_comment
+                              item.compliance_reviewer_comment ||
+                              item.audit_reviewer_comment ||
+                              item.comment ||
+                              item.reviewer_comment
                               }}
                             </div>
-                            <div
-                              *ngIf="item.compliance_response || item.response || item.answer_given"
-                              class="row-comment text-blue"
-                            >
+                            <div *ngIf="item.compliance_response || item.response || item.answer_given"
+                              class="row-comment text-blue">
                               <strong>Mgr:</strong>
                               {{ item.compliance_response || item.response || item.answer_given }}
-                              <span
-                                class="inline-evidences"
-                                *ngIf="
+                              <span class="inline-evidences" *ngIf="
                                   evidenceList(item).length ||
                                   evidenceList(item, 'compliance_evidence').length
-                                "
-                              >
-                                <button
-                                  *ngFor="let e of evidenceList(item); let ei = index"
-                                  type="button"
-                                  class="btn-link"
-                                  (click)="viewEvidence(e)"
-                                  title="View auditor supporting document"
-                                >
+                                ">
+                                <button *ngFor="let e of evidenceList(item); let ei = index" type="button"
+                                  class="btn-link" (click)="viewEvidence(e)" title="View auditor supporting document">
                                   <i class="pi pi-paperclip"></i>
                                 </button>
-                                <button
-                                  *ngFor="
+                                <button *ngFor="
                                     let e of evidenceList(item, 'compliance_evidence');
                                     let ei = index
-                                  "
-                                  type="button"
-                                  class="btn-link"
-                                  (click)="viewComplianceEvidence(e)"
-                                  title="View manager supporting document"
-                                >
+                                  " type="button" class="btn-link" (click)="viewComplianceEvidence(e)"
+                                  title="View manager supporting document">
                                   <i class="pi pi-eye"></i>
                                 </button>
                               </span>
@@ -850,90 +620,55 @@
                     </td>
 
                     <td>
-                      <button
-                        *ngFor="let evidence of evidenceList(row); let ei = index"
-                        pButton
-                        type="button"
-                        icon="pi pi-paperclip"
-                        severity="secondary"
+                      <button *ngFor="let evidence of evidenceList(row); let ei = index" pButton type="button"
+                        icon="pi pi-paperclip" severity="secondary"
                         [title]="'View auditor supporting document ' + (ei + 1)"
-                        (click)="viewEvidence(evidence)"
-                      ></button>
+                        (click)="viewEvidence(evidence)"></button>
                       <span *ngIf="!evidenceList(row).length">-</span>
                     </td>
 
                     <td>
-                      <div *ngIf="responseRequired(row)" class="supporting-docs-box supporting-docs-box--table">
+                      <div *ngIf="responseRequired(row) && (isComplianceEvidenceUploadRequired(answer) || evidenceList(row, 'compliance_evidence').length)" class="supporting-docs-box supporting-docs-box--table">
                         <span class="supporting-docs-label">Supporting Documents</span>
-                        <span
-                          class="evidence-chip"
-                          *ngFor="
+                        <span class="evidence-chip" *ngFor="
                             let evidence of evidenceList(row, 'compliance_evidence');
                             let ei = index
-                          "
-                        >
-                          <button
-                            pButton
-                            type="button"
-                            icon="pi pi-eye"
-                            severity="secondary"
+                          ">
+                          <button pButton type="button" icon="pi pi-eye" severity="secondary"
                             [title]="'View compliance supporting document ' + (ei + 1)"
-                            (click)="viewComplianceEvidence(evidence)"
-                          ></button>
-                          <button
-                            pButton
-                            type="button"
-                            icon="pi pi-trash"
-                            severity="danger"
+                            (click)="viewComplianceEvidence(evidence)"></button>
+                          <button pButton type="button" icon="pi pi-trash" severity="danger"
                             [title]="'Remove compliance supporting document ' + (ei + 1)"
                             [loading]="deletingEvidenceKey() === evidenceDeleteKey(evidence)"
                             [disabled]="deletingEvidenceKey() === evidenceDeleteKey(evidence)"
-                            (click)="deleteEvidence(evidence)"
-                          ></button>
+                            (click)="deleteEvidence(evidence)"></button>
                         </span>
 
-                        <input
-                          #rowEvidenceInput
-                          type="file"
-                          multiple
-                          accept=".jpg,.jpeg,.png,.pdf,image/jpeg,image/png,application/pdf"
-                          style="display: none"
-                          (change)="uploadEvidence('annexure', row, $event)"
-                        />
+                        <input #rowEvidenceInput type="file" multiple
+                          accept=".jpg,.jpeg,.png,.pdf,image/jpeg,image/png,application/pdf" style="display: none"
+                          (change)="uploadEvidence('annexure', row, $event)" />
 
-                        <button
-                          pButton
-                          type="button"
-                          icon="pi pi-upload"
-                          severity="secondary"
+                        <button *ngIf="isComplianceEvidenceUploadRequired(answer)" pButton type="button" icon="pi pi-upload" severity="secondary"
                           title="Upload compliance supporting document"
                           [loading]="uploadingEvidenceKey() === evidenceKey('annexure', row.id)"
-                          (click)="rowEvidenceInput.click()"
-                        ></button>
+                          (click)="rowEvidenceInput.click()"></button>
                       </div>
-                      <span *ngIf="!responseRequired(row)">-</span>
+                      <span *ngIf="!responseRequired(row) || (!isComplianceEvidenceUploadRequired(answer) && !evidenceList(row, 'compliance_evidence').length)">-</span>
                     </td>
 
                     <td>
-                      <textarea
-                        *ngIf="responseRequired(row)"
-                        rows="1"
-                        [(ngModel)]="row.compliance_response"
+                      <textarea *ngIf="responseRequired(row)" rows="1" [(ngModel)]="row.compliance_response"
                         [placeholder]="
                           isReCompliance() ? 'Corrected response' : 'Compliance response'
-                        "
-                      ></textarea>
+                        "></textarea>
                       <span *ngIf="!responseRequired(row)">{{
                         row.compliance_response || '-'
-                      }}</span>
+                        }}</span>
                     </td>
 
                     <td>
-                      <p-tag
-                        *ngIf="responseRequired(row)"
-                        [value]="isSaved(row) ? 'Saved' : 'Pending'"
-                        [severity]="isSaved(row) ? 'success' : 'warn'"
-                      ></p-tag>
+                      <p-tag *ngIf="responseRequired(row)" [value]="isSaved(row) ? 'Saved' : 'Pending'"
+                        [severity]="isSaved(row) ? 'success' : 'warn'"></p-tag>
                       <span *ngIf="!responseRequired(row)">-</span>
                     </td>
                   </tr>
@@ -942,15 +677,8 @@
             </div>
 
             <div class="flex justify-content-end mt-3" *ngIf="hasSaveableAnnexureRows(answer)">
-              <button
-                pButton
-                type="button"
-                label="Save All Annexure Responses"
-                icon="pi pi-save"
-                class="p-button-sm"
-                [loading]="annexureSavingQuestionId() === answer.id"
-                (click)="saveAllAnnexureRows(answer)"
-              ></button>
+              <button pButton type="button" label="Save All Annexure Responses" icon="pi pi-save" class="p-button-sm"
+                [loading]="annexureSavingQuestionId() === answer.id" (click)="saveAllAnnexureRows(answer)"></button>
             </div>
           </div>
         </article>

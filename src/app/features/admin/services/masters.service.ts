@@ -345,9 +345,14 @@ export class UnitsService {
           .filter((unit: any) => Number(unit?.is_active ?? 1) === 1)
           .map((unit: any) => ({
             id: Number(unit.id),
-            name: unit.audit_unit_code ? `${unit.name} (${unit.audit_unit_code})` : unit.name,
+            name: unit.audit_unit_code ? `(${unit.audit_unit_code}) ${unit.name}` : unit.name,
             audit_unit_code: unit.audit_unit_code || '',
-          }));
+          }))
+          .sort((a: any, b: any) => {
+            const codeA = Number(a.audit_unit_code || 0);
+            const codeB = Number(b.audit_unit_code || 0);
+            return codeA - codeB;
+          });
       }),
     );
   }
@@ -1186,8 +1191,8 @@ export interface UpdateManageAssessmentMasterDto extends Partial<ManageAssessmen
 export class ManageAssessmentMasterService {
   private http = inject(HttpClient);
   private config = inject(APP_CONFIG);
-  private apiUrl = `${this.config.apiUrl}/manage-assessment-masters
-`;
+  private apiUrl = `${this.config.apiUrl}/manage-assessment-masters`;
+
 
   getManageAssessmentMaster(
     assesment_period_from: string,
