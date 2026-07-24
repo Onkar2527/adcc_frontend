@@ -1,4 +1,4 @@
-import { Component, input, WritableSignal, computed, output, signal } from '@angular/core';
+import { Component, input, WritableSignal, computed, output, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MultiSelectModule } from 'primeng/multiselect';
@@ -37,7 +37,7 @@ import { TooltipModule } from 'primeng/tooltip';
             [ngModel]="field()()"
             (ngModelChange)="onValueChange($event)"
             (onBlur)="onBlur()"
-            (onFilter)="onFilter($event)"
+            (onPanelShow)="onDropdownShow()"
             [options]="sortedOptions()"
             [optionLabel]="optionLabel()"
             [optionValue]="optionValue()"
@@ -148,7 +148,7 @@ import { TooltipModule } from 'primeng/tooltip';
     }
   `]
 })
-export class MultiSelectFieldComponent<T = any> {
+export class MultiSelectFieldComponent<T = any> implements OnInit {
   /** Signal field for two-way binding - stores values in selection order */
   field = input.required<WritableSignal<T[]>>();
 
@@ -183,7 +183,7 @@ export class MultiSelectFieldComponent<T = any> {
   filter = input<boolean>(true);
 
   /** Properties to filter by */
-  filterBy = input<string>('label');
+  filterBy = input<string>('');
 
   /** Show clear button */
   showClear = input<boolean>(false);
@@ -198,7 +198,7 @@ export class MultiSelectFieldComponent<T = any> {
   display = input<'comma' | 'chip'>('comma');
 
   /** Enable virtual scrolling for large datasets */
-  virtualScroll = input<boolean>(true);
+  virtualScroll = input<boolean>(false);
 
   /** Height of each item in virtual scroll (default 38px) */
   virtualScrollItemSize = input<number>(38);
@@ -215,24 +215,37 @@ export class MultiSelectFieldComponent<T = any> {
   /** Add event emitter */
   add = output<void>();
 
-  private _filterQuery = signal<string>('');
+  actualFilterBy = computed(() => this.filterBy() || this.optionLabel());
 
-  /** Sorted options based on filter query priority */
+  private _openedSelectedKeys = new Set<any>();
+  private _sortTrigger = signal<number>(0);
+
+  ngOnInit(): void {
+    const selectedList = this.field()() || [];
+    this._openedSelectedKeys = new Set(selectedList);
+  }
+
+  /** Sorted options based on selection */
   sortedOptions = computed(() => {
-    const query = this._filterQuery().toLowerCase().trim();
     const options = this.options() || [];
-    const labelKey = this.optionLabel();
+    this._sortTrigger(); // React to sorting triggers
+    const valKey = this.optionValue();
+    const keys = this._openedSelectedKeys;
 
-    if (!query) return options;
+    const getVal = (opt: any) => {
+      return valKey ? opt[valKey] : opt;
+    };
 
+    const isSelected = (opt: any) => {
+      const val = getVal(opt);
+      return keys.has(val);
+    };
+
+    // Sort: initially selected first, then preserve original order
     return [...options].sort((a, b) => {
-      const labelA = String(a[labelKey] || '').toLowerCase();
-      const labelB = String(b[labelKey] || '').toLowerCase();
-
-      const scoreA = labelA === query ? 0 : (labelA.startsWith(query) ? 1 : 2);
-      const scoreB = labelB === query ? 0 : (labelB.startsWith(query) ? 1 : 2);
-
-      return scoreA - scoreB;
+      const selA = isSelected(a) ? 1 : 0;
+      const selB = isSelected(b) ? 1 : 0;
+      return selB - selA;
     });
   });
 
@@ -289,7 +302,9 @@ export class MultiSelectFieldComponent<T = any> {
     this._touched = false;
   }
 
-  onFilter(event: any): void {
-    this._filterQuery.set(event.filter || '');
+  onDropdownShow(): void {
+    const selectedList = this.field()() || [];
+    this._openedSelectedKeys = new Set(selectedList);
+    this._sortTrigger.update(n => n + 1);
   }
 }

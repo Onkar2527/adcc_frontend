@@ -1889,69 +1889,81 @@ export class CategoryAssessmentComponent
                 : String(firstOption);
         }
 
-        let defaultIndex = 0;
-        let previousRiskTotal = 0;
-        let hasOnlyNeutralRisk = true;
-        const riskTotals: number[] = [];
+        let defaultOptionIndex = 0;
+        let prevTotRiskControl = 0;
+        let checkYesNo = false;
+        let noRiskStatus = true;
+        const noRiskOptionIndex: number[] = [];
 
         for (
             let index = 0;
             index < parameters.length;
             index++
         ) {
-            const option =
-                parameters[index];
+            const option = parameters[index];
+            const br = Number(option?.br || 0);
+            const cr = Number(option?.cr || 0);
+            const CRP = br + cr;
 
-            const totalRisk =
-                Number(option?.br || 0)
-                +
-                Number(option?.cr || 0);
+            const rtLower = String(option?.rt || '').trim().toLowerCase();
 
-            riskTotals.push(
-                totalRisk,
-            );
-
+            // check options has yes no
             if (
-                ![0, 4.4, 8].includes(
-                    totalRisk,
-                )
+                (rtLower === 'yes' || rtLower === 'no') &&
+                [0, 4.4, 8].includes(CRP)
             ) {
-                hasOnlyNeutralRisk =
-                    false;
+                checkYesNo = true;
+                defaultOptionIndex = index;
             }
 
-            if (
-                previousRiskTotal < totalRisk
-            ) {
-                defaultIndex =
-                    index;
+            if (!checkYesNo) {
+                // check no risk ans
+                if (![0, 4.4, 8].includes(CRP)) {
+                    noRiskStatus = false;
+                }
+
+                if (prevTotRiskControl < CRP) {
+                    defaultOptionIndex = index;
+                }
+
+                prevTotRiskControl = CRP;
+
+                // for not applicable
+                if (
+                    rtLower === 'not applicable' &&
+                    [0, 4.4, 8].includes(CRP)
+                ) {
+                    noRiskStatus = false;
+                }
+
+                noRiskOptionIndex.push(CRP);
+            }
+        }
+
+        // no risk options
+        if (!checkYesNo && noRiskStatus && noRiskOptionIndex.length > 0) {
+            const firstOi = noRiskOptionIndex[0];
+            let checkOi = true;
+
+            for (const oiVal of noRiskOptionIndex) {
+                if (oiVal !== firstOi) {
+                    checkOi = false;
+                    break;
+                }
             }
 
-            previousRiskTotal =
-                totalRisk;
+            if (checkOi) {
+                defaultOptionIndex = noRiskOptionIndex.length - 1;
+            }
         }
 
-        if (
-            hasOnlyNeutralRisk
-            &&
-            riskTotals.length
-            &&
-            riskTotals.every(
-                (risk) =>
-                    risk === riskTotals[0],
-            )
-        ) {
-            defaultIndex =
-                parameters.length - 1;
-        }
-
-        const answer =
-            parameters[defaultIndex]?.rt;
+        const answer = parameters[defaultOptionIndex]?.rt;
 
         return answer === undefined
             ? null
             : String(answer);
     }
+
 
     private collectHeaderQuestionsForSave(
         header: any,
