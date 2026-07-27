@@ -170,7 +170,12 @@ interface PreviewRow {
               <div class="font-bold text-red-700 text-lg mb-2 flex align-items-center gap-2">
                 <i class="pi pi-times-circle"></i> Validation Errors Found
               </div>
-              <p class="text-700 m-0">The file contains errors in one or more rows. Please resolve them in your file and try uploading again.</p>
+              <p class="text-700 mb-2">The file contains errors in one or more rows. Please resolve them in your file and try uploading again.</p>
+              <ul class="m-0 pl-3 text-red-700 text-sm">
+                @for (error of errorSummary(); track error) {
+                  <li>{{ error }}</li>
+                }
+              </ul>
             </div>
           } @else {
             <div class="surface-100 border-left-3 border-green-500 p-4 border-round-right mb-4 flex justify-content-between align-items-center">
@@ -253,6 +258,7 @@ export class ExecutiveSummaryUploadComponent implements OnInit {
   selectedFileName = signal<string>('');
   previewRows = signal<PreviewRow[]>([]);
   validRows = signal<any[]>([]);
+  errorSummary = signal<string[]>([]);
   validating = signal(false);
   uploading = signal(false);
   totalRows = signal(0);
@@ -297,6 +303,7 @@ export class ExecutiveSummaryUploadComponent implements OnInit {
     this.selectedFileName.set(file.name);
     this.previewRows.set([]);
     this.validRows.set([]);
+    this.errorSummary.set([]);
     this.totalRows.set(0);
   }
 
@@ -305,6 +312,7 @@ export class ExecutiveSummaryUploadComponent implements OnInit {
     this.selectedFileName.set('');
     this.previewRows.set([]);
     this.validRows.set([]);
+    this.errorSummary.set([]);
     this.totalRows.set(0);
   }
 
@@ -355,6 +363,7 @@ export class ExecutiveSummaryUploadComponent implements OnInit {
             const preview: PreviewRow[] = [];
             const valid: any[] = [];
             const seenBatchKeys = new Set<string>();
+            const errors: string[] = [];
 
             parsed.rows.forEach((row, index) => {
               const rowNumber = index + 2; // header is row 1
@@ -411,11 +420,14 @@ export class ExecutiveSummaryUploadComponent implements OnInit {
                   march_position: marchPos,
                   admin_id: 1
                 });
+              } else {
+                errors.push(`Row ${rowNumber}: ${message}`);
               }
             });
 
             this.previewRows.set(preview);
             this.validRows.set(valid);
+            this.errorSummary.set(errors);
             this.totalRows.set(preview.length);
             this.validating.set(false);
 
@@ -426,6 +438,7 @@ export class ExecutiveSummaryUploadComponent implements OnInit {
             });
           } catch (err: any) {
             this.validating.set(false);
+            this.errorSummary.set([err?.message || 'Unable to parse CSV']);
             this.messageService.add({
               severity: 'error',
               summary: 'Validation Failed',
