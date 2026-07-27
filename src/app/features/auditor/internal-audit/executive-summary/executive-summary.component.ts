@@ -38,8 +38,9 @@ import {
 import { CardModule } from 'primeng/card';
 import { InputTextModule } from 'primeng/inputtext';
 import { MessageService } from 'primeng/api';
-import { TableModule } from 'primeng/table';
 import { SelectModule } from 'primeng/select';
+import { TableModule } from 'primeng/table';
+import { InternalAuditNavService } from '../../services/internal-audit-nav.service';
 
 @Component({
 
@@ -92,6 +93,10 @@ export class ExecutiveSummaryComponent
     private messageService =
         inject(
             MessageService,
+        );
+    private navService =
+        inject(
+            InternalAuditNavService,
         );
 
     assessmentId!: number;
@@ -363,15 +368,19 @@ export class ExecutiveSummaryComponent
                         const categoryMarch = this.summary?.march_positions?.find(
                             (x: any) => x.gl_type_id === item.category_id
                         );
-                        const marchPositionValue = categoryMarch ? Number(categoryMarch.march_position || 0) : 0;
+                        const marchPositionValue = (categoryMarch ? Number(categoryMarch.march_position || 0) : 0) / 100000;
 
                         const amount = this.savedAmountOrDefault(
                             savedLine,
                             type === 'NPA' ? '' : 0,
                         );
 
+                        const displayAmount = (type === 'NPA')
+                            ? (amount !== '' && amount !== null && amount !== undefined ? Number(amount) / 100000 : '')
+                            : Number(amount) / 100000;
+
                         totalAccounts += Number(accounts || 0);
-                        totalAmount += Number(amount || 0);
+                        totalAmount += Number(displayAmount || 0);
                         totalMarch += marchPositionValue;
 
                         rowItems.push({
@@ -384,8 +393,8 @@ export class ExecutiveSummaryComponent
                             total_accounts: accounts,
                             account_input: accounts,
                             march_position: marchPositionValue,
-                            total_amount: amount,
-                            amount_input: amount,
+                            total_amount: displayAmount,
+                            amount_input: displayAmount,
                             type_id: type === 'NPA' ? item.position_type_id : item.scheme_code,
                             position_type_id: item.position_type_id,
                             fresh_type_ids: item.fresh_type_ids,
@@ -408,8 +417,8 @@ export class ExecutiveSummaryComponent
                 });
 
                 this.financialPositionData = groupedData;
-                this.cdr.detectChanges();
                 this.loading.set(false);
+                this.cdr.detectChanges();
             });
             return;
         }
@@ -486,7 +495,7 @@ export class ExecutiveSummaryComponent
                                             const categoryMarch = this.summary?.march_positions?.find(
                                                 (x: any) => Number(x.gl_type_id) === Number(item.scheme_id)
                                             );
-                                            const marchPositionValue = categoryMarch ? Number(categoryMarch.march_position || 0) : 0;
+                                            const marchPositionValue = (categoryMarch ? Number(categoryMarch.march_position || 0) : 0) / 100000;
 
                                             const accounts = this.savedAccountsOrDefault(
                                                 savedFreshLine,
@@ -495,7 +504,7 @@ export class ExecutiveSummaryComponent
                                             const amount = this.savedAmountOrDefault(
                                                 savedLine,
                                                 Math.abs(Number(item.total_amount || 0)),
-                                            );
+                                            ) / 100000;
 
                                             totalAccounts += Number(accounts || 0);
                                             totalAmount += Number(amount || 0);
@@ -561,10 +570,11 @@ export class ExecutiveSummaryComponent
                                     savedFreshLine,
                                     '',
                                 );
-                                const amountInput = this.savedAmountOrDefault(
+                                const amountInputRaw = this.savedAmountOrDefault(
                                     savedLine,
                                     '',
                                 );
+                                const amountInput = amountInputRaw !== '' && amountInputRaw !== null && amountInputRaw !== undefined ? Number(amountInputRaw) / 100000 : '';
 
                                 totalNpaAccounts += Number(accountInput || 0);
                                 totalNpaAmount += Number(amountInput || 0);
@@ -602,9 +612,9 @@ export class ExecutiveSummaryComponent
                         this.financialPositionData =
                             groupedData;
 
-                        this.cdr.detectChanges();
-
                         this.loading.set(false);
+
+                        this.cdr.detectChanges();
 
                     });
 
@@ -648,18 +658,38 @@ export class ExecutiveSummaryComponent
                         res || null;
                     this.branchPositionLines =
                         res.branch_positions || [];
-                    if (this.summary?.audit_unit_id) {
-
-                        this.getBranchFinancialPosition();
-
-                    }
-
                     this.summary_detail =
                         res.summary_detail || [];
 
-                    this.loading.set(
-                        false,
-                    );
+                    if (this.summary?.audit_unit_id) {
+                        this.getBranchFinancialPosition();
+                    } else {
+                        this.loading.set(false);
+                    }
+
+                    const userType = String(this.user?.user_type_id || '').trim();
+                    const isAuditor = userType === '2';
+                    if (isAuditor && !this.viewOnlyModeFromRoute && !this.reviewModeFromRoute) {
+                        const employeeId = Number(
+                            this.user?.id
+                            || this.user?.employee_id
+                            || this.user?.emp_id
+                            || 0,
+                        );
+                        this.service.getInternalAuditMenu(this.assessmentId, employeeId).subscribe({
+                            next: (menuRes: any) => {
+                                this.navService.setAssessmentMenus(
+                                    this.assessmentId,
+                                    menuRes?.menus || [],
+                                    menuRes?.overview || null
+                                );
+                            },
+                            error: (err) => {
+                                console.error('Failed to load nav menus:', err);
+                            }
+                        });
+                    }
+
                     this.cdr.detectChanges();
 
                 },
@@ -769,7 +799,7 @@ export class ExecutiveSummaryComponent
 
             if (this.isLegacyData()) {
                 if (!row.isNpa) {
-                    const amtVal = Number(row.total_amount);
+                    const amtVal = Number(row.total_amount) * 100000;
                     const amount = Number.isFinite(amtVal) && amtVal >= 0 ? amtVal : 0;
                     branch_positions.push({
                         type_id: row.position_type_id,
@@ -785,7 +815,7 @@ export class ExecutiveSummaryComponent
                         });
                     }
                 } else {
-                    const amtVal = Number(row.amount_input);
+                    const amtVal = Number(row.amount_input) * 100000;
                     const amount = Number.isFinite(amtVal) && amtVal >= 0 ? amtVal : 0;
                     branch_positions.push({
                         type_id: row.position_type_id,
@@ -805,7 +835,7 @@ export class ExecutiveSummaryComponent
                 const schemeCode = String(row.scheme_code).trim();
 
                 if (!row.isNpa) {
-                    const amtVal = Number(row.total_amount);
+                    const amtVal = Number(row.total_amount) * 100000;
                     const amount = Number.isFinite(amtVal) && amtVal >= 0 ? amtVal : 0;
 
                     const acctVal = Number(row.total_accounts);
@@ -820,7 +850,7 @@ export class ExecutiveSummaryComponent
                         accounts
                     });
                 } else {
-                    const amtVal = Number(row.amount_input);
+                    const amtVal = Number(row.amount_input) * 100000;
                     const amount = Number.isFinite(amtVal) && amtVal >= 0 ? amtVal : 0;
 
                     const acctVal = Number(row.account_input);

@@ -1,3 +1,8 @@
+<div *ngIf="loading()" style="background: rgba(0, 0, 0, 0.45); position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 99999;">
+  <i class="pi pi-spin pi-spinner text-white text-5xl mb-3"></i>
+  <span class="text-white text-xl font-medium">Please wait, loading data...</span>
+</div>
+
 <div class="grid">
   <!-- Header -->
   <div class="col-12">
@@ -181,7 +186,9 @@
 
   <div class="col-12">
     <p-card styleClass="shadow-1 border-round-xl">
-      <div class="text-2xl font-bold mb-4 text-center">Branch Financial Position</div>
+      <div class="text-2xl font-bold mb-4 text-center">
+        Branch Financial Position
+      </div>
 
       <div *ngIf="shouldShowReviewColumns" class="flex justify-content-end mb-3">
         <button
@@ -198,6 +205,7 @@
 
       <p-table
         [value]="financialPositionData"
+        [loading]="loading()"
         responsiveLayout="scroll"
         styleClass="p-datatable-sm p-datatable-gridlines"
       >
@@ -235,6 +243,7 @@
 
             <td class="text-right">
               {{ getCategoryHeaderTotal(row.scheme_type, 'march') | number: '1.2-2' }}
+              <div class="text-xs text-500 mt-1">In Lakhs</div>
             </td>
 
             <td class="text-center">
@@ -242,12 +251,12 @@
             </td>
 
             <td class="text-right">
-              {{ getCategoryHeaderTotal(row.scheme_type, 'current') / 100000 | number: '1.2-2' }}
+              {{ getCategoryHeaderTotal(row.scheme_type, 'current') | number: '1.2-2' }}
               <div class="text-xs text-500 mt-1">In Lakhs</div>
             </td>
 
             <td class="text-right">
-              {{ getCategoryHeaderTotal(row.scheme_type, 'ytd') / 100000 | number: '1.2-2' }}
+              {{ getCategoryHeaderTotal(row.scheme_type, 'ytd') | number: '1.2-2' }}
               <div class="text-xs text-500 mt-1">In Lakhs</div>
             </td>
 
@@ -270,7 +279,7 @@
             </td>
 
             <td class="text-right">
-              {{ row.march_position | number: '1.2-2' }}
+              {{ (row.march_position || 0) | number: '1.2-2' }}
             </td>
 
             <td class="text-center">
@@ -293,13 +302,12 @@
               />
 
               <div class="text-xs text-500 mt-1">
-                {{ row.total_amount / 100000 | number: '1.2-2' }}
-                Lakhs
+                {{ (row.total_amount || 0) | number: '1.2-2' }} Lakhs
               </div>
             </td>
 
             <td class="text-right">
-              {{ (row.total_amount - row.march_position) / 100000 | number: '1.2-2' }}
+              {{ ((row.total_amount || 0) - (row.march_position || 0)) | number: '1.2-2' }}
             </td>
 
             <td *ngIf="shouldShowReviewColumns" class="text-center">
@@ -355,7 +363,7 @@
             </td>
 
             <td class="text-right">
-              {{ row.march_position | number: '1.2-2' }}
+              {{ (row.march_position || 0) | number: '1.2-2' }}
             </td>
 
             <td class="text-center">
@@ -377,8 +385,7 @@
                 class="w-full text-right"
               />
               <div class="text-xs text-500 mt-1">
-                {{ row.amount_input / 100000 | number: '1.2-2' }}
-                Lakhs
+                {{ (row.amount_input || 0) | number: '1.2-2' }} Lakhs
               </div>
             </td>
 
