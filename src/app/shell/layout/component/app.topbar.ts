@@ -8,6 +8,7 @@ import {
   ElementRef,
   OnInit,
   OnDestroy,
+  ChangeDetectorRef,
 } from '@angular/core';
 import { MenuItem } from 'primeng/api';
 import { Router, RouterModule } from '@angular/router';
@@ -24,6 +25,9 @@ import { InputGroupModule } from 'primeng/inputgroup';
 import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
 import { IconFieldModule } from 'primeng/iconfield';
 import { InputIconModule } from 'primeng/inputicon';
+import { PopoverModule } from 'primeng/popover';
+import { BadgeModule } from 'primeng/badge';
+import { HttpClient } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { KeyboardShortcutService } from '../../../core/services/keyboard-shortcut';
@@ -54,6 +58,8 @@ interface SearchItem {
     InputGroupAddonModule,
     IconFieldModule,
     InputIconModule,
+    PopoverModule,
+    BadgeModule,
     FormsModule,
   ],
   template: `
@@ -74,6 +80,7 @@ interface SearchItem {
       </div>
 
       <div class="layout-topbar-actions">
+        <!-- Search bar -->
         <div class="topbar-search-wrapper">
           <p-iconField iconPosition="left">
             <p-inputIcon class="pi pi-search" />
@@ -108,6 +115,7 @@ interface SearchItem {
           </p-iconField>
         </div>
 
+        <!-- Language Selector -->
         <p-select
           [options]="languages"
           [(ngModel)]="selectedLanguage"
@@ -120,11 +128,12 @@ interface SearchItem {
           <ng-template pTemplate="selectedItem">
             <div class="flex align-items-center gap-2" *ngIf="selectedLanguage">
               <i class="pi pi-language"></i>
-              <span>{{ selectedLanguage === 'en' ? 'English' : selectedLanguage }}</span>
+              <span>{{ selectedLanguage === 'en' ? 'English' : (selectedLanguage === 'mr' ? 'मराठी' : selectedLanguage) }}</span>
             </div>
           </ng-template>
         </p-select>
 
+        <!-- Dark/Light Theme Button -->
         <p-button
           class="layout-topbar-action hide-on-small"
           [icon]="layoutService.layoutConfig().darkTheme ? 'pi pi-moon' : 'pi pi-sun'"
@@ -132,14 +141,98 @@ interface SearchItem {
           (click)="toggleTheme()"
         ></p-button>
 
-        <p-button
-          icon="pi pi-bell"
-          pTooltip="Notification"
-          tooltipPosition="bottom"
-          styleClass="hide-on-small"
-          severity="secondary"
-          (click)="logout()"
-        ></p-button>
+        <!-- Notification Icon -->
+        <div class="notification-container hide-on-small">
+          <p-button
+            icon="pi pi-bell"
+            pTooltip="Notification"
+            tooltipPosition="bottom"
+            severity="secondary"
+            (click)="op.toggle($event)"
+          >
+          </p-button>
+          <span *ngIf="unreadCount() > 0" class="notification-badge animate-fadein">
+            {{ unreadCount() }}
+          </span>
+        </div>
+
+        <p-popover #op [style]="{ width: '380px', padding: '0' }" styleClass="notification-popover-panel">
+          <div class="notification-dropdown-card">
+            
+            <!-- Sticky Header -->
+            <div class="notification-dropdown-header">
+              <div class="flex align-items-center gap-2" style="display: flex; align-items: center; gap: 0.5rem;">
+                <span class="font-bold text-base text-900" style="font-weight: 700; font-size: 1rem; color: #111827;">Notifications</span>
+                <span *ngIf="unreadCount() > 0" class="unread-badge">
+                  {{ unreadCount() }} new
+                </span>
+              </div>
+              <button 
+                *ngIf="unreadCount() > 0"
+                pButton 
+                type="button" 
+                label="Mark all as read" 
+                class="p-button-text p-button-sm mark-all-btn"
+                (click)="markAllAsRead($event)"
+              ></button>
+            </div>
+
+            <!-- Scrollable Content -->
+            <div class="notification-list-container">
+              
+              <!-- Empty State -->
+              <div *ngIf="notifications.length === 0" class="notification-empty-state">
+                <i class="pi pi-bell muted-bell-icon"></i>
+                <p class="empty-title">You're all caught up!</p>
+                <p class="empty-subtitle">No notifications to display at this time.</p>
+              </div>
+
+              <!-- Notifications Loop -->
+              <div 
+                *ngFor="let n of notifications" 
+                class="notification-item-row"
+                [ngClass]="{'unread-item': !n.is_read}"
+                (click)="markAsRead(n)"
+              >
+                <!-- Left Icon Indicator -->
+                <div class="item-icon-wrapper" [class]="getNotificationSeverityClass(n)">
+                  <i [class]="getNotificationIcon(n)"></i>
+                </div>
+
+                <!-- Main Content -->
+                <div class="item-content-body" style="display: flex; flex-direction: column; gap: 0.15rem;">
+                  <div class="item-title-text" [class.text-semibold]="!n.is_read" style="font-size: 0.85rem; color: #111827; font-weight: 700;">
+                    {{ n.title || 'Notification' }}
+                  </div>
+                  <div class="item-message-text" style="font-size: 0.78rem; color: #4b5563; line-height: 1.35;">
+                    {{ n.message }}
+                  </div>
+                  <div class="item-meta-row" style="margin-top: 0.15rem;">
+                    <span class="item-time">{{ getRelativeTime(n.created_at) }}</span>
+                  </div>
+                </div>
+
+                <!-- Unread Indicator Dot -->
+                <div *ngIf="!n.is_read" class="unread-indicator-dot"></div>
+              </div>
+
+            </div>
+
+            <!-- Sticky Footer -->
+            <div class="notification-dropdown-footer">
+              <a 
+                routerLink="/notifications" 
+                (click)="op.hide()" 
+                class="view-all-link"
+              >
+                View All Notifications <i class="pi pi-arrow-right ml-1"></i>
+              </a>
+            </div>
+
+          </div>
+        </p-popover>
+
+        <!-- Profile Box -->
         <div
           class="topbar-profile flex align-items-center gap-3 hide-on-small"
           (click)="logout()"
@@ -194,21 +287,14 @@ interface SearchItem {
       }
 
       :host ::ng-deep {
-        // .topbar-search-autocomplete {
-        //     width: 100%;
-        // }
-
         .topbar-search-autocomplete .p-autocomplete-input {
-          // width: 100%;
           background-color: var(--surface-card) !important;
           color: var(--text-color) !important;
           border: 1px solid var(--surface-border);
           border-radius: 4px;
-          padding-left: 2.5rem !important; /* Make room for icon */
+          padding-left: 2.5rem !important;
           height: 2.25rem;
         }
-
-        /* Remove the complex focus/border logic since IconField handles it */
 
         .topbar-search-autocomplete .p-autocomplete-panel {
           background: white;
@@ -225,6 +311,33 @@ interface SearchItem {
 
         .topbar-search-autocomplete .p-autocomplete-item:hover {
           background: #f0f0f0;
+        }
+
+        .notification-container {
+          position: relative;
+          display: inline-flex;
+          align-items: center;
+        }
+
+        .notification-badge {
+          position: absolute;
+          top: -4px;
+          right: -4px;
+          background-color: #ef4444;
+          color: #ffffff;
+          font-size: 0.65rem;
+          font-weight: 700;
+          border-radius: 9999px;
+          min-width: 1rem;
+          height: 1rem;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          padding: 0 4px;
+          border: 1.5px solid #5c6bc0;
+          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+          pointer-events: none;
+          z-index: 10;
         }
 
         .layout-topbar-actions .p-button {
@@ -272,7 +385,6 @@ interface SearchItem {
         }
       }
 
-      /* Search Item Styles */
       .search-item {
         display: flex;
         align-items: center;
@@ -299,14 +411,13 @@ interface SearchItem {
         color: #777;
       }
 
-      /* Windows-style Controls */
       .window-controls {
         display: flex;
         align-items: center;
         height: 100%;
         -webkit-app-region: no-drag;
       }
-      /* ... rest of existing styles ... */
+
       .win-btn {
         background: transparent;
         border: none;
@@ -337,7 +448,6 @@ interface SearchItem {
         background-color: rgba(255, 255, 255, 0.16);
       }
 
-      /* Separator */
       .controls-separator {
         display: inline-block;
         width: 1px;
@@ -345,6 +455,209 @@ interface SearchItem {
         background: rgba(255, 255, 255, 0.18);
         margin: 0 8px;
         align-self: center;
+      }
+
+      ::ng-deep .notification-popover-panel {
+        width: 380px !important;
+        border-radius: 12px !important;
+        overflow: hidden !important;
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1) !important;
+        border: 1px solid var(--surface-border) !important;
+        background: var(--surface-card) !important;
+      }
+
+      ::ng-deep .notification-popover-panel .p-popover-content {
+        padding: 0 !important;
+      }
+
+      ::ng-deep .notification-dropdown-card {
+        display: flex;
+        flex-direction: column;
+        background: var(--surface-card);
+        border-radius: 12px;
+        overflow: hidden;
+      }
+
+      ::ng-deep .notification-dropdown-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0.85rem 1.25rem;
+        border-bottom: 1px solid var(--surface-border);
+        background: var(--surface-card);
+        position: sticky;
+        top: 0;
+        z-index: 10;
+      }
+
+      ::ng-deep .unread-badge {
+        background: rgba(59, 130, 246, 0.1);
+        color: var(--primary-color);
+        font-size: 0.72rem;
+        font-weight: 700;
+        padding: 0.15rem 0.5rem;
+        border-radius: 9999px;
+        text-transform: uppercase;
+        letter-spacing: 0.02em;
+      }
+
+      ::ng-deep .mark-all-btn {
+        font-size: 0.78rem !important;
+        font-weight: 600 !important;
+        padding: 0 !important;
+        color: var(--primary-color) !important;
+        height: auto !important;
+        width: auto !important;
+      }
+      ::ng-deep .mark-all-btn:hover {
+        background: transparent !important;
+        text-decoration: underline !important;
+      }
+
+      ::ng-deep .notification-list-container {
+        overflow-y: auto;
+        overflow-x: hidden;
+        max-height: 380px;
+        background: var(--surface-card);
+      }
+
+      ::ng-deep .notification-list-container::-webkit-scrollbar {
+        width: 6px;
+      }
+      ::ng-deep .notification-list-container::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      ::ng-deep .notification-list-container::-webkit-scrollbar-thumb {
+        background: var(--surface-300);
+        border-radius: 99px;
+      }
+      ::ng-deep .notification-list-container::-webkit-scrollbar-thumb:hover {
+        background: var(--surface-400);
+      }
+
+      ::ng-deep .notification-item-row {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.85rem;
+        padding: 0.9rem 1.25rem;
+        border-bottom: 1px solid var(--surface-border);
+        cursor: pointer;
+        transition: background-color 0.2s ease-in-out;
+        position: relative;
+      }
+      ::ng-deep .notification-item-row:last-child {
+        border-bottom: none;
+      }
+      ::ng-deep .notification-item-row:hover {
+        background-color: var(--surface-hover);
+      }
+      ::ng-deep .notification-item-row.unread-item {
+        background-color: rgba(59, 130, 246, 0.02);
+      }
+
+      ::ng-deep .item-icon-wrapper {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 2.15rem;
+        height: 2.15rem;
+        border-radius: 8px;
+        flex-shrink: 0;
+      }
+      ::ng-deep .item-icon-wrapper i {
+        font-size: 0.95rem;
+      }
+
+      ::ng-deep .item-content-body {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+        min-width: 0;
+      }
+
+      ::ng-deep .item-message-text {
+        font-size: 0.85rem;
+        color: var(--text-color);
+        line-height: 1.4;
+        word-wrap: break-word;
+      }
+      ::ng-deep .item-message-text.text-semibold {
+        font-weight: 600;
+        color: var(--text-color-900);
+      }
+
+      ::ng-deep .item-meta-row {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+      ::ng-deep .item-time {
+        font-size: 0.72rem;
+        color: var(--text-color-secondary);
+      }
+
+      ::ng-deep .unread-indicator-dot {
+        width: 0.5rem;
+        height: 0.5rem;
+        border-radius: 50%;
+        background-color: #3b82f6;
+        box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.25);
+        align-self: center;
+        flex-shrink: 0;
+      }
+
+      ::ng-deep .notification-dropdown-footer {
+        border-top: 1px solid var(--surface-border);
+        background: var(--surface-card);
+        padding: 0.75rem 1.25rem;
+        text-align: center;
+        position: sticky;
+        bottom: 0;
+        z-index: 10;
+      }
+
+      ::ng-deep .view-all-link {
+        font-size: 0.825rem;
+        font-weight: 600;
+        color: var(--primary-color);
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        padding: 0.25rem 0;
+        transition: color 0.2s;
+      }
+      ::ng-deep .view-all-link:hover {
+        color: var(--primary-dark-color);
+        text-decoration: underline;
+      }
+
+      ::ng-deep .notification-empty-state {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 3rem 1.5rem;
+        text-align: center;
+      }
+      ::ng-deep .muted-bell-icon {
+        font-size: 2.25rem;
+        color: var(--text-color-secondary);
+        opacity: 0.5;
+        margin-bottom: 0.75rem;
+      }
+      ::ng-deep .empty-title {
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: var(--text-color);
+        margin: 0 0 0.25rem 0;
+      }
+      ::ng-deep .empty-subtitle {
+        font-size: 0.78rem;
+        color: var(--text-color-secondary);
+        margin: 0;
       }
     `,
   ],
@@ -361,6 +674,15 @@ export class AppTopbar implements OnInit, OnDestroy {
 
   userName = 'User';
   userDesignation = '';
+  branchId: number | null = null;
+
+  // Notifications State
+  notifications: any[] = [];
+  unreadCount = signal(0);
+  private notificationInterval: any;
+  http = inject(HttpClient);
+
+  cdr = inject(ChangeDetectorRef);
 
   // Role and Language Data
   languages = [
@@ -369,6 +691,10 @@ export class AppTopbar implements OnInit, OnDestroy {
   ];
 
   selectedLanguage = this.offlineTranslationService.getCurrentLanguage();
+
+  onLanguageChange(event: any) {
+    this.offlineTranslationService.setLanguage(event.value);
+  }
 
   suggestions: SearchItem[] = [];
   selectedItem: any;
@@ -380,9 +706,21 @@ export class AppTopbar implements OnInit, OnDestroy {
   ) { }
 
   ngOnInit() {
-    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    let user: any = {};
+    try {
+      user = JSON.parse(localStorage.getItem('user') || '{}');
+    } catch (e) {
+      console.warn('Invalid user JSON in topbar:', e);
+    }
     this.userName = user.name || 'User';
     this.userDesignation = this.getUserRoleName(user.user_type_id) || user.designation;
+    this.branchId = Number(user.branch_id || user.branchId || 0) || 1;
+
+    setTimeout(() => {
+      this.loadNotifications();
+    }, 0);
+    // Poll every 30 seconds
+    this.notificationInterval = setInterval(() => this.loadNotifications(), 30000);
 
     // Subscribe to search focus requests
     this.searchSubscription = this.searchService.searchFocus$.subscribe(() => {
@@ -396,27 +734,23 @@ export class AppTopbar implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    // Unsubscribe from search
     if (this.searchSubscription) {
       this.searchSubscription.unsubscribe();
     }
-  }
-
-  onLanguageChange(event: any) {
-    this.offlineTranslationService.setLanguage(event.value);
+    if (this.notificationInterval) {
+      clearInterval(this.notificationInterval);
+    }
   }
 
   // Search Methods
   search(event: any) {
     const query = event.query.toLowerCase();
 
-    // If query is empty, show all items
     if (!query || query.trim() === '') {
       this.suggestions = [...this.items];
       return;
     }
 
-    // Helper to check if any word in text starts with query
     const matchesRequest = (text: string) => {
       if (!text) return false;
       return text
@@ -437,17 +771,14 @@ export class AppTopbar implements OnInit, OnDestroy {
       const aLabel = a.label.toLowerCase();
       const bLabel = b.label.toLowerCase();
 
-      // Priority 1: Exact match
       if (aLabel === query && bLabel !== query) return -1;
       if (bLabel === query && aLabel !== query) return 1;
 
-      // Priority 2: Label Starts with
       const aStarts = aLabel.startsWith(query);
       const bStarts = bLabel.startsWith(query);
       if (aStarts && !bStarts) return -1;
       if (bStarts && !aStarts) return 1;
 
-      // Priority 3: Alphanumeric Sort
       return a.label.localeCompare(b.label, undefined, { numeric: true, sensitivity: 'base' });
     });
   }
@@ -455,7 +786,7 @@ export class AppTopbar implements OnInit, OnDestroy {
   onSelect(event: AutoCompleteSelectEvent) {
     const item = event.value as SearchItem;
     this.router.navigate([item.route]);
-    this.selectedItem = null; // Clear selection
+    this.selectedItem = null;
   }
 
   onClear() {
@@ -469,6 +800,116 @@ export class AppTopbar implements OnInit, OnDestroy {
 
   logout() {
     this.authService.logout();
+  }
+
+  loadNotifications() {
+    let user: any = {};
+    try {
+      user = JSON.parse(localStorage.getItem('user') || '{}');
+    } catch (e) {}
+    const employeeId = user.id || '';
+
+    this.http.get<any[]>(`${this.config.apiUrl}/notifications`, {
+      params: { employeeId: String(employeeId) }
+    }).subscribe({
+      next: (data) => {
+        this.notifications = data;
+        this.unreadCount.set(data.filter(n => !n.is_read).length);
+        this.cdr.detectChanges();
+      },
+      error: () => {}
+    });
+  }
+
+  markAsRead(n: any) {
+    if (n.is_read) return;
+    let user: any = {};
+    try {
+      user = JSON.parse(localStorage.getItem('user') || '{}');
+    } catch (e) {}
+    const employeeId = user.id || '';
+
+    this.http.put(`${this.config.apiUrl}/notifications/${n.id}/read`, {}, {
+      params: { employeeId: String(employeeId) }
+    }).subscribe(() => {
+      n.is_read = true;
+      this.unreadCount.set(this.notifications.filter(x => !x.is_read).length);
+      this.cdr.detectChanges();
+    });
+  }
+
+  markAllAsRead(event?: Event) {
+    if (event) {
+      event.stopPropagation();
+    }
+    let user: any = {};
+    try {
+      user = JSON.parse(localStorage.getItem('user') || '{}');
+    } catch (e) {}
+    const employeeId = user.id || '';
+
+    this.http.put(`${this.config.apiUrl}/notifications/read-all`, {}, {
+      params: { employeeId: String(employeeId) }
+    }).subscribe({
+      next: () => {
+        this.notifications.forEach(n => n.is_read = true);
+        this.unreadCount.set(0);
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error('Failed to mark all as read:', err);
+      }
+    });
+  }
+
+  getNotificationIcon(n: any): string {
+    const title = String(n.title || '').toLowerCase();
+    const msg = String(n.message || '').toLowerCase();
+    if (title.includes('reject') || msg.includes('reject')) {
+      return 'pi pi-times-circle';
+    }
+    if (title.includes('escalat') || msg.includes('escalat')) {
+      return 'pi pi-exclamation-triangle';
+    }
+    if (title.includes('submit') || msg.includes('submit')) {
+      return 'pi pi-check-circle';
+    }
+    return 'pi pi-bell';
+  }
+
+  getNotificationSeverityClass(n: any): string {
+    const title = String(n.title || '').toLowerCase();
+    const msg = String(n.message || '').toLowerCase();
+    if (title.includes('reject') || msg.includes('reject')) {
+      return 'bg-red-50 text-red-600 border border-red-100';
+    }
+    if (title.includes('escalat') || msg.includes('escalat')) {
+      return 'bg-amber-50 text-amber-600 border border-amber-100';
+    }
+    if (title.includes('submit') || msg.includes('submit')) {
+      return 'bg-green-50 text-green-600 border border-green-100';
+    }
+    return 'bg-blue-50 text-blue-600 border border-blue-100';
+  }
+
+  getRelativeTime(dateStr: string): string {
+    if (!dateStr) return '';
+    const date = new Date(dateStr);
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffMins = Math.floor(diffMs / 60000);
+    
+    if (diffMins < 1) return 'Just now';
+    if (diffMins < 60) return `${diffMins}m ago`;
+    
+    const diffHours = Math.floor(diffMs / 3600000);
+    if (diffHours < 24) return `${diffHours}h ago`;
+    
+    const diffDays = Math.floor(diffHours / 24);
+    if (diffDays === 1) return 'Yesterday';
+    if (diffDays < 7) return `${diffDays}d ago`;
+    
+    return new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }).format(date);
   }
 
   getAvatarInitial(): string {

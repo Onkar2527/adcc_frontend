@@ -23,6 +23,7 @@ export const routes: Routes = [
       { path: 'branchscrutiny', loadComponent: () => import('./features/proposals/forms-proposal/loan-application/loan-application').then(mod => mod.LoanApplicationComponent) },
       { path: 'employees', redirectTo: '/admin/employee-master', pathMatch: 'full' },
       { path: 'password-policy', redirectTo: '/admin/password-policy-master', pathMatch: 'full' },
+      { path: 'notifications', loadComponent: () => import('./features/notifications/notifications').then(mod => mod.NotificationsComponent) },
       { path: 'auditor', loadChildren: () => import('./features/auditor/auditor.routes').then(mod => mod.AUDITOR_ROUTES) },
       { path: 'reports', loadComponent: () => import('./features/reports/reports.component').then(mod => mod.ReportsComponent) },
       { path: 'reports/detail', loadComponent: () => import('./features/reports/reports-detail-placeholder.component').then(mod => mod.ReportsDetailPlaceholderComponent) },
