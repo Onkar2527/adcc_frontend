@@ -1490,7 +1490,9 @@ export class ComplianceWorkspaceComponent implements OnInit {
                         (res?.answers || [])
                             .filter(
                                 (answer: any) =>
-                                    Number(answer?.is_compliance || 0) === 1,
+                                    Number(answer?.is_compliance || 0) === 1 &&
+                                    answer?.audit_comment &&
+                                    answer.audit_comment.trim() !== '',
                             );
 
                     for (

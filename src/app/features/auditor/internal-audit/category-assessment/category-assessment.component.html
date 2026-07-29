@@ -766,7 +766,7 @@
                       </ng-container>
 
                       <div class="answer-checks">
-                        <label class="compliance-check">
+                        <label class="compliance-check" *ngIf="!isTextAnswer(question)">
                           <input
                             type="checkbox"
                             [(ngModel)]="question.is_compliance"

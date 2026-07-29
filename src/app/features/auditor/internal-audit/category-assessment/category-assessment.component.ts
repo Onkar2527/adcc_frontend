@@ -676,6 +676,7 @@ export class CategoryAssessmentComponent
                     question.showSuggestions = false;
 
                     question.is_compliance =
+                        !this.isTextAnswer(question) &&
                         Boolean(
                             Number(
                                 question.answer?.is_compliance || 0,
@@ -2029,7 +2030,7 @@ export class CategoryAssessmentComponent
                         question.audit_comment || '',
 
                     is_compliance:
-                        question.is_compliance === true,
+                        !this.isTextAnswer(question) && question.is_compliance === true,
 
                     audit_compulsary_ev_upload:
                         question.audit_compulsary_ev_upload === true,
@@ -2069,7 +2070,7 @@ export class CategoryAssessmentComponent
                     audit_comment:
                         question.audit_comment || '',
                     is_compliance:
-                        question.is_compliance === true ? 1 : 0,
+                        (!this.isTextAnswer(question) && question.is_compliance === true) ? 1 : 0,
                     audit_compulsary_ev_upload:
                         question.audit_compulsary_ev_upload === true ? 1 : 0,
                 };
@@ -3697,13 +3698,11 @@ export class CategoryAssessmentComponent
             )
         ) {
             const hasAnswer =
-                String(
-                    this.isTextAnswer(question)
-                        ? question?.audit_comment || ''
-                        : question?.answer_value || '',
-                )
-                    .trim()
-                    .length > 0;
+                this.isTextAnswer(question)
+                    ? true
+                    : String(question?.answer_value || '')
+                        .trim()
+                        .length > 0;
 
             if (!hasAnswer) {
                 messages.push(
@@ -3779,12 +3778,12 @@ export class CategoryAssessmentComponent
     private isQuestionPendingForCompletion(
         question: any,
     ) {
+        if (this.isTextAnswer(question)) {
+            return false;
+        }
+
         const hasAnswer =
-            String(
-                this.isTextAnswer(question)
-                    ? question?.audit_comment || ''
-                    : question?.answer_value || '',
-            )
+            String(question?.answer_value || '')
                 .trim()
                 .length > 0;
 
