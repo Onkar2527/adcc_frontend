@@ -368,7 +368,7 @@ export class ExecutiveSummaryComponent
                         const categoryMarch = this.summary?.march_positions?.find(
                             (x: any) => x.gl_type_id === item.category_id
                         );
-                        const marchPositionValue = (categoryMarch ? Number(categoryMarch.march_position || 0) : 0) / 100000;
+                        const marchPositionValue = Number(((categoryMarch ? Number(categoryMarch.march_position || 0) : 0) / 100000).toFixed(2));
 
                         const amount = this.savedAmountOrDefault(
                             savedLine,
@@ -376,8 +376,8 @@ export class ExecutiveSummaryComponent
                         );
 
                         const displayAmount = (type === 'NPA')
-                            ? (amount !== '' && amount !== null && amount !== undefined ? Number(amount) / 100000 : '')
-                            : Number(amount) / 100000;
+                            ? (amount !== '' && amount !== null && amount !== undefined ? Number((Number(amount) / 100000).toFixed(2)) : '')
+                            : Number((Number(amount) / 100000).toFixed(2));
 
                         totalAccounts += Number(accounts || 0);
                         totalAmount += Number(displayAmount || 0);
@@ -495,16 +495,16 @@ export class ExecutiveSummaryComponent
                                             const categoryMarch = this.summary?.march_positions?.find(
                                                 (x: any) => Number(x.gl_type_id) === Number(item.scheme_id)
                                             );
-                                            const marchPositionValue = (categoryMarch ? Number(categoryMarch.march_position || 0) : 0) / 100000;
+                                            const marchPositionValue = Number(((categoryMarch ? Number(categoryMarch.march_position || 0) : 0) / 100000).toFixed(2));
 
                                             const accounts = this.savedAccountsOrDefault(
                                                 savedFreshLine,
                                                 Number(item.total_accounts || 0),
                                             );
-                                            const amount = this.savedAmountOrDefault(
+                                            const amount = Number((this.savedAmountOrDefault(
                                                 savedLine,
                                                 Math.abs(Number(item.total_amount || 0)),
-                                            ) / 100000;
+                                            ) / 100000).toFixed(2));
 
                                             totalAccounts += Number(accounts || 0);
                                             totalAmount += Number(amount || 0);
@@ -574,7 +574,7 @@ export class ExecutiveSummaryComponent
                                     savedLine,
                                     '',
                                 );
-                                const amountInput = amountInputRaw !== '' && amountInputRaw !== null && amountInputRaw !== undefined ? Number(amountInputRaw) / 100000 : '';
+                                const amountInput = amountInputRaw !== '' && amountInputRaw !== null && amountInputRaw !== undefined ? Number((Number(amountInputRaw) / 100000).toFixed(2)) : '';
 
                                 totalNpaAccounts += Number(accountInput || 0);
                                 totalNpaAmount += Number(amountInput || 0);
@@ -1039,7 +1039,7 @@ export class ExecutiveSummaryComponent
                 total += (current - march);
             }
         });
-        return total;
+        return column === 'accounts' ? total : Number(total.toFixed(2));
     }
 
 }
