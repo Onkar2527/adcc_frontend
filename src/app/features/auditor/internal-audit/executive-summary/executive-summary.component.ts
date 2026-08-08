@@ -368,7 +368,7 @@ export class ExecutiveSummaryComponent
                         const categoryMarch = this.summary?.march_positions?.find(
                             (x: any) => x.gl_type_id === item.category_id
                         );
-                        const marchPositionValue = Number(((categoryMarch ? Number(categoryMarch.march_position || 0) : 0) / 100000).toFixed(2));
+                        const marchPositionValue = Number((categoryMarch ? Number(categoryMarch.march_position || 0) : 0).toFixed(2));
 
                         const amount = this.savedAmountOrDefault(
                             savedLine,
@@ -495,7 +495,7 @@ export class ExecutiveSummaryComponent
                                             const categoryMarch = this.summary?.march_positions?.find(
                                                 (x: any) => Number(x.gl_type_id) === Number(item.scheme_id)
                                             );
-                                            const marchPositionValue = Number(((categoryMarch ? Number(categoryMarch.march_position || 0) : 0) / 100000).toFixed(2));
+                                            const marchPositionValue = Number((categoryMarch ? Number(categoryMarch.march_position || 0) : 0).toFixed(2));
 
                                             const accounts = this.savedAccountsOrDefault(
                                                 savedFreshLine,
