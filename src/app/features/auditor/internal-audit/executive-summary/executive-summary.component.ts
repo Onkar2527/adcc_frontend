@@ -366,7 +366,7 @@ export class ExecutiveSummaryComponent
                         }
 
                         const categoryMarch = this.summary?.march_positions?.find(
-                            (x: any) => x.gl_type_id === item.category_id
+                            (x: any) => String(x.gl_type_id).trim() === String(item.category_id).trim()
                         );
                         const marchPositionValue = Number((categoryMarch ? Number(categoryMarch.march_position || 0) : 0).toFixed(2));
 
@@ -493,7 +493,7 @@ export class ExecutiveSummaryComponent
                                                 (x: any) => String(x.type_id).trim() === String(item.fresh_type_ids?.[0] || item.scheme_code).trim()
                                             );
                                             const categoryMarch = this.summary?.march_positions?.find(
-                                                (x: any) => Number(x.gl_type_id) === Number(item.scheme_id)
+                                                (x: any) => String(x.gl_type_id).trim() === String(item.scheme_code).trim()
                                             );
                                             const marchPositionValue = Number((categoryMarch ? Number(categoryMarch.march_position || 0) : 0).toFixed(2));
 
@@ -564,7 +564,10 @@ export class ExecutiveSummaryComponent
                                 const savedFreshLine = this.summary?.fresh_accounts?.find(
                                     (x: any) => String(x.type_id).trim() === (String(item.scheme_code).trim() + '_NPA')
                                 );
-                                const marchPositionValue = 0;
+                                const categoryMarch = this.summary?.march_positions?.find(
+                                    (x: any) => String(x.gl_type_id).trim() === (String(item.scheme_code).trim() + '_NPA')
+                                );
+                                const marchPositionValue = Number((categoryMarch ? Number(categoryMarch.march_position || 0) : 0).toFixed(2));
 
                                 const accountInput = this.savedAccountsOrDefault(
                                     savedFreshLine,

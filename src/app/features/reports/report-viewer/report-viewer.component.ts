@@ -1067,7 +1067,7 @@ export class ReportViewerComponent implements OnInit {
     const data = this.exeReportData();
     if (!data || !data.marchPositions) return 0;
     const row = data.marchPositions.find(
-      (r: any) => Number(r.gl_type_id) === Number(scheme.scheme_id),
+      (r: any) => String(r.gl_type_id).trim() === String(scheme.scheme_code).trim(),
     );
     return Number(row?.march_position || 0);
   }
