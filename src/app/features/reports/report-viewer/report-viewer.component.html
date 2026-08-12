@@ -697,19 +697,19 @@
           <tr>
             <td class="text-center" style="font-weight: bold;">16</td>
             <td colspan="3">Annual Incremental Deposit Target (IN LAKHS)</td>
-            <td colspan="2"><strong>{{ exeReportData()?.assessment?.deposit_target || 0 | number: '1.2-2' }}</strong>
+            <td colspan="2"><strong>{{ getFormattedTarget(exeReportData()?.assessment?.deposit_target) | number: '1.2-2' }}</strong>
             </td>
           </tr>
           <tr>
             <td class="text-center" style="font-weight: bold;">17</td>
             <td colspan="3">Annual Incremental Advances Target (IN LAKHS)</td>
-            <td colspan="2"><strong>{{ exeReportData()?.assessment?.advances_target || 0 | number: '1.2-2' }}</strong>
+            <td colspan="2"><strong>{{ getFormattedTarget(exeReportData()?.assessment?.advances_target) | number: '1.2-2' }}</strong>
             </td>
           </tr>
           <tr>
             <td class="text-center" style="font-weight: bold;">18</td>
             <td colspan="3">Annual Differential NPA Target (IN LAKHS)</td>
-            <td colspan="2"><strong>{{ exeReportData()?.assessment?.npa_target || 0 | number: '1.2-2' }}</strong></td>
+            <td colspan="2"><strong>{{ getFormattedTarget(exeReportData()?.assessment?.npa_target) | number: '1.2-2' }}</strong></td>
           </tr>
 
           <!-- SECTION 2: BRANCH FINANCIAL POSITION -->

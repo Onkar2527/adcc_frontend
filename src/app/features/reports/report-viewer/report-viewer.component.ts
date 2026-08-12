@@ -1110,7 +1110,7 @@ export class ReportViewerComponent implements OnInit {
         const row = data.branchPositions.find(
           (r: any) => String(r.type_id).trim() === String(scheme.scheme_code).trim(),
         );
-        if (row) return Number(row.amount || 0);
+        if (row) return Number(row.amount || 0) / 100000;
       }
     }
 
@@ -1133,7 +1133,7 @@ export class ReportViewerComponent implements OnInit {
           const row = data.branchPositions.find(
             (r: any) => String(r.type_id).trim() === String(typeId).trim(),
           );
-          if (row) return Number(row.amount || 0);
+          if (row) return Number(row.amount || 0) / 100000;
         }
       }
     }
@@ -1204,6 +1204,11 @@ export class ReportViewerComponent implements OnInit {
   getCategoryYtdTotal(type: string): number {
     const schemes = this.getSchemesByType(type);
     return schemes.reduce((sum, scheme) => sum + this.getYtdValue(scheme), 0);
+  }
+
+  getFormattedTarget(val: any): number {
+    const num = Number(val || 0);
+    return num > 100000 ? num / 100000 : num;
   }
 
   getCdRatio(): number {
