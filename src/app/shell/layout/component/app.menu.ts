@@ -411,6 +411,9 @@ export class AppMenu implements OnInit, OnDestroy {
         .trim()
         .toLowerCase();
 
+    const overview = this.auditNavService.overview();
+    const isComplianceActive = overview && Number(overview.audit_status_id) === 4;
+
     const dynamicItems: MenuItem[] = [
       {
         label: 'Assessment Info',
@@ -429,65 +432,70 @@ export class AppMenu implements OnInit, OnDestroy {
           fragment: 'ignored',
         },
       },
-      {
+    ];
+
+    if (!isComplianceActive) {
+      dynamicItems.push({
         label: 'Executive Summary',
         icon: 'pi pi-fw pi-file-edit',
         routerLink: ['/auditor/internal-audit/executive-summary', assessmentId],
-      },
-    ];
-
-    for (const menu of this.auditNavService.menus()) {
-      const categoryItems = (menu.categories || [])
-        .filter(
-          (category: any) =>
-            !['executive summary', 'assessment info'].includes(normalized(category?.name)),
-        )
-        .map((category: any) => {
-          const isCarryForward = category?.carry_forward || Number(category?.id) === 0;
-
-          return {
-            label: category.name,
-            meta: this.categoryProgressText(category),
-            badgeClass:
-              Number(category?.live_pending_count || 0) > 0 ? 'live-compliance-pending' : '',
-            livePendingCount: Number(category?.live_pending_count || 0),
-            livePendingLabel: `${Number(category?.live_pending_count || 0)} manager response${Number(category?.live_pending_count || 0) === 1 ? '' : 's'} pending with Auditor`,
-            icon: isCarryForward ? 'pi pi-fw pi-forward' : 'pi pi-fw pi-angle-right',
-            routerLink: ['/auditor/internal-audit', assessmentId],
-            queryParams: isCarryForward
-              ? {
-                  view: 'carry-forward',
-                  categoryId: null,
-                  dumpId: null,
-                  pending: null,
-                }
-              : {
-                  view: 'category',
-                  categoryId: Number(category.id),
-                  dumpId: null,
-                  pending: null,
-                },
-            routerLinkActiveOptions: {
-              paths: 'exact',
-              queryParams: 'exact',
-              matrixParams: 'ignored',
-              fragment: 'ignored',
-            },
-          };
-        });
-
-      if (
-        !categoryItems.length ||
-        ['executive summary', 'assessment info'].includes(normalized(menu?.name))
-      ) {
-        continue;
-      }
-
-      dynamicItems.push({
-        label: menu.name,
-        icon: 'pi pi-fw pi-folder',
-        items: categoryItems,
       });
+    }
+
+    if (!isComplianceActive) {
+      for (const menu of this.auditNavService.menus()) {
+        const categoryItems = (menu.categories || [])
+          .filter(
+            (category: any) =>
+              !['executive summary', 'assessment info'].includes(normalized(category?.name)),
+          )
+          .map((category: any) => {
+            const isCarryForward = category?.carry_forward || Number(category?.id) === 0;
+
+            return {
+              label: category.name,
+              meta: this.categoryProgressText(category),
+              badgeClass:
+                Number(category?.live_pending_count || 0) > 0 ? 'live-compliance-pending' : '',
+              livePendingCount: Number(category?.live_pending_count || 0),
+              livePendingLabel: `${Number(category?.live_pending_count || 0)} manager response${Number(category?.live_pending_count || 0) === 1 ? '' : 's'} pending with Auditor`,
+              icon: isCarryForward ? 'pi pi-fw pi-forward' : 'pi pi-fw pi-angle-right',
+              routerLink: ['/auditor/internal-audit', assessmentId],
+              queryParams: isCarryForward
+                ? {
+                    view: 'carry-forward',
+                    categoryId: null,
+                    dumpId: null,
+                    pending: null,
+                  }
+                : {
+                    view: 'category',
+                    categoryId: Number(category.id),
+                    dumpId: null,
+                    pending: null,
+                  },
+              routerLinkActiveOptions: {
+                paths: 'exact',
+                queryParams: 'exact',
+                matrixParams: 'ignored',
+                fragment: 'ignored',
+              },
+            };
+          });
+
+        if (
+          !categoryItems.length ||
+          ['executive summary', 'assessment info'].includes(normalized(menu?.name))
+        ) {
+          continue;
+        }
+
+        dynamicItems.push({
+          label: menu.name,
+          icon: 'pi pi-fw pi-folder',
+          items: categoryItems,
+        });
+      }
     }
 
     return {

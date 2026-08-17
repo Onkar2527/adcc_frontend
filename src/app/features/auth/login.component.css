@@ -35,8 +35,6 @@
     width: 100%;
     height: 3px;
     background: linear-gradient(90deg, transparent, #3f51b5, #e8eaf6, #3f51b5, transparent);
-    background-size: 200% 100%;
-    animation: scanLine 6s linear infinite;
     z-index: 3;
     box-shadow: 0 1px 8px rgba(63, 81, 181, 0.4);
 }
@@ -108,7 +106,6 @@
     border: 1px solid rgba(207, 214, 228, 0.75);
     border-top: 4px solid #3f51b5;
     transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.4s ease;
-    animation: cardBorderGlow 6s infinite ease-in-out;
 }
 
 .login-card:hover {
@@ -117,15 +114,6 @@
         0 24px 60px rgba(63, 81, 181, 0.12),
         0 8px 20px rgba(10, 25, 38, 0.04);
     border-color: rgba(63, 81, 181, 0.3);
-}
-
-@keyframes cardBorderGlow {
-    0%, 100% {
-        border-top-color: #3f51b5;
-    }
-    50% {
-        border-top-color: #5c6bc0;
-    }
 }
 
 .login-card h2 {
@@ -429,7 +417,7 @@
     height: 70px;
     top: 15%;
     left: 20%;
-    animation: floatNode1 12s infinite ease-in-out alternate;
+    opacity: 0.35;
 }
 
 .node-2 {
@@ -437,7 +425,7 @@
     height: 110px;
     bottom: 10%;
     right: 15%;
-    animation: floatNode2 18s infinite ease-in-out alternate;
+    opacity: 0.25;
 }
 
 .node-3 {
@@ -445,43 +433,7 @@
     height: 45px;
     top: 45%;
     right: 35%;
-    animation: floatNode3 14s infinite ease-in-out alternate;
-}
-
-@keyframes floatNode1 {
-    0% {
-        transform: translateY(0) scale(1);
-        opacity: 0.35;
-    }
-    100% {
-        transform: translateY(-20px) scale(1.15);
-        opacity: 0.65;
-        box-shadow: 0 0 15px rgba(255, 255, 255, 0.25);
-    }
-}
-
-@keyframes floatNode2 {
-    0% {
-        transform: translateY(0) scale(1);
-        opacity: 0.25;
-    }
-    100% {
-        transform: translateY(25px) scale(1.1);
-        opacity: 0.55;
-        box-shadow: 0 0 25px rgba(255, 255, 255, 0.2);
-    }
-}
-
-@keyframes floatNode3 {
-    0% {
-        transform: translate(0, 0) scale(1);
-        opacity: 0.45;
-    }
-    100% {
-        transform: translate(15px, -15px) scale(1.2);
-        opacity: 0.75;
-        box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
-    }
+    opacity: 0.45;
 }
 
 /* Background Floating Shapes in White Space */
@@ -500,7 +452,6 @@
     background: rgba(63, 81, 181, 0.08); /* Indigo soft blur */
     top: 50%;
     left: 10%;
-    animation: floatShape1 20s infinite ease-in-out alternate;
 }
 
 .shape-2 {
@@ -509,7 +460,6 @@
     background: rgba(92, 107, 192, 0.06);
     top: 65%;
     right: 8%;
-    animation: floatShape2 25s infinite ease-in-out alternate;
 }
 
 .shape-3 {
@@ -518,63 +468,12 @@
     background: rgba(63, 81, 181, 0.05);
     bottom: 5%;
     left: 40%;
-    animation: floatShape3 22s infinite ease-in-out alternate;
-}
-
-@keyframes floatShape1 {
-    0% {
-        transform: translate(0, 0) scale(1);
-    }
-    100% {
-        transform: translate(30px, -40px) scale(1.15);
-    }
-}
-
-@keyframes floatShape2 {
-    0% {
-        transform: translate(0, 0) scale(1);
-    }
-    100% {
-        transform: translate(-40px, -20px) scale(1.1);
-    }
-}
-
-@keyframes floatShape3 {
-    0% {
-        transform: translate(0, 0) scale(1);
-    }
-    100% {
-        transform: translate(20px, 30px) scale(1.2);
-    }
 }
 
 /* Staggered Entrance Animations */
 .animate-item {
-    opacity: 0;
-    transform: translateY(18px);
-    animation: fadeInUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-
-.delay-1 { animation-delay: 0.06s; }
-.delay-2 { animation-delay: 0.12s; }
-.delay-3 { animation-delay: 0.18s; }
-.delay-4 { animation-delay: 0.24s; }
-.delay-5 { animation-delay: 0.3s; }
-
-@keyframes fadeInUp {
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-@keyframes scanLine {
-    0% {
-        background-position: 200% 0;
-    }
-    100% {
-        background-position: -200% 0;
-    }
+    opacity: 1;
+    transform: none;
 }
 
 /* iOS Segment Control style for Tabs */

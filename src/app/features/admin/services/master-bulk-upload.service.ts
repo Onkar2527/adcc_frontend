@@ -207,9 +207,6 @@ export class MasterBulkUploadService {
         if (session.empCodes.has(normalizedEmpCode) || session.seenEmpCodes.has(normalizedEmpCode)) {
           errors.push('Employee code already exists');
         }
-        if (session.emails.has(normalizedEmail) || session.seenEmails.has(normalizedEmail)) {
-          errors.push('Email already exists');
-        }
 
         if (userTypeId === 6) {
           const regionExists = context.regionNames.some(
