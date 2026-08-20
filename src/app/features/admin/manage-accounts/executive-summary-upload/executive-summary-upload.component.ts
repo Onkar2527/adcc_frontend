@@ -381,8 +381,11 @@ export class ExecutiveSummaryUploadComponent implements OnInit {
 
               if (!glCode) {
                 issues.push('GL Code is required');
-              } else if (!schemeCodes.has(glCode.toLowerCase())) {
-                issues.push(`GL Code '${glCode}' not found in master`);
+              } else {
+                const baseGlCode = glCode.replace(/_NPA$/i, '').trim().toLowerCase();
+                if (!schemeCodes.has(baseGlCode)) {
+                  issues.push(`GL Code '${glCode}' not found in master`);
+                }
               }
 
               if (marchPos === '') {
