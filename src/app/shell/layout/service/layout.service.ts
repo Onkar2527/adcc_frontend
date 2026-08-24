@@ -31,7 +31,7 @@ export class LayoutService {
         preset: 'Aura',
         primary: 'indigo',  // Material Design Indigo #3F51B5
         surface: null,
-        darkTheme: false,
+        darkTheme: typeof localStorage !== 'undefined' ? localStorage.getItem('darkTheme') === 'true' : false,
         menuMode: 'static'
     };
 
@@ -85,24 +85,28 @@ export class LayoutService {
         effect(() => {
             const config = this.layoutConfig();
             if (config) {
+                if (typeof localStorage !== 'undefined') {
+                    localStorage.setItem('darkTheme', String(!!config.darkTheme));
+                }
                 this.onConfigUpdate();
             }
         });
 
         effect(() => {
             const config = this.layoutConfig();
+            if (!config) return;
 
-            if (!this.initialized || !config) {
+            if (!this.initialized) {
                 this.initialized = true;
-                return;
+                this.toggleDarkMode(config);
+            } else {
+                this.handleDarkModeTransition(config);
             }
-
-            this.handleDarkModeTransition(config);
         });
     }
 
     private handleDarkModeTransition(config: layoutConfig): void {
-        if ((document as any).startViewTransition) {
+        if (typeof document !== 'undefined' && (document as any).startViewTransition) {
             this.startViewTransition(config);
         } else {
             this.toggleDarkMode(config);
@@ -124,10 +128,12 @@ export class LayoutService {
 
     toggleDarkMode(config?: layoutConfig): void {
         const _config = config || this.layoutConfig();
-        if (_config.darkTheme) {
-            document.documentElement.classList.add('app-dark');
-        } else {
-            document.documentElement.classList.remove('app-dark');
+        if (typeof document !== 'undefined') {
+            if (_config.darkTheme) {
+                document.documentElement.classList.add('app-dark');
+            } else {
+                document.documentElement.classList.remove('app-dark');
+            }
         }
     }
 

@@ -235,33 +235,16 @@ interface SearchItem {
         <!-- Profile Box -->
         <div
           class="topbar-profile flex align-items-center gap-3 hide-on-small"
-          (click)="logout()"
-          tooltipPosition="bottom"
-          style="padding: 0.35rem 0.75rem; margin-right: 0.5rem; border-radius: 8px; cursor: pointer; transition: all 0.2s ease-in-out; background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.08);"
-          onmouseover="this.style.background='rgba(255, 255, 255, 0.08)'; this.style.borderColor='rgba(255, 255, 255, 0.16)';"
-          onmouseout="this.style.background='rgba(255, 255, 255, 0.04)'; this.style.borderColor='rgba(255, 255, 255, 0.08)';"
         >
           <div
             class="profile-avatar flex align-items-center justify-content-center"
-            style="width: 2.25rem; height: 2.25rem; border-radius: 50%; background: linear-gradient(135deg, #eaf1f8, #cbe0f2); color: #173a59; font-weight: 700; font-size: 0.95rem; border: 2px solid rgba(255, 255, 255, 0.4); box-shadow: 0 4px 6px rgba(0, 0, 0, 0.08); transition: transform 0.2s;"
-            onmouseover="this.style.transform='scale(1.05)';"
-            onmouseout="this.style.transform='scale(1)';"
             (click)="$event.stopPropagation()"
           >
             {{ getAvatarInitial() }}
           </div>
           <div class="flex flex-column text-left" style="line-height: 1.25;">
-            <span
-              class="profile-name"
-              style="font-weight: 600; font-size: 0.85rem; color: #ffffff; letter-spacing: 0.02em;"
-              >{{ userName }}</span
-            >
-            <span
-              class="profile-role"
-              style="font-size: 0.68rem; font-weight: 500; text-transform: uppercase; letter-spacing: 0.06em; color: rgba(255, 255, 255, 0.65);"
-              *ngIf="userDesignation"
-              >{{ userDesignation }}</span
-            >
+            <span class="profile-name">{{ userName }}</span>
+            <span class="profile-role" *ngIf="userDesignation">{{ userDesignation }}</span>
           </div>
         </div>
 
@@ -270,7 +253,7 @@ interface SearchItem {
             icon="pi pi-power-off"
             pTooltip="Logout"
             tooltipPosition="bottom"
-            styleClass="hide-on-small"
+            styleClass="hide-on-small logout-btn"
             severity="danger"
             (click)="logout()"
           ></p-button>
@@ -288,10 +271,7 @@ interface SearchItem {
 
       :host ::ng-deep {
         .topbar-search-autocomplete .p-autocomplete-input {
-          background-color: var(--surface-card) !important;
-          color: var(--text-color) !important;
-          border: 1px solid var(--surface-border);
-          border-radius: 4px;
+          border-radius: 6px;
           padding-left: 2.5rem !important;
           height: 2.25rem;
         }

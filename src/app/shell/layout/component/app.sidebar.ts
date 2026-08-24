@@ -21,11 +21,8 @@ import { LayoutService } from '../service/layout.service';
             height: calc(100vh - 3.5rem);
             top: 3.5rem; /* Below topbar */
             left: 0;
-            background: linear-gradient(180deg, #f4f8fc 0%, #f8fafc 42%, #f7f9fc 100%);
-            border-right: 1px solid #d9e2ec;
-            box-shadow: inset -1px 0 0 rgba(31, 59, 87, 0.04);
             z-index: 999;
-            transition: width 0.3s;
+            transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             display: flex;
             flex-direction: column;
             overflow-y: auto;
@@ -37,29 +34,59 @@ import { LayoutService } from '../service/layout.service';
 
         .sidebar-resize-handle {
             position: absolute;
-            right: 0;
+            right: -2px;
             top: 0;
             bottom: 0;
-            width: 4px;
+            width: 6px;
             cursor: ew-resize;
             background: transparent;
-            transition: background-color 0.2s;
+            transition: background-color 0.22s ease, box-shadow 0.22s ease;
             z-index: 1000;
         }
         
         .sidebar-resize-handle:hover {
-            background-color: var(--primary-color);
-            opacity: 0.5;
+            background-color: var(--primary-color, #3b82f6);
+            box-shadow: 0 0 8px var(--primary-color, #3b82f6);
+            opacity: 0.8;
         }
         
         .sidebar-resize-handle:active {
-            background-color: var(--primary-color);
-            opacity: 0.8;
+            background-color: var(--primary-color, #3b82f6);
+            box-shadow: 0 0 12px var(--primary-color, #3b82f6);
+            opacity: 0.95;
+        }
+
+        .sidebar-resize-handle::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 4px;
+            height: 48px;
+            background: rgba(125, 140, 160, 0.4);
+            border-radius: 4px;
+            opacity: 0;
+            transition: opacity 0.22s ease, background-color 0.22s ease;
+        }
+
+        .sidebar-resize-handle:hover::after,
+        .sidebar-resize-handle:active::after {
+            opacity: 1;
+            background: #ffffff;
+        }
+        
+        :root[class*='app-dark'] .sidebar-resize-handle::after {
+            background: rgba(255, 255, 255, 0.3);
+        }
+        :root[class*='app-dark'] .sidebar-resize-handle:hover::after,
+        :root[class*='app-dark'] .sidebar-resize-handle:active::after {
+            background: #ffffff;
         }
     `]
 })
 export class AppSidebar implements OnInit, OnDestroy {
-    sidebarWidth: number = 15; // Compact default for audit workspace
+    sidebarWidth: number = 21; // Compact default for audit workspace
     private startX = 0;
     private startWidth = 0;
     private mouseMoveListener: (() => void) | null = null;
@@ -87,8 +114,8 @@ export class AppSidebar implements OnInit, OnDestroy {
             if (!Number.isNaN(parsedWidth)) {
                 this.sidebarWidth =
                     compactWidthApplied
-                        ? parsedWidth
-                        : Math.min(parsedWidth, 15);
+                        ? (parsedWidth === 15 ? 21 : parsedWidth)
+                        : Math.min(parsedWidth, 21);
             }
 
             if (!compactWidthApplied) {
@@ -141,8 +168,8 @@ export class AppSidebar implements OnInit, OnDestroy {
         const deltaRem = deltaX / 16; // Convert pixels to rem (assuming 16px = 1rem)
         let newWidth = this.startWidth + deltaRem;
 
-        // Constrain width between 12rem and 24rem
-        newWidth = Math.max(12, Math.min(24, newWidth));
+        // Constrain width between 12rem and 28rem
+        newWidth = Math.max(12, Math.min(28, newWidth));
 
         this.sidebarWidth = newWidth;
 

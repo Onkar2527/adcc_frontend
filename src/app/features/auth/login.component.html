@@ -1,6 +1,18 @@
 <p-toast></p-toast>
 
 <div class="login-page">
+  <!-- Theme Toggle Button in Top Right Corner -->
+  <div class="login-theme-toggle">
+    <button
+      pButton
+      type="button"
+      [icon]="layoutService.layoutConfig().darkTheme ? 'pi pi-moon' : 'pi pi-sun'"
+      severity="secondary"
+      (click)="toggleTheme()"
+      aria-label="Toggle theme"
+    ></button>
+  </div>
+
   <!-- Fixed Banner -->
   <div class="top-banner">
     <div class="glow-node node-1"></div>
@@ -64,7 +76,7 @@
             <div class="reset-link-container animate-item delay-3"
               style="text-align: right; margin-bottom: 12px; margin-top: -6px;">
               <a href="javascript:void(0)" (click)="goToForgotPassword()" class="reset-pass-link"
-                style="font-size: 0.85rem; color: #3f51b5; text-decoration: none; font-weight: 600;">Forgot/Reset
+                style="font-size: 0.85rem; color: #0e52a4; text-decoration: none; font-weight: 600;">Forgot/Reset
                 Password?</a>
             </div>
 

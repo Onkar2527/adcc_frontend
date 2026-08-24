@@ -14,6 +14,7 @@ import { PasswordPolicyService } from '../admin/services/masters.service';
 import { SelectModule } from 'primeng/select';
 import { OfflineTranslationService } from '../../core/services/offline-translation.service';
 import { APP_CONFIG } from '../../core/services/config/config.token';
+import { LayoutService } from '../../shell/layout/service/layout.service';
 
 @Component({
   selector: 'app-login',
@@ -34,6 +35,7 @@ export class LoginComponent {
   private authService = inject(AuthService);
   offlineTranslationService = inject(OfflineTranslationService);
   private config = inject(APP_CONFIG);
+  public layoutService = inject(LayoutService);
   bankName = this.config.bank_name || 'KREDPOOL SOLUTIONS PVT LTD.';
 
   selectedLanguage = this.offlineTranslationService.getCurrentLanguage();
@@ -41,6 +43,10 @@ export class LoginComponent {
   onLanguageChange(lang: string) {
     this.selectedLanguage = lang;
     this.offlineTranslationService.setLanguage(lang);
+  }
+
+  toggleTheme() {
+    this.layoutService.layoutConfig.update((state) => ({ ...state, darkTheme: !state.darkTheme }));
   }
   private router = inject(Router);
   private route = inject(ActivatedRoute);

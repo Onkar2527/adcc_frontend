@@ -67,7 +67,7 @@ import { LayoutService } from '../service/layout.service';
             top: 3.5rem;
             left: 0;
             right: 0;
-            margin-left: var(--sidebar-width, 16rem);
+            margin-left: var(--sidebar-width, 21rem);
             z-index: 996;
             background: var(--surface-ground);
             border-bottom: 1px solid var(--surface-border);

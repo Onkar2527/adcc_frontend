@@ -2373,7 +2373,7 @@ export class CategoryAssessmentComponent
                 setIndex,
             );
 
-        return this.openedHeaders()[key] || this.defaultOpenedHeaders;
+        return this.openedHeaders()[key] || (set?.headers ? set.headers.map((_: any, i: number) => i.toString()) : this.defaultOpenedHeaders);
     }
 
     setOpenedHeaderValues(

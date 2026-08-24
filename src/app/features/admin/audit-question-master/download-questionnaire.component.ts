@@ -406,6 +406,56 @@ import { ExportService } from '../../../core/services/export/export.service';
     .text-gray-risk {
       color: #6b7280;
     }
+
+    /* ======== DARK MODE OVERRIDES ======== */
+    :host-context(.app-dark) .card {
+      background: #1e293b !important;
+      border-color: #334155 !important;
+      color: #e2e8f0 !important;
+    }
+    :host-context(.app-dark) h2,
+    :host-context(.app-dark) h3,
+    :host-context(.app-dark) h4,
+    :host-context(.app-dark) h5 {
+      color: #e2e8f0 !important;
+    }
+    :host-context(.app-dark) .target-card {
+      background: #1e293b !important;
+      border-color: #334155 !important;
+      color: #e2e8f0 !important;
+    }
+    :host-context(.app-dark) .preview-table-container {
+      background: #1e293b !important;
+      border-color: #334155 !important;
+    }
+    :host-context(.app-dark) .preview-table-container table {
+      border-color: #475569 !important;
+    }
+    :host-context(.app-dark) .preview-table-container tr[style*='background: #fff'],
+    :host-context(.app-dark) .preview-table-container tr[style*='background:#fff'] {
+      background: #1e293b !important;
+    }
+    :host-context(.app-dark) .preview-table-container tr[style*='#f8f9fa'],
+    :host-context(.app-dark) .preview-table-container tr[style*='#f4f6f9'],
+    :host-context(.app-dark) .preview-table-container tr[style*='#e9ecef'] {
+      background: #0f172a !important;
+    }
+    :host-context(.app-dark) .preview-table-container td,
+    :host-context(.app-dark) .preview-table-container th {
+      border-color: #334155 !important;
+      color: #e2e8f0 !important;
+    }
+    :host-context(.app-dark) .preview-table-container td[style*='#fbfcfd'],
+    :host-context(.app-dark) .preview-table-container td[style*='#fafafb'],
+    :host-context(.app-dark) .preview-table-container td[style*='#fdfdfd'],
+    :host-context(.app-dark) .preview-table-container td[style*='#f4f5f7'] {
+      background: #1e293b !important;
+    }
+    :host-context(.app-dark) .preview-table-container td[style*='#f1f2f4'],
+    :host-context(.app-dark) .preview-table-container th[style*='#f1f2f4'],
+    :host-context(.app-dark) .preview-table-container th[style*='#e2e3e5'] {
+      background: #0f172a !important;
+    }
   `]
 })
 export class DownloadQuestionnaireComponent implements OnInit {

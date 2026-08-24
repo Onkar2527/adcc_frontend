@@ -793,6 +793,109 @@ export interface CalendarDay {
         color: #ffffff;
         box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25);
       }
+
+      /* ======== DARK MODE OVERRIDES ======== */
+      :host-context(.app-dark) .apcard {
+        background: var(--surface-card, #1e293b) !important;
+        border-color: var(--surface-border, #334155) !important;
+        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3) !important;
+        color: var(--text-color, #e2e8f0) !important;
+      }
+      :host-context(.app-dark) .text-gray-900,
+      :host-context(.app-dark) .text-gray-800,
+      :host-context(.app-dark) .text-gray-700,
+      :host-context(.app-dark) .text-gray-600 {
+        color: var(--text-color, #e2e8f0) !important;
+      }
+      :host-context(.app-dark) .tab-btn {
+        color: var(--text-color-secondary, #94a3b8) !important;
+      }
+      :host-context(.app-dark) .tab-btn:hover {
+        background: var(--surface-hover, #334155) !important;
+        color: var(--text-color, #ffffff) !important;
+      }
+      :host-context(.app-dark) .tab-btn.active-tab {
+        background: #3b82f6 !important;
+        color: #ffffff !important;
+      }
+      :host-context(.app-dark) select.bg-white,
+      :host-context(.app-dark) select {
+        background-color: var(--surface-input-background, #1e293b) !important;
+        color: var(--text-color, #e2e8f0) !important;
+        border-color: var(--surface-border, #334155) !important;
+      }
+      :host-context(.app-dark) select option {
+        background-color: var(--surface-card, #1e293b) !important;
+        color: var(--text-color, #e2e8f0) !important;
+      }
+      :host-context(.app-dark) .legend-item {
+        background: var(--surface-card, #1e293b) !important;
+        border-color: var(--surface-border, #334155) !important;
+        color: var(--text-color, #e2e8f0) !important;
+      }
+      :host-context(.app-dark) .calendar-grid,
+      :host-context(.app-dark) .calendar-grid th,
+      :host-context(.app-dark) .calendar-grid td,
+      :host-context(.app-dark) .v-table,
+      :host-context(.app-dark) .v-table th,
+      :host-context(.app-dark) .v-table td,
+      :host-context(.app-dark) .risk-matrix-table,
+      :host-context(.app-dark) .risk-matrix-table th,
+      :host-context(.app-dark) .risk-matrix-table td {
+        border-color: var(--surface-border, #334155) !important;
+      }
+      :host-context(.app-dark) .calendar-grid th,
+      :host-context(.app-dark) .v-table th,
+      :host-context(.app-dark) .risk-matrix-table th {
+        background-color: var(--surface-hover, #0f172a) !important;
+        color: var(--text-color, #e2e8f0) !important;
+      }
+      :host-context(.app-dark) .calendar-cell {
+        background-color: var(--surface-card, #1e293b) !important;
+      }
+      :host-context(.app-dark) .calendar-cell:hover {
+        background-color: var(--surface-hover, #334155) !important;
+      }
+      :host-context(.app-dark) .calendar-date-num {
+        color: var(--text-color, #e2e8f0) !important;
+      }
+      :host-context(.app-dark) .calendar-status-past {
+        background-color: rgba(255, 255, 255, 0.02) !important;
+      }
+      :host-context(.app-dark) .calendar-status-today {
+        background-color: rgba(40, 167, 69, 0.08) !important;
+      }
+      :host-context(.app-dark) .calendar-status-future {
+        background-color: rgba(59, 130, 246, 0.05) !important;
+      }
+      :host-context(.app-dark) .frequency-select {
+        background-color: var(--surface-input-background, #1e293b) !important;
+        color: var(--text-color, #e2e8f0) !important;
+        border-color: var(--surface-border, #334155) !important;
+      }
+      :host-context(.app-dark) .calendar-popup-event {
+        background: var(--surface-section, #0f172a) !important;
+        color: var(--text-color, #e2e8f0) !important;
+      }
+      :host-context(.app-dark) .calendar-popup-event strong {
+        color: var(--text-color, #ffffff) !important;
+      }
+      :host-context(.app-dark) .calendar-popup-event span {
+        color: var(--text-color-secondary, #94a3b8) !important;
+      }
+      :host-context(.app-dark) .bg-gray-50 {
+        background-color: var(--surface-section, #0f172a) !important;
+        border-color: var(--surface-border, #334155) !important;
+        color: var(--text-color-secondary, #94a3b8) !important;
+      }
+      :host-context(.app-dark) .calendar-grid th.bg-red-50 {
+        background-color: rgba(220, 53, 69, 0.15) !important;
+        color: #f87171 !important;
+      }
+      :host-context(.app-dark) .calendar-grid th.surface-100 {
+        background-color: var(--surface-hover, #334155) !important;
+        color: var(--text-color, #e2e8f0) !important;
+      }
     `,
   ],
 })

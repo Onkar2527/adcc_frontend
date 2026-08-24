@@ -857,7 +857,7 @@
                       <div class="audit-comment-wrapper">
                         <textarea
                           class="answer-control"
-                          rows="2"
+                          rows="4"
                           placeholder="Audit Comment"
                           [(ngModel)]="question.audit_comment"
                           [disabled]="question.is_editable === false"
@@ -1010,7 +1010,7 @@
                             <textarea
                               *ngIf="column.column_type_id == 2; else annexureInput"
                               class="answer-control"
-                              rows="2"
+                              rows="1"
                               [(ngModel)]="question.annexure_draft.values[ci]"
                               [disabled]="question.is_editable === false"
                             ></textarea>
@@ -1760,7 +1760,7 @@
                           <div class="audit-comment-wrapper">
                             <textarea
                               class="answer-control"
-                              rows="2"
+                              rows="4"
                               placeholder="Audit Comment"
                               [(ngModel)]="subsetQuestion.audit_comment"
                               [disabled]="subsetQuestion.is_editable === false"
@@ -1958,7 +1958,7 @@
                               <textarea
                                 *ngIf="column.column_type_id == 2; else subsetAnnexureInput"
                                 class="answer-control"
-                                rows="2"
+                                rows="1"
                                 [(ngModel)]="subsetQuestion.annexure_draft.values[ci]"
                                 [disabled]="subsetQuestion.is_editable === false"
                               ></textarea>

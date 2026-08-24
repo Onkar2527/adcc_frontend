@@ -282,3 +282,173 @@
     }
   }
 }
+
+:host-context(.app-dark) {
+  .quick-mapper-container {
+    background-color: var(--surface-ground, #0b0f19);
+  }
+
+  /* Header-card (top banner) */
+  .header-card {
+    background: var(--surface-card, #252526) !important;
+    border-color: var(--surface-border, #3e3e3e) !important;
+  }
+
+  /* Editor cards (both panels) */
+  .editor-card {
+    border-color: var(--surface-border, #3e3e3e);
+    background: var(--surface-card, #252526);
+    color: var(--text-color, #e2e8f0);
+
+    &:hover {
+      border-color: var(--surface-400, #555555);
+    }
+
+    /* Panel section headings */
+    .font-bold {
+      color: var(--text-color, #e2e8f0);
+    }
+
+    .border-bottom-1,
+    .border-gray-100 {
+      border-color: var(--surface-border, #3e3e3e) !important;
+    }
+  }
+
+  /* Risk Scoring Mapping inner box */
+  .mapping-box {
+    background: var(--surface-section, #1f1f1f) !important;
+    border-color: var(--surface-border, #3e3e3e) !important;
+  }
+
+  /* Inline table inside the risk mapping panel */
+  .table-container {
+    border-color: var(--surface-border, #3e3e3e) !important;
+
+    table {
+      background-color: var(--surface-card, #252526) !important;
+      color: var(--text-color, #e2e8f0) !important;
+    }
+
+    thead tr {
+      background-color: var(--surface-section, #1f1f1f) !important;
+      border-bottom-color: var(--surface-border, #3e3e3e) !important;
+      color: var(--text-color-secondary, #9fa6b2) !important;
+    }
+
+    tbody tr {
+      border-bottom-color: var(--surface-border, #3e3e3e) !important;
+
+      &:hover {
+        background-color: rgba(255, 255, 255, 0.03) !important;
+      }
+
+      td {
+        color: var(--text-color, #e2e8f0) !important;
+      }
+    }
+  }
+
+  /* Bottom card / Questions Master Directory */
+  .card {
+    background: var(--surface-card, #252526) !important;
+    border-color: var(--surface-border, #3e3e3e) !important;
+    color: var(--text-color, #e2e8f0) !important;
+  }
+
+  .risk-badge {
+    &.no, &.no-risk {
+      background-color: rgba(255, 255, 255, 0.05);
+      color: var(--text-color-secondary, #9fa6b2);
+    }
+  }
+
+  .badge-count {
+    background-color: var(--surface-section, #1f1f1f);
+    color: var(--text-color-secondary, #9fa6b2);
+    border-color: var(--surface-border, #3e3e3e);
+  }
+}
+
+/* ng-deep dark mode overrides — must be outside :host-context nesting */
+:host-context(.app-dark) ::ng-deep {
+  .p-inputtext, .p-select, textarea {
+    border-color: var(--surface-border, #3e3e3e) !important;
+    background-color: var(--surface-section, #1f1f1f) !important;
+    color: var(--text-color, #e2e8f0) !important;
+
+    &:focus, &.p-focus {
+      border-color: var(--primary-color, #3b82f6) !important;
+    }
+  }
+
+  .p-select .p-select-label {
+    color: var(--text-color, #e2e8f0) !important;
+  }
+
+  .p-floatlabel {
+    label {
+      color: var(--text-color-secondary, #9fa6b2);
+    }
+
+    &:focus-within label,
+    &.p-floatlabel-focus label,
+    .p-inputtext:focus ~ label,
+    .p-inputtext.p-filled ~ label,
+    .p-select:focus-within ~ label,
+    .p-select.p-filled ~ label,
+    textarea:focus ~ label,
+    textarea.p-filled ~ label,
+    .has-value label {
+      color: var(--primary-color, #3b82f6);
+      background-color: var(--surface-section, #1f1f1f) !important;
+    }
+  }
+
+  .p-datatable {
+    border-color: var(--surface-border, #3e3e3e);
+
+    .p-datatable-thead > tr > th {
+      background-color: var(--surface-section, #1f1f1f);
+      color: var(--text-color, #e2e8f0);
+      border-bottom-color: var(--surface-border, #3e3e3e);
+    }
+
+    .p-datatable-tbody > tr {
+      background-color: var(--surface-card, #252526);
+
+      &:hover {
+        background-color: var(--surface-hover, rgba(255, 255, 255, 0.03));
+      }
+
+      & > td {
+        border-bottom-color: var(--surface-border, #3e3e3e);
+        color: var(--text-color, #e2e8f0);
+      }
+    }
+  }
+
+  .p-dialog {
+    border-color: var(--surface-border, #3e3e3e);
+    background-color: var(--surface-card, #252526);
+
+    .p-dialog-header {
+      background-color: var(--surface-section, #1f1f1f);
+      border-bottom-color: var(--surface-border, #3e3e3e);
+
+      .p-dialog-title {
+        color: var(--text-color, #e2e8f0);
+      }
+    }
+
+    .p-dialog-content {
+      background-color: var(--surface-card, #252526);
+      color: var(--text-color, #e2e8f0);
+    }
+
+    .p-dialog-footer {
+      background-color: var(--surface-section, #1f1f1f);
+      border-top-color: var(--surface-border, #3e3e3e);
+    }
+  }
+}
