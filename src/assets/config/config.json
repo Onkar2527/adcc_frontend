@@ -1,5 +1,5 @@
 {
   "company_uuid4": "from_config",
-  "apiUrl": "https://assureprosmbankbackend.kredpool.ai",
+  "apiUrl": "http://localhost:3581",
   "bank_name": "Kredpool Bank"
 }

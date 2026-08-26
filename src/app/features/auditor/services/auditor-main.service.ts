@@ -730,6 +730,18 @@ export class AuditDashboardService {
     );
   }
 
+  applyDefaultsAll(
+    assessmentId: number,
+    employeeId: number,
+  ) {
+    return this.http.post<any>(
+      `${this.config.apiUrl}/internal-audit/${assessmentId}/apply-defaults-all`,
+      {
+        employee_id: employeeId,
+      },
+    );
+  }
+
   saveInternalAuditAnnexureRow(
     assessmentId: number,
     categoryId: number,

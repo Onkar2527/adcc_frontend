@@ -98,6 +98,9 @@ export class AssessmentWorkspaceComponent implements OnInit {
     selectedDumpId =
         signal(0);
 
+    applyingDefaultsAll =
+        signal(false);
+
     carryForward =
         signal<any[]>([]);
 
@@ -1261,6 +1264,10 @@ export class AssessmentWorkspaceComponent implements OnInit {
         return audit_flow_config.liveManagerCompliance === true;
     }
 
+    canShowApplyDefaultsButton() {
+        return Number(audit_flow_config.showApplyDefaultsAndSaveAll || 0) === 1;
+    }
+
     submitActionLabel(audit: any) {
         if (
             Number(audit?.audit_status_id) === 3
@@ -1370,5 +1377,32 @@ export class AssessmentWorkspaceComponent implements OnInit {
         }
 
         return 'secondary';
+    }
+
+    applyDefaultsAndSaveAll(assessmentId: number) {
+        this.confirmationService.confirm({
+            message: 'Are you sure you want to apply default answers and save for all unanswered questions across all categories in this assessment?',
+            header: 'Apply Defaults & Save All',
+            icon: 'pi pi-exclamation-triangle',
+            accept: () => {
+                this.applyingDefaultsAll.set(true);
+                this.service.applyDefaultsAll(assessmentId, this.employeeId())
+                    .subscribe({
+                        next: (res: any) => {
+                            this.applyingDefaultsAll.set(false);
+                            if (res?.success) {
+                                this.notification.success(res?.message || 'Default answers applied and saved successfully.');
+                                this.loadMenu(assessmentId, true, true);
+                            } else {
+                                this.notification.error(res?.message || 'Unable to apply default answers.');
+                            }
+                        },
+                        error: (err) => {
+                            this.applyingDefaultsAll.set(false);
+                            this.notification.error(err?.error?.message || 'Error occurred while applying defaults.');
+                        }
+                    });
+            }
+        });
     }
 }

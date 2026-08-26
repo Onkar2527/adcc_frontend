@@ -88,6 +88,19 @@
           >
             {{ audit.block_reason }}
           </div>
+
+          <div class="mt-4 flex flex-column gap-2" *ngIf="audit.can_continue && canShowApplyDefaultsButton()">
+            <button
+              pButton
+              type="button"
+              icon="pi pi-check-square"
+              label="Apply Defaults & Save All"
+              class="p-button-outlined w-full"
+              [loading]="applyingDefaultsAll()"
+              [disabled]="applyingDefaultsAll()"
+              (click)="applyDefaultsAndSaveAll(audit.id)"
+            ></button>
+          </div>
         </p-card>
       </div>
 

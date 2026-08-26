@@ -444,6 +444,9 @@ export class AppMenu implements OnInit, OnDestroy {
 
     if (!isComplianceActive) {
       for (const menu of this.auditNavService.menus()) {
+        let menuTotal = 0;
+        let menuAnswered = 0;
+
         const categoryItems = (menu.categories || [])
           .filter(
             (category: any) =>
@@ -451,6 +454,18 @@ export class AppMenu implements OnInit, OnDestroy {
           )
           .map((category: any) => {
             const isCarryForward = category?.carry_forward || Number(category?.id) === 0;
+
+            const isAccountBased = !!category?.account_based;
+            const answered = isAccountBased
+              ? Number(category?.completed_account_count || 0)
+              : Number(category?.answered_count || 0);
+            const total = isAccountBased
+              ? Number(category?.account_count || 0)
+              : Number(category?.question_count || 0);
+            const progress = total > 0 ? Math.min(100, Math.round((answered / total) * 100)) : 0;
+
+            menuTotal += total;
+            menuAnswered += answered;
 
             return {
               label: category.name,
@@ -490,9 +505,12 @@ export class AppMenu implements OnInit, OnDestroy {
           continue;
         }
 
+        const menuProgress = menuTotal > 0 ? Math.min(100, Math.round((menuAnswered / menuTotal) * 100)) : 0;
+
         dynamicItems.push({
           label: menu.name,
           icon: 'pi pi-fw pi-folder',
+          progress: menuProgress,
           items: categoryItems,
         });
       }

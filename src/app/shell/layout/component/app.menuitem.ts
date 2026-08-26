@@ -29,6 +29,12 @@ import { LayoutService } from '../service/layout.service';
                         </span>
                     </span>
                     <small *ngIf="item['meta']" class="layout-menuitem-meta">{{ item['meta'] }}</small>
+                    <div *ngIf="item['progress'] !== undefined" class="menuitem-progress-wrapper">
+                        <div class="menuitem-progress-bar">
+                            <div class="menuitem-progress-fill" [style.width.%]="item['progress']"></div>
+                        </div>
+                        <span class="menuitem-progress-percentage">{{ item['progress'] }}%</span>
+                    </div>
                 </span>
                 <i class="pi pi-fw pi-angle-down layout-submenu-toggler" *ngIf="item.items"></i>
             </a>
@@ -63,6 +69,12 @@ import { LayoutService } from '../service/layout.service';
                         </span>
                     </span>
                     <small *ngIf="item['meta']" class="layout-menuitem-meta">{{ item['meta'] }}</small>
+                    <div *ngIf="item['progress'] !== undefined" class="menuitem-progress-wrapper">
+                        <div class="menuitem-progress-bar">
+                            <div class="menuitem-progress-fill" [style.width.%]="item['progress']"></div>
+                        </div>
+                        <span class="menuitem-progress-percentage">{{ item['progress'] }}%</span>
+                    </div>
                 </span>
                 <i class="pi pi-fw pi-angle-down layout-submenu-toggler" *ngIf="item.items"></i>
             </a>
@@ -140,6 +152,36 @@ import { LayoutService } from '../service/layout.service';
             font-size: .68rem;
             font-weight: 500;
             line-height: 1.2;
+        }
+
+        .menuitem-progress-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            width: 100%;
+            margin-top: 4px;
+        }
+
+        .menuitem-progress-bar {
+            flex: 1;
+            height: 4px;
+            background: #E0F2FE;
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .menuitem-progress-fill {
+            height: 100%;
+            background: #0284c7;
+            border-radius: 2px;
+            transition: width 0.3s ease-in-out;
+        }
+
+        .menuitem-progress-percentage {
+            font-size: 10px;
+            font-weight: 600;
+            color: var(--text-color-secondary);
+            white-space: nowrap;
         }
     `]
 })

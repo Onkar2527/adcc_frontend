@@ -630,11 +630,7 @@ export class ReviewerWorkspaceComponent implements OnInit {
                 return true;
             }
 
-            if (
-                action === 2
-            ) {
-                return status === 14;
-            }
+
 
             if (
                 action === 3
@@ -1188,7 +1184,7 @@ export class ReviewerWorkspaceComponent implements OnInit {
             ).trim();
 
         if (
-            status === 13
+            status === 14
             || status === 8
         ) {
             return true;

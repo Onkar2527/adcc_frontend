@@ -544,7 +544,7 @@
             <textarea *ngIf="!isComplianceReview()" rows="2" [(ngModel)]="answer.audit_reviewer_comment"
               placeholder="Reviewer comment"></textarea>
 
-            <textarea *ngIf="isComplianceReview()" rows="2" [(ngModel)]="answer.compliance_reviewer_comment"
+            <textarea *ngIf="isComplianceReview() && reviewStatus(answer) !== 13" rows="2" [(ngModel)]="answer.compliance_reviewer_comment"
               placeholder="Reviewer Remark"></textarea>
 
             <div class="review-buttons">
@@ -703,7 +703,7 @@
                       <textarea *ngIf="!isComplianceReview()" rows="1" [(ngModel)]="row.audit_reviewer_comment"
                         placeholder="Reviewer comment"></textarea>
 
-                      <textarea *ngIf="isComplianceReview()" rows="1" [(ngModel)]="row.compliance_reviewer_comment"
+                      <textarea *ngIf="isComplianceReview() && reviewStatus(row) !== 13" rows="1" [(ngModel)]="row.compliance_reviewer_comment"
                         placeholder="Reviewer Remark"></textarea>
                     </td>
                     <td>

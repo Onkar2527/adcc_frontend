@@ -191,4 +191,5 @@ export const FREE_AUDIT_FLOW = false;
 export const ENABLE_2FA = false;
 export const audit_flow_config = {
   liveManagerCompliance: true,
+  showApplyDefaultsAndSaveAll: 0, // 1 for show, 0 for hide
 };
