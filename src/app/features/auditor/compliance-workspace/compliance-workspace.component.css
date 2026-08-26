@@ -483,6 +483,10 @@
     outline: none;
 }
 
+.response-panel textarea {
+    min-height: 5.1rem;
+}
+
 .response-panel textarea:focus,
 .annexure-table textarea:focus {
     border-color: var(--primary-color);

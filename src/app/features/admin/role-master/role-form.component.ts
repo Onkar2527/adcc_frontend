@@ -1,6 +1,7 @@
 import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormDrawerRef } from '../../../core/services/drawer/form-drawer.ref';
+import { MessageService } from 'primeng/api';
 import { 
   TextFieldComponent, 
   CheckboxFieldComponent, 
@@ -55,6 +56,7 @@ import { RoleService } from '../services/masters.service';
 export class RoleFormComponent {
   private ref = inject(FormDrawerRef);
   private roleService = inject(RoleService);
+  private messageService = inject(MessageService);
 
   roleName = signal('');
   description = signal('');
@@ -92,7 +94,14 @@ export class RoleFormComponent {
         this.saving.set(false);
         this.ref.close(res);
       },
-      error: () => this.saving.set(false)
+      error: (err) => {
+        this.saving.set(false);
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: err?.error?.message || 'Unable to save role details'
+        });
+      }
     });
   }
 

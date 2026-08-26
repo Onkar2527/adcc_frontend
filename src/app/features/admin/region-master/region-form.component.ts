@@ -166,12 +166,12 @@ export class RegionFormComponent {
   private loadUnits() {
     this.unitsService.getUnits().subscribe({
       next: (units) => this.units.set(units),
-      error: () => {
+      error: (err) => {
         this.units.set([]);
         this.messageService.add({
           severity: 'error',
           summary: 'Error',
-          detail: 'Unable to load audit units'
+          detail: err?.error?.message || 'Unable to load audit units'
         });
       }
     });

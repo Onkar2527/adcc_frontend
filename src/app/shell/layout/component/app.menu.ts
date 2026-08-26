@@ -463,17 +463,17 @@ export class AppMenu implements OnInit, OnDestroy {
               routerLink: ['/auditor/internal-audit', assessmentId],
               queryParams: isCarryForward
                 ? {
-                    view: 'carry-forward',
-                    categoryId: null,
-                    dumpId: null,
-                    pending: null,
-                  }
+                  view: 'carry-forward',
+                  categoryId: null,
+                  dumpId: null,
+                  pending: null,
+                }
                 : {
-                    view: 'category',
-                    categoryId: Number(category.id),
-                    dumpId: null,
-                    pending: null,
-                  },
+                  view: 'category',
+                  categoryId: Number(category.id),
+                  dumpId: null,
+                  pending: null,
+                },
               routerLinkActiveOptions: {
                 paths: 'exact',
                 queryParams: 'exact',

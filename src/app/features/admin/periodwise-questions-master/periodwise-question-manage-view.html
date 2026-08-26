@@ -3,7 +3,7 @@
 
     <!-- HEADER -->
 
-    <div class="border-round-xl p-4 mb-4 surface-card shadow-2">
+    <div class="border-round-xl p-4 mb-4 periodwise-header-card shadow-3">
 
         <div class="flex justify-content-between align-items-start">
 
@@ -51,7 +51,7 @@
                     [disabled]="hasUnsavedChanges()"
                     [title]="hasUnsavedChanges() ? 'Please save all unsaved changes first before syncing' : 'Sync this question setup to all active branch assessments for this period'"
                     (click)="syncAllBranchesCurrentAssessment()"></button>
-                <p-chip label="ACTIVE" styleClass="bg-green-100 text-green-700"></p-chip>
+                <p-chip label="ACTIVE" styleClass="premium-chip-active"></p-chip>
             </div>
 
         </div>
@@ -72,87 +72,31 @@
         </div>
     </div>
 
+    <!-- HORIZONTAL TOP BAR NAVIGATION -->
     <div class="periodwise-section-nav surface-card border-1 surface-border border-round-xl shadow-1 p-2 mb-4">
         <div class="flex align-items-center gap-2 flex-wrap">
-            <span class="text-600 text-sm font-semibold px-2">Go to</span>
+            <span class="text-600 text-sm font-semibold px-3 uppercase tracking-wider">Setup Sections</span>
             <div *ngFor="let section of sectionLinks; trackBy: trackById" class="relative">
                 <button pButton type="button"
-                    class="p-button-sm p-button-text"
-                    [label]="section.label"
-                    (click)="scrollToSection(section.id)"></button>
-                <!-- Dirty dot indicator -->
-                <span *ngIf="section.dirtyFn()" class="absolute border-circle"
-                    style="width:8px;height:8px;background:#f97316;top:4px;right:4px;"
-                    title="Unsaved changes"></span>
+                    class="p-button-sm p-button-text periodwise-nav-btn flex align-items-center gap-2"
+                    [class.active-nav-btn]="activeSection() === section.id"
+                    (click)="selectSection(section.id)">
+                    <i [class]="getSectionIcon(section.id) + ' text-base'"></i>
+                    <span class="font-semibold">{{ section.label }}</span>
+                    <!-- Dirty dot indicator -->
+                    <span *ngIf="section.dirtyFn()" class="ml-1 border-circle"
+                        style="width:8px;height:8px;background:#f97316;display:inline-block;"
+                        title="Unsaved changes"></span>
+                </button>
             </div>
         </div>
     </div>
 
-    <!-- ADVANCE SCHEMES -->
-
-    <div id="advance-schemes" class="border-round-xl p-4 surface-card shadow-1 periodwise-section">
-
-        <div class="flex justify-content-between align-items-center mb-4">
-
-            <div>
-
-                <div class="text-2xl font-semibold">
-                    Active Advances Schemes
-                </div>
-
-                <div class="text-500 mt-1">
-
-                    Total Schemes:
-                    {{ selectedSchemes().length }}
-
-                </div>
-
-            </div>
-
-            <button pButton type="button" label="Update Advance Schemes" icon="pi pi-pencil" class="p-button-primary"
-                (click)="toggleSchemeSection()"></button>
-
-        </div>
-
-        <!-- SELECTED ADVANCE -->
-
-        <div class="grid">
-
-            <div *ngFor="
-            let item of selectedSchemes() | slice:0:selectedPreviewLimit; trackBy: trackById
-          " class="col-12 md:col-6">
-
-                <div class="border-1 surface-border border-round-xl p-3 h-full">
-
-                    <div class="font-semibold text-primary text-lg line-height-3">
-
-                        {{ item.name }}
-                        ({{ item.scheme_code }})
-
-                    </div>
-
-                    <div class="mt-3 px-2 py-1 inline-block border-round bg-blue-50 text-blue-700 text-sm">
-
-                        Mapped Category :
-                        {{ item.category_name }}
-
-                    </div>
-
-                </div>
-
-            </div>
-
-        </div>
-
-        <div *ngIf="selectedSchemes().length > selectedPreviewLimit" class="text-600 text-sm mt-3">
-            + {{ selectedSchemes().length - selectedPreviewLimit }} more advance schemes selected
-        </div>
-
-    </div>
-
+    <!-- MAIN CONTENT AREA (Full width) -->
+    <div class="flex flex-column gap-4">
     <!-- UPDATE ADVANCE -->
 
-    <div *ngIf="showUpdateSection()" class="border-round-xl p-4 surface-card shadow-2 mt-4 border-1 border-primary">
+    <div *ngIf="showUpdateSection()" [style.display]="activeSection() === 'advance-schemes' ? 'block' : 'none'" class="border-round-xl p-4 surface-card shadow-2 border-1 border-primary">
 
         <div class="flex justify-content-between align-items-center mb-4">
 
@@ -213,13 +157,13 @@
           height: '450px'
         }">
 
-            <div class="grid">
+            <div class="periodwise-grid-5">
 
                 <div *ngFor="
               let item of allSchemes(); trackBy: trackById
-            " class="col-12 md:col-6">
+            " class="h-full">
 
-                    <div class="border-1 surface-border border-round-xl p-3 h-full">
+                    <div class="periodwise-card p-3 h-full">
 
                         <div class="flex align-items-start">
 
@@ -235,11 +179,9 @@
 
                                 </div>
 
-                                <div class="mt-3 px-2 py-1 inline-block border-round bg-blue-50 text-blue-700 text-sm">
-
-                                    Mapped Category :
-                                    {{ item.category_name }}
-
+                                <div class="mt-3 mapped-badge mapped-badge-blue">
+                                    <i class="pi pi-tag text-xs"></i>
+                                    Mapped Category : {{ item.category_name }}
                                 </div>
 
                             </div>
@@ -256,41 +198,41 @@
 
     </div>
 
-    <!-- DEPOSIT SCHEMES -->
+    <!-- ADVANCE SCHEMES -->
 
-    <div id="deposit-schemes" class="border-round-xl p-4 surface-card shadow-1 mt-4 periodwise-section">
+    <div id="advance-schemes" [style.display]="activeSection() === 'advance-schemes' ? 'block' : 'none'" class="border-round-xl p-4 surface-card shadow-1 mt-4 periodwise-section">
 
         <div class="flex justify-content-between align-items-center mb-4">
 
             <div>
 
                 <div class="text-2xl font-semibold">
-                    Active Deposit Schemes
+                    Active Advances Schemes
                 </div>
 
                 <div class="text-500 mt-1">
 
                     Total Schemes:
-                    {{ depositSchemes().length }}
+                    {{ selectedSchemes().length }}
 
                 </div>
 
             </div>
 
-            <button pButton type="button" label="Update Deposit Schemes" icon="pi pi-pencil" class="p-button-primary"
-                (click)="toggleDepositSection()"></button>
+            <button pButton type="button" label="Update Advance Schemes" icon="pi pi-pencil" class="p-button-primary"
+                (click)="toggleSchemeSection()"></button>
 
         </div>
 
-        <!-- SELECTED DEPOSIT -->
+        <!-- SELECTED ADVANCE -->
 
-        <div class="grid">
+        <div class="periodwise-grid-5">
 
             <div *ngFor="
-            let item of depositSchemes() | slice:0:selectedPreviewLimit; trackBy: trackById
-          " class="col-12 md:col-6">
+            let item of selectedSchemes(); trackBy: trackById
+          " class="h-full">
 
-                <div class="border-1 surface-border border-round-xl p-3 h-full">
+                <div class="periodwise-card p-3 h-full">
 
                     <div class="font-semibold text-primary text-lg line-height-3">
 
@@ -299,11 +241,9 @@
 
                     </div>
 
-                    <div class="mt-3 px-2 py-1 inline-block border-round bg-blue-50 text-blue-700 text-sm">
-
-                        Mapped Category :
-                        {{ item.category_name }}
-
+                    <div class="mt-3 mapped-badge mapped-badge-blue">
+                        <i class="pi pi-tag text-xs"></i>
+                        Mapped Category : {{ item.category_name }}
                     </div>
 
                 </div>
@@ -312,15 +252,11 @@
 
         </div>
 
-        <div *ngIf="depositSchemes().length > selectedPreviewLimit" class="text-600 text-sm mt-3">
-            + {{ depositSchemes().length - selectedPreviewLimit }} more deposit schemes selected
-        </div>
-
     </div>
 
     <!-- UPDATE DEPOSIT -->
 
-    <div *ngIf="showDepositSection()" class="border-round-xl p-4 surface-card shadow-2 mt-4 border-1 border-green-400">
+    <div *ngIf="showDepositSection()" [style.display]="activeSection() === 'deposit-schemes' ? 'block' : 'none'" class="border-round-xl p-4 surface-card shadow-2 border-1 border-green-400">
 
         <div class="flex justify-content-between align-items-center mb-4">
 
@@ -382,13 +318,13 @@
           height: '450px'
         }">
 
-            <div class="grid">
+            <div class="periodwise-grid-5">
 
                 <div *ngFor="
               let item of allDepositSchemes(); trackBy: trackById
-            " class="col-12 md:col-6">
+            " class="h-full">
 
-                    <div class="border-1 surface-border border-round-xl p-3 h-full">
+                    <div class="periodwise-card p-3 h-full">
 
                         <div class="flex align-items-start">
 
@@ -404,11 +340,9 @@
 
                                 </div>
 
-                                <div class="mt-3 px-2 py-1 inline-block border-round bg-blue-50 text-blue-700 text-sm">
-
-                                    Mapped Category :
-                                    {{ item.category_name }}
-
+                                <div class="mt-3 mapped-badge mapped-badge-purple">
+                                    <i class="pi pi-tag text-xs"></i>
+                                    Mapped Category : {{ item.category_name }}
                                 </div>
 
                             </div>
@@ -424,46 +358,53 @@
         </p-scrollPanel>
 
     </div>
-    <!-- MENUS -->
 
-    <div id="menus" class="border-round-xl p-4 surface-card shadow-1 mt-4 periodwise-section">
+    <!-- DEPOSIT SCHEMES -->
+
+    <div id="deposit-schemes" [style.display]="activeSection() === 'deposit-schemes' ? 'block' : 'none'" class="border-round-xl p-4 surface-card shadow-1 mt-4 periodwise-section">
 
         <div class="flex justify-content-between align-items-center mb-4">
 
             <div>
 
                 <div class="text-2xl font-semibold">
-                    Active Menus
+                    Active Deposit Schemes
                 </div>
 
                 <div class="text-500 mt-1">
 
-                    Total Menus:
-                    {{ selectedMenus().length }}
+                    Total Schemes:
+                    {{ depositSchemes().length }}
 
                 </div>
 
             </div>
 
-            <button pButton type="button" label="Update Menus" icon="pi pi-pencil" class="p-button-warning"
-                (click)="toggleMenuSection()"></button>
+            <button pButton type="button" label="Update Deposit Schemes" icon="pi pi-pencil" class="p-button-primary"
+                (click)="toggleDepositSection()"></button>
 
         </div>
 
-        <!-- SELECTED MENUS -->
+        <!-- SELECTED DEPOSIT -->
 
-        <div class="grid">
+        <div class="periodwise-grid-5">
 
             <div *ngFor="
-        let item of selectedMenus() | slice:0:selectedPreviewLimit; trackBy: trackById
-      " class="col-12 md:col-4">
+            let item of depositSchemes(); trackBy: trackById
+          " class="h-full">
 
-                <div class="border-1 surface-border border-round-xl p-3 h-full">
+                <div class="periodwise-card p-3 h-full">
 
-                    <div class="font-semibold  text-primary text-lg line-height-3 text-lg line-height-3">
+                    <div class="font-semibold text-primary text-lg line-height-3">
 
                         {{ item.name }}
+                        ({{ item.scheme_code }})
 
+                    </div>
+
+                    <div class="mt-3 mapped-badge mapped-badge-purple">
+                        <i class="pi pi-tag text-xs"></i>
+                        Mapped Category : {{ item.category_name }}
                     </div>
 
                 </div>
@@ -472,15 +413,10 @@
 
         </div>
 
-        <div *ngIf="selectedMenus().length > selectedPreviewLimit" class="text-600 text-sm mt-3">
-            + {{ selectedMenus().length - selectedPreviewLimit }} more menus selected
-        </div>
-
     </div>
-
     <!-- UPDATE MENUS -->
 
-    <div *ngIf="showMenuSection()" class="border-round-xl p-4 surface-card shadow-2 mt-4 border-1 border-green-400">
+    <div *ngIf="showMenuSection()" [style.display]="activeSection() === 'menus' ? 'block' : 'none'" class="border-round-xl p-4 surface-card shadow-2 border-1 border-green-400">
 
         <div class="flex justify-content-between align-items-center mb-4">
 
@@ -547,7 +483,7 @@
           let item of allMenus(); trackBy: trackById
         " class="col-12 md:col-4">
 
-                    <div class="border-1 surface-border border-round-xl p-3 h-full">
+                    <div class="periodwise-card p-3 h-full">
 
                         <div class="flex align-items-start">
 
@@ -576,41 +512,41 @@
 
     </div>
 
-    <!-- CATEGORIES -->
+    <!-- MENUS -->
 
-    <div id="categories" class="border-round-xl p-4 surface-card shadow-1 mt-4 periodwise-section">
+    <div id="menus" [style.display]="activeSection() === 'menus' ? 'block' : 'none'" class="border-round-xl p-4 surface-card shadow-1 mt-4 periodwise-section">
 
         <div class="flex justify-content-between align-items-center mb-4">
 
             <div>
 
                 <div class="text-2xl font-semibold">
-                    Active Categories
+                    Active Menus
                 </div>
 
                 <div class="text-500 mt-1">
 
-                    Total Categories:
-                    {{ selectedCategories().length }}
+                    Total Menus:
+                    {{ selectedMenus().length }}
 
                 </div>
 
             </div>
 
-            <button pButton type="button" label="Update Categories" icon="pi pi-pencil" class="p-button-primary"
-                (click)="toggleCategorySection()"></button>
+            <button pButton type="button" label="Update Menus" icon="pi pi-pencil" class="p-button-warning"
+                (click)="toggleMenuSection()"></button>
 
         </div>
 
-        <!-- SELECTED CATEGORIES -->
+        <!-- SELECTED MENUS -->
 
         <div class="grid">
 
             <div *ngFor="
-        let item of selectedCategories() | slice:0:selectedPreviewLimit; trackBy: trackById
+        let item of selectedMenus() | slice:0:selectedPreviewLimit; trackBy: trackById
       " class="col-12 md:col-4">
 
-                <div class="border-1 surface-border border-round-xl p-3 h-full">
+                <div class="periodwise-card p-3 h-full">
 
                     <div class="font-semibold text-primary text-lg line-height-3">
 
@@ -624,15 +560,15 @@
 
         </div>
 
-        <div *ngIf="selectedCategories().length > selectedPreviewLimit" class="text-600 text-sm mt-3">
-            + {{ selectedCategories().length - selectedPreviewLimit }} more categories selected
+        <div *ngIf="selectedMenus().length > selectedPreviewLimit" class="text-600 text-sm mt-3">
+            + {{ selectedMenus().length - selectedPreviewLimit }} more menus selected
         </div>
 
     </div>
 
+    <!-- UPDATE CATEGORIES -->
 
-
-    <div *ngIf="showCategorySection()" class="border-round-xl p-4 surface-card shadow-2 mt-4 border-1 border-primary">
+    <div *ngIf="showCategorySection()" [style.display]="activeSection() === 'categories' ? 'block' : 'none'" class="border-round-xl p-4 surface-card shadow-2 border-1 border-primary">
 
         <!-- TOP -->
 
@@ -704,7 +640,7 @@
         " class="col-12 md:col-4">
 
                     <div
-                        class="border-1 surface-border border-round-xl p-3 h-full hover:surface-100 transition-duration-200">
+                        class="periodwise-card p-3 h-full">
 
                         <div class="flex align-items-start">
 
@@ -721,14 +657,11 @@
 
                                     {{ item.name }}
 
-
                                 </div>
 
-                                <div class="mt-3 px-2 py-1 inline-block border-round bg-blue-50 text-blue-700 text-sm">
-
-                                    Mapped Menu :
-                                    {{ item.menu_name }}
-
+                                <div class="mt-3 mapped-badge mapped-badge-blue">
+                                    <i class="pi pi-folder text-xs"></i>
+                                    Mapped Menu : {{ item.menu_name }}
                                 </div>
 
                             </div>
@@ -745,7 +678,61 @@
 
     </div>
 
-    <div id="auditor" class="border-round-xl p-4 surface-card shadow-1 mt-4 periodwise-section">
+    <!-- CATEGORIES -->
+
+    <div id="categories" [style.display]="activeSection() === 'categories' ? 'block' : 'none'" class="border-round-xl p-4 surface-card shadow-1 mt-4 periodwise-section">
+
+        <div class="flex justify-content-between align-items-center mb-4">
+
+            <div>
+
+                <div class="text-2xl font-semibold">
+                    Active Categories
+                </div>
+
+                <div class="text-500 mt-1">
+
+                    Total Categories:
+                    {{ selectedCategories().length }}
+
+                </div>
+
+            </div>
+
+            <button pButton type="button" label="Update Categories" icon="pi pi-pencil" class="p-button-primary"
+                (click)="toggleCategorySection()"></button>
+
+        </div>
+
+        <!-- SELECTED CATEGORIES -->
+
+        <div class="grid">
+
+            <div *ngFor="
+        let item of selectedCategories() | slice:0:selectedPreviewLimit; trackBy: trackById
+      " class="col-12 md:col-4">
+
+                <div class="periodwise-card p-3 h-full">
+
+                    <div class="font-semibold text-primary text-lg line-height-3">
+
+                        {{ item.name }}
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div *ngIf="selectedCategories().length > selectedPreviewLimit" class="text-600 text-sm mt-3">
+            + {{ selectedCategories().length - selectedPreviewLimit }} more categories selected
+        </div>
+
+    </div>
+
+    <div id="auditor" [style.display]="activeSection() === 'auditor' ? 'block' : 'none'" class="border-round-xl p-4 surface-card shadow-1 mt-4 periodwise-section">
         <div class="flex justify-content-between align-items-center mb-4">
             <div>
                 <div class="text-2xl font-semibold text-primary">
@@ -784,7 +771,7 @@
             </div>
 
             <div class="col-12 md:col-6">
-                <div class="border-1 surface-border border-round-xl p-3 h-full">
+                <div class="periodwise-card p-3 h-full">
                     <div class="text-sm text-500 mb-2">Current Assignment</div>
                     <div class="font-semibold text-primary text-lg">
                         {{ selectedAuditorLabel() }}
@@ -861,15 +848,15 @@
                 </div>
                 <div class="grid">
                     <div *ngFor="let cat of selectedCategories(); trackBy: trackById" class="col-12 lg:col-6 mb-3">
-                        <div class="border-1 surface-border border-round-xl p-4 h-full bg-light">
-                            <div class="text-lg font-bold text-gray-800 mb-3 flex align-items-center justify-content-between">
+                        <div class="border-1 surface-border border-round-xl p-4 h-full surface-card">
+                            <div class="text-lg font-bold text-900 mb-3 flex align-items-center justify-content-between">
                                 <span>{{ cat.name }}</span>
                                 <span class="text-sm text-500 font-normal">Category ID: {{ cat.id }}</span>
                             </div>
                             <div class="text-sm font-semibold text-600 mb-2">Assign to Auditors:</div>
                             <div class="flex flex-column gap-2">
                                 <div *ngFor="let auditor of eligibleAuditors(); trackBy: trackById"
-                                     class="flex align-items-center p-2 border-round hover:bg-100 transition-colors transition-duration-150">
+                                     class="flex align-items-center p-2 border-round hover:surface-hover transition-colors transition-duration-150">
                                     <p-checkbox [binary]="true"
                                                 [ngModel]="isAuditorAssigned(cat.id, auditor.id)"
                                                 (onChange)="toggleAuditorAssignment(cat.id, auditor.id)"></p-checkbox>
@@ -892,7 +879,7 @@
     <!-- ACTIVE QUESTIONS -->
 
 
-    <div id="questions" class="border-round-xl p-4 surface-card shadow-1 mt-4 periodwise-section">
+    <div id="questions" [style.display]="activeSection() === 'questions' ? 'block' : 'none'" class="border-round-xl p-4 surface-card shadow-1 mt-4 periodwise-section">
 
         <!-- TOP -->
 
@@ -944,7 +931,7 @@
 
             <!-- MENU -->
 
-            <div class="text-2xl font-bold text-primary mb-4">
+            <div class="periodwise-menu-header mb-4">
 
                 MENU:
                 {{ menu.menu_name }}
@@ -961,7 +948,7 @@
 
                 <!-- CATEGORY -->
 
-                <div class="text-xl font-semibold mb-3">
+                <div class="periodwise-cat-header mb-3">
 
                     {{ i + 1 }}.
                     CATEGORY:
@@ -977,7 +964,7 @@
 
                     <!-- HEADER -->
 
-                    <div class="surface-100 border-round p-3 mb-3">
+                    <div class="periodwise-header-block mb-3">
 
                         <div class="flex justify-content-between align-items-center gap-3 flex-wrap">
                             <div>
@@ -1017,7 +1004,7 @@
             trackBy: trackById
           " class="ml-4 mb-3">
 
-                        <div class="flex align-items-start border-1 surface-border border-round-lg p-3">
+                        <div class="flex align-items-start periodwise-question-row">
 
                             <!-- CHECKBOX -->
 
@@ -1047,4 +1034,5 @@
 
     </div>
 
+</div>
 </div>

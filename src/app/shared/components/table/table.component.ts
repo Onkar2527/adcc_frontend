@@ -105,7 +105,11 @@ export class TableComponent {
   data = input<any[]>([]);
   columns = input<TableColumn[]>([]);
   loading = input<boolean>(false);
-  totalRecords = input<number>(0);
+  totalRecordsInput = input<number>(0, { alias: 'totalRecords' });
+  totalRecords = computed(() => {
+    const inputVal = this.totalRecordsInput();
+    return inputVal > 0 ? inputVal : this.data().length;
+  });
   rows = input<number>(10);
   globalFilterFields = input<string[]>([]);
   actions = input<TableAction[]>([]);

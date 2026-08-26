@@ -78,9 +78,9 @@ export class RegionMasterComponent implements OnInit {
         })));
         this.loading.set(false);
       },
-      error: () => {
+      error: (err) => {
         this.loading.set(false);
-        this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Unable to load regions' });
+        this.messageService.add({ severity: 'error', summary: 'Error', detail: err?.error?.message || 'Unable to load regions' });
       }
     });
   }

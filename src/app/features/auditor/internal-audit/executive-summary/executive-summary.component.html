@@ -124,18 +124,42 @@
             </span>
 
             <span>
-              <ng-container *ngIf="i === 8 || i === 11 || i === 12; else normalValue">
-                <input
-                  [type]="i === 8 ? 'date' : 'text'"
-                  pInputText
-                  [ngModel]="i === 8 && item.value ? (item.value | date: 'yyyy-MM-dd') : item.value"
-                  (ngModelChange)="item.value = $event"
-                  [disabled]="isReviewMode || viewOnlyModeFromRoute"
-                  class="w-full"
-                />
+              <!-- Index 8, 11, 12 (Editable Fields) -->
+              <ng-container *ngIf="i === 8 || i === 11 || i === 12">
+                <!-- Read Only / Disabled Mode -->
+                <ng-container *ngIf="isReviewMode || viewOnlyModeFromRoute">
+                  <span *ngIf="i === 8">
+                    {{ item.value ? (item.value | date: 'dd-MM-yyyy') : '-' }}
+                  </span>
+                  <span *ngIf="i !== 8">
+                    {{ item.value || '-' }}
+                  </span>
+                </ng-container>
+
+                <!-- Edit Mode -->
+                <ng-container *ngIf="!isReviewMode && !viewOnlyModeFromRoute">
+                  <p-datepicker
+                    *ngIf="i === 8"
+                    [(ngModel)]="item.value"
+                    dateFormat="dd-mm-yy"
+                    styleClass="w-full"
+                    [showIcon]="true"
+                    iconDisplay="input"
+                    appendTo="body"
+                  ></p-datepicker>
+                  <input
+                    *ngIf="i !== 8"
+                    type="text"
+                    class="p-inputtext w-full"
+                    [(ngModel)]="item.value"
+                    (focus)="clearIfZero(item)"
+                    (blur)="restoreIfEmpty(item)"
+                  />
+                </ng-container>
               </ng-container>
 
-              <ng-template #normalValue>
+              <!-- Index other than 8, 11, 12 (Non-editable Fields) -->
+              <ng-container *ngIf="i !== 8 && i !== 11 && i !== 12">
                 <ng-container
                   *ngIf="item?.value === null || item?.value === undefined || item?.value === ''"
                 >
@@ -149,7 +173,7 @@
                       item.value.toString().includes('T18:30:00'))
                   "
                 >
-                  {{ item.value | date: 'yyyy-MM-dd' }}
+                  {{ item.value | date: 'dd-MM-yyyy' }}
                 </ng-container>
 
                 <!-- Text -->
@@ -164,7 +188,7 @@
                 >
                   {{ item.value }}
                 </ng-container>
-              </ng-template>
+              </ng-container>
             </span>
           </div>
         </div>
@@ -282,21 +306,23 @@
 
             <td class="text-center">
               <input
-                pInputText
                 type="number"
                 [(ngModel)]="row.total_accounts"
                 [disabled]="isExecutiveAccountsReadOnly(row)"
-                class="w-6rem text-center"
+                class="p-inputtext w-6rem text-center"
+                (focus)="clearIfZero(row, 'total_accounts')"
+                (blur)="restoreIfEmpty(row, 'total_accounts')"
               />
             </td>
 
             <td class="text-right">
               <input
-                pInputText
                 type="number"
                 [(ngModel)]="row.total_amount"
                 [disabled]="isExecutiveAmountReadOnly(row)"
-                class="w-full text-right"
+                class="p-inputtext w-full text-right"
+                (focus)="clearIfZero(row, 'total_amount')"
+                (blur)="restoreIfEmpty(row, 'total_amount')"
               />
 
               <div class="text-xs text-500 mt-1">
@@ -322,11 +348,10 @@
 
             <td *ngIf="shouldShowReviewColumns">
               <textarea
-                pInputText
                 [(ngModel)]="row.reviewer_comment"
                 rows="1"
                 placeholder="Comment"
-                class="w-full"
+                class="p-inputtext w-full"
               ></textarea>
             </td>
 
@@ -366,21 +391,23 @@
 
             <td class="text-center">
               <input
-                pInputText
                 type="number"
                 [(ngModel)]="row.account_input"
                 [disabled]="isExecutiveAccountsReadOnly(row)"
-                class="w-6rem"
+                class="p-inputtext w-6rem"
+                (focus)="clearIfZero(row, 'account_input')"
+                (blur)="restoreIfEmpty(row, 'account_input')"
               />
             </td>
 
             <td class="text-right">
               <input
-                pInputText
                 type="number"
                 [(ngModel)]="row.amount_input"
                 [disabled]="isExecutiveAmountReadOnly(row)"
-                class="w-full text-right"
+                class="p-inputtext w-full text-right"
+                (focus)="clearIfZero(row, 'amount_input')"
+                (blur)="restoreIfEmpty(row, 'amount_input')"
               />
               <div class="text-xs text-500 mt-1">
                 {{ (row.amount_input || 0) | number: '1.2-2' }} Lakhs
@@ -405,11 +432,10 @@
 
             <td *ngIf="shouldShowReviewColumns">
               <textarea
-                pInputText
                 [(ngModel)]="row.reviewer_comment"
                 rows="1"
                 placeholder="Comment"
-                class="w-full"
+                class="p-inputtext w-full"
               ></textarea>
             </td>
 

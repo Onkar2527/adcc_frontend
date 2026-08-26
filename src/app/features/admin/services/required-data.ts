@@ -46,9 +46,7 @@ export const compliance_review_action = [
 
 export const carry_forward_array = [{ label: 'CARRY FORWARD POINTS', value: 'CF' }];
 
-export const audit_flow_config = {
-  liveManagerCompliance: true,
-};
+
 
 export const assesment_timeline_array = [
   { label: 'AUDIT (PENDING / ACTIVE)', value: '1' },
@@ -173,7 +171,7 @@ export const branch_fresh_accounts_npa = [
   { label: 'Decreed Accounts', value: '16' },
 ];
 
-export const FREE_AUDIT_FLOW = false;
+
 
 export const approvedByOptions = [
   { label: 'Chairman', value: 'Chairman' },
@@ -189,5 +187,8 @@ export const approvedByOptions = [
   { label: 'Risk Management Committee', value: 'Risk Management Committee' },
   { label: 'Compliance Committee', value: 'Compliance Committee' },
 ];
-
+export const FREE_AUDIT_FLOW = false;
 export const ENABLE_2FA = false;
+export const audit_flow_config = {
+  liveManagerCompliance: true,
+};

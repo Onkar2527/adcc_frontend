@@ -81,40 +81,7 @@ interface SearchItem {
 
       <div class="layout-topbar-actions">
         <!-- Search bar -->
-        <div class="topbar-search-wrapper">
-          <p-iconField iconPosition="left">
-            <p-inputIcon class="pi pi-search" />
-            <p-autoComplete
-              #searchInput
-              [(ngModel)]="selectedItem"
-              [suggestions]="suggestions"
-              (completeMethod)="search($event)"
-              (onSelect)="onSelect($event)"
-              (onClear)="onClear()"
-              placeholder="Search (Ctrl+K)"
-              appendTo="body"
-              [minLength]="0"
-              [completeOnFocus]="true"
-              [delay]="0"
-              [style]="{ width: '100%' }"
-              [inputStyle]="{ width: '100%' }"
-              field="label"
-              styleClass="topbar-search-autocomplete"
-              [forceSelection]="false"
-            >
-              <ng-template let-item pTemplate="item">
-                <div class="search-item">
-                  <i [class]="item.icon" class="item-icon"></i>
-                  <div class="item-details">
-                    <span class="item-label">{{ item.label }}</span>
-                    <span class="item-route">{{ item.route }}</span>
-                  </div>
-                </div>
-              </ng-template>
-            </p-autoComplete>
-          </p-iconField>
-        </div>
-
+        
         <!-- Language Selector -->
         <p-select
           [options]="languages"
@@ -786,7 +753,7 @@ export class AppTopbar implements OnInit, OnDestroy {
     let user: any = {};
     try {
       user = JSON.parse(localStorage.getItem('user') || '{}');
-    } catch (e) {}
+    } catch (e) { }
     const employeeId = user.id || '';
 
     this.http.get<any[]>(`${this.config.apiUrl}/notifications`, {
@@ -797,7 +764,7 @@ export class AppTopbar implements OnInit, OnDestroy {
         this.unreadCount.set(data.filter(n => !n.is_read).length);
         this.cdr.detectChanges();
       },
-      error: () => {}
+      error: () => { }
     });
   }
 
@@ -806,7 +773,7 @@ export class AppTopbar implements OnInit, OnDestroy {
     let user: any = {};
     try {
       user = JSON.parse(localStorage.getItem('user') || '{}');
-    } catch (e) {}
+    } catch (e) { }
     const employeeId = user.id || '';
 
     this.http.put(`${this.config.apiUrl}/notifications/${n.id}/read`, {}, {
@@ -825,7 +792,7 @@ export class AppTopbar implements OnInit, OnDestroy {
     let user: any = {};
     try {
       user = JSON.parse(localStorage.getItem('user') || '{}');
-    } catch (e) {}
+    } catch (e) { }
     const employeeId = user.id || '';
 
     this.http.put(`${this.config.apiUrl}/notifications/read-all`, {}, {
@@ -878,17 +845,17 @@ export class AppTopbar implements OnInit, OnDestroy {
     const now = new Date();
     const diffMs = now.getTime() - date.getTime();
     const diffMins = Math.floor(diffMs / 60000);
-    
+
     if (diffMins < 1) return 'Just now';
     if (diffMins < 60) return `${diffMins}m ago`;
-    
+
     const diffHours = Math.floor(diffMs / 3600000);
     if (diffHours < 24) return `${diffHours}h ago`;
-    
+
     const diffDays = Math.floor(diffHours / 24);
     if (diffDays === 1) return 'Yesterday';
     if (diffDays < 7) return `${diffDays}d ago`;
-    
+
     return new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }).format(date);
   }
 

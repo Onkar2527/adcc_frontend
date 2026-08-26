@@ -58,11 +58,238 @@ import { NotificationService } from '../../../core/services/notification/notific
     .periodwise-section-nav {
       position: sticky;
       top: 0;
-      z-index: 5;
+      z-index: 100;
+      backdrop-filter: blur(10px);
+      background: rgba(255, 255, 255, 0.9);
+      border: 1px solid rgba(226, 232, 240, 0.8);
     }
 
     .periodwise-section {
-      scroll-margin-top: 4.5rem;
+      scroll-margin-top: 5rem;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* Premium Header Card */
+    .periodwise-header-card {
+      background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+      color: #f8fafc;
+      border: none;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+    }
+
+    .periodwise-header-card .text-primary {
+      color: #38bdf8 !important;
+    }
+
+    .periodwise-header-card .text-700 {
+      color: #cbd5e1 !important;
+    }
+
+    .periodwise-header-card .text-500 {
+      color: #94a3b8 !important;
+    }
+
+    /* Scaling down big fonts to make dialog look modern & clean */
+    .periodwise-header-card .text-3xl {
+      font-size: 1.5rem !important; /* 24px instead of 30px */
+    }
+
+    .periodwise-header-card .text-lg {
+      font-size: 0.95rem !important; /* 15px instead of 18px */
+    }
+
+    .periodwise-section .text-2xl {
+      font-size: 1.2rem !important; /* 19.2px instead of 24px */
+    }
+
+    .periodwise-card .text-lg {
+      font-size: 0.95rem !important; /* 15.2px instead of 18px */
+      font-weight: 600 !important;
+    }
+
+    .periodwise-header-block .font-semibold.text-lg {
+      font-size: 0.95rem !important;
+    }
+
+    .periodwise-header-card .p-button-outlined.p-button-primary {
+      color: #38bdf8 !important;
+      border-color: rgba(56, 189, 248, 0.4) !important;
+      background: transparent !important;
+    }
+    .periodwise-header-card .p-button-outlined.p-button-primary:hover:not([disabled]) {
+      background: rgba(56, 189, 248, 0.1) !important;
+      border-color: #38bdf8 !important;
+    }
+
+    .periodwise-header-card .p-button-outlined.p-button-success {
+      color: #4ade80 !important;
+      border-color: rgba(74, 222, 128, 0.4) !important;
+      background: transparent !important;
+    }
+    .periodwise-header-card .p-button-outlined.p-button-success:hover:not([disabled]) {
+      background: rgba(74, 222, 128, 0.1) !important;
+      border-color: #4ade80 !important;
+    }
+
+    .periodwise-header-card button:disabled {
+      opacity: 0.45 !important;
+      color: #94a3b8 !important;
+      border-color: #334155 !important;
+      background: transparent !important;
+      cursor: not-allowed !important;
+    }
+
+    /* Modern Schemes / Cards */
+    .periodwise-card {
+      background: var(--surface-card, #ffffff);
+      border: 1px solid var(--surface-border, #e2e8f0);
+      border-radius: 0.75rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .periodwise-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -4px rgba(0, 0, 0, 0.05);
+      border-color: var(--primary-color, #cbd5e1);
+    }
+
+    .mapped-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.35rem 0.75rem;
+      font-size: 0.75rem;
+      font-weight: 600;
+      border-radius: 9999px;
+      gap: 0.375rem;
+    }
+
+    .mapped-badge-blue {
+      background-color: var(--p-primary-50, #eff6ff);
+      color: var(--p-primary-700, #1d4ed8);
+      border: 1px solid var(--p-primary-200, #dbeafe);
+    }
+
+    .mapped-badge-purple {
+      background-color: var(--p-purple-50, #faf5ff);
+      color: var(--p-purple-700, #6b21a8);
+      border: 1px solid var(--p-purple-200, #f3e8ff);
+    }
+
+    :host-context(.app-dark) .mapped-badge-blue {
+      background-color: rgba(37, 99, 235, 0.15) !important;
+      color: #93c5fd !important;
+      border: 1px solid rgba(37, 99, 235, 0.3) !important;
+    }
+
+    :host-context(.app-dark) .mapped-badge-purple {
+      background-color: rgba(147, 51, 234, 0.15) !important;
+      color: #d8b4fe !important;
+      border: 1px solid rgba(147, 51, 234, 0.3) !important;
+    }
+
+    /* Section navigation styling */
+    .periodwise-nav-btn {
+      color: var(--text-color, #475569) !important;
+      font-weight: 600 !important;
+      font-size: 0.875rem !important;
+      padding: 0.6rem 1rem !important;
+      border-radius: 0 !important;
+      border-bottom: 3px solid transparent !important;
+      transition: all 0.2s;
+    }
+
+    .periodwise-nav-btn:hover {
+      background: var(--surface-hover, #f1f5f9) !important;
+      color: var(--text-color, #0f172a) !important;
+    }
+
+    .active-nav-btn {
+      background: var(--surface-hover, #f0f7ff) !important;
+      color: var(--primary-color, #2563eb) !important;
+      border-bottom-color: var(--primary-color, #2563eb) !important;
+    }
+
+    /* Question rows and sections */
+    .periodwise-menu-header {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--text-color, #1e293b);
+      letter-spacing: -0.025em;
+      border-bottom: 2px solid var(--surface-border, #e2e8f0);
+      padding-bottom: 0.5rem;
+      margin-top: 2rem;
+    }
+
+    .periodwise-cat-header {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--text-color-secondary, #334155);
+      margin-top: 1.5rem;
+    }
+
+    .periodwise-header-block {
+      background: var(--surface-hover, #f8fafc);
+      border: 1px solid var(--surface-border, #e2e8f0);
+      border-left: 4px solid var(--primary-color, #3b82f6);
+      border-radius: 0.5rem;
+      padding: 1rem 1.25rem;
+      transition: all 0.2s;
+    }
+
+    .periodwise-header-block:hover {
+      background: var(--surface-card, #f1f5f9);
+      border-color: var(--primary-color, #cbd5e1);
+    }
+
+    .periodwise-question-row {
+      background: var(--surface-card, #ffffff);
+      border: 1px solid var(--surface-border, #e2e8f0);
+      border-radius: 0.5rem;
+      padding: 1rem;
+      transition: all 0.15s ease;
+    }
+
+    .periodwise-question-row:hover {
+      background: var(--surface-hover, #f8fafc);
+      border-color: var(--primary-color, #cbd5e1);
+    }
+
+    /* Premium active chip */
+    .premium-chip-active {
+      background: #dcfce7 !important;
+      color: #166534 !important;
+      font-weight: 700 !important;
+      font-size: 0.75rem !important;
+      letter-spacing: 0.05em;
+      padding: 0.25rem 0.75rem !important;
+      border-radius: 9999px !important;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    }
+    .periodwise-grid-5 {
+      display: grid;
+      grid-template-columns: repeat(1, minmax(0, 1fr));
+      gap: 1rem;
+    }
+    @media (min-width: 576px) {
+      .periodwise-grid-5 {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+    @media (min-width: 768px) {
+      .periodwise-grid-5 {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+    }
+    @media (min-width: 992px) {
+      .periodwise-grid-5 {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+      }
+    }
+    @media (min-width: 1200px) {
+      .periodwise-grid-5 {
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+      }
     }
   `],
 
@@ -92,6 +319,24 @@ export class PeriodwiseQuestionsMasterViewComponent
   private cdr =
     inject(ChangeDetectorRef);
   data = this.ref.data;
+
+  activeSection = signal('advance-schemes');
+
+  selectSection(sectionId: string) {
+    this.activeSection.set(sectionId);
+  }
+
+  getSectionIcon(id: string): string {
+    switch (id) {
+      case 'advance-schemes': return 'pi pi-arrow-up-right text-blue-500';
+      case 'deposit-schemes': return 'pi pi-arrow-down-left text-green-500';
+      case 'menus': return 'pi pi-bars text-orange-500';
+      case 'categories': return 'pi pi-tags text-cyan-500';
+      case 'auditor': return 'pi pi-user text-purple-500';
+      case 'questions': return 'pi pi-question-circle text-red-500';
+      default: return 'pi pi-circle';
+    }
+  }
 
   showUpdateSection =
     signal(false);
@@ -378,8 +623,11 @@ export class PeriodwiseQuestionsMasterViewComponent
         },
 
         error: (err: any) => {
-
-
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: err?.error?.message || 'Unable to load categories'
+          });
         }
 
       });
@@ -481,19 +729,11 @@ export class PeriodwiseQuestionsMasterViewComponent
         },
 
         error: (err: any) => {
-
-
           this.messageService.add({
-
             severity: 'error',
-
             summary: 'Error',
-
-            detail:
-              'Unable To Update Categories'
-
+            detail: err?.error?.message || 'Unable To Update Categories'
           });
-
         }
 
       });
@@ -673,20 +913,11 @@ export class PeriodwiseQuestionsMasterViewComponent
         },
 
         error: (err: any) => {
-
-
-
           this.messageService.add({
-
             severity: 'error',
-
             summary: 'Error',
-
-            detail:
-              'Unable To Update Menus'
-
+            detail: err?.error?.message || 'Unable To Update Menus'
           });
-
         }
 
       });
@@ -797,18 +1028,11 @@ export class PeriodwiseQuestionsMasterViewComponent
         },
 
         error: (err: any) => {
-
           this.messageService.add({
-
             severity: 'error',
-
             summary: 'Error',
-
-            detail:
-              'Unable To Update Advance Schemes'
-
+            detail: err?.error?.message || 'Unable To Update Advance Schemes'
           });
-
         }
 
       });
@@ -971,18 +1195,11 @@ export class PeriodwiseQuestionsMasterViewComponent
         },
 
         error: (err: any) => {
-
           this.messageService.add({
-
             severity: 'error',
-
             summary: 'Error',
-
-            detail:
-              'Unable To Update Deposit Schemes'
-
+            detail: err?.error?.message || 'Unable To Update Deposit Schemes'
           });
-
         }
 
       });
@@ -1114,7 +1331,11 @@ export class PeriodwiseQuestionsMasterViewComponent
         },
 
         error: (err: any) => {
-
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: err?.error?.message || 'Unable to load question data'
+          });
         }
 
       });
@@ -1416,20 +1637,11 @@ export class PeriodwiseQuestionsMasterViewComponent
         },
 
         error: (err: any) => {
-
-
-
           this.messageService.add({
-
             severity: 'error',
-
             summary: 'Error',
-
-            detail:
-              'Unable To Update Questions'
-
+            detail: err?.error?.message || 'Unable To Update Questions'
           });
-
         }
 
       });

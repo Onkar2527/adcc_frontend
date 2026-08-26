@@ -40,6 +40,7 @@ import { InputTextModule } from 'primeng/inputtext';
 import { MessageService } from 'primeng/api';
 import { SelectModule } from 'primeng/select';
 import { TableModule } from 'primeng/table';
+import { DatePickerModule } from 'primeng/datepicker';
 import { InternalAuditNavService } from '../../services/internal-audit-nav.service';
 
 @Component({
@@ -61,7 +62,8 @@ import { InternalAuditNavService } from '../../services/internal-audit-nav.servi
         InputTextModule,
         TableModule,
         AccordionModule,
-        SelectModule
+        SelectModule,
+        DatePickerModule
 
 
     ],
@@ -333,6 +335,27 @@ export class ExecutiveSummaryComponent
 
         if (this.isLegacyData()) {
             setTimeout(() => {
+                const branchPositionMap = new Map<string, any>();
+                this.branchPositionLines.forEach((x: any) => {
+                    if (x && x.type_id !== undefined && x.type_id !== null) {
+                        branchPositionMap.set(String(x.type_id).trim(), x);
+                    }
+                });
+
+                const freshAccountsMap = new Map<string, any>();
+                this.summary?.fresh_accounts?.forEach((x: any) => {
+                    if (x && x.type_id !== undefined && x.type_id !== null) {
+                        freshAccountsMap.set(String(x.type_id).trim(), x);
+                    }
+                });
+
+                const marchPositionsMap = new Map<string, any>();
+                this.summary?.march_positions?.forEach((x: any) => {
+                    if (x && x.gl_type_id !== undefined && x.gl_type_id !== null) {
+                        marchPositionsMap.set(String(x.gl_type_id).trim(), x);
+                    }
+                });
+
                 const groupedData: any[] = [];
                 let prefixIndex = 0;
                 const keys = ['DEPOSITS', 'ADVANCES', 'NPA'];
@@ -344,16 +367,16 @@ export class ExecutiveSummaryComponent
                     let totalMarch = 0;
 
                     items.forEach((item: any, index: number) => {
-                        const savedLine = this.branchPositionLines.find(
-                            (x: any) => String(x.type_id).trim() === String(item.position_type_id).trim()
+                        const savedLine = branchPositionMap.get(
+                            String(item.position_type_id).trim()
                         );
                         
                         let accounts: any = '';
                         let savedFreshLine: any = null;
                         if (item.fresh_type_ids.length > 0) {
                             for (const typeId of item.fresh_type_ids) {
-                                const fl = this.summary?.fresh_accounts?.find(
-                                    (x: any) => String(x.type_id).trim() === String(typeId).trim()
+                                const fl = freshAccountsMap.get(
+                                    String(typeId).trim()
                                 );
                                 if (fl) {
                                     if (accounts === '') accounts = 0;
@@ -365,8 +388,8 @@ export class ExecutiveSummaryComponent
                             }
                         }
 
-                        const categoryMarch = this.summary?.march_positions?.find(
-                            (x: any) => String(x.gl_type_id).trim() === String(item.category_id).trim()
+                        const categoryMarch = marchPositionsMap.get(
+                            String(item.category_id).trim()
                         );
                         const marchPositionValue = Number((categoryMarch ? Number(categoryMarch.march_position || 0) : 0).toFixed(2));
 
@@ -434,6 +457,27 @@ export class ExecutiveSummaryComponent
 
                     setTimeout(() => {
 
+                        const branchPositionMap = new Map<string, any>();
+                        this.branchPositionLines.forEach((x: any) => {
+                            if (x && x.type_id !== undefined && x.type_id !== null) {
+                                branchPositionMap.set(String(x.type_id).trim(), x);
+                            }
+                        });
+
+                        const freshAccountsMap = new Map<string, any>();
+                        this.summary?.fresh_accounts?.forEach((x: any) => {
+                            if (x && x.type_id !== undefined && x.type_id !== null) {
+                                freshAccountsMap.set(String(x.type_id).trim(), x);
+                            }
+                        });
+
+                        const marchPositionsMap = new Map<string, any>();
+                        this.summary?.march_positions?.forEach((x: any) => {
+                            if (x && x.gl_type_id !== undefined && x.gl_type_id !== null) {
+                                marchPositionsMap.set(String(x.gl_type_id).trim(), x);
+                            }
+                        });
+
                         const groupedData: any[] = [];
 
                         const grouped =
@@ -486,14 +530,14 @@ export class ExecutiveSummaryComponent
                                             item: any,
                                             index: number,
                                         ) => {
-                                            const savedLine = this.branchPositionLines.find(
-                                                (x: any) => String(x.type_id).trim() === String(item.position_type_id || item.scheme_code).trim()
+                                            const savedLine = branchPositionMap.get(
+                                                String(item.position_type_id || item.scheme_code).trim()
                                             );
-                                            const savedFreshLine = this.summary?.fresh_accounts?.find(
-                                                (x: any) => String(x.type_id).trim() === String(item.fresh_type_ids?.[0] || item.scheme_code).trim()
+                                            const savedFreshLine = freshAccountsMap.get(
+                                                String(item.fresh_type_ids?.[0] || item.scheme_code).trim()
                                             );
-                                            const categoryMarch = this.summary?.march_positions?.find(
-                                                (x: any) => String(x.gl_type_id).trim() === String(item.scheme_code).trim()
+                                            const categoryMarch = marchPositionsMap.get(
+                                                String(item.scheme_code).trim()
                                             );
                                             const marchPositionValue = Number((categoryMarch ? Number(categoryMarch.march_position || 0) : 0).toFixed(2));
 
@@ -558,15 +602,10 @@ export class ExecutiveSummaryComponent
                                 item: any,
                                 index: number,
                             ) => {
-                                const savedLine = this.branchPositionLines.find(
-                                    (x: any) => String(x.type_id).trim() === (String(item.scheme_code).trim() + '_NPA')
-                                );
-                                const savedFreshLine = this.summary?.fresh_accounts?.find(
-                                    (x: any) => String(x.type_id).trim() === (String(item.scheme_code).trim() + '_NPA')
-                                );
-                                const categoryMarch = this.summary?.march_positions?.find(
-                                    (x: any) => String(x.gl_type_id).trim() === (String(item.scheme_code).trim() + '_NPA')
-                                );
+                                const npaKey = String(item.scheme_code).trim() + '_NPA';
+                                const savedLine = branchPositionMap.get(npaKey);
+                                const savedFreshLine = freshAccountsMap.get(npaKey);
+                                const categoryMarch = marchPositionsMap.get(npaKey);
                                 const marchPositionValue = Number((categoryMarch ? Number(categoryMarch.march_position || 0) : 0).toFixed(2));
 
                                 const accountInput = this.savedAccountsOrDefault(
@@ -664,6 +703,13 @@ export class ExecutiveSummaryComponent
                     this.summary_detail =
                         res.summary_detail || [];
 
+                    const dateItem = this.summary_detail.find(
+                        (x: any) => x.label === '9. Audit Report Submitted Date'
+                    );
+                    if (dateItem) {
+                        dateItem.value = this.parseDate(dateItem.value);
+                    }
+
                     if (this.summary?.audit_unit_id) {
                         this.getBranchFinancialPosition();
                     } else {
@@ -735,26 +781,28 @@ export class ExecutiveSummaryComponent
                         x.label ===
                         '9. Audit Report Submitted Date',
                 )?.value;
-                if (!val) return '';
-                if (typeof val === 'string' && val.includes('T')) {
-                    return val.split('T')[0];
-                }
-                return val;
+                return this.formatDateToString(val);
             })(),
 
             staff_count:
-                this.summary_detail.find(
-                    x =>
-                        x.label ===
-                        '12. Number of Staff including Contractual/Daily wages staff',
-                )?.value,
+                (() => {
+                    const val = this.summary_detail.find(
+                        x =>
+                            x.label ===
+                            '12. Number of Staff including Contractual/Daily wages staff',
+                    )?.value;
+                    return val === '' || val === null || val === undefined ? 0 : Number(val);
+                })(),
 
             manual_challans_per_day:
-                this.summary_detail.find(
-                    x =>
-                        x.label ===
-                        '13. Approximate Number of manual Challans per day',
-                )?.value,
+                (() => {
+                    const val = this.summary_detail.find(
+                        x =>
+                            x.label ===
+                            '13. Approximate Number of manual Challans per day',
+                    )?.value;
+                    return val === '' || val === null || val === undefined ? 0 : Number(val);
+                })(),
 
         };
 
@@ -1043,6 +1091,49 @@ export class ExecutiveSummaryComponent
             }
         });
         return column === 'accounts' ? total : Number(total.toFixed(2));
+    }
+
+    parseDate(value: any): Date | null {
+        if (!value) return null;
+        if (value instanceof Date) {
+            return isNaN(value.getTime()) ? null : value;
+        }
+        const d = new Date(value);
+        return isNaN(d.getTime()) ? null : d;
+    }
+
+    formatDateToString(value: any): string {
+        if (!value) return '';
+        if (value instanceof Date) {
+            if (isNaN(value.getTime())) return '';
+            const year = value.getFullYear();
+            const month = String(value.getMonth() + 1).padStart(2, '0');
+            const day = String(value.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+        if (typeof value === 'string') {
+            const d = new Date(value);
+            if (!isNaN(d.getTime())) {
+                const year = d.getFullYear();
+                const month = String(d.getMonth() + 1).padStart(2, '0');
+                const day = String(d.getDate()).padStart(2, '0');
+                return `${year}-${month}-${day}`;
+            }
+            return value;
+        }
+        return '';
+    }
+
+    clearIfZero(obj: any, prop: string = 'value') {
+        if (obj[prop] === 0 || obj[prop] === '0') {
+            obj[prop] = '';
+        }
+    }
+
+    restoreIfEmpty(obj: any, prop: string = 'value') {
+        if (obj[prop] === '' || obj[prop] === null || obj[prop] === undefined) {
+            obj[prop] = 0;
+        }
     }
 
 }

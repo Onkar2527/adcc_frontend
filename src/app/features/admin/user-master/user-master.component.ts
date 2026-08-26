@@ -61,7 +61,14 @@ export class UserMasterComponent implements OnInit {
         this.users.set(res.data);
         this.loading.set(false);
       },
-      error: () => this.loading.set(false)
+      error: (err) => {
+        this.loading.set(false);
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: err?.error?.message || 'Unable to load users'
+        });
+      }
     });
   }
 

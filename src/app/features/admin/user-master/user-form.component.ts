@@ -1,6 +1,7 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormDrawerRef } from '../../../core/services/drawer/form-drawer.ref';
+import { MessageService } from 'primeng/api';
 import { 
   TextFieldComponent, 
   SelectFieldComponent,
@@ -107,6 +108,7 @@ export class UserFormComponent implements OnInit {
   private userService = inject(MasterUserService);
   private roleService = inject(RoleService);
   private branchService = inject(BranchService);
+  private messageService = inject(MessageService);
 
   fullName = signal('');
   username = signal('');
@@ -180,7 +182,14 @@ export class UserFormComponent implements OnInit {
         this.saving.set(false);
         this.ref.close(res);
       },
-      error: () => this.saving.set(false)
+      error: (err) => {
+        this.saving.set(false);
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: err?.error?.message || 'Unable to save user details'
+        });
+      }
     });
   }
 

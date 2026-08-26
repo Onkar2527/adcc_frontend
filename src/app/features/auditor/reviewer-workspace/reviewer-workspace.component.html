@@ -5,15 +5,8 @@
       <p>Review audit observations and completed compliance responses.</p>
     </div>
 
-    <button
-      pButton
-      type="button"
-      icon="pi pi-refresh"
-      severity="secondary"
-      aria-label="Refresh reviews"
-      [loading]="loadingQueue()"
-      (click)="loadQueue()"
-    ></button>
+    <button pButton type="button" icon="pi pi-refresh" severity="secondary" aria-label="Refresh reviews"
+      [loading]="loadingQueue()" (click)="loadQueue()"></button>
   </header>
 
   <div *ngIf="error()" class="review-error">
@@ -22,67 +15,34 @@
   </div>
 
   <div *ngIf="!selected()" class="audit-mode-switch" aria-label="Review type">
-    <button
-      type="button"
-      [class.active]="reviewMode() === 'regular'"
-      (click)="selectReviewMode('regular')"
-    >
+    <button type="button" [class.active]="reviewMode() === 'regular'" (click)="selectReviewMode('regular')">
       Internal Audits
       <span>{{ regularAssessments().length }}</span>
     </button>
 
-    <button
-      *ngIf="specialAssessments().length > 0"
-      type="button"
-      [class.active]="reviewMode() === 'special'"
-      (click)="selectReviewMode('special')"
-    >
+    <button *ngIf="specialAssessments().length > 0" type="button" [class.active]="reviewMode() === 'special'"
+      (click)="selectReviewMode('special')">
       Special Audits
       <span>{{ specialAssessments().length }}</span>
     </button>
   </div>
 
-  <app-audit-unit-dashboard
-    *ngIf="!selected()"
-    [eyebrow]="dashboardEyebrow()"
-    [title]="dashboardTitle()"
-    [subtitle]="dashboardSubtitle()"
-    [panelTitle]="dashboardPanelTitle()"
+  <app-audit-unit-dashboard *ngIf="!selected()" [eyebrow]="dashboardEyebrow()" [title]="dashboardTitle()"
+    [subtitle]="dashboardSubtitle()" [panelTitle]="dashboardPanelTitle()"
     emptyTitle="No assessment is pending for review"
-    emptyMessage="Assigned reviews will appear here once an auditor or manager submits them."
-    refreshLabel="Refresh"
-    detailsActionLabel="View assessment history"
-    [units]="dashboardUnits()"
-    [loading]="loadingQueue()"
-    [search]="search()"
-    [selectedStatus]="selectedStatus()"
-    [statusOptions]="statusOptions"
-    [totalUnits]="modeAssessments().length"
-    [totalAuditPending]="0"
-    [totalReviewPending]="totalReviewPending()"
-    [totalCompliancePending]="totalCompliancePending()"
-    [totalCompleted]="0"
-    [summaryItems]="reviewerSummaryItems()"
-    [cardMetrics]="reviewerCardMetrics"
-    [cardMetaItems]="reviewerCardMetaItems"
-    [groupAssessments]="true"
-    (searchChange)="search.set($event)"
-    (selectedStatusChange)="selectedStatus.set($event)"
-    (refresh)="loadQueue()"
-    (openUnit)="openAssessment($event)"
-    (viewDetails)="viewAssessmentDetails($event)"
-  ></app-audit-unit-dashboard>
+    emptyMessage="Assigned reviews will appear here once an auditor or manager submits them." refreshLabel="Refresh"
+    detailsActionLabel="View assessment history" [units]="dashboardUnits()" [loading]="loadingQueue()"
+    [search]="search()" [selectedStatus]="selectedStatus()" [statusOptions]="statusOptions"
+    [totalUnits]="modeAssessments().length" [totalAuditPending]="0" [totalReviewPending]="totalReviewPending()"
+    [totalCompliancePending]="totalCompliancePending()" [totalCompleted]="0" [summaryItems]="reviewerSummaryItems()"
+    [cardMetrics]="reviewerCardMetrics" [cardMetaItems]="reviewerCardMetaItems" [groupAssessments]="true"
+    (searchChange)="search.set($event)" (selectedStatusChange)="selectedStatus.set($event)" (refresh)="loadQueue()"
+    (openUnit)="openAssessment($event)" (viewDetails)="viewAssessmentDetails($event)"></app-audit-unit-dashboard>
 
   <section *ngIf="selected()" class="review-detail">
     <div class="detail-toolbar">
-      <button
-        pButton
-        type="button"
-        icon="pi pi-arrow-left"
-        severity="secondary"
-        aria-label="Back to pending reviews"
-        (click)="closeAssessment()"
-      ></button>
+      <button pButton type="button" icon="pi pi-arrow-left" severity="secondary" aria-label="Back to pending reviews"
+        (click)="closeAssessment()"></button>
 
       <div>
         <h3>{{ selectedTitle() }}</h3>
@@ -90,39 +50,21 @@
       </div>
 
       <div class="toolbar-actions">
-        <button
-          pButton
-          type="button"
-          label="View Executive Summary"
-          icon="pi pi-file-edit"
-          severity="info"
-          (click)="viewExecutiveSummary()"
-        ></button>
+        <button pButton type="button" label="View Executive Summary" icon="pi pi-file-edit" severity="info"
+          (click)="viewExecutiveSummary()"></button>
 
-        <button
-          *ngIf="canUseRemarks(detail()?.overview)"
-          pButton
-          type="button"
+        <button *ngIf="canUseRemarks(detail()?.overview)" pButton type="button"
           [label]="remarks()?.unread_count ? 'Remarks (' + remarks().unread_count + ')' : 'Remarks'"
           [icon]="remarks()?.unread_count ? 'pi pi-bell' : 'pi pi-comments'"
-          [severity]="remarks()?.unread_count ? 'danger' : 'secondary'"
-          (click)="toggleRemarksPanel()"
-        ></button>
+          [severity]="remarks()?.unread_count ? 'danger' : 'secondary'" (click)="toggleRemarksPanel()"></button>
 
-        <button
-          pButton
-          type="button"
-          [label]="isComplianceReview() ? 'Submit Compliance Review' : 'Submit Review'"
-          icon="pi pi-send"
-          [loading]="submitting()"
-          [disabled]="
+        <button pButton type="button" [label]="isComplianceReview() ? 'Submit Compliance Review' : 'Submit Review'"
+          icon="pi pi-send" [loading]="submitting()" [disabled]="
             submitting() ||
             bulkSaving() ||
             pendingReviewCount() > 0 ||
             (isLiveManagerComplianceReview() && !hasLiveReviewerSubmissionScope())
-          "
-          (click)="submitReview()"
-        ></button>
+          " (click)="submitReview()"></button>
       </div>
     </div>
 
@@ -132,13 +74,9 @@
     </div>
 
     <ng-container *ngIf="!loadingDetail() && detail() as review">
-      <section
-        *ngIf="canUseRemarks(review.overview) && showRemarksPanel()"
-        class="remark-panel surface-card border-round-xl shadow-1 p-4 mb-4"
-      >
-        <div
-          class="flex flex-column md:flex-row md:align-items-center md:justify-content-between gap-3 mb-3"
-        >
+      <section *ngIf="canUseRemarks(review.overview) && showRemarksPanel()"
+        class="remark-panel surface-card border-round-xl shadow-1 p-4 mb-4">
+        <div class="flex flex-column md:flex-row md:align-items-center md:justify-content-between gap-3 mb-3">
           <div class="flex align-items-center gap-2">
             <h3 class="text-xl font-bold text-900 m-0">Assessment Remarks</h3>
 
@@ -148,29 +86,17 @@
           </div>
 
           <div class="remark-tabs" role="tablist">
-            <button
-              type="button"
-              [class.active]="remarkTab() === 'add'"
-              (click)="remarkTab.set('add')"
-            >
+            <button type="button" [class.active]="remarkTab() === 'add'" (click)="remarkTab.set('add')">
               <i class="pi pi-plus"></i>
               Add Remark
             </button>
 
-            <button
-              type="button"
-              [class.active]="remarkTab() === 'current'"
-              (click)="remarkTab.set('current')"
-            >
+            <button type="button" [class.active]="remarkTab() === 'current'" (click)="remarkTab.set('current')">
               <i class="pi pi-send"></i>
               Your Remarks
             </button>
 
-            <button
-              type="button"
-              [class.active]="remarkTab() === 'other'"
-              (click)="remarkTab.set('other')"
-            >
+            <button type="button" [class.active]="remarkTab() === 'other'" (click)="remarkTab.set('other')">
               <i class="pi pi-inbox"></i>
               For You
             </button>
@@ -179,58 +105,29 @@
 
         <div *ngIf="remarksLoading()" class="remark-loading">Loading remarks...</div>
 
-        <form
-          *ngIf="!remarksLoading() && remarkTab() === 'add'"
-          class="remark-form"
-          (ngSubmit)="saveRemark()"
-        >
+        <form *ngIf="!remarksLoading() && remarkTab() === 'add'" class="remark-form" (ngSubmit)="saveRemark()">
           <div class="remark-fields">
             <label>
               <span>Remark For</span>
-              <p-select
-                [options]="remarks()?.remark_types || []"
-                optionLabel="name"
-                optionValue="id"
-                placeholder="Select recipient"
-                name="remarkNotiType"
-                [(ngModel)]="remarkNotiType"
-                styleClass="w-full"
-              ></p-select>
+              <p-select [options]="remarks()?.remark_types || []" optionLabel="name" optionValue="id"
+                placeholder="Select recipient" name="remarkNotiType" [(ngModel)]="remarkNotiType"
+                styleClass="w-full"></p-select>
             </label>
 
             <label>
               <span>Subject</span>
-              <input
-                pInputText
-                class="w-full"
-                name="remarkSubject"
-                type="text"
-                [(ngModel)]="remarkSubject"
-                placeholder="Remark subject"
-              />
+              <input pInputText class="w-full" name="remarkSubject" type="text" [(ngModel)]="remarkSubject"
+                placeholder="Remark subject" />
             </label>
           </div>
 
           <label class="remark-message">
             <span>Message</span>
-            <textarea
-              pTextarea
-              [autoResize]="true"
-              class="w-full"
-              name="remarkMessage"
-              rows="4"
-              [(ngModel)]="remarkMessage"
-              placeholder="Write remark here"
-            ></textarea>
+            <textarea pTextarea [autoResize]="true" class="w-full" name="remarkMessage" rows="4"
+              [(ngModel)]="remarkMessage" placeholder="Write remark here"></textarea>
           </label>
 
-          <button
-            pButton
-            type="submit"
-            icon="pi pi-send"
-            label="Save Remark"
-            [loading]="savingRemark()"
-          ></button>
+          <button pButton type="submit" icon="pi pi-send" label="Save Remark" [loading]="savingRemark()"></button>
         </form>
 
         <div *ngIf="!remarksLoading() && remarkTab() === 'current'" class="remark-list">
@@ -243,26 +140,15 @@
               <small>
                 {{ remark.created_at | date: 'medium' }}
               </small>
-              <i
-                class="pi"
-                [class.pi-chevron-down]="!isRemarkExpanded(remark.id)"
-                [class.pi-chevron-up]="isRemarkExpanded(remark.id)"
-              ></i>
+              <i class="pi" [class.pi-chevron-down]="!isRemarkExpanded(remark.id)"
+                [class.pi-chevron-up]="isRemarkExpanded(remark.id)"></i>
             </button>
 
             <div *ngIf="isRemarkExpanded(remark.id)" class="remark-body">
               <p>{{ remark.message }}</p>
 
-              <button
-                *ngIf="remark.can_delete"
-                pButton
-                type="button"
-                icon="pi pi-trash"
-                label="Remove Remark"
-                severity="danger"
-                size="small"
-                (click)="removeRemark(remark)"
-              ></button>
+              <button *ngIf="remark.can_delete" pButton type="button" icon="pi pi-trash" label="Remove Remark"
+                severity="danger" size="small" (click)="removeRemark(remark)"></button>
 
               <span *ngIf="!remark.can_delete && remark.has_been_read" class="remark-read-note">
                 Read by recipient. This remark cannot be removed.
@@ -274,11 +160,8 @@
         <div *ngIf="!remarksLoading() && remarkTab() === 'other'" class="remark-list">
           <div *ngIf="!remarks()?.other?.length" class="remark-empty">No remarks found.</div>
 
-          <article
-            *ngFor="let remark of remarks()?.other || []; trackBy: trackByAnswer"
-            class="remark-item"
-            [class.remark-unread]="remark.is_unread"
-          >
+          <article *ngFor="let remark of remarks()?.other || []; trackBy: trackByAnswer" class="remark-item"
+            [class.remark-unread]="remark.is_unread">
             <button type="button" class="remark-heading" (click)="toggleRemark(remark, true)">
               <span class="remark-type">
                 {{ remark.noti_type_label }}
@@ -291,11 +174,8 @@
                 &nbsp;|&nbsp;
                 {{ remark.created_at | date: 'medium' }}
               </small>
-              <i
-                class="pi"
-                [class.pi-chevron-down]="!isRemarkExpanded(remark.id)"
-                [class.pi-chevron-up]="isRemarkExpanded(remark.id)"
-              ></i>
+              <i class="pi" [class.pi-chevron-down]="!isRemarkExpanded(remark.id)"
+                [class.pi-chevron-up]="isRemarkExpanded(remark.id)"></i>
             </button>
 
             <div *ngIf="isRemarkExpanded(remark.id)" class="remark-body">
@@ -310,15 +190,14 @@
           <span>Total Questions Applicable</span><strong>{{ review.counts.total }}</strong>
         </div>
         <div>
-          <span>Branch Complied Points</span
-          ><strong class="red">{{ review.counts.compliance }}</strong>
+          <span>Branch Complied Points</span><strong class="red">{{ review.counts.compliance }}</strong>
         </div>
         <div>
           <span>Reviewer Accepted Questions</span><strong>{{ review.counts.accepted }}</strong>
         </div>
         <div>
-          <span>{{ isComplianceReview() ? 'Re-Compliance Needed Questions' : 'Re-Audit Needed Questions' }}</span
-          ><strong class="red">{{ review.counts.rejected }}</strong>
+          <span>{{ isComplianceReview() ? 'Re-Compliance Needed Questions' : 'Re-Audit Needed Questions'
+            }}</span><strong class="red">{{ review.counts.rejected }}</strong>
         </div>
         <div *ngIf="isComplianceReview()">
           <span>Partially Pass Questions</span><strong>{{ review.counts.partially_passed || 0 }}</strong>
@@ -335,60 +214,35 @@
         </div>
 
         <div class="review-filter-chips">
-          <button
-            type="button"
-            class="review-filter-chip"
-            [class.active]="reviewFilter() === 'all'"
-            (click)="reviewFilter.set('all')"
-          >
+          <button type="button" class="review-filter-chip" [class.active]="reviewFilter() === 'all'"
+            (click)="reviewFilter.set('all')">
             All <span>{{ reviewFilterCount('all') }}</span>
           </button>
 
-          <button
-            type="button"
-            class="review-filter-chip"
-            [class.active]="reviewFilter() === 'pending'"
-            (click)="reviewFilter.set('pending')"
-          >
+          <button type="button" class="review-filter-chip" [class.active]="reviewFilter() === 'pending'"
+            (click)="reviewFilter.set('pending')">
             Pending <span>{{ reviewFilterCount('pending') }}</span>
           </button>
 
-          <button
-            type="button"
-            class="review-filter-chip danger"
-            [class.active]="reviewFilter() === 'highRisk'"
-            (click)="reviewFilter.set('highRisk')"
-          >
+          <button type="button" class="review-filter-chip danger" [class.active]="reviewFilter() === 'highRisk'"
+            (click)="reviewFilter.set('highRisk')">
             High Risk <span>{{ reviewFilterCount('highRisk') }}</span>
           </button>
 
-          <button
-            type="button"
-            class="review-filter-chip warning"
-            [class.warning-has-count]="reviewFilterCount('rework') > 0"
-            [class.active]="reviewFilter() === 'rework'"
-            (click)="reviewFilter.set('rework')"
-          >
+          <button type="button" class="review-filter-chip warning"
+            [class.warning-has-count]="reviewFilterCount('rework') > 0" [class.active]="reviewFilter() === 'rework'"
+            (click)="reviewFilter.set('rework')">
             {{ isComplianceReview() ? 'Re-Compliance' : 'Re-Audit' }}
             <span>{{ reviewFilterCount('rework') }}</span>
           </button>
 
-          <button
-            type="button"
-            class="review-filter-chip warning"
-            *ngIf="isComplianceReview()"
-            [class.active]="reviewFilter() === 'partial'"
-            (click)="reviewFilter.set('partial')"
-          >
+          <button type="button" class="review-filter-chip warning" *ngIf="isComplianceReview()"
+            [class.active]="reviewFilter() === 'partial'" (click)="reviewFilter.set('partial')">
             Partially Pass <span>{{ reviewFilterCount('partial') }}</span>
           </button>
 
-          <button
-            type="button"
-            class="review-filter-chip success"
-            [class.active]="reviewFilter() === 'accepted'"
-            (click)="reviewFilter.set('accepted')"
-          >
+          <button type="button" class="review-filter-chip success" [class.active]="reviewFilter() === 'accepted'"
+            (click)="reviewFilter.set('accepted')">
             Accepted <span>{{ reviewFilterCount('accepted') }}</span>
           </button>
         </div>
@@ -401,35 +255,19 @@
         </div>
 
         <div class="bulk-review-buttons">
-          <button
-            pButton
-            type="button"
-            icon="pi pi-check"
-            [label]="
+          <button pButton type="button" [label]="
               isLiveManagerComplianceReview()
                 ? 'Accept All Pending Points'
                 : 'Accept All Observations'
-            "
-            severity="success"
-            [loading]="bulkSaving()"
-            [disabled]="submitting() || bulkSaving()"
-            (click)="saveBulkAction(2)"
-          ></button>
+            " severity="success" [loading]="bulkSaving()" [disabled]="submitting() || bulkSaving()"
+            (click)="saveBulkAction(2)"></button>
 
-          <button
-            pButton
-            type="button"
-            icon="pi pi-times"
-            [label]="
+          <button pButton type="button" [label]="
               isLiveManagerComplianceReview()
                 ? 'Send All Pending Points to Manager'
                 : 'Reject All Observations'
-            "
-            severity="danger"
-            [loading]="bulkSaving()"
-            [disabled]="submitting() || bulkSaving()"
-            (click)="saveBulkAction(3)"
-          ></button>
+            " severity="danger" [loading]="bulkSaving()" [disabled]="submitting() || bulkSaving()"
+            (click)="saveBulkAction(3)"></button>
         </div>
       </div>
 
@@ -496,17 +334,17 @@
                 <th>Open Date</th>
                 <td>
                   {{
-                    group.account.account_opening_date
-                      ? (group.account.account_opening_date | date: 'dd/MM/yyyy')
-                      : '-'
+                  group.account.account_opening_date
+                  ? (group.account.account_opening_date | date: 'dd/MM/yyyy')
+                  : '-'
                   }}
                 </td>
                 <th>Renewal Date</th>
                 <td>
                   {{
-                    group.account.renewal_date
-                      ? (group.account.renewal_date | date: 'dd/MM/yyyy')
-                      : '-'
+                  group.account.renewal_date
+                  ? (group.account.renewal_date | date: 'dd/MM/yyyy')
+                  : '-'
                   }}
                 </td>
               </tr>
@@ -520,9 +358,9 @@
                 <th>Balance As On</th>
                 <td>
                   {{
-                    group.account.balance_date
-                      ? (group.account.balance_date | date: 'dd/MM/yyyy')
-                      : '-'
+                  group.account.balance_date
+                  ? (group.account.balance_date | date: 'dd/MM/yyyy')
+                  : '-'
                   }}
                 </td>
                 <th>Due Date</th>
@@ -540,13 +378,9 @@
           </table>
         </div>
 
-        <article
-          *ngFor="let answer of group.answers; trackBy: trackByAnswer"
-          class="answer-row"
-          [class.compliance-answer]="answer.is_compliance == 1"
-          [class.answer-row--account]="group.isAccountGroup"
-          [class.re-compliance-needed-row]="reviewStatus(answer) === 3"
-        >
+        <article *ngFor="let answer of group.answers; trackBy: trackByAnswer" class="answer-row"
+          [class.compliance-answer]="answer.is_compliance == 1" [class.answer-row--account]="group.isAccountGroup"
+          [class.re-compliance-needed-row]="reviewStatus(answer) === 3">
           <div class="answer-head">
             <div class="answer-title-wrap">
               <span class="answer-serial">{{ answer._displayIndex }}</span>
@@ -559,23 +393,14 @@
             </div>
 
             <div class="answer-status-stack">
-              <p-tag
-                *ngIf="answer.is_compliance == 1"
-                value="Compliance Required"
-                severity="danger"
-              ></p-tag>
+              <p-tag *ngIf="answer.is_compliance == 1" value="Compliance Required" severity="danger"></p-tag>
 
-              <p-tag
-                [value]="liveComplianceStatusLabel(answer)"
-                [severity]="statusSeverity(reviewStatus(answer))"
-              ></p-tag>
+              <p-tag [value]="liveComplianceStatusLabel(answer)"
+                [severity]="statusSeverity(reviewStatus(answer))"></p-tag>
             </div>
           </div>
 
-          <table
-            *ngIf="hasAccountDetails(answer) && !group.isAccountGroup"
-            class="review-account-table"
-          >
+          <table *ngIf="hasAccountDetails(answer) && !group.isAccountGroup" class="review-account-table">
             <tbody>
               <tr>
                 <th>Branch Name</th>
@@ -605,9 +430,9 @@
                 <th>Open Date</th>
                 <td>
                   {{
-                    answer.account_opening_date
-                      ? (answer.account_opening_date | date: 'dd/MM/yyyy')
-                      : '-'
+                  answer.account_opening_date
+                  ? (answer.account_opening_date | date: 'dd/MM/yyyy')
+                  : '-'
                   }}
                 </td>
                 <th>Renewal Date</th>
@@ -661,76 +486,53 @@
           <div *ngIf="getTimeline(answer).length" class="answers-timeline">
             <label class="timeline-title"><i class="pi pi-history"></i> Compliance History</label>
             <div class="timeline-container">
-              <div
-                *ngFor="let item of getTimeline(answer); let index = index; trackBy: trackByIndex"
-                class="timeline-item"
-              >
+              <div *ngFor="let item of getTimeline(answer); let index = index; trackBy: trackByIndex"
+                class="timeline-item">
                 <div class="timeline-badge"></div>
                 <div class="timeline-content">
                   <div class="timeline-header-meta">
                     <span class="round-badge">Round {{ index + 1 }}</span>
                     <span class="timeline-date" *ngIf="item.created_at">{{
                       item.created_at | date: 'medium'
-                    }}</span>
+                      }}</span>
                   </div>
-                  <div
-                    *ngIf="
+                  <div *ngIf="
                       item.compliance_reviewer_comment ||
                       item.audit_reviewer_comment ||
                       item.comment ||
                       item.reviewer_comment
-                    "
-                    class="timeline-entry reviewer-entry"
-                  >
+                    " class="timeline-entry reviewer-entry">
                     <span class="timeline-author">Reviewer Feedback</span>
                     <p class="timeline-text">
                       {{
-                        item.compliance_reviewer_comment ||
-                          item.audit_reviewer_comment ||
-                          item.comment ||
-                          item.reviewer_comment
+                      item.compliance_reviewer_comment ||
+                      item.audit_reviewer_comment ||
+                      item.comment ||
+                      item.reviewer_comment
                       }}
                     </p>
                   </div>
-                  <div
-                    *ngIf="item.compliance_response || item.response || item.answer_given"
-                    class="timeline-entry manager-entry"
-                  >
+                  <div *ngIf="item.compliance_response || item.response || item.answer_given"
+                    class="timeline-entry manager-entry">
                     <span class="timeline-author">Manager Response</span>
                     <p class="timeline-text">
                       {{ item.compliance_response || item.response || item.answer_given }}
                     </p>
-                    <div
-                      class="timeline-evidences"
-                      *ngIf="
+                    <div class="timeline-evidences" *ngIf="
                         evidenceList(item).length ||
                         evidenceList(item, 'compliance_evidence').length
-                      "
-                    >
-                      <button
-                        *ngFor="let evidence of evidenceList(item); let ei = index; trackBy: trackByEvidence"
-                        pButton
-                        type="button"
-                        icon="pi pi-paperclip"
-                        severity="secondary"
-                        [title]="'View auditor supporting document ' + (ei + 1)"
-                        (click)="viewEvidence(evidence)"
-                        class="p-button-sm"
-                      ></button>
-                      <button
-                        *ngFor="
+                      ">
+                      <button *ngFor="let evidence of evidenceList(item); let ei = index; trackBy: trackByEvidence"
+                        pButton type="button" icon="pi pi-paperclip" severity="secondary"
+                        [title]="'View auditor supporting document ' + (ei + 1)" (click)="viewEvidence(evidence)"
+                        class="p-button-sm"></button>
+                      <button *ngFor="
                           let evidence of evidenceList(item, 'compliance_evidence');
                           let ei = index;
                           trackBy: trackByEvidence
-                        "
-                        pButton
-                        type="button"
-                        icon="pi pi-eye"
-                        severity="secondary"
-                        [title]="'View compliance supporting document ' + (ei + 1)"
-                        (click)="viewEvidence(evidence)"
-                        class="p-button-sm"
-                      ></button>
+                        " pButton type="button" icon="pi pi-eye" severity="secondary"
+                        [title]="'View compliance supporting document ' + (ei + 1)" (click)="viewEvidence(evidence)"
+                        class="p-button-sm"></button>
                     </div>
                   </div>
                 </div>
@@ -739,116 +541,56 @@
           </div>
 
           <div class="review-action">
-            <textarea
-              *ngIf="!isComplianceReview()"
-              rows="1"
-              [(ngModel)]="answer.audit_reviewer_comment"
-              placeholder="Reviewer comment"
-            ></textarea>
+            <textarea *ngIf="!isComplianceReview()" rows="2" [(ngModel)]="answer.audit_reviewer_comment"
+              placeholder="Reviewer comment"></textarea>
 
-            <textarea
-              *ngIf="isComplianceReview()"
-              rows="1"
-              [(ngModel)]="answer.compliance_reviewer_comment"
-              placeholder="Reviewer Remark"
-            ></textarea>
+            <textarea *ngIf="isComplianceReview()" rows="2" [(ngModel)]="answer.compliance_reviewer_comment"
+              placeholder="Reviewer Remark"></textarea>
 
             <div class="review-buttons">
-              <div
-                *ngIf="
+              <div *ngIf="
                   evidenceList(answer).length ||
                   (isComplianceReview() && evidenceList(answer, 'compliance_evidence').length)
-                "
-                class="evidence-actions"
-              >
-                <button
-                  *ngFor="let evidence of evidenceList(answer); let ei = index; trackBy: trackByEvidence"
-                  pButton
-                  type="button"
-                  class="evidence-link"
-                  icon="pi pi-paperclip"
-                  severity="secondary"
-                  [title]="
+                " class="evidence-actions">
+                <button *ngFor="let evidence of evidenceList(answer); let ei = index; trackBy: trackByEvidence" pButton
+                  type="button" class="evidence-link" icon="pi pi-paperclip" severity="secondary" [title]="
                     (isComplianceReview() ? 'View auditor supporting document ' : 'View evidence ') + (ei + 1)
-                  "
-                  (click)="viewEvidence(evidence)"
-                ></button>
+                  " (click)="viewEvidence(evidence)"></button>
 
-                <button
-                  *ngFor="
+                <button *ngFor="
                     let evidence of isComplianceReview()
                       ? evidenceList(answer, 'compliance_evidence')
                       : [];
                     let ei = index;
                     trackBy: trackByEvidence
-                  "
-                  pButton
-                  type="button"
-                  class="evidence-link"
-                  icon="pi pi-eye"
-                  severity="secondary"
-                  [title]="'View manager supporting document ' + (ei + 1)"
-                  (click)="viewEvidence(evidence)"
-                ></button>
+                  " pButton type="button" class="evidence-link" icon="pi pi-eye" severity="secondary"
+                  [title]="'View manager supporting document ' + (ei + 1)" (click)="viewEvidence(evidence)"></button>
               </div>
 
-              <ng-container
-                *ngIf="
+              <ng-container *ngIf="
                   answer.is_compliance == 1 &&
                   (!isLiveManagerComplianceReview() || canTakeLiveComplianceReviewerAction(answer))
-                "
-              >
-                <button
-                  pButton
-                  type="button"
-                  label="Accept"
-                  icon="pi pi-check"
-                  severity="success"
+                ">
+                <button pButton type="button" label="Accept" severity="success"
                   [loading]="actionSaving()[actionKey('answer', answer.id)]"
-                  [disabled]="isReviewActionDisabled(answer, 2)"
-                  (click)="saveAction('answer', answer, 2)"
-                ></button>
+                  [disabled]="isReviewActionDisabled(answer, 2)" (click)="saveAction('answer', answer, 2)"></button>
 
-                <button
-                  pButton
-                  type="button"
-                  [label]="
+                <button pButton type="button" [label]="
                     isLiveManagerComplianceReview()
                       ? 'Send To Manager'
                       : isComplianceReview()
                         ? 'Re-Compliance'
                         : 'Re-Audit'
-                  "
-                  icon="pi pi-times"
-                  severity="danger"
-                  [loading]="actionSaving()[actionKey('answer', answer.id)]"
-                  [disabled]="isReviewActionDisabled(answer, 3)"
-                  (click)="saveAction('answer', answer, 3)"
-                ></button>
+                  " severity="danger" [loading]="actionSaving()[actionKey('answer', answer.id)]"
+                  [disabled]="isReviewActionDisabled(answer, 3)" (click)="saveAction('answer', answer, 3)"></button>
 
-                <button
-                  *ngIf="isComplianceReview()"
-                  pButton
-                  type="button"
-                  label="Carry Forward"
-                  icon="pi pi-forward"
-                  severity="info"
+                <button *ngIf="isComplianceReview()" pButton type="button" label="Carry Forward" severity="info"
                   [loading]="actionSaving()[actionKey('answer', answer.id)]"
-                  [disabled]="isReviewActionDisabled(answer, 5)"
-                  (click)="saveAction('answer', answer, 5)"
-                ></button>
+                  [disabled]="isReviewActionDisabled(answer, 5)" (click)="saveAction('answer', answer, 5)"></button>
 
-                <button
-                  *ngIf="isComplianceReview()"
-                  pButton
-                  type="button"
-                  label="Partially Pass"
-                  icon="pi pi-percentage"
-                  severity="warn"
+                <button *ngIf="isComplianceReview()" pButton type="button" label="Partially Pass" severity="warn"
                   [loading]="actionSaving()[actionKey('answer', answer.id)]"
-                  [disabled]="isReviewActionDisabled(answer, 7)"
-                  (click)="saveAction('answer', answer, 7)"
-                ></button>
+                  [disabled]="isReviewActionDisabled(answer, 7)" (click)="saveAction('answer', answer, 7)"></button>
               </ng-container>
             </div>
           </div>
@@ -859,15 +601,8 @@
                 <span>Annexure Rows</span>
                 <small>{{ answer.annexure_rows.length }} row(s)</small>
               </div>
-              <button
-                pButton
-                type="button"
-                label="Select Accept For All Rows"
-                icon="pi pi-check"
-                severity="secondary"
-                class="p-button-sm"
-                (click)="selectAcceptForAllAnnexureRows(answer)"
-              ></button>
+              <button pButton type="button" label="Select Accept For All Rows" icon="pi pi-check" severity="secondary"
+                class="p-button-sm" (click)="selectAcceptForAllAnnexureRows(answer)"></button>
             </div>
 
             <div class="annexure-review-table-wrap">
@@ -886,10 +621,8 @@
                 </thead>
 
                 <tbody>
-                  <tr
-                    *ngFor="let row of answer.annexure_rows; trackBy: trackByRow"
-                    [class.re-compliance-needed-tr]="reviewStatus(row) === 3"
-                  >
+                  <tr *ngFor="let row of answer.annexure_rows; trackBy: trackByRow"
+                    [class.re-compliance-needed-tr]="reviewStatus(row) === 3">
                     <td *ngFor="let column of annexureColumns(answer); let ci = index; trackBy: trackByColumn">
                       {{ row.values?.[ci] || '-' }}
                     </td>
@@ -898,67 +631,48 @@
 
                       <!-- Inline tiny timeline for annexure row -->
                       <div *ngIf="getTimeline(row).length" class="row-timeline-inline">
-                        <div
-                          *ngFor="let item of getTimeline(row); let index = index; trackBy: trackByIndex"
-                          class="row-timeline-item"
-                        >
+                        <div *ngFor="let item of getTimeline(row); let index = index; trackBy: trackByIndex"
+                          class="row-timeline-item">
                           <div class="row-timeline-header">
                             <span class="round-badge">R{{ index + 1 }}</span>
                             <span class="date" *ngIf="item.created_at">{{
                               item.created_at | date: 'dd/MM/yy'
-                            }}</span>
+                              }}</span>
                           </div>
                           <div class="row-timeline-body">
-                            <div
-                              *ngIf="
+                            <div *ngIf="
                                 item.compliance_reviewer_comment ||
                                 item.audit_reviewer_comment ||
                                 item.comment ||
                                 item.reviewer_comment
-                              "
-                              class="row-comment text-red"
-                            >
+                              " class="row-comment text-red">
                               <strong>Rev:</strong>
                               {{
-                                item.compliance_reviewer_comment ||
-                                  item.audit_reviewer_comment ||
-                                  item.comment ||
-                                  item.reviewer_comment
+                              item.compliance_reviewer_comment ||
+                              item.audit_reviewer_comment ||
+                              item.comment ||
+                              item.reviewer_comment
                               }}
                             </div>
-                            <div
-                              *ngIf="item.compliance_response || item.response || item.answer_given"
-                              class="row-comment text-blue"
-                            >
+                            <div *ngIf="item.compliance_response || item.response || item.answer_given"
+                              class="row-comment text-blue">
                               <strong>Mgr:</strong>
                               {{ item.compliance_response || item.response || item.answer_given }}
-                              <span
-                                class="inline-evidences"
-                                *ngIf="
+                              <span class="inline-evidences" *ngIf="
                                   evidenceList(item).length ||
                                   evidenceList(item, 'compliance_evidence').length
-                                "
-                              >
-                                <button
-                                  *ngFor="let e of evidenceList(item); let ei = index; trackBy: trackByEvidence"
-                                  type="button"
-                                  class="btn-link"
-                                  (click)="viewEvidence(e)"
-                                  title="View auditor supporting document"
-                                >
+                                ">
+                                <button *ngFor="let e of evidenceList(item); let ei = index; trackBy: trackByEvidence"
+                                  type="button" class="btn-link" (click)="viewEvidence(e)"
+                                  title="View auditor supporting document">
                                   <i class="pi pi-paperclip"></i>
                                 </button>
-                                <button
-                                  *ngFor="
+                                <button *ngFor="
                                     let e of evidenceList(item, 'compliance_evidence');
                                     let ei = index;
                                     trackBy: trackByEvidence
-                                  "
-                                  type="button"
-                                  class="btn-link"
-                                  (click)="viewEvidence(e)"
-                                  title="View manager supporting document"
-                                >
+                                  " type="button" class="btn-link" (click)="viewEvidence(e)"
+                                  title="View manager supporting document">
                                   <i class="pi pi-eye"></i>
                                 </button>
                               </span>
@@ -969,75 +683,47 @@
                     </td>
                     <td>
                       <div class="annexure-evidence-actions">
-                        <button
-                          *ngFor="let evidence of evidenceList(row); let ei = index; trackBy: trackByEvidence"
-                          pButton
-                          type="button"
-                          icon="pi pi-paperclip"
-                          severity="secondary"
-                          [title]="
+                        <button *ngFor="let evidence of evidenceList(row); let ei = index; trackBy: trackByEvidence"
+                          pButton type="button" icon="pi pi-paperclip" severity="secondary" [title]="
                             (isComplianceReview() ? 'View auditor supporting document ' : 'View evidence ') +
                             (ei + 1)
-                          "
-                          (click)="viewEvidence(evidence)"
-                        ></button>
-                        <button
-                          *ngFor="
+                          " (click)="viewEvidence(evidence)"></button>
+                        <button *ngFor="
                             let evidence of isComplianceReview()
                               ? evidenceList(row, 'compliance_evidence')
                               : [];
                             let ei = index;
                             trackBy: trackByEvidence
-                          "
-                          pButton
-                          type="button"
-                          icon="pi pi-eye"
-                          severity="secondary"
+                          " pButton type="button" icon="pi pi-eye" severity="secondary"
                           [title]="'View manager supporting document ' + (ei + 1)"
-                          (click)="viewEvidence(evidence)"
-                        ></button>
+                          (click)="viewEvidence(evidence)"></button>
                       </div>
                     </td>
                     <td>
-                      <textarea
-                        *ngIf="!isComplianceReview()"
-                        rows="1"
-                        [(ngModel)]="row.audit_reviewer_comment"
-                        placeholder="Reviewer comment"
-                      ></textarea>
+                      <textarea *ngIf="!isComplianceReview()" rows="1" [(ngModel)]="row.audit_reviewer_comment"
+                        placeholder="Reviewer comment"></textarea>
 
-                      <textarea
-                        *ngIf="isComplianceReview()"
-                        rows="1"
-                        [(ngModel)]="row.compliance_reviewer_comment"
-                        placeholder="Reviewer Remark"
-                      ></textarea>
+                      <textarea *ngIf="isComplianceReview()" rows="1" [(ngModel)]="row.compliance_reviewer_comment"
+                        placeholder="Reviewer Remark"></textarea>
                     </td>
                     <td>
-                      <p-tag
-                        [value]="liveComplianceStatusLabel(row)"
-                        [severity]="statusSeverity(reviewStatus(row))"
-                      ></p-tag>
+                      <p-tag [value]="liveComplianceStatusLabel(row)"
+                        [severity]="statusSeverity(reviewStatus(row))"></p-tag>
                     </td>
                     <td>
-                      <select
-                        class="answer-control"
-                        [(ngModel)]="row.temp_action"
-                        [disabled]="
+                      <select class="answer-control" [(ngModel)]="row.temp_action" [disabled]="
                           (isLiveManagerComplianceReview() && !canTakeLiveComplianceReviewerAction(row)) ||
                           reviewStatus(row) === 9
-                        "
-                        style="min-width: 140px; padding: 0.25rem"
-                      >
+                        " style="min-width: 140px; padding: 0.25rem">
                         <option value="">Select Action</option>
                         <option [value]="2">Accept</option>
                         <option [value]="3">
                           {{
-                            isLiveManagerComplianceReview()
-                              ? 'Send To Manager'
-                              : isComplianceReview()
-                                ? 'Re-Compliance'
-                                : 'Re-Audit'
+                          isLiveManagerComplianceReview()
+                          ? 'Send To Manager'
+                          : isComplianceReview()
+                          ? 'Re-Compliance'
+                          : 'Re-Audit'
                           }}
                         </option>
                         <option [value]="5" *ngIf="isComplianceReview()">
@@ -1054,15 +740,8 @@
             </div>
 
             <div class="flex justify-content-end mt-3" *ngIf="hasReviewableAnnexureRows(answer)">
-              <button
-                pButton
-                type="button"
-                label="Save All Annexure Actions"
-                icon="pi pi-save"
-                class="p-button-sm"
-                [loading]="annexureSavingQuestionId() === answer.id"
-                (click)="saveAllAnnexureActions(answer)"
-              ></button>
+              <button pButton type="button" label="Save All Annexure Actions" icon="pi pi-save" class="p-button-sm"
+                [loading]="annexureSavingQuestionId() === answer.id" (click)="saveAllAnnexureActions(answer)"></button>
             </div>
           </div>
         </article>

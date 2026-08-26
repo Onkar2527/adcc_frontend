@@ -26,7 +26,7 @@
 
       <!-- Quick Metrics Grid -->
       <div class="metrics-grid">
-        <div class="metric-card theme-blue">
+        <div class="metric-card theme-blue" [routerLink]="['/admin/employee-master']">
           <div class="card-glow"></div>
           <div class="card-icon"><i class="pi pi-users"></i></div>
           <div class="card-details">
@@ -35,7 +35,7 @@
           </div>
         </div>
 
-        <div class="metric-card theme-purple">
+        <div class="metric-card theme-purple" [routerLink]="['/admin/audit-unit-master']">
           <div class="card-glow"></div>
           <div class="card-icon"><i class="pi pi-building"></i></div>
           <div class="card-details">
@@ -53,7 +53,7 @@
           </div>
         </div>
 
-        <div class="metric-card theme-amber">
+        <div class="metric-card theme-amber" [routerLink]="['/admin/audit-scheme-master']">
           <div class="card-glow"></div>
           <div class="card-icon"><i class="pi pi-sitemap"></i></div>
           <div class="card-details">

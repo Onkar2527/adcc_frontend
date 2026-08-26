@@ -214,7 +214,7 @@ export class PeriodwiseQuestionsMasterComponent implements OnInit {
     const res = await this.drawer.open(PeriodwiseQuestionsMasterFormComponent, {
       header: periodwiseQuestionsMaster ? 'Edit Question Setup' : 'Create New Question Setup',
       data: periodwiseQuestionsMaster,
-      width: '620px'
+      width: '90vw'
     });
 
     if (res.saved) {
@@ -250,7 +250,7 @@ export class PeriodwiseQuestionsMasterComponent implements OnInit {
     const res = await this.drawer.open(PeriodwiseQuestionsMasterViewComponent, {
       header: periodwiseQuestionsMaster ? 'Edit Question Setup Master' : 'Create New Question Setup Master',
       data: periodwiseQuestionsMaster,
-      width: '1020px'
+      width: '100vw'
     });
 
     if (res.saved) {

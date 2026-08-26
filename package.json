@@ -2,11 +2,10 @@
   "name": "auditPro",
   "version": "0.0.0",
   "scripts": {
-  "ng": "ng",
-  "test": "ng test",
-  "lint": "ng lint",
-  "e2e": "ng e2e",
-
+    "ng": "ng",
+    "test": "ng test",
+    "lint": "ng lint",
+    "e2e": "ng e2e",
     "start": "ng serve",
     "serve": "ng serve",
     "build": "ng build --configuration production --output-path ./out/ng --base-href ./",
