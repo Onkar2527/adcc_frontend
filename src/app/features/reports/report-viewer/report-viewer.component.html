@@ -129,6 +129,7 @@
 
       <div class="official-report-meta">
         <p><strong>Report:</strong> {{ definition()?.title }}</p>
+        <p *ngIf="reportAuditType()"><strong>Audit Type:</strong> {{ reportAuditType() }}</p>
         <p><strong>Report Run Date:</strong> {{ reportRunDate() }}</p>
         <p *ngIf="reportAssessmentPeriod()">
           <strong>Assessment Period:</strong> {{ reportAssessmentPeriod() }}

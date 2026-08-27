@@ -16,7 +16,7 @@ import {
 } from '../services/reports.service';
 import { InternalAuditNavService } from '../../auditor/services/internal-audit-nav.service';
 import { APP_CONFIG } from '../../../core/services/config/config.token';
-import { AuditTypeService } from '../../admin/services/masters.service';
+import { AuditSectionService, AuditTypeService } from '../../admin/services/masters.service';
 
 @Component({
   selector: 'app-report-viewer',
@@ -34,6 +34,7 @@ export class ReportViewerComponent implements OnInit {
   private dateTimeService = inject(DateTimeService);
   private sanitizer = inject(DomSanitizer);
   private auditTypeService = inject(AuditTypeService);
+  private auditSectionService = inject(AuditSectionService);
   public config = inject(APP_CONFIG);
   private auditTypeFilter: ReportFilterDefinition = {
     key: 'audit_type_id',
@@ -306,7 +307,7 @@ export class ReportViewerComponent implements OnInit {
   }
 
   private loadAuditTypes(done: () => void) {
-    this.auditTypeService.findAll().subscribe({
+    this.auditSectionService.findAll().subscribe({
       next: (response: any) => {
         const rows = Array.isArray(response)
           ? response
@@ -957,6 +958,21 @@ export class ReportViewerComponent implements OnInit {
 
   reportAuditUnit() {
     return this.reportHeader()?.['auditUnit'] || '';
+  }
+
+  reportAuditType() {
+    const dbSectionName = this.reportHeader()?.['sectionName'];
+    if (dbSectionName) {
+      return dbSectionName;
+    }
+
+    const firstRow = this.rows()?.[0];
+    if (firstRow && firstRow.section_name) {
+      return firstRow.section_name;
+    }
+
+    const value = this.filters['audit_type_id'];
+    return this.auditTypeFilter.options?.find((option) => String(option.value) === String(value))?.label || '';
   }
 
   hasGroupedRows() {
