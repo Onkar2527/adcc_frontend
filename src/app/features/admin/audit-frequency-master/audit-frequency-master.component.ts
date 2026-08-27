@@ -19,6 +19,8 @@ import { MasterBulkUploadService } from '../services/master-bulk-upload.service'
 export interface RiskFrequency {
     risk_type_id: number;
     frequency: number;
+    audit_due_days?: number;
+    compliance_due_days?: number;
     riskName?: string;
     description?: string;
     colorClass?: string;
@@ -91,28 +93,76 @@ export interface RiskFrequency {
                 </div>
 
                 <div *ngIf="!loading()">
-                    <div class="flex flex-column gap-4">
+                    <div class="flex flex-column gap-3">
                         <!-- Frequency Config Rows -->
-                        <div *ngFor="let item of frequencies()" class="config-row p-3 border-round border-1 surface-border">
-                            <div class="flex flex-column md:flex-row align-items-start md:align-items-center justify-content-between gap-3">
-                                <div>
-                                    <span class="px-3 py-1 border-round text-xs font-bold mr-2 uppercase" [ngClass]="item.colorClass">
-                                        {{ item.riskName }}
-                                    </span>
-                                    <p class="text-gray-500 text-sm mt-2 mb-0">{{ item.description }}</p>
+                        <div *ngFor="let item of frequencies()" class="config-row p-4 border-round-xl border-1 surface-border bg-white shadow-sm">
+                            <div class="grid align-items-center">
+                                <!-- Info Section -->
+                                <div class="col-12 lg:col-4 mb-3 lg:mb-0">
+                                    <div class="flex flex-column gap-2">
+                                        <div>
+                                            <span class="px-3 py-2 border-round-lg text-xs font-bold uppercase white-space-nowrap" [ngClass]="item.colorClass">
+                                                {{ item.riskName }}
+                                            </span>
+                                        </div>
+                                        <p class="text-gray-500 text-sm leading-normal m-0">{{ item.description }}</p>
+                                    </div>
                                 </div>
                                 
-                                <div class="flex align-items-center gap-2 min-width-150">
-                                    <input 
-                                        type="number" 
-                                        [(ngModel)]="item.frequency" 
-                                        min="1" 
-                                        max="60"
-                                        class="w-full p-2 border-1 border-round surface-border text-base bg-white font-semibold text-center text-gray-800"
-                                        style="height: 42px; width: 80px;"
-                                        (ngModelChange)="onValueChange()"
-                                    />
-                                    <span class="font-medium text-gray-700 text-sm">Months</span>
+                                <!-- Inputs Section -->
+                                <div class="col-12 lg:col-8">
+                                    <div class="grid">
+                                        <!-- Frequency -->
+                                        <div class="col-12 sm:col-4">
+                                            <label class="block font-bold text-xs text-gray-600 uppercase mb-2" style="letter-spacing: 0.5px;">Frequency</label>
+                                            <div class="p-inputgroup" style="height: 42px;">
+                                                <input 
+                                                    type="number" 
+                                                    [(ngModel)]="item.frequency" 
+                                                    min="1" 
+                                                    max="60"
+                                                    class="p-2 border-1 border-round-left surface-border text-base bg-white font-semibold text-center text-gray-800 w-full"
+                                                    style="height: 42px;"
+                                                    (ngModelChange)="onValueChange()"
+                                                />
+                                                <span class="p-inputgroup-addon bg-gray-50 text-gray-600 text-sm font-semibold border-1 border-left-none surface-border px-3 border-round-right flex align-items-center">Months</span>
+                                            </div>
+                                        </div>
+
+                                        <!-- Audit Due -->
+                                        <div class="col-12 sm:col-4">
+                                            <label class="block font-bold text-xs text-gray-600 uppercase mb-2" style="letter-spacing: 0.5px;">Audit Due</label>
+                                            <div class="p-inputgroup" style="height: 42px;">
+                                                <input 
+                                                    type="number" 
+                                                    [(ngModel)]="item.audit_due_days" 
+                                                    min="1" 
+                                                    max="120"
+                                                    class="p-2 border-1 border-round-left surface-border text-base bg-white font-semibold text-center text-gray-800 w-full"
+                                                    style="height: 42px;"
+                                                    (ngModelChange)="onValueChange()"
+                                                />
+                                                <span class="p-inputgroup-addon bg-gray-50 text-gray-600 text-sm font-semibold border-1 border-left-none surface-border px-3 border-round-right flex align-items-center">Days</span>
+                                            </div>
+                                        </div>
+
+                                        <!-- Compliance Due -->
+                                        <div class="col-12 sm:col-4">
+                                            <label class="block font-bold text-xs text-gray-600 uppercase mb-2" style="letter-spacing: 0.5px;">Compliance Due</label>
+                                            <div class="p-inputgroup" style="height: 42px;">
+                                                <input 
+                                                    type="number" 
+                                                    [(ngModel)]="item.compliance_due_days" 
+                                                    min="1" 
+                                                    max="120"
+                                                    class="p-2 border-1 border-round-left surface-border text-base bg-white font-semibold text-center text-gray-800 w-full"
+                                                    style="height: 42px;"
+                                                    (ngModelChange)="onValueChange()"
+                                                />
+                                                <span class="p-inputgroup-addon bg-gray-50 text-gray-600 text-sm font-semibold border-1 border-left-none surface-border px-3 border-round-right flex align-items-center">Days</span>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -215,7 +265,7 @@ export class AuditFrequencyMasterComponent implements OnInit {
     saving = signal(false);
     isDirty = signal(false);
 
-    private originalValues: Record<number, number> = {};
+    private originalValues: Record<number, { frequency: number; audit_due_days: number; compliance_due_days: number }> = {};
 
     ngOnInit() {
         this.load();
@@ -242,12 +292,22 @@ export class AuditFrequencyMasterComponent implements OnInit {
                         colorClass = 'bg-medium-risk';
                     }
 
+                    const originalFreq = Number(item.frequency);
+                    const originalAuditDays = Number(item.audit_due_days || 20);
+                    const originalComplianceDays = Number(item.compliance_due_days || 20);
+
                     // Store original for cancellation comparison
-                    this.originalValues[rId] = Number(item.frequency);
+                    this.originalValues[rId] = {
+                        frequency: originalFreq,
+                        audit_due_days: originalAuditDays,
+                        compliance_due_days: originalComplianceDays
+                    };
 
                     return {
                         risk_type_id: rId,
-                        frequency: Number(item.frequency),
+                        frequency: originalFreq,
+                        audit_due_days: originalAuditDays,
+                        compliance_due_days: originalComplianceDays,
                         riskName,
                         description,
                         colorClass
@@ -271,7 +331,12 @@ export class AuditFrequencyMasterComponent implements OnInit {
     onValueChange() {
         let dirty = false;
         this.frequencies().forEach(item => {
-            if (this.originalValues[item.risk_type_id] !== item.frequency) {
+            const orig = this.originalValues[item.risk_type_id];
+            if (
+                orig.frequency !== item.frequency ||
+                orig.audit_due_days !== item.audit_due_days ||
+                orig.compliance_due_days !== item.compliance_due_days
+            ) {
                 dirty = true;
             }
         });
@@ -293,10 +358,15 @@ export class AuditFrequencyMasterComponent implements OnInit {
     }
 
     cancelChanges() {
-        const resetData = this.frequencies().map(item => ({
-            ...item,
-            frequency: this.originalValues[item.risk_type_id]
-        }));
+        const resetData = this.frequencies().map(item => {
+            const orig = this.originalValues[item.risk_type_id];
+            return {
+                ...item,
+                frequency: orig.frequency,
+                audit_due_days: orig.audit_due_days,
+                compliance_due_days: orig.compliance_due_days
+            };
+        });
         this.frequencies.set(resetData);
         this.isDirty.set(false);
         this.messageService.add({
@@ -313,13 +383,19 @@ export class AuditFrequencyMasterComponent implements OnInit {
             if (!item.frequency || item.frequency <= 0 || item.frequency > 60) {
                 valid = false;
             }
+            if (!item.audit_due_days || item.audit_due_days <= 0 || item.audit_due_days > 120) {
+                valid = false;
+            }
+            if (!item.compliance_due_days || item.compliance_due_days <= 0 || item.compliance_due_days > 120) {
+                valid = false;
+            }
         });
 
         if (!valid) {
             this.messageService.add({
                 severity: 'error',
                 summary: 'Validation Error',
-                detail: 'Frequencies must be positive numbers between 1 and 60 months'
+                detail: 'Frequencies must be between 1 and 60 months, due days must be between 1 and 120 days'
             });
             return;
         }
@@ -332,16 +408,21 @@ export class AuditFrequencyMasterComponent implements OnInit {
                 this.saving.set(true);
                 const payload = this.frequencies().map(item => ({
                     risk_type_id: item.risk_type_id,
-                    frequency: Number(item.frequency)
+                    frequency: Number(item.frequency),
+                    audit_due_days: Number(item.audit_due_days),
+                    compliance_due_days: Number(item.compliance_due_days)
                 }));
 
                 this.service.updateRiskFrequencies(payload).subscribe({
                     next: (res) => {
                         this.saving.set(false);
                         this.isDirty.set(false);
-                        // Save new original references
                         payload.forEach(item => {
-                            this.originalValues[item.risk_type_id] = item.frequency;
+                            this.originalValues[item.risk_type_id] = {
+                                frequency: item.frequency,
+                                audit_due_days: item.audit_due_days,
+                                compliance_due_days: item.compliance_due_days
+                            };
                         });
                         this.messageService.add({
                             severity: 'success',

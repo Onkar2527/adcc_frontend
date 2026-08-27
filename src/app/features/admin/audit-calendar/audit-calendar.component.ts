@@ -386,7 +386,7 @@ export interface CalendarDay {
                 >
                   <option *ngFor="let p of branchPeriods(); let i = index" [ngValue]="p">
                     Cycle {{ i + 1 }}: {{ formatDateLabel(p.assessment_period_from) }} to
-                    {{ formatDateLabel(p.assessment_period_to) }}
+                    {{ formatDateLabel(p.assessment_period_to) }}{{ p.status ? ' (' + p.status + ')' : '' }}
                   </option>
                 </select>
               </div>
@@ -1297,7 +1297,8 @@ export class AuditCalendarComponent implements OnInit {
       // Calculate events for this date based on all schedules
       const events: any[] = [];
       this.filteredProjectedSchedules().forEach((unit) => {
-        if (unit.assessment_period_from === dateStr) {
+        const assessmentStartDay = this.getNextDay(unit.assessment_period_to);
+        if (assessmentStartDay === dateStr) {
           events.push({
             type: 'AST',
             label: 'Assessment Start',
@@ -1385,6 +1386,7 @@ export class AuditCalendarComponent implements OnInit {
 
     const newMonthStr = String(currentMonth + 1).padStart(2, '0');
     this.selectedMonthYear = `${currentYear}-${newMonthStr}`;
+    this.selectedMonthVal = this.selectedMonthYear;
     this.generateCalendar();
   }
 
@@ -1393,6 +1395,7 @@ export class AuditCalendarComponent implements OnInit {
     const year = now.getFullYear();
     const month = String(now.getMonth() + 1).padStart(2, '0');
     this.selectedMonthYear = `${year}-${month}`;
+    this.selectedMonthVal = this.selectedMonthYear;
     this.generateCalendar();
   }
 

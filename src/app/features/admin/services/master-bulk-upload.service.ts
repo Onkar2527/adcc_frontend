@@ -594,15 +594,19 @@ export class MasterBulkUploadService {
       expectedHeaders: [
         'risk_type',
         'frequency_months',
+        'audit_due_days',
+        'compliance_due_days',
       ],
       sampleRows: [
-        ['HIGH RISK', '1'],
-        ['MEDIUM RISK', '3'],
-        ['LOW RISK', '6'],
+        ['HIGH RISK', '1', '20', '20'],
+        ['MEDIUM RISK', '3', '20', '20'],
+        ['LOW RISK', '6', '20', '20'],
       ],
       previewFields: [
         { field: 'risk_name', header: 'Risk Type' },
         { field: 'frequency', header: 'Frequency (Months)' },
+        { field: 'audit_due_days', header: 'Audit Due (Days)' },
+        { field: 'compliance_due_days', header: 'Compliance Due (Days)' },
       ],
       loadContext: () => this.auditCalendarService.getRiskFrequencies(),
       createSession: () => ({
@@ -611,12 +615,20 @@ export class MasterBulkUploadService {
       validateRow: (row, rowNumber, _context, session) => {
         const riskTypeRaw = this.normalizeValue(row['risk_type']);
         const frequencyValue = Number((row['frequency_months'] || '').trim());
+        const auditDueDaysValue = Number((row['audit_due_days'] || '').trim());
+        const complianceDueDaysValue = Number((row['compliance_due_days'] || '').trim());
         const riskTypeId = this.riskTypeMap[riskTypeRaw];
         const errors: string[] = [];
 
         if (!riskTypeId) errors.push('Risk type must be HIGH RISK, MEDIUM RISK or LOW RISK');
         if (!Number.isFinite(frequencyValue) || frequencyValue <= 0) {
           errors.push('Frequency must be a positive number');
+        }
+        if (!Number.isFinite(auditDueDaysValue) || auditDueDaysValue <= 0) {
+          errors.push('Audit due days must be a positive number');
+        }
+        if (!Number.isFinite(complianceDueDaysValue) || complianceDueDaysValue <= 0) {
+          errors.push('Compliance due days must be a positive number');
         }
         if (session.seenRiskTypes.has(riskTypeRaw)) {
           errors.push('Duplicate risk type found in CSV');
@@ -632,11 +644,15 @@ export class MasterBulkUploadService {
           message: errors.join('; ') || 'Ready to upload',
           risk_name: row['risk_type'] || '',
           frequency: row['frequency_months'] || '',
+          audit_due_days: row['audit_due_days'] || '',
+          compliance_due_days: row['compliance_due_days'] || '',
           normalized: errors.length
             ? undefined
             : {
                 risk_type_id: riskTypeId,
                 frequency: frequencyValue,
+                audit_due_days: auditDueDaysValue,
+                compliance_due_days: complianceDueDaysValue,
               },
         };
       },
