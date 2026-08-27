@@ -354,56 +354,75 @@
           <!-- Timeline of older comments -->
           <div *ngIf="getTimeline(answer).length" class="answers-timeline">
             <label class="timeline-title"><i class="pi pi-history"></i> Compliance History</label>
+
+            <div class="timeline-toggle-container" *ngIf="getTimeline(answer).length > 1">
+              <a href="javascript:void(0)" (click)="answer.showAllHistory = !answer.showAllHistory" class="timeline-toggle-link">
+                <i class="pi" [ngClass]="answer.showAllHistory ? 'pi-chevron-up' : 'pi-chevron-down'"></i>
+                {{ answer.showAllHistory ? 'Hide previous comments' : 'See previous comments (' + (getTimeline(answer).length - 1) + ')' }}
+              </a>
+            </div>
+
             <div class="timeline-container">
-              <div *ngFor="let item of getTimeline(answer); let index = index" class="timeline-item">
-                <div class="timeline-badge"></div>
-                <div class="timeline-content">
-                  <div class="timeline-header-meta">
-                    <span class="round-badge">Round {{ index + 1 }}</span>
-                    <span class="timeline-date" *ngIf="item.created_at">{{
-                      item.created_at | date: 'medium'
-                      }}</span>
-                  </div>
-                  <div *ngIf="
-                      item.compliance_reviewer_comment ||
-                      item.audit_reviewer_comment ||
-                      item.comment ||
-                      item.reviewer_comment
-                    " class="timeline-entry reviewer-entry">
-                    <span class="timeline-author">Reviewer Feedback</span>
-                    <p class="timeline-text">
-                      {{
-                      item.compliance_reviewer_comment ||
-                      item.audit_reviewer_comment ||
-                      item.comment ||
-                      item.reviewer_comment
-                      }}
-                    </p>
-                  </div>
-                  <div *ngIf="item.compliance_response || item.response || item.answer_given"
-                    class="timeline-entry manager-entry">
-                    <span class="timeline-author">Manager Response</span>
-                    <p class="timeline-text">
-                      {{ item.compliance_response || item.response || item.answer_given }}
-                    </p>
-                    <div class="timeline-evidences" *ngIf="
-                        evidenceList(item).length ||
-                        evidenceList(item, 'compliance_evidence').length
-                      ">
-                      <button *ngFor="let evidence of evidenceList(item); let ei = index" pButton type="button"
-                        icon="pi pi-paperclip" severity="secondary"
-                        [title]="'View auditor supporting document ' + (ei + 1)" (click)="viewEvidence(evidence)"
-                        class="p-button-sm"></button>
-                      <button *ngFor="
-                          let evidence of evidenceList(item, 'compliance_evidence');
-                          let ei = index
-                        " pButton type="button" icon="pi pi-eye" severity="secondary"
-                        [title]="'View compliance supporting document ' + (ei + 1)"
-                        (click)="viewComplianceEvidence(evidence)" class="p-button-sm"></button>
+              <ng-container *ngFor="let item of getTimeline(answer); let index = index; let isLast = last">
+                <div *ngIf="answer.showAllHistory || isLast" class="timeline-item">
+                  <div class="timeline-badge"></div>
+                  <div class="timeline-content">
+                    <div class="timeline-header-meta">
+                      <span class="round-badge">Round {{ index + 1 }}</span>
+                      <span class="timeline-date" *ngIf="item.created_at">{{
+                        item.created_at | date: 'medium'
+                        }}</span>
+                    </div>
+                    <div *ngIf="item.audit_comment || item.answer_given" class="timeline-entry auditor-entry">
+                      <span class="timeline-author">
+                        Auditor Feedback
+                        <span class="timeline-date" *ngIf="item.answer_given">(Answer: {{ item.answer_given }})</span>
+                      </span>
+                      <p class="timeline-text" *ngIf="item.audit_comment">
+                        {{ item.audit_comment }}
+                      </p>
+                    </div>
+                    <div *ngIf="
+                        item.compliance_reviewer_comment ||
+                        item.audit_reviewer_comment ||
+                        item.comment ||
+                        item.reviewer_comment
+                      " class="timeline-entry reviewer-entry">
+                      <span class="timeline-author">Reviewer Feedback</span>
+                      <p class="timeline-text">
+                        {{
+                        item.compliance_reviewer_comment ||
+                        item.audit_reviewer_comment ||
+                        item.comment ||
+                        item.reviewer_comment
+                        }}
+                      </p>
+                    </div>
+                    <div *ngIf="item.compliance_response || item.response"
+                      class="timeline-entry manager-entry">
+                      <span class="timeline-author">Manager Response</span>
+                      <p class="timeline-text">
+                        {{ item.compliance_response || item.response }}
+                      </p>
+                      <div class="timeline-evidences" *ngIf="
+                          evidenceList(item).length ||
+                          evidenceList(item, 'compliance_evidence').length
+                        ">
+                        <button *ngFor="let evidence of evidenceList(item); let ei = index" pButton type="button"
+                          icon="pi pi-paperclip" severity="secondary"
+                          [title]="'View auditor supporting document ' + (ei + 1)" (click)="viewEvidence(evidence)"
+                          class="p-button-sm"></button>
+                        <button *ngFor="
+                            let evidence of evidenceList(item, 'compliance_evidence');
+                            let ei = index
+                          " pButton type="button" icon="pi pi-eye" severity="secondary"
+                          [title]="'View compliance supporting document ' + (ei + 1)"
+                          (click)="viewComplianceEvidence(evidence)" class="p-button-sm"></button>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
+              </ng-container>
             </div>
           </div>
 
@@ -579,6 +598,10 @@
                               }}</span>
                           </div>
                           <div class="row-timeline-body">
+                            <div *ngIf="item.audit_comment || item.answer_given" class="row-comment text-purple">
+                              <strong>Aud:</strong>
+                              {{ item.audit_comment || item.answer_given }}
+                            </div>
                             <div *ngIf="
                                 item.compliance_reviewer_comment ||
                                 item.audit_reviewer_comment ||
@@ -593,10 +616,10 @@
                               item.reviewer_comment
                               }}
                             </div>
-                            <div *ngIf="item.compliance_response || item.response || item.answer_given"
+                            <div *ngIf="item.compliance_response || item.response"
                               class="row-comment text-blue">
                               <strong>Mgr:</strong>
-                              {{ item.compliance_response || item.response || item.answer_given }}
+                              {{ item.compliance_response || item.response }}
                               <span class="inline-evidences" *ngIf="
                                   evidenceList(item).length ||
                                   evidenceList(item, 'compliance_evidence').length

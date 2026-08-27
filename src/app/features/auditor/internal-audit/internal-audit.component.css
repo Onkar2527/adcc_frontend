@@ -2407,6 +2407,16 @@ textarea.answer-control1 {
     padding-bottom: 0;
 }
 
+.auditor-entry {
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid color-mix(in srgb, var(--surface-border) 50%, transparent);
+}
+
+.auditor-entry:last-child {
+    border-bottom: 0;
+    padding-bottom: 0;
+}
+
 .timeline-author {
     display: flex;
     align-items: center;
@@ -2423,6 +2433,10 @@ textarea.answer-control1 {
 
 .manager-entry .timeline-author {
     color: var(--primary-color);
+}
+
+.auditor-entry .timeline-author {
+    color: #8b5cf6;
 }
 
 .timeline-date {
@@ -2509,6 +2523,10 @@ textarea.answer-control1 {
 
 .row-comment.text-blue {
     color: var(--primary-color);
+}
+
+.row-comment.text-purple {
+    color: #8b5cf6;
 }
 
 .inline-evidences {
@@ -2703,4 +2721,32 @@ textarea.answer-control1 {
     height: 8px;
     border-radius: 50%;
 }
+
+/* Timeline Toggle Button Styling */
+.timeline-toggle-container {
+    margin-top: 0.5rem;
+    margin-bottom: 0.75rem;
+}
+
+.timeline-toggle-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.82rem;
+    color: var(--primary-color);
+    text-decoration: none;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.timeline-toggle-link:hover {
+    color: var(--primary-color-hover, #0056b3);
+    text-decoration: underline;
+}
+
+.timeline-toggle-link i {
+    font-size: 0.75rem;
+}
+
 
