@@ -618,6 +618,8 @@
     margin: 0 !important;
     page-break-after: always !important;
     break-after: page !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
     background: #ffffff !important;
     width: 100% !important;
     max-width: none !important;
@@ -625,14 +627,13 @@
   }
 
   .report-cover-page {
-    height: 28.2cm !important;
-    min-height: 28.2cm !important;
+    min-height: 94vh !important;
     padding-top: 100px !important;
   }
 
   .report-letter-page {
-    height: 28.2cm !important;
-    min-height: 28.2cm !important;
+    height: auto !important;
+    min-height: 0 !important;
     padding: 30px 50px !important;
     font-size: 0.95rem !important;
     line-height: 1.45 !important;
@@ -679,90 +680,101 @@
   }
 
   /* Specific scaling adjustments when printing in landscape mode to prevent page height overflows */
-  body.print-landscape {
-    .report-cover-page,
-    .report-letter-page {
-      height: 17.2cm !important;
-      min-height: 17.2cm !important;
-      border: 1px solid #000000 !important;
-      margin: 0 !important;
-      page-break-after: always !important;
-      break-after: page !important;
-      background: #ffffff !important;
-      width: 100% !important;
-      max-width: none !important;
-      box-sizing: border-box !important;
-    }
+  ::ng-deep body.print-landscape {
+    @media (orientation: landscape) {
+      .report-cover-page,
+      .report-letter-page {
+        border: 1px solid #000000 !important;
+        margin: 0 !important;
+        page-break-after: always !important;
+        break-after: page !important;
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+        background: #ffffff !important;
+        width: 100% !important;
+        max-width: none !important;
+        box-sizing: border-box !important;
+      }
 
-    .report-cover-page {
-      padding-top: 40px !important;
-      
-      .logo-container {
-        margin-bottom: 1rem !important;
-        img {
-          max-width: 180px !important;
-          margin-bottom: 15px !important;
-        }
+      .report-cover-page {
+        min-height: 94vh !important;
       }
-      .bank-title {
-        font-size: 1.8rem !important;
-        margin-bottom: 0.2rem !important;
-      }
-      .dept-title {
-        font-size: 1.25rem !important;
-        margin-bottom: 0.4rem !important;
-      }
-      .report-title {
-        font-size: 1.15rem !important;
-        margin-bottom: 1.2rem !important;
-      }
-      .audit-details-box {
-        margin-top: 1.2rem !important;
-        font-size: 0.95rem !important;
-        line-height: 1.4 !important;
-      }
-    }
 
-    .report-letter-page {
-      padding: 20px 40px !important;
-      font-size: 0.82rem !important;
-      line-height: 1.35 !important;
+      .report-letter-page {
+        height: auto !important;
+        min-height: 0 !important;
+      }
 
-      .letter-header {
-        margin-bottom: 0.4rem !important;
-        .dept-title { font-size: 1.05rem !important; }
-        .bank-title { font-size: 1.25rem !important; }
-      }
-      .letter-divider {
-        margin: 0.2rem 0 0.4rem !important;
-      }
-      .letter-meta {
-        font-size: 0.78rem !important;
-      }
-      .letter-recipient {
-        margin-top: 0.4rem !important;
-        margin-bottom: 0.4rem !important;
-      }
-      .letter-body {
-        p {
-          margin-bottom: 0.35rem !important;
-        }
-        .letter-subject {
-          margin-top: 0.4rem !important;
-          margin-bottom: 0.4rem !important;
-        }
-        ol {
-          margin-bottom: 0.4rem !important;
-          li {
-            margin-bottom: 0.15rem !important;
+      .report-cover-page {
+        padding-top: 40px !important;
+        
+        .logo-container {
+          margin-bottom: 1rem !important;
+          img {
+            max-width: 180px !important;
+            margin-bottom: 15px !important;
           }
         }
+        .bank-title {
+          font-size: 1.8rem !important;
+          margin-bottom: 0.2rem !important;
+        }
+        .dept-title {
+          font-size: 1.25rem !important;
+          margin-bottom: 0.4rem !important;
+        }
+        .report-title {
+          font-size: 1.15rem !important;
+          margin-bottom: 1.2rem !important;
+        }
+        .audit-details-box {
+          margin-top: 1.2rem !important;
+          font-size: 0.95rem !important;
+          line-height: 1.4 !important;
+        }
       }
-      .letter-closing {
-        margin-top: 0.4rem !important;
-      }
-      .letter-signatures {
-        margin-top: 0.8rem !important;
+
+      .report-letter-page {
+        padding: 15px 30px !important;
+        font-size: 0.82rem !important;
+        line-height: 1.25 !important;
+
+        .letter-header {
+          margin-bottom: 0.3rem !important;
+          .dept-title { font-size: 1.05rem !important; }
+          .bank-title { font-size: 1.25rem !important; }
+        }
+        .letter-divider {
+          margin: 0.15rem 0 0.3rem !important;
+        }
+        .letter-meta {
+          font-size: 0.78rem !important;
+        }
+        .letter-recipient {
+          margin-top: 0.3rem !important;
+          margin-bottom: 0.3rem !important;
+        }
+        .letter-body {
+          p {
+            margin-bottom: 0.22rem !important;
+          }
+          .letter-subject {
+            margin-top: 0.3rem !important;
+            margin-bottom: 0.3rem !important;
+          }
+          ol {
+            margin-bottom: 0.3rem !important;
+            li {
+              margin-bottom: 0.1rem !important;
+            }
+          }
+        }
+        .letter-closing {
+          margin-top: 0.3rem !important;
+        }
+        .letter-signatures {
+          margin-top: 0.6rem !important;
+        }
       }
     }
   }

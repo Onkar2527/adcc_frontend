@@ -683,6 +683,9 @@
         *ngIf="!isExecutiveSummary() && !isInternalAssessmentReport() && !isQuestionWiseScoringReport() && !isAuditObservationCountReport()"
         [class.risk-wise-report-table]="isRiskWiseReport()"
         [class.performance-risk-report-table]="isPerformanceRiskWeightageReport()">
+        <colgroup *ngIf="!isRiskWiseReport() && definition()?.columns">
+          <col *ngFor="let column of definition()?.columns" [style.width]="column.width || null">
+        </colgroup>
         <thead *ngIf="isRiskWiseReport(); else defaultReportHeader">
           <tr>
             <th *ngFor="let column of riskWiseLeadingColumns()" [attr.rowspan]="2" [style.width]="column.width || null"
