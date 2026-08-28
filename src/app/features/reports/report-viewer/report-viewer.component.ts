@@ -76,12 +76,19 @@ export class ReportViewerComponent implements OnInit {
           .map((s) => s.trim())
           .filter(Boolean);
 
+        const isAllowedSlug =
+          definition.slug === 'audit-status-report' ||
+          definition.slug === 'audit-complete-report';
+
         if (assignedIds.length > 0) {
           filteredOptions = originalOptions.filter((opt) =>
+            (isAllowedSlug && (opt.value === 'all' || opt.value === 'all_branches' || opt.value === 'all_head_of_dept')) ||
             assignedIds.includes(String(opt.value)),
           );
         } else if (userTypeId === '2' || userTypeId === '4' || userTypeId === '6') {
-          filteredOptions = [];
+          filteredOptions = originalOptions.filter((opt) =>
+            isAllowedSlug && (opt.value === 'all' || opt.value === 'all_branches' || opt.value === 'all_head_of_dept')
+          );
         }
       }
 
@@ -217,12 +224,17 @@ export class ReportViewerComponent implements OnInit {
       const auditTypeValue = String(this.filters['audit_type_id'] || 'all');
 
       return options.filter((option: any) => {
-        const matchesUnit = !option.audit_unit_id || String(option.audit_unit_id) === unitValue;
+        const matchesUnit =
+          unitValue === 'all' ||
+          unitValue === 'all_branches' ||
+          unitValue === 'all_head_of_dept' ||
+          !option.audit_unit_id ||
+          String(option.audit_unit_id) === unitValue;
         const matchesYear = !option.year_id || !yearValue || yearValue === 'all' || String(option.year_id) === yearValue;
         const matchesAuditType =
           auditTypeValue === 'all'
-            || !option.audit_type_id
-            || String(option.audit_type_id) === auditTypeValue;
+          || !option.audit_type_id
+          || String(option.audit_type_id) === auditTypeValue;
         return matchesUnit && matchesYear && matchesAuditType;
       });
     }
@@ -236,7 +248,11 @@ export class ReportViewerComponent implements OnInit {
     return options.filter((option: any) => {
       const optionParentValue = option[filter.optionParentKey as string];
 
-      return !optionParentValue || (parentValue && String(optionParentValue) === parentValue);
+      return !optionParentValue ||
+        parentValue === 'all' ||
+        parentValue === 'all_branches' ||
+        parentValue === 'all_head_of_dept' ||
+        (parentValue && String(optionParentValue) === parentValue);
     });
   }
 
@@ -348,7 +364,7 @@ export class ReportViewerComponent implements OnInit {
 
     this.reportsService.getReportDefinition(slug).subscribe({
       next: (definition) => {
-        definition = this.ensureAuditTypeFilter(definition);
+        definition = this.ensureAllOptions(definition);
         this.definition.set(definition);
         this.filters = {
           ...(definition.defaultFilters || {}),
@@ -413,9 +429,9 @@ export class ReportViewerComponent implements OnInit {
         filters: definition.filters.map((filter) =>
           filter.key === 'audit_type_id'
             ? {
-                ...filter,
-                options: this.auditTypeFilter.options,
-              }
+              ...filter,
+              options: this.auditTypeFilter.options,
+            }
             : filter,
         ),
       };
@@ -731,9 +747,9 @@ export class ReportViewerComponent implements OnInit {
 
         for (let qIdx = 0; qIdx < questions.length; qIdx++) {
           const q = questions[qIdx];
-          const riskScore    = Number(q.risk_score || 0).toFixed(2);
+          const riskScore = Number(q.risk_score || 0).toFixed(2);
           const weightedScore = Number(q.weighted_risk_score || 0).toFixed(2);
-          const maxScore     = Number(q.highest_weightage_risk || 0).toFixed(2);
+          const maxScore = Number(q.highest_weightage_risk || 0).toFixed(2);
           const notApplicable = q.answer_given === 'NOT APPLICABLE';
 
           html += '<tr>';
@@ -786,9 +802,9 @@ export class ReportViewerComponent implements OnInit {
     for (const menu of rows) {
       for (const risk of (menu.risk_category_wise || [])) {
         for (const q of (risk.questions || [])) {
-          riskScore    += Number(q.risk_score || 0);
+          riskScore += Number(q.risk_score || 0);
           weightedScore += Number(q.weighted_risk_score || 0);
-          maxScore     += Number(q.highest_weightage_risk || 0);
+          maxScore += Number(q.highest_weightage_risk || 0);
         }
       }
     }
@@ -902,8 +918,8 @@ export class ReportViewerComponent implements OnInit {
       const values = Array.isArray(value)
         ? value.map(String)
         : String(value || '')
-            .split(',')
-            .filter(Boolean);
+          .split(',')
+          .filter(Boolean);
 
       if (!values.length) {
         return 'All';
@@ -1377,5 +1393,53 @@ export class ReportViewerComponent implements OnInit {
     const dd = String(value.getDate()).padStart(2, '0');
 
     return `${yyyy}-${mm}-${dd}`;
+  }
+
+  private ensureAllOptions(definition: ReportDefinition): ReportDefinition {
+    let def = this.ensureAuditTypeFilter(definition);
+
+    const isAllowedSlug =
+      definition.slug === 'audit-complete-report' ||
+      definition.slug === 'audit-status-report';
+
+    if (!isAllowedSlug) {
+      return def;
+    }
+
+    def = {
+      ...def,
+      filters: def.filters.map(filter => {
+        if (filter.key === 'reportAuditUnit' || filter.key === 'audit_unit_id') {
+          const options = filter.options || [];
+          const hasAll = options.some(opt => opt.value === 'all_branches' || opt.value === 'all_head_of_dept');
+          if (!hasAll) {
+            return {
+              ...filter,
+              options: [
+                { value: 'all_branches', label: 'All Branches' },
+                { value: 'all_head_of_dept', label: 'All Departments' },
+                ...options.filter(opt => opt.value !== '')
+              ]
+            };
+          }
+        }
+        if (filter.key === 'reportAuditAssesment') {
+          const options = filter.options || [];
+          const hasAll = options.some(opt => opt.value === 'all');
+          if (!hasAll) {
+            return {
+              ...filter,
+              options: [
+                { value: 'all', label: 'All Assessments' },
+                ...options.filter(opt => opt.value !== '')
+              ]
+            };
+          }
+        }
+        return filter;
+      })
+    };
+
+    return def;
   }
 }
