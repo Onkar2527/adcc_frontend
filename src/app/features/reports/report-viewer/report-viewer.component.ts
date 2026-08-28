@@ -78,10 +78,15 @@ export class ReportViewerComponent implements OnInit {
 
         if (assignedIds.length > 0) {
           filteredOptions = originalOptions.filter((opt) =>
-            assignedIds.includes(String(opt.value)),
+            assignedIds.includes(String(opt.value)) ||
+            opt.value === 'all_branches' ||
+            opt.value === 'all_head_of_dept'
           );
         } else if (userTypeId === '2' || userTypeId === '4' || userTypeId === '6') {
-          filteredOptions = [];
+          filteredOptions = originalOptions.filter((opt) =>
+            opt.value === 'all_branches' ||
+            opt.value === 'all_head_of_dept'
+          );
         }
       }
 
@@ -149,6 +154,10 @@ export class ReportViewerComponent implements OnInit {
     );
   }
 
+  isAuditObservationCountReport(): boolean {
+    return this.definition()?.slug === 'audit-observation-count-report';
+  }
+
   showsNestedComplianceColumn(): boolean {
     const slug = this.definition()?.slug;
     return [
@@ -172,6 +181,14 @@ export class ReportViewerComponent implements OnInit {
     return (
       slug === 'executive-summary-audit-report' || slug === 'executive-summary-compliance-report'
     );
+  }
+
+  getRiskWeightageTotalScore(): number {
+    return this.rows().reduce((sum: number, row: any) => sum + Number(row.weighted_score || 0), 0);
+  }
+
+  getRiskWeightageTotalPercentage(): number {
+    return this.rows().reduce((sum: number, row: any) => sum + Number(row.percentage || 0), 0);
   }
 
   isAuditCommitteeBoardReport1(): boolean {
@@ -307,7 +324,7 @@ export class ReportViewerComponent implements OnInit {
   }
 
   private loadAuditTypes(done: () => void) {
-    this.auditSectionService.findAll().subscribe({
+    this.auditTypeService.findAll().subscribe({
       next: (response: any) => {
         const rows = Array.isArray(response)
           ? response
@@ -530,6 +547,12 @@ export class ReportViewerComponent implements OnInit {
 
   print() {
     const isLandscape = this.definition()?.page === 'A4L';
+    const reportTitle = this.definition()?.title || 'Report';
+    const previousTitle = document.title;
+
+    // Set document title to report name so the PDF filename is correct
+    document.title = reportTitle;
+
     if (isLandscape) {
       document.body.classList.add('print-landscape');
     }
@@ -540,6 +563,8 @@ export class ReportViewerComponent implements OnInit {
       if (isLandscape) {
         document.body.classList.remove('print-landscape');
       }
+      // Restore original page title
+      document.title = previousTitle;
     });
   }
 
@@ -855,7 +880,8 @@ export class ReportViewerComponent implements OnInit {
       definition.slug === 'questionwsie-broader-areawise-report' ||
       definition.slug === 'executive-summary-audit-report' ||
       definition.slug === 'executive-summary-compliance-report' ||
-      definition.slug === 'question-wise-scoring-report'
+      definition.slug === 'question-wise-scoring-report' ||
+      definition.slug === 'audit-observation-count-report'
     ) {
       const tableElement = document.querySelector('.official-report-table.question-wise-scoring-table') || document.querySelector('.official-report-table');
       if (tableElement) {

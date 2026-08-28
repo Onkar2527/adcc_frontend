@@ -1,7 +1,7 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { APP_CONFIG } from '../../../core/services/config/config.token';
-import { FREE_AUDIT_FLOW } from '../../admin/services/required-data';
+import { FREE_AUDIT_FLOW, audit_flow_config } from '../../admin/services/required-data';
 
 export interface ReportFilterDefinition {
   key: string;
@@ -22,9 +22,10 @@ export interface ReportColumnDefinition {
   label: string;
   width?: string;
   align?: 'left' | 'center' | 'right';
-  type?: 'text' | 'date' | 'status' | 'assessmentPeriod';
+  type?: 'text' | 'date' | 'status' | 'assessmentPeriod' | 'trend' | 'commentWithAuthor';
   expiredKey?: string;
   dueDateKey?: string;
+  authorKey?: string;
 }
 
 export interface ReportDefinition {
@@ -57,6 +58,7 @@ export class ReportsService {
   getReportDefinition(reportSlug: string) {
     let params = new HttpParams()
       .set('freeFlow', FREE_AUDIT_FLOW ? 'true' : 'false')
+      .set('live_manager_compliance', audit_flow_config.liveManagerCompliance ? 'true' : 'false')
       .set('_t', String(Date.now()));
     return this.http.get<ReportDefinition>(
       `${this.apiUrl}/${reportSlug}/definition`,
@@ -84,6 +86,7 @@ export class ReportsService {
     }
 
     params = params.set('freeFlow', FREE_AUDIT_FLOW ? 'true' : 'false')
+      .set('live_manager_compliance', audit_flow_config.liveManagerCompliance ? 'true' : 'false')
       .set('_t', String(Date.now()));
 
     return this.http.get<any>(

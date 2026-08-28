@@ -260,7 +260,82 @@
         </tbody>
       </table>
 
-      <table class="official-report-table" *ngIf="!isExecutiveSummary() && !isInternalAssessmentReport() && !isQuestionWiseScoringReport()"
+      <!-- Audit Observation Count Report Table (Nested Headers) -->
+      <table class="official-report-table observation-count-table" *ngIf="isAuditObservationCountReport()">
+        <thead>
+          <tr class="bg-light-gray" style="background-color: #f4f6f9;">
+            <th rowspan="2" class="text-center" style="vertical-align: middle; width: 4%">Sr. No.</th>
+            <th rowspan="2" style="vertical-align: middle; width: 18%">Audit Unit</th>
+            <th rowspan="2" style="vertical-align: middle; width: 18%">Assessment Period</th>
+            <th rowspan="2" style="vertical-align: middle; width: 15%">Audit Status</th>
+            <th colspan="4" class="text-center" style="background-color: #e9ecef; border-bottom: 2px solid #dee2e6;">Audited</th>
+            <th colspan="4" class="text-center" style="background-color: #fff3cd; border-bottom: 2px solid #dee2e6;">Pending Observations</th>
+            <th colspan="4" class="text-center" style="background-color: #d1e7dd; border-bottom: 2px solid #dee2e6;">Completed</th>
+          </tr>
+          <tr class="bg-light-gray">
+            <!-- Audited Sub-columns -->
+            <th class="text-center" style="width: 5%">High</th>
+            <th class="text-center" style="width: 5%">Medium</th>
+            <th class="text-center" style="width: 5%">Low</th>
+            <th class="text-center" style="width: 5%">No Risk</th>
+            <!-- Pending Sub-columns -->
+            <th class="text-center" style="width: 5%">High</th>
+            <th class="text-center" style="width: 5%">Medium</th>
+            <th class="text-center" style="width: 5%">Low</th>
+            <th class="text-center" style="width: 5%">No Risk</th>
+            <!-- Completed Sub-columns -->
+            <th class="text-center" style="width: 5%">High</th>
+            <th class="text-center" style="width: 5%">Medium</th>
+            <th class="text-center" style="width: 5%">Low</th>
+            <th class="text-center" style="width: 5%">No Risk</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let row of rows()">
+            <td class="text-center">{{ row.sr_no }}</td>
+            <td>{{ row.audit_unit_name }}</td>
+            <td>{{ row.assessment_period }}</td>
+            <td>{{ row.audit_status_label }}</td>
+            <!-- Audited counts -->
+            <td class="text-center" style="font-weight: 500;">{{ row.audited_high }}</td>
+            <td class="text-center" style="font-weight: 500;">{{ row.audited_medium }}</td>
+            <td class="text-center" style="font-weight: 500;">{{ row.audited_low }}</td>
+            <td class="text-center" style="font-weight: 500;">{{ row.audited_no_risk }}</td>
+            <!-- Pending counts -->
+            <td class="text-center" style="color: #856404; font-weight: 500;">{{ row.pending_high }}</td>
+            <td class="text-center" style="color: #856404; font-weight: 500;">{{ row.pending_medium }}</td>
+            <td class="text-center" style="color: #856404; font-weight: 500;">{{ row.pending_low }}</td>
+            <td class="text-center" style="color: #856404; font-weight: 500;">{{ row.pending_no_risk }}</td>
+            <!-- Completed counts -->
+            <td class="text-center" style="color: #0f5132; font-weight: 500;">{{ row.completed_high }}</td>
+            <td class="text-center" style="color: #0f5132; font-weight: 500;">{{ row.completed_medium }}</td>
+            <td class="text-center" style="color: #0f5132; font-weight: 500;">{{ row.completed_low }}</td>
+            <td class="text-center" style="color: #0f5132; font-weight: 500;">{{ row.completed_no_risk }}</td>
+          </tr>
+        </tbody>
+        <tfoot>
+          <tr class="bg-light-gray" style="font-weight: bold; background-color: #f8f9fa;">
+            <td colspan="4" class="text-center">Total</td>
+            <!-- Audited Totals -->
+            <td class="text-center">{{ summary()?.['totalAuditedHigh'] || 0 }}</td>
+            <td class="text-center">{{ summary()?.['totalAuditedMedium'] || 0 }}</td>
+            <td class="text-center">{{ summary()?.['totalAuditedLow'] || 0 }}</td>
+            <td class="text-center">{{ summary()?.['totalAuditedNoRisk'] || 0 }}</td>
+            <!-- Pending Totals -->
+            <td class="text-center" style="color: #856404;">{{ summary()?.['totalPendingHigh'] || 0 }}</td>
+            <td class="text-center" style="color: #856404;">{{ summary()?.['totalPendingMedium'] || 0 }}</td>
+            <td class="text-center" style="color: #856404;">{{ summary()?.['totalPendingLow'] || 0 }}</td>
+            <td class="text-center" style="color: #856404;">{{ summary()?.['totalPendingNoRisk'] || 0 }}</td>
+            <!-- Completed Totals -->
+            <td class="text-center" style="color: #0f5132;">{{ summary()?.['totalCompletedHigh'] || 0 }}</td>
+            <td class="text-center" style="color: #0f5132;">{{ summary()?.['totalCompletedMedium'] || 0 }}</td>
+            <td class="text-center" style="color: #0f5132;">{{ summary()?.['totalCompletedLow'] || 0 }}</td>
+            <td class="text-center" style="color: #0f5132;">{{ summary()?.['totalCompletedNoRisk'] || 0 }}</td>
+          </tr>
+        </tfoot>
+      </table>
+
+      <table class="official-report-table" *ngIf="!isExecutiveSummary() && !isInternalAssessmentReport() && !isQuestionWiseScoringReport() && !isAuditObservationCountReport()"
         [class.risk-wise-report-table]="isRiskWiseReport()"
         [class.performance-risk-report-table]="isPerformanceRiskWeightageReport()">
         <thead *ngIf="isRiskWiseReport(); else defaultReportHeader">
@@ -504,6 +579,20 @@
                     </small>
                   </ng-container>
 
+                  <ng-container *ngSwitchCase="'trend'">
+                    <p-tag *ngIf="row[column.key] === 'Increasing'" value="▲ Increasing" severity="danger"></p-tag>
+                    <p-tag *ngIf="row[column.key] === 'Decreasing'" value="▼ Decreasing" severity="success"></p-tag>
+                    <span *ngIf="row[column.key] === 'No Change'" style="color: gray; font-size: 0.875rem;">— No Change</span>
+                    <span *ngIf="!row[column.key] || row[column.key] === '-'">-</span>
+                  </ng-container>
+
+                  <ng-container *ngSwitchCase="'commentWithAuthor'">
+                    <span>{{ row[column.key] ?? '-' }}</span>
+                    <small *ngIf="$any(column).authorKey && row[$any(column).authorKey]" class="report-author-info">
+                      {{ row[$any(column).authorKey] }}
+                    </small>
+                  </ng-container>
+
                   <ng-container *ngSwitchDefault>
                     {{ row[column.key] ?? '-' }}
                   </ng-container>
@@ -512,6 +601,13 @@
             </tr>
           </ng-container>
         </tbody>
+        <tfoot *ngIf="definition()?.slug === 'type-wise-risk-weightage' && rows().length > 0">
+          <tr style="font-weight: bold; background-color: #f8f9fa;">
+            <td colspan="4" class="text-center" style="font-weight: bold;">Total</td>
+            <td class="text-right" style="font-weight: bold;">{{ getRiskWeightageTotalScore() | number:'1.2-2' }}</td>
+            <td class="text-right" style="font-weight: bold;">{{ getRiskWeightageTotalPercentage() | number:'1.2-2' }}%</td>
+          </tr>
+        </tfoot>
       </table>
 
       <!-- Question Wise Scoring Report Table -->

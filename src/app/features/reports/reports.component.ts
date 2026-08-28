@@ -127,12 +127,13 @@ export class ReportsComponent implements OnInit {
       route: '/reports/compliance-summary-report',
       category: '2_audit',
     },
-    {
-      srNo: 33,
-      name: 'Audit Observations Report',
-      route: '/reports/audit-observations-report',
-      category: '2_audit',
-    },
+    // {
+    //   srNo: 33,
+    //   name: 'Audit Observations Report',
+    //   route: '/reports/audit-observations-report',
+    //   category: '2_audit',
+    // },
+
     {
       srNo: 34,
       name: 'Partially Pass Report',
@@ -145,6 +146,12 @@ export class ReportsComponent implements OnInit {
       srNo: 35,
       name: 'Risk Weightage Report',
       route: '/reports/risk-weightage-report',
+      category: '3_advanced',
+    },
+    {
+      srNo: 35.1,
+      name: 'Typewise Risk Weightage Report',
+      route: '/reports/type-wise-risk-weightage',
       category: '3_advanced',
     },
     {
@@ -212,6 +219,11 @@ export class ReportsComponent implements OnInit {
       name: 'Risk & NPA Wise Audit Units Report',
       route: '/reports/risk-npa-wise-audit-units-report',
       category: '3_advanced',
+    }, {
+      srNo: 48,
+      name: 'Risk Trend Summary Report',
+      route: '/reports/risk-trend-summary-report',
+      category: '3_advanced',
     },
     {
       srNo: 47,
@@ -219,6 +231,12 @@ export class ReportsComponent implements OnInit {
       route: '/reports/question-wise-scoring-report',
       category: '3_advanced',
     },
+    {
+      srNo: 49,
+      name: 'Risk Category Summary Report',
+      route: '/reports/risk-category-summary',
+      category: '3_advanced',
+    }
   ];
 
   goBack() {
