@@ -268,26 +268,29 @@
             <th rowspan="2" style="vertical-align: middle; width: 18%">Audit Unit</th>
             <th rowspan="2" style="vertical-align: middle; width: 18%">Assessment Period</th>
             <th rowspan="2" style="vertical-align: middle; width: 15%">Audit Status</th>
-            <th colspan="4" class="text-center" style="background-color: #e9ecef; border-bottom: 2px solid #dee2e6;">Audited</th>
-            <th colspan="4" class="text-center" style="background-color: #fff3cd; border-bottom: 2px solid #dee2e6;">Pending Observations</th>
-            <th colspan="4" class="text-center" style="background-color: #d1e7dd; border-bottom: 2px solid #dee2e6;">Completed</th>
+            <th colspan="5" class="text-center" style="background-color: #e9ecef; border-bottom: 2px solid #dee2e6;">Audited</th>
+            <th colspan="5" class="text-center" style="background-color: #fff3cd; border-bottom: 2px solid #dee2e6;">Pending Observations</th>
+            <th colspan="5" class="text-center" style="background-color: #d1e7dd; border-bottom: 2px solid #dee2e6;">Completed</th>
           </tr>
           <tr class="bg-light-gray">
             <!-- Audited Sub-columns -->
-            <th class="text-center" style="width: 5%">High</th>
-            <th class="text-center" style="width: 5%">Medium</th>
-            <th class="text-center" style="width: 5%">Low</th>
-            <th class="text-center" style="width: 5%">No Risk</th>
+            <th class="text-center" style="width: 4%">High</th>
+            <th class="text-center" style="width: 4%">Medium</th>
+            <th class="text-center" style="width: 4%">Low</th>
+            <th class="text-center" style="width: 4%">No Risk</th>
+            <th class="text-center" style="width: 4%">Total</th>
             <!-- Pending Sub-columns -->
-            <th class="text-center" style="width: 5%">High</th>
-            <th class="text-center" style="width: 5%">Medium</th>
-            <th class="text-center" style="width: 5%">Low</th>
-            <th class="text-center" style="width: 5%">No Risk</th>
+            <th class="text-center" style="width: 4%">High</th>
+            <th class="text-center" style="width: 4%">Medium</th>
+            <th class="text-center" style="width: 4%">Low</th>
+            <th class="text-center" style="width: 4%">No Risk</th>
+            <th class="text-center" style="width: 4%">Total</th>
             <!-- Completed Sub-columns -->
-            <th class="text-center" style="width: 5%">High</th>
-            <th class="text-center" style="width: 5%">Medium</th>
-            <th class="text-center" style="width: 5%">Low</th>
-            <th class="text-center" style="width: 5%">No Risk</th>
+            <th class="text-center" style="width: 4%">High</th>
+            <th class="text-center" style="width: 4%">Medium</th>
+            <th class="text-center" style="width: 4%">Low</th>
+            <th class="text-center" style="width: 4%">No Risk</th>
+            <th class="text-center" style="width: 4%">Total</th>
           </tr>
         </thead>
         <tbody>
@@ -301,16 +304,19 @@
             <td class="text-center" style="font-weight: 500;">{{ row.audited_medium }}</td>
             <td class="text-center" style="font-weight: 500;">{{ row.audited_low }}</td>
             <td class="text-center" style="font-weight: 500;">{{ row.audited_no_risk }}</td>
+            <td class="text-center" style="font-weight: 600; background-color: #f0f0f0;">{{ row.audited_total }}</td>
             <!-- Pending counts -->
             <td class="text-center" style="color: #856404; font-weight: 500;">{{ row.pending_high }}</td>
             <td class="text-center" style="color: #856404; font-weight: 500;">{{ row.pending_medium }}</td>
             <td class="text-center" style="color: #856404; font-weight: 500;">{{ row.pending_low }}</td>
             <td class="text-center" style="color: #856404; font-weight: 500;">{{ row.pending_no_risk }}</td>
+            <td class="text-center" style="color: #856404; font-weight: 600; background-color: #fffbe6;">{{ row.pending_total }}</td>
             <!-- Completed counts -->
             <td class="text-center" style="color: #0f5132; font-weight: 500;">{{ row.completed_high }}</td>
             <td class="text-center" style="color: #0f5132; font-weight: 500;">{{ row.completed_medium }}</td>
             <td class="text-center" style="color: #0f5132; font-weight: 500;">{{ row.completed_low }}</td>
             <td class="text-center" style="color: #0f5132; font-weight: 500;">{{ row.completed_no_risk }}</td>
+            <td class="text-center" style="color: #0f5132; font-weight: 600; background-color: #eaf5ef;">{{ row.completed_total }}</td>
           </tr>
         </tbody>
         <tfoot>
@@ -321,16 +327,19 @@
             <td class="text-center">{{ summary()?.['totalAuditedMedium'] || 0 }}</td>
             <td class="text-center">{{ summary()?.['totalAuditedLow'] || 0 }}</td>
             <td class="text-center">{{ summary()?.['totalAuditedNoRisk'] || 0 }}</td>
+            <td class="text-center" style="background-color: #e0e0e0;">{{ summary()?.['totalAuditedTotal'] || 0 }}</td>
             <!-- Pending Totals -->
             <td class="text-center" style="color: #856404;">{{ summary()?.['totalPendingHigh'] || 0 }}</td>
             <td class="text-center" style="color: #856404;">{{ summary()?.['totalPendingMedium'] || 0 }}</td>
             <td class="text-center" style="color: #856404;">{{ summary()?.['totalPendingLow'] || 0 }}</td>
             <td class="text-center" style="color: #856404;">{{ summary()?.['totalPendingNoRisk'] || 0 }}</td>
+            <td class="text-center" style="color: #856404; background-color: #fff3cd;">{{ summary()?.['totalPendingTotal'] || 0 }}</td>
             <!-- Completed Totals -->
             <td class="text-center" style="color: #0f5132;">{{ summary()?.['totalCompletedHigh'] || 0 }}</td>
             <td class="text-center" style="color: #0f5132;">{{ summary()?.['totalCompletedMedium'] || 0 }}</td>
             <td class="text-center" style="color: #0f5132;">{{ summary()?.['totalCompletedLow'] || 0 }}</td>
             <td class="text-center" style="color: #0f5132;">{{ summary()?.['totalCompletedNoRisk'] || 0 }}</td>
+            <td class="text-center" style="color: #0f5132; background-color: #d1e7dd;">{{ summary()?.['totalCompletedTotal'] || 0 }}</td>
           </tr>
         </tfoot>
       </table>
