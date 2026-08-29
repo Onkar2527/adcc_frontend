@@ -1131,9 +1131,8 @@ select.answer-control {
 }
 
 .timeline-entry {
-    display: flex;
-    flex-direction: column;
-    gap: 0.25rem;
+    display: block;
+    margin-bottom: 0.25rem;
 }
 
 .reviewer-entry {
@@ -1157,9 +1156,7 @@ select.answer-control {
 }
 
 .timeline-author {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
+    display: inline-block;
     font-size: 0.72rem;
     font-weight: 800;
     text-transform: uppercase;
@@ -1186,6 +1183,7 @@ select.answer-control {
 }
 
 .timeline-text {
+    display: inline;
     margin: 0;
     font-size: 0.86rem;
     line-height: 1.4;

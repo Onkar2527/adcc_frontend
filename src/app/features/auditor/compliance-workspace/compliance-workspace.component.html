@@ -68,6 +68,11 @@
           [icon]="remarks()?.unread_count ? 'pi pi-bell' : 'pi pi-comments'"
           [severity]="remarks()?.unread_count ? 'danger' : 'secondary'" (click)="toggleRemarksPanel()"></button>
 
+        <!-- Maker Checker: Checker bulk assignment -->
+        <ng-container *ngIf="isMakerCheckerEnabled() && isChecker() && hasUnassignedPoints()">
+          <button pButton type="button" label="Assign All to Maker" icon="pi pi-user-plus" severity="secondary" (click)="assignAllToMaker()"></button>
+        </ng-container>
+
         <button pButton type="button" [label]="
             isLiveManagerComplianceFlow()
               ? 'Submit Responses'
@@ -324,6 +329,8 @@
 
             <div class="flex align-items-center gap-2">
               <p-tag *ngIf="isPartiallyPass(answer)" value="Partially Pass" severity="warn"></p-tag>
+              <p-tag *ngIf="isMakerCheckerEnabled() && answer.compliance_status_id === 15" value="Pending Maker" severity="warn"></p-tag>
+              <p-tag *ngIf="isMakerCheckerEnabled() && answer.compliance_status_id === 16" value="Pending Checker" severity="info"></p-tag>
               <p-tag value="Compliance Required" severity="danger"></p-tag>
             </div>
           </div>
@@ -373,51 +380,46 @@
                         item.created_at | date: 'medium'
                         }}</span>
                     </div>
-                    <div *ngIf="item.audit_comment || item.answer_given" class="timeline-entry auditor-entry">
-                      <span class="timeline-author">
-                        Auditor Feedback
-                        <span class="timeline-date" *ngIf="item.answer_given">(Answer: {{ item.answer_given }})</span>
-                      </span>
-                      <p class="timeline-text" *ngIf="item.audit_comment">
-                        {{ item.audit_comment }}
-                      </p>
-                    </div>
-                    <div *ngIf="
-                        item.compliance_reviewer_comment ||
-                        item.audit_reviewer_comment ||
-                        item.comment ||
-                        item.reviewer_comment
-                      " class="timeline-entry reviewer-entry">
-                      <span class="timeline-author">Reviewer Feedback</span>
-                      <p class="timeline-text">
-                        {{
-                        item.compliance_reviewer_comment ||
-                        item.audit_reviewer_comment ||
-                        item.comment ||
-                        item.reviewer_comment
-                        }}
-                      </p>
-                    </div>
-                    <div *ngIf="item.compliance_response || item.response"
-                      class="timeline-entry manager-entry">
-                      <span class="timeline-author">Manager Response</span>
-                      <p class="timeline-text">
-                        {{ item.compliance_response || item.response }}
-                      </p>
-                      <div class="timeline-evidences" *ngIf="
-                          evidenceList(item).length ||
-                          evidenceList(item, 'compliance_evidence').length
-                        ">
-                        <button *ngFor="let evidence of evidenceList(item); let ei = index" pButton type="button"
-                          icon="pi pi-paperclip" severity="secondary"
-                          [title]="'View auditor supporting document ' + (ei + 1)" (click)="viewEvidence(evidence)"
-                          class="p-button-sm"></button>
-                        <button *ngFor="
-                            let evidence of evidenceList(item, 'compliance_evidence');
-                            let ei = index
-                          " pButton type="button" icon="pi pi-eye" severity="secondary"
-                          [title]="'View compliance supporting document ' + (ei + 1)"
-                          (click)="viewComplianceEvidence(evidence)" class="p-button-sm"></button>
+                    <div class="flex flex-row flex-wrap gap-4 align-items-center w-full mt-2">
+                      <div *ngIf="item.audit_comment || item.answer_given" class="timeline-entry auditor-entry">
+                        <span class="timeline-author font-bold">Auditor Feedback<span class="timeline-date" *ngIf="item.answer_given"> (Answer: {{ item.answer_given }})</span>:</span>
+                        <span class="timeline-text ml-1" *ngIf="item.audit_comment">{{ item.audit_comment }}</span>
+                      </div>
+                      <div *ngIf="
+                          item.compliance_reviewer_comment ||
+                          item.audit_reviewer_comment ||
+                          item.comment ||
+                          item.reviewer_comment
+                        " class="timeline-entry reviewer-entry">
+                        <span class="timeline-author font-bold">Reviewer Feedback:</span>
+                        <span class="timeline-text ml-1">
+                          {{
+                          item.compliance_reviewer_comment ||
+                          item.audit_reviewer_comment ||
+                          item.comment ||
+                          item.reviewer_comment
+                          }}
+                        </span>
+                      </div>
+                      <div *ngIf="item.compliance_response || item.response"
+                        class="timeline-entry manager-entry">
+                        <span class="timeline-author font-bold">Manager Response:</span>
+                        <span class="timeline-text ml-1">{{ item.compliance_response || item.response }}</span>
+                        <div class="timeline-evidences" *ngIf="
+                            evidenceList(item).length ||
+                            evidenceList(item, 'compliance_evidence').length
+                          ">
+                          <button *ngFor="let evidence of evidenceList(item); let ei = index" pButton type="button"
+                            icon="pi pi-paperclip" severity="secondary"
+                            [title]="'View auditor supporting document ' + (ei + 1)" (click)="viewEvidence(evidence)"
+                            class="p-button-sm"></button>
+                          <button *ngFor="
+                              let evidence of evidenceList(item, 'compliance_evidence');
+                              let ei = index
+                            " pButton type="button" icon="pi pi-eye" severity="secondary"
+                            [title]="'View compliance supporting document ' + (ei + 1)"
+                            (click)="viewComplianceEvidence(evidence)" class="p-button-sm"></button>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -490,59 +492,144 @@
           </table>
 
           <div *ngIf="responseRequired(answer) && canUseAnswerLevelComplianceResponse(answer)" class="response-panel">
-            <div class="response-panel-head">
-              <div class="flex align-items-center gap-2">
-                <label>{{
-                  isReCompliance() ? 'Corrected Compliance Response' : 'Compliance Response'
-                  }}</label>
-                <p-tag [value]="isSaved(answer) ? 'Saved' : 'Pending'"
-                  [severity]="isSaved(answer) ? 'success' : 'warn'"></p-tag>
+            <!-- Maker checker controls -->
+            <ng-container *ngIf="isMakerCheckerEnabled()">
+              
+              <!-- MAKER VIEW (Status 15 - Maker Pending) -->
+              <div *ngIf="isMaker() && answer.compliance_status_id === 15" class="maker-response-container">
+                <div class="response-panel-head">
+                  <div class="flex align-items-center gap-2">
+                    <label>Maker Compliance Response Draft</label>
+                    <p-tag [value]="isSaved(answer) ? 'Saved' : 'Pending'" [severity]="isSaved(answer) ? 'success' : 'warn'"></p-tag>
+                  </div>
+                </div>
+                <textarea rows="4" [(ngModel)]="answer.compliance_maker_comment" placeholder="Enter your draft response as Maker"></textarea>
+                <div class="response-actions mt-2">
+                  <button pButton type="button" label="Submit Draft to Checker" icon="pi pi-send"
+                    [loading]="responseSaving()[actionKey('answer', answer.id)]"
+                    (click)="saveResponse('answer', answer)"></button>
+                </div>
               </div>
 
-              <div *ngIf="isComplianceEvidenceUploadRequired(answer) || evidenceList(answer).length || evidenceList(answer, 'compliance_evidence').length" class="response-tools supporting-docs-box">
-                <span class="supporting-docs-label">Supporting Documents</span>
-                <button *ngFor="let evidence of evidenceList(answer); let ei = index" pButton type="button"
-                  icon="pi pi-paperclip" severity="secondary" [title]="'View auditor supporting document ' + (ei + 1)"
-                  (click)="viewEvidence(evidence)"></button>
-
-                <span class="evidence-chip" *ngFor="
-                    let evidence of evidenceList(answer, 'compliance_evidence');
-                    let ei = index
-                  ">
-                  <button pButton type="button" icon="pi pi-eye" severity="secondary"
-                    [title]="'View compliance supporting document ' + (ei + 1)"
-                    (click)="viewComplianceEvidence(evidence)"></button>
-                  <button pButton type="button" icon="pi pi-trash" severity="danger"
-                    [title]="'Remove compliance supporting document ' + (ei + 1)"
-                    [loading]="deletingEvidenceKey() === evidenceDeleteKey(evidence)"
-                    [disabled]="deletingEvidenceKey() === evidenceDeleteKey(evidence)"
-                    (click)="deleteEvidence(evidence)"></button>
-                </span>
-
-                <ng-container *ngIf="isComplianceEvidenceUploadRequired(answer)">
-                  <input #answerEvidenceInput type="file" multiple
-                    accept=".jpg,.jpeg,.png,.pdf,image/jpeg,image/png,application/pdf" style="display: none"
-                    (change)="uploadEvidence('answer', answer, $event)" />
-
-                  <button pButton type="button" icon="pi pi-upload" severity="secondary"
-                    title="Upload compliance supporting document"
-                    [loading]="uploadingEvidenceKey() === evidenceKey('answer', answer.id)"
-                    (click)="answerEvidenceInput.click()"></button>
-                </ng-container>
+              <!-- MAKER VIEW (Status 16 - Checker Pending) -->
+              <div *ngIf="isMaker() && answer.compliance_status_id === 16" class="maker-pending-checker w-full">
+                <p class="text-secondary font-medium mb-2">
+                  <i class="pi pi-hourglass mr-1"></i> Submitted draft to Manager. Awaiting Manager's review.
+                </p>
+                <div class="maker-draft-preview p-3 bg-gray-50 border-round">
+                  <strong>Your Draft Response:</strong>
+                  <p class="m-0 mt-1 text-700">{{ answer.compliance_maker_comment || '-' }}</p>
+                </div>
               </div>
-            </div>
 
-            <textarea rows="4" [(ngModel)]="answer.compliance_response" [placeholder]="
-                isReCompliance()
-                  ? 'Enter corrected compliance response'
-                  : 'Enter compliance response'
-              "></textarea>
+              <!-- CHECKER VIEW (Status 15 - Maker Pending) -->
+              <div *ngIf="isChecker() && answer.compliance_status_id === 15" class="checker-waiting-maker w-full p-3 border-1 border-round border-gray-200">
+                <p class="text-secondary font-medium m-0">
+                  <i class="pi pi-user mr-1"></i> Assigned to Maker: <strong>{{ answer.compliance_maker_name || 'Sub-head' }}</strong>. Awaiting response.
+                </p>
+              </div>
 
-            <div class="response-actions">
-              <button pButton type="button" [label]="isReCompliance() ? 'Save Correction' : 'Save Response'"
-                icon="pi pi-save" [loading]="responseSaving()[actionKey('answer', answer.id)]"
-                (click)="saveResponse('answer', answer)"></button>
-            </div>
+              <!-- CHECKER VIEW (Status 16 - Checker Pending) -->
+              <div *ngIf="isChecker() && answer.compliance_status_id === 16" class="checker-review-container w-full">
+                <div class="p-3 bg-blue-50 border-round border-left-3 border-blue-500 mb-3">
+                  <span class="text-blue-800 font-bold block mb-1">Maker Draft Response (submitted by {{ answer.compliance_maker_name }}):</span>
+                  <p class="m-0 text-700">{{ answer.compliance_maker_comment }}</p>
+                  <button pButton type="button" label="Copy to Final Response" icon="pi pi-copy" severity="secondary" size="small" class="mt-2 p-button-sm" (click)="copyMakerResponse(answer)"></button>
+                </div>
+
+                <div class="response-panel-head">
+                  <div class="flex align-items-center gap-2">
+                    <label>Final Compliance Response</label>
+                    <p-tag [value]="isSaved(answer) ? 'Saved' : 'Pending'" [severity]="isSaved(answer) ? 'success' : 'warn'"></p-tag>
+                  </div>
+                </div>
+                <textarea rows="4" [(ngModel)]="answer.compliance_response" placeholder="Enter final compliance response"></textarea>
+                
+                <div class="response-actions mt-2 flex gap-2">
+                  <button pButton type="button" label="Approve & Save Response" icon="pi pi-check"
+                    [loading]="responseSaving()[actionKey('answer', answer.id)]"
+                    (click)="saveResponse('answer', answer)"></button>
+                  <button pButton type="button" label="Return for Rework" icon="pi pi-refresh" severity="danger"
+                    [loading]="responseSaving()[actionKey('answer', answer.id)]"
+                    (click)="returnPointToMaker('answer', answer)"></button>
+                </div>
+              </div>
+
+              <!-- CHECKER VIEW (Unassigned States: 0, 3, 4, 12) -->
+              <div *ngIf="isChecker() && [0, 3, 4, 12].includes(answer.compliance_status_id)" class="w-full">
+                <div class="response-panel-head">
+                  <div class="flex align-items-center gap-2">
+                    <label>Compliance Response</label>
+                    <p-tag [value]="isSaved(answer) ? 'Saved' : 'Pending'" [severity]="isSaved(answer) ? 'success' : 'warn'"></p-tag>
+                  </div>
+                </div>
+                <textarea rows="4" [(ngModel)]="answer.compliance_response" placeholder="Enter compliance response"></textarea>
+                <div class="response-actions mt-2 flex justify-content-end gap-2">
+                  <button pButton type="button" label="Assign to Maker" icon="pi pi-user-plus" class="p-button-sm p-button-outlined" (click)="assignPointToMaker('answer', answer)"></button>
+                  <button pButton type="button" label="Save Response" icon="pi pi-save" class="p-button-sm"
+                    [loading]="responseSaving()[actionKey('answer', answer.id)]"
+                    (click)="saveResponse('answer', answer)"></button>
+                </div>
+              </div>
+
+            </ng-container>
+
+            <!-- Standard direct flow (if Maker-Checker disabled or other roles) -->
+            <ng-container *ngIf="!isMakerCheckerEnabled() || (!isMaker() && !isChecker())">
+              <div class="response-panel-head">
+                <div class="flex align-items-center gap-2">
+                  <label>{{
+                    isReCompliance() ? 'Corrected Compliance Response' : 'Compliance Response'
+                    }}</label>
+                  <p-tag [value]="isSaved(answer) ? 'Saved' : 'Pending'"
+                    [severity]="isSaved(answer) ? 'success' : 'warn'"></p-tag>
+                </div>
+
+                <div *ngIf="isComplianceEvidenceUploadRequired(answer) || evidenceList(answer).length || evidenceList(answer, 'compliance_evidence').length" class="response-tools supporting-docs-box">
+                  <span class="supporting-docs-label">Supporting Documents</span>
+                  <button *ngFor="let evidence of evidenceList(answer); let ei = index" pButton type="button"
+                    icon="pi pi-paperclip" severity="secondary" [title]="'View auditor supporting document ' + (ei + 1)"
+                    (click)="viewEvidence(evidence)"></button>
+
+                  <span class="evidence-chip" *ngFor="
+                      let evidence of evidenceList(answer, 'compliance_evidence');
+                      let ei = index
+                    ">
+                    <button pButton type="button" icon="pi pi-eye" severity="secondary"
+                      [title]="'View compliance supporting document ' + (ei + 1)"
+                      (click)="viewComplianceEvidence(evidence)"></button>
+                    <button pButton type="button" icon="pi pi-trash" severity="danger"
+                      [title]="'Remove compliance supporting document ' + (ei + 1)"
+                      [loading]="deletingEvidenceKey() === evidenceDeleteKey(evidence)"
+                      [disabled]="deletingEvidenceKey() === evidenceDeleteKey(evidence)"
+                      (click)="deleteEvidence(evidence)"></button>
+                  </span>
+
+                  <ng-container *ngIf="isComplianceEvidenceUploadRequired(answer)">
+                    <input #answerEvidenceInput type="file" multiple
+                      accept=".jpg,.jpeg,.png,.pdf,image/jpeg,image/png,application/pdf" style="display: none"
+                      (change)="uploadEvidence('answer', answer, $event)" />
+
+                    <button pButton type="button" icon="pi pi-upload" severity="secondary"
+                      title="Upload compliance supporting document"
+                      [loading]="uploadingEvidenceKey() === evidenceKey('answer', answer.id)"
+                      (click)="answerEvidenceInput.click()"></button>
+                  </ng-container>
+                </div>
+              </div>
+
+              <textarea rows="4" [(ngModel)]="answer.compliance_response" [placeholder]="
+                  isReCompliance()
+                    ? 'Enter corrected compliance response'
+                    : 'Enter compliance response'
+                "></textarea>
+
+              <div class="response-actions">
+                <button pButton type="button" [label]="isReCompliance() ? 'Save Correction' : 'Save Response'"
+                  icon="pi pi-save" [loading]="responseSaving()[actionKey('answer', answer.id)]"
+                  (click)="saveResponse('answer', answer)"></button>
+              </div>
+            </ng-container>
           </div>
 
           <div *ngIf="responseRequired(answer) && !canUseAnswerLevelComplianceResponse(answer)" class="context-note">
@@ -680,10 +767,40 @@
                     </td>
 
                     <td>
-                      <textarea *ngIf="responseRequired(row)" rows="1" [(ngModel)]="row.compliance_response"
-                        [placeholder]="
-                          isReCompliance() ? 'Corrected response' : 'Compliance response'
-                        "></textarea>
+                      <!-- Maker-Checker active -->
+                      <ng-container *ngIf="isMakerCheckerEnabled() && responseRequired(row)">
+                        <!-- Maker view - status 15 -->
+                        <textarea *ngIf="isMaker() && row.compliance_status_id === 15" rows="1" 
+                          [(ngModel)]="row.compliance_maker_comment" placeholder="Maker response"></textarea>
+                        
+                        <!-- Maker view - status 16 -->
+                        <span *ngIf="isMaker() && row.compliance_status_id === 16" class="text-secondary text-sm">
+                          Draft: {{ row.compliance_maker_comment || '-' }} (Awaiting Checker review)
+                        </span>
+
+                        <!-- Checker view - status 15 -->
+                        <span *ngIf="isChecker() && row.compliance_status_id === 15" class="text-secondary text-sm">
+                          Assigned to Maker (Awaiting Response)
+                        </span>
+
+                        <!-- Checker view - status 16 -->
+                        <div *ngIf="isChecker() && row.compliance_status_id === 16" class="flex flex-column gap-1">
+                          <small class="text-blue-600 block">Draft: {{ row.compliance_maker_comment || '-' }}</small>
+                          <textarea rows="1" [(ngModel)]="row.compliance_response" placeholder="Final response"></textarea>
+                          <a href="javascript:void(0)" class="text-xs text-blue-500 underline" (click)="copyMakerResponse(row)">Use Draft</a>
+                        </div>
+
+                        <!-- Checker view - unassigned status -->
+                        <textarea *ngIf="isChecker() && [0, 3, 4, 12].includes(row.compliance_status_id)" rows="1" 
+                          [(ngModel)]="row.compliance_response" placeholder="Compliance response"></textarea>
+                      </ng-container>
+
+                      <!-- Standard/Default flow -->
+                      <ng-container *ngIf="(!isMakerCheckerEnabled() || (!isMaker() && !isChecker())) && responseRequired(row)">
+                        <textarea rows="1" [(ngModel)]="row.compliance_response"
+                          [placeholder]="isReCompliance() ? 'Corrected response' : 'Compliance response'"></textarea>
+                      </ng-container>
+
                       <span *ngIf="!responseRequired(row)">{{
                         row.compliance_response || '-'
                         }}</span>
@@ -699,9 +816,18 @@
               </table>
             </div>
 
-            <div class="flex justify-content-end mt-3" *ngIf="hasSaveableAnnexureRows(answer)">
-              <button pButton type="button" label="Save All Annexure Responses" icon="pi pi-save" class="p-button-sm"
-                [loading]="annexureSavingQuestionId() === answer.id" (click)="saveAllAnnexureRows(answer)"></button>
+            <div class="flex justify-content-end align-items-center gap-3 mt-3" *ngIf="hasSaveableAnnexureRows(answer)">
+              <!-- Checker Assignment Box -->
+              <div *ngIf="isMakerCheckerEnabled() && isChecker() && [0, 3, 4, 12].includes(answer.compliance_status_id)" class="flex align-items-center gap-2">
+                <button pButton type="button" label="Assign Annexure to Maker" icon="pi pi-user-plus" class="p-button-sm" (click)="assignPointToMaker('annexure', answer)"></button>
+              </div>
+
+              <!-- Checker Return for Rework Box -->
+              <button *ngIf="isMakerCheckerEnabled() && isChecker() && answer.compliance_status_id === 16" pButton type="button" 
+                label="Return Annexure to Maker" icon="pi pi-refresh" severity="danger" class="p-button-sm" (click)="returnPointToMaker('annexure', answer)"></button>
+
+              <button pButton type="button" [label]="isMakerCheckerEnabled() && isMaker() ? 'Submit Maker Drafts' : 'Save All Annexure Responses'" 
+                icon="pi pi-save" class="p-button-sm" [loading]="annexureSavingQuestionId() === answer.id" (click)="saveAllAnnexureRows(answer)"></button>
             </div>
           </div>
         </article>

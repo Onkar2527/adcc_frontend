@@ -83,6 +83,32 @@ export class ComplianceWorkspaceComponent implements OnInit {
     deletingEvidenceKey =
         signal('');
 
+    bulkMakerId: number | null = null;
+
+    makerchekerflag = audit_flow_config.makerchekerflag === true;
+
+    isMakerCheckerEnabled() {
+        return this.makerchekerflag;
+    }
+
+    isChecker() {
+        if (!this.makerchekerflag) return false;
+        const headId = Number(this.overview()?.branch_head_id || 0);
+        return this.employeeId() === headId;
+    }
+
+    isMaker() {
+        if (!this.makerchekerflag) return false;
+        const subheadId = Number(this.overview()?.branch_subhead_id || 0);
+        if (this.employeeId() === subheadId) return true;
+        const makers = this.detail()?.makers || [];
+        return makers.some((m: any) => Number(m.id) === this.employeeId());
+    }
+
+    makers() {
+        return this.detail()?.makers || [];
+    }
+
     evidenceDeleteKey(
         evidence: any,
     ) {
@@ -653,6 +679,11 @@ export class ComplianceWorkspaceComponent implements OnInit {
     isSaved(
         observation: any,
     ) {
+        if (this.isMakerCheckerEnabled() && this.isMaker()) {
+            const saved = String(observation?._savedComplianceMakerComment || '').trim();
+            const current = String(observation?.compliance_maker_comment || '').trim();
+            return Boolean(saved && saved === current);
+        }
         const saved =
             String(
                 observation?._savedComplianceResponse || '',
@@ -882,18 +913,27 @@ export class ComplianceWorkspaceComponent implements OnInit {
 
         this.annexureSavingQuestionId.set(answer.id);
 
+        const isMaker = this.isMakerCheckerEnabled() && this.isMaker();
         const requests = rowsToSave.map((row: any) => {
-            const response =
-                String(
-                    row.compliance_response || '',
-                ).trim();
-            return this.service.saveComplianceResponse(
-                assessmentId,
-                'annexure',
-                Number(row.id),
-                this.employeeId(),
-                response,
-            );
+            if (isMaker) {
+                const comment = String(row.compliance_maker_comment || '').trim();
+                return this.service.saveMakerResponse(
+                    assessmentId,
+                    'annexure',
+                    Number(row.id),
+                    this.employeeId(),
+                    comment,
+                );
+            } else {
+                const response = String(row.compliance_response || '').trim();
+                return this.service.saveComplianceResponse(
+                    assessmentId,
+                    'annexure',
+                    Number(row.id),
+                    this.employeeId(),
+                    response,
+                );
+            }
         });
 
         forkJoin(requests).subscribe({
@@ -932,10 +972,10 @@ export class ComplianceWorkspaceComponent implements OnInit {
             Number(
                 this.detail()?.overview?.id || 0,
             );
-        const response =
-            String(
-                observation?.compliance_response || '',
-            ).trim();
+        const isMaker = this.isMakerCheckerEnabled() && this.isMaker();
+        const response = isMaker
+            ? String(observation?.compliance_maker_comment || '').trim()
+            : String(observation?.compliance_response || '').trim();
         const previousStatus =
             Number(
                 observation?.compliance_status_id || 0,
@@ -945,7 +985,9 @@ export class ComplianceWorkspaceComponent implements OnInit {
             !response
         ) {
             this.notification.error(
-                'Enter a compliance response before saving.',
+                isMaker
+                    ? 'Enter a maker response before saving.'
+                    : 'Enter a compliance response before saving.',
             );
             return;
         }
@@ -961,14 +1003,23 @@ export class ComplianceWorkspaceComponent implements OnInit {
             [key]: true,
         });
 
-        this.service
-            .saveComplianceResponse(
+        const req$ = isMaker
+            ? this.service.saveMakerResponse(
                 assessmentId,
                 targetType,
                 Number(observation.id),
                 this.employeeId(),
                 response,
             )
+            : this.service.saveComplianceResponse(
+                assessmentId,
+                targetType,
+                Number(observation.id),
+                this.employeeId(),
+                response,
+            );
+
+        req$
             .subscribe({
                 next: (res: any) => {
                     observation.compliance_response =
@@ -1005,6 +1056,75 @@ export class ComplianceWorkspaceComponent implements OnInit {
                     );
                 },
             });
+    }
+
+    assignPointToMaker(targetType: 'answer' | 'annexure', observation: any) {
+        const assessmentId = Number(this.detail()?.overview?.id || 0);
+        const makerEmpId = Number(this.detail()?.overview?.branch_subhead_id || 0);
+        if (!makerEmpId) {
+            this.notification.error('No Sub-Head assigned to this branch.');
+            return;
+        }
+        this.service.assignToMaker(assessmentId, makerEmpId, targetType, [Number(observation.id)], this.employeeId()).subscribe({
+            next: () => {
+                this.notification.success('Observation assigned to Maker.');
+                this.loadDetail(assessmentId);
+            },
+            error: (err) => {
+                this.notification.error(err?.error?.message || 'Failed to assign to Maker.');
+            }
+        });
+    }
+
+    assignAllToMaker() {
+        const assessmentId = Number(this.detail()?.overview?.id || 0);
+        const empId = Number(this.detail()?.overview?.branch_subhead_id || 0);
+        if (!empId) {
+            this.notification.error('No Sub-Head assigned to this branch.');
+            return;
+        }
+        this.service.assignToMaker(assessmentId, empId, 'all', [], this.employeeId()).subscribe({
+            next: () => {
+                this.notification.success('All pending points assigned to Maker.');
+                this.loadDetail(assessmentId);
+            },
+            error: (err) => {
+                this.notification.error(err?.error?.message || 'Failed to assign to Maker.');
+            }
+        });
+    }
+
+    returnPointToMaker(targetType: 'answer' | 'annexure', observation: any) {
+        const assessmentId = Number(this.detail()?.overview?.id || 0);
+        this.confirmation.confirm({
+            message: 'Are you sure you want to return this point to Maker for rework?',
+            accept: () => {
+                const key = this.actionKey(targetType, observation.id);
+                this.responseSaving.set({ ...this.responseSaving(), [key]: true });
+                this.service.returnToMaker(assessmentId, targetType, Number(observation.id), this.employeeId(), 'Returned for rework').subscribe({
+                    next: () => {
+                        this.clearSaving(key);
+                        this.notification.success('Returned to Maker successfully.');
+                        this.loadDetail(assessmentId);
+                    },
+                    error: (err) => {
+                        this.clearSaving(key);
+                        this.notification.error(err?.error?.message || 'Failed to return to Maker.');
+                    }
+                });
+            }
+        });
+    }
+
+    copyMakerResponse(observation: any) {
+        observation.compliance_response = observation.compliance_maker_comment;
+    }
+
+    hasUnassignedPoints() {
+        const detail = this.detail();
+        return (detail?.answers || []).some(
+            (answer: any) => [0, 3, 4, 12].includes(Number(answer.compliance_status_id || 0))
+        );
     }
 
     checkCompletion() {
@@ -1502,6 +1622,7 @@ export class ComplianceWorkspaceComponent implements OnInit {
                                 answer,
                                 res?.overview,
                             );
+                        answer._savedComplianceMakerComment = answer.compliance_maker_comment || '';
 
                         for (
                             const row
@@ -1512,6 +1633,7 @@ export class ComplianceWorkspaceComponent implements OnInit {
                                     row,
                                     res?.overview,
                                 );
+                            row._savedComplianceMakerComment = row.compliance_maker_comment || '';
                         }
                     }
 
@@ -1616,6 +1738,13 @@ export class ComplianceWorkspaceComponent implements OnInit {
     private hasEditedResponse(
         observation: any,
     ) {
+        if (this.isMakerCheckerEnabled() && this.isMaker()) {
+            return String(
+                observation?.compliance_maker_comment || '',
+            ).trim() !== String(
+                observation?._savedComplianceMakerComment || '',
+            ).trim();
+        }
         return String(
             observation?.compliance_response || '',
         ).trim() !== String(

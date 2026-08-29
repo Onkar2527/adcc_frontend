@@ -55,7 +55,7 @@ export class LoginComponent {
   username = '';
   password = '';
   rememberMe = false;
-  selectedRole: 'auditor' | 'reviewer' | 'manager' | undefined;
+  selectedRole: 'auditor' | 'reviewer' | 'manager' | 'subhead' | undefined;
 
   showOtpScreen = false;
   otpCode = '';
@@ -212,6 +212,7 @@ export class LoginComponent {
         return '/reports';
 
       case 3:
+      case 10:
         return '/auditor/compliance';
 
       case 4:
@@ -222,7 +223,7 @@ export class LoginComponent {
     }
   }
 
-  setCredentials(type: 'auditor' | 'reviewer' | 'manager') {
+  setCredentials(type: 'auditor' | 'reviewer' | 'manager' | 'subhead') {
     if (this.loading()) return;
 
     this.selectedRole = type;
@@ -235,6 +236,9 @@ export class LoginComponent {
       this.password = 'Emp@2024';
     } else if (type === 'manager') {
       this.username = '140';
+      this.password = 'Emp@2024';
+    } else if (type === 'subhead') {
+      this.username = '150';
       this.password = 'Emp@2024';
     }
 

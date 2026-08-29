@@ -50,7 +50,7 @@ export class AppMenu implements OnInit, OnDestroy {
   private baseModel: MenuItem[] = [
     {
       label: 'Home',
-      authority: ['1', '3', '5', '9'],
+      authority: ['1', '3', '5', '9', '10'],
       items: [
         { label: 'Dashboard', icon: 'pi pi-fw pi-home', routerLink: ['/home'] },
         {
@@ -95,7 +95,7 @@ export class AppMenu implements OnInit, OnDestroy {
     },
     {
       label: 'Compliance',
-      authority: ['3'],
+      authority: ['3', '10'],
       items: [
         {
           label: 'Pending Compliance',
@@ -106,12 +106,12 @@ export class AppMenu implements OnInit, OnDestroy {
     },
     {
       label: 'Reports',
-      authority: ['1', '2', '3', '4', '6', '5'],
+      authority: ['1', '2', '3', '4', '6', '5', '10'],
       items: [{ label: 'Reports', icon: 'pi pi-fw pi-file', routerLink: ['/reports'] }],
     },
     {
       label: 'Policies',
-      authority: ['1', '2', '3', '4', '5', '6', '9'],
+      authority: ['1', '2', '3', '4', '5', '6', '9', '10'],
       items: [
         {
           label: 'Policy Documents',
@@ -122,7 +122,7 @@ export class AppMenu implements OnInit, OnDestroy {
     },
     {
       label: 'Incident Management',
-      authority: ['1', '2', '3', '4', '5', '9'],
+      authority: ['1', '2', '3', '4', '5', '9', '10'],
       items: [
         {
           label: 'Incidents',
@@ -506,12 +506,19 @@ export class AppMenu implements OnInit, OnDestroy {
         }
 
         const menuProgress = menuTotal > 0 ? Math.min(100, Math.round((menuAnswered / menuTotal) * 100)) : 0;
+        const parentLivePendingCount = categoryItems.reduce(
+          (sum: number, cat: any) => sum + (cat.livePendingCount || 0),
+          0
+        );
 
         dynamicItems.push({
           label: menu.name,
           icon: 'pi pi-fw pi-folder',
           progress: menuProgress,
           items: categoryItems,
+          livePendingCount: parentLivePendingCount,
+          badgeClass: parentLivePendingCount > 0 ? 'live-compliance-pending' : '',
+          livePendingLabel: `${parentLivePendingCount} manager response${parentLivePendingCount === 1 ? '' : 's'} pending with Auditor`,
         });
       }
     }

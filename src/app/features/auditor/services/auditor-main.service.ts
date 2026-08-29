@@ -488,6 +488,56 @@ export class AuditDashboardService {
     );
   }
 
+  assignToMaker(
+    assessmentId: number,
+    makerEmpId: number,
+    targetType: 'all' | 'answer' | 'annexure',
+    observationIds: number[],
+    employeeId: number,
+  ) {
+    return this.http.post<any>(
+      `${this.config.apiUrl}/internal-audit/compliance/${assessmentId}/assign-to-maker`,
+      {
+        maker_emp_id: makerEmpId,
+        target_type: targetType,
+        observation_ids: observationIds,
+        employee_id: employeeId,
+      },
+    );
+  }
+
+  saveMakerResponse(
+    assessmentId: number,
+    targetType: 'answer' | 'annexure',
+    observationId: number,
+    employeeId: number,
+    comment: string,
+  ) {
+    return this.http.post<any>(
+      `${this.config.apiUrl}/internal-audit/compliance/${assessmentId}/observation/${targetType}/${observationId}/maker-response`,
+      {
+        employee_id: employeeId,
+        comment,
+      },
+    );
+  }
+
+  returnToMaker(
+    assessmentId: number,
+    targetType: 'answer' | 'annexure',
+    observationId: number,
+    employeeId: number,
+    comment: string,
+  ) {
+    return this.http.post<any>(
+      `${this.config.apiUrl}/internal-audit/compliance/${assessmentId}/observation/${targetType}/${observationId}/return-to-maker`,
+      {
+        employee_id: employeeId,
+        comment,
+      },
+    );
+  }
+
   saveAuditorLiveComplianceAction(
     assessmentId: number,
     targetType: 'answer' | 'annexure',

@@ -115,6 +115,11 @@
                 (click)="setCredentials('manager')">
                 Employee
               </button>
+
+              <button type="button" class="user-btn" [class.active]="selectedRole === 'subhead'" [disabled]="loading()"
+                (click)="setCredentials('subhead')">
+                Sub-Head
+              </button>
             </div>
           </form>
         </div>

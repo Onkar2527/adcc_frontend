@@ -253,7 +253,8 @@ export class EmployeeFormComponent {
     { label: 'Employee', value: 3 },
     { label: 'Reviewer', value: 4 },
     { label: 'Top Level Management', value: 5 },
-    { label: 'Division', value: 6 }
+    { label: 'Division', value: 6 },
+    { label: 'Sub-Head', value: 10 }
   ];
 
   showAuditUnits = computed(() => {

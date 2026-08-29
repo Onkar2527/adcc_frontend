@@ -73,7 +73,8 @@ export class EmployeeMasterComponent implements OnInit {
     3: 'Employee',
     4: 'Reviewer',
     5: 'Top Level Management',
-    6: 'Division'
+    6: 'Division',
+    10: 'Sub-Head'
   };
 
   ngOnInit() {

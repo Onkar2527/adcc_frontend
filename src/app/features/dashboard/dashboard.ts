@@ -100,7 +100,7 @@ export class Dashboard implements OnInit {
         this.loadAuthorizedUnits();
       } else if (this.userTypeId === 5) {
         this.loadManagementDashboard();
-      } else if ([2, 3, 4].includes(this.userTypeId)) {
+      } else if ([2, 3, 4, 10].includes(this.userTypeId)) {
         this.loadAuthorizedUnits();
       } else {
         this.loading = false;
@@ -122,6 +122,8 @@ export class Dashboard implements OnInit {
         return 'Audit Reviewer';
       case 5:
         return 'Top Level Management';
+      case 10:
+        return 'Branch Sub-Head / Maker';
       default:
         return 'User';
     }

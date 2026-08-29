@@ -77,6 +77,7 @@ export class MasterBulkUploadService {
     reviewer: 4,
     'top level management': 5,
     division: 6,
+    'sub-head': 10
   };
 
   private readonly genderMap: Record<string, string> = {
@@ -233,17 +234,17 @@ export class MasterBulkUploadService {
           normalized: errors.length
             ? undefined
             : ({
-                emp_code: empCode,
-                name,
-                email,
-                mobile,
-                designation,
-                gender,
-                user_type_id: userTypeId,
-                password,
-                region_name: userTypeId === 6 ? regionName : undefined,
-                is_active: isActive ? 1 : 0,
-              } satisfies CreateEmployeeDto),
+              emp_code: empCode,
+              name,
+              email,
+              mobile,
+              designation,
+              gender,
+              user_type_id: userTypeId,
+              password,
+              region_name: userTypeId === 6 ? regionName : undefined,
+              is_active: isActive ? 1 : 0,
+            } satisfies CreateEmployeeDto),
         };
       },
       upload: (rows) =>
@@ -317,8 +318,8 @@ export class MasterBulkUploadService {
           schemeTypeRaw === 'deposit' || schemeTypeRaw === '1'
             ? 1
             : schemeTypeRaw === 'advances' || schemeTypeRaw === 'advance' || schemeTypeRaw === '2'
-            ? 2
-            : 0;
+              ? 2
+              : 0;
 
         const categories = schemeTypeId === 1 ? context.depositCategories : context.advanceCategories;
         const category = categories.find(
@@ -351,12 +352,12 @@ export class MasterBulkUploadService {
           normalized: errors.length
             ? undefined
             : ({
-                scheme_type_id: schemeTypeId,
-                category_id: Number(category.id),
-                scheme_code: schemeCode,
-                name,
-                is_active: isActive ? 1 : 0,
-              } satisfies CreateSchemeDto),
+              scheme_type_id: schemeTypeId,
+              category_id: Number(category.id),
+              scheme_code: schemeCode,
+              name,
+              is_active: isActive ? 1 : 0,
+            } satisfies CreateSchemeDto),
         };
       },
       upload: (rows) =>
@@ -443,8 +444,8 @@ export class MasterBulkUploadService {
         );
         const assistant = assistantName
           ? context.employees.find(
-              (item: any) => this.normalizeValue(item.name) === this.normalizeValue(assistantName),
-            )
+            (item: any) => this.normalizeValue(item.name) === this.normalizeValue(assistantName),
+          )
           : null;
         const frequency = this.frequencyMap[frequencyRaw];
 
@@ -479,15 +480,15 @@ export class MasterBulkUploadService {
           normalized: errors.length
             ? undefined
             : ({
-                section_type_id: Number(section.id),
-                audit_unit_code: auditUnitCode,
-                name,
-                branch_head_id: Number(head.id),
-                branch_subhead_id: assistant ? Number(assistant.id) : null,
-                last_audit_date: lastAuditDate,
-                frequency,
-                is_active: isActive ? 1 : 0,
-              } satisfies CreateAuditUnitDto),
+              section_type_id: Number(section.id),
+              audit_unit_code: auditUnitCode,
+              name,
+              branch_head_id: Number(head.id),
+              branch_subhead_id: assistant ? Number(assistant.id) : null,
+              last_audit_date: lastAuditDate,
+              frequency,
+              is_active: isActive ? 1 : 0,
+            } satisfies CreateAuditUnitDto),
         };
       },
       upload: (rows) =>
@@ -564,10 +565,10 @@ export class MasterBulkUploadService {
           normalized: errors.length
             ? undefined
             : ({
-                region_name: regionName,
-                unit_ids: unitIds,
-                is_active: isActive ? 1 : 0,
-              } satisfies CreateRegionDto),
+              region_name: regionName,
+              unit_ids: unitIds,
+              is_active: isActive ? 1 : 0,
+            } satisfies CreateRegionDto),
         };
       },
       upload: (rows) =>
@@ -649,11 +650,11 @@ export class MasterBulkUploadService {
           normalized: errors.length
             ? undefined
             : {
-                risk_type_id: riskTypeId,
-                frequency: frequencyValue,
-                audit_due_days: auditDueDaysValue,
-                compliance_due_days: complianceDueDaysValue,
-              },
+              risk_type_id: riskTypeId,
+              frequency: frequencyValue,
+              audit_due_days: auditDueDaysValue,
+              compliance_due_days: complianceDueDaysValue,
+            },
         };
       },
       upload: (rows) =>
@@ -807,14 +808,14 @@ export class MasterBulkUploadService {
           normalized: errors.length
             ? undefined
             : ({
-                name,
-                appetite_percent: appetitePercent,
-                occurance_percent: occurancePercent,
-                magnitude,
-                frequency,
-                average_qualitative_count: averageQualitativeCount,
-                average_quantitative_count: averageQuantitativeCount,
-              } satisfies CreateBroaderAreaMasterDto),
+              name,
+              appetite_percent: appetitePercent,
+              occurance_percent: occurancePercent,
+              magnitude,
+              frequency,
+              average_qualitative_count: averageQualitativeCount,
+              average_quantitative_count: averageQuantitativeCount,
+            } satisfies CreateBroaderAreaMasterDto),
         };
       },
       upload: (rows) =>

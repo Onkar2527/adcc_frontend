@@ -398,7 +398,7 @@
 
 
     <!-- 2. AUDITOR / EMPLOYEE / REVIEWER VIEW -->
-    <div class="role-view-panel" *ngIf="[2, 3, 4].includes(userTypeId)">
+    <div class="role-view-panel" *ngIf="[2, 3, 4, 10].includes(userTypeId)">
       
       <!-- Welcome Header with Selection Dropdown -->
       <div class="dashboard-hero select-hero">
@@ -423,7 +423,7 @@
               styleClass="dashboard-select"
             ></p-select>
           </div>
-          <div class="select-wrapper" *ngIf="selectedUnitId !== null && userTypeId === 3">
+          <div class="select-wrapper" *ngIf="selectedUnitId !== null && (userTypeId === 3 || userTypeId === 10)">
             <label class="dropdown-label">Financial Year</label>
             <p-select
               [options]="yearFilterOptions"
@@ -450,7 +450,7 @@
 
       <div *ngIf="!detailsLoading && selectedUnitId !== null">
         <!-- Status Metrics Grid -->
-        <div class="metrics-grid" *ngIf="userTypeId !== 3">
+        <div class="metrics-grid" *ngIf="userTypeId !== 3 && userTypeId !== 10">
           <div class="metric-card theme-purple">
             <div class="card-glow"></div>
             <div class="card-icon"><i class="pi pi-chart-bar"></i></div>
@@ -652,7 +652,7 @@
         </div>
 
         <!-- Year-wise Assessment Schedule List (Same view and logic as auditprodemo) -->
-        <ng-container *ngIf="userTypeId !== 3">
+        <ng-container *ngIf="userTypeId !== 3 && userTypeId !== 10">
           <div class="dashboard-panel table-panel full-width margin-top-2rem" *ngFor="let yearGroup of filteredYearWiseAssessments">
             <div class="panel-header header-with-select">
               <div>
@@ -764,7 +764,7 @@
                           </ng-container>
 
                           <!-- Compliance Employee Actions -->
-                          <ng-container *ngIf="userTypeId === 3">
+                          <ng-container *ngIf="userTypeId === 3 || userTypeId === 10">
                             <button
                               pButton
                               type="button"
