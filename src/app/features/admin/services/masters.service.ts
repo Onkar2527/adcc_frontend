@@ -1195,13 +1195,16 @@ export class ManageAssessmentMasterService {
 
 
   getManageAssessmentMaster(
-    assesment_period_from: string,
-    assesment_period_to: string,
+    yearId: number,
     audit_unit_id: number,
   ): Observable<ManageAssessmentMaster[]> {
     return this.http.get<ManageAssessmentMaster[]>(
-      `${this.apiUrl}?assesment_period_from=${assesment_period_from}&assesment_period_to=${assesment_period_to}&audit_unit_id=${audit_unit_id}`,
+      `${this.apiUrl}?year_id=${yearId}&audit_unit_id=${audit_unit_id}`,
     );
+  }
+
+  getYears(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/years`);
   }
   updateManageAssessmentMaster(id: number, data: any): Observable<any> {
     return this.http.put(`${this.apiUrl}/${id}`, data);
@@ -1221,6 +1224,14 @@ export class ManageAssessmentMasterService {
 
   assignQuestions(id: number, assignments: any[]): Observable<any> {
     return this.http.post<any>(`${this.config.apiUrl}/manage-assessment-masters/${id}/assign-questions`, { assignments });
+  }
+
+  bulkUpdateDates(ids: number[], auditDueDate?: string, complianceDueDate?: string): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/bulk-update-dates`, {
+      ids,
+      audit_due_date: auditDueDate,
+      compliance_due_date: complianceDueDate
+    });
   }
 }
 export interface PeriodwiseQuestionsMaster {

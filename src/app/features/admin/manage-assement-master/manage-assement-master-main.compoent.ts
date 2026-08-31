@@ -63,20 +63,16 @@ import { AssessmentDetailsFormComponent } from './assement-details.component';
       ></app-select-field>
     </div>
 
-    <!-- Assessment From -->
+    <!-- Year Dropdown -->
     <div class="col-12 md:col-4">
-      <app-date-field
-        label="Assessment Period From"
-        [field]="assesment_period_from"
-      ></app-date-field>
-    </div>
-
-    <!-- Assessment To -->
-    <div class="col-12 md:col-4">
-      <app-date-field
-        label="Assessment Period To"
-        [field]="assesment_period_to"
-      ></app-date-field>
+      <app-select-field
+        label="Year"
+        [field]="year_id"
+        [options]="yearsOptions()"
+        optionLabel="label"
+        optionValue="value"
+        [required]="true"
+      ></app-select-field>
     </div>
 
     <!-- Search Button -->
@@ -94,6 +90,40 @@ import { AssessmentDetailsFormComponent } from './assement-details.component';
 
   <!-- Table -->
   @if (manageAssessments().length > 0) {
+
+    <!-- Bulk Update Panel -->
+    @if (audit_unit_id() === 0) {
+      <div class="mt-4 p-4 border-round surface-card border-1 border-gray-200 shadow-1 w-full">
+        <h6 class="m-0 mb-3 text-lg font-semibold text-800 flex align-items-center">
+          <i class="pi pi-calendar-plus mr-2 text-primary"></i>Bulk Update Due Dates
+        </h6>
+        <div class="grid align-items-end">
+          <div class="col-12 md:col-4 p-1">
+            <app-date-field
+              label="Bulk Audit Due Date"
+              [field]="bulkAuditDueDate"
+            ></app-date-field>
+          </div>
+          <div class="col-12 md:col-4 p-1">
+            <app-date-field
+              label="Bulk Compliance Due Date"
+              [field]="bulkComplianceDueDate"
+            ></app-date-field>
+          </div>
+          <div class="col-12 md:col-4 p-1 flex justify-content-start md:justify-content-end">
+            <button
+              pButton
+              type="button"
+              label="Apply Bulk Update"
+              icon="pi pi-check"
+              class="p-button-success w-full md:w-auto font-medium"
+              [loading]="bulkUpdating()"
+              (click)="applyBulkUpdate()"
+            ></button>
+          </div>
+        </div>
+      </div>
+    }
 
     <div class="mt-4 w-full overflow-auto">
 
@@ -142,11 +172,14 @@ export class ManageAssessmentMasterComponent implements OnInit {
     searched = signal(false);
 
     sectionTypeOptions = signal<any[]>([]);
+    yearsOptions = signal<any[]>([]);
 
     audit_unit_id = signal<number | null>(null);
-    assesment_period_from = signal<Date | null>(null);
+    year_id = signal<number | null>(null);
 
-    assesment_period_to = signal<Date | null>(null);
+    bulkAuditDueDate = signal<Date | null>(null);
+    bulkComplianceDueDate = signal<Date | null>(null);
+    bulkUpdating = signal(false);
 
     columns: TableColumn[] = [
         {
@@ -157,7 +190,17 @@ export class ManageAssessmentMasterComponent implements OnInit {
         {
             field: 'audit_status_display',
             header: 'Audit Status',
-            width: '250px'
+            width: '200px'
+        },
+        {
+            field: 'formatted_audit_due_date',
+            header: 'Audit Due Date',
+            width: '150px'
+        },
+        {
+            field: 'formatted_compliance_due_date',
+            header: 'Compliance Due Date',
+            width: '150px'
         },
         {
             field: '_edit',
@@ -194,39 +237,59 @@ export class ManageAssessmentMasterComponent implements OnInit {
 
     ngOnInit() {
         this.loadBranches();
+        this.loadYears();
     }
 
     loadBranches() {
-
-
-
         this.auditUnitService.findAll().subscribe({
-
             next: (res: any) => {
-
                 const rows = Array.isArray(res)
                     ? res
                     : res?.data || [];
 
-                this.sectionTypeOptions.set(
-                    rows
+                const branches = rows
                     .filter((item: any) => String(item.section_type_id) === '1')
                     .map((item: any) => ({
                         label: item.audit_unit_code
                             ? `(${item.audit_unit_code}) ${item.name}`
                             : item.name,
                         value: Number(item.id)
-                    }))
-                );
+                    }));
 
-
+                this.sectionTypeOptions.set([
+                    { label: 'All Branches', value: 0 },
+                    ...branches
+                ]);
             },
             error: () => {
-
                 this.messageService.add({
                     severity: 'error',
                     summary: 'Error',
                     detail: 'Unable to load branches'
+                });
+            }
+        });
+    }
+
+    loadYears() {
+        this.manageAssessmentService.getYears().subscribe({
+            next: (res: any) => {
+                const rows = Array.isArray(res)
+                    ? res
+                    : res?.data || [];
+
+                this.yearsOptions.set(
+                    rows.map((item: any) => ({
+                        label: String(item.year),
+                        value: Number(item.id)
+                    }))
+                );
+            },
+            error: () => {
+                this.messageService.add({
+                    severity: 'error',
+                    summary: 'Error',
+                    detail: 'Unable to load years'
                 });
             }
         });
@@ -245,9 +308,8 @@ export class ManageAssessmentMasterComponent implements OnInit {
     loadManageAssessments() {
 
         if (
-            !this.audit_unit_id() ||
-            !this.assesment_period_from() ||
-            !this.assesment_period_to()
+            this.audit_unit_id() === null ||
+            this.year_id() === null
         ) {
 
             this.messageService.add({
@@ -263,8 +325,7 @@ export class ManageAssessmentMasterComponent implements OnInit {
 
         this.manageAssessmentService
             .getManageAssessmentMaster(
-                this.formatDate(this.assesment_period_from()),
-                this.formatDate(this.assesment_period_to()),
+                this.year_id()!,
                 this.audit_unit_id()!
             )
             .subscribe({
@@ -279,7 +340,9 @@ export class ManageAssessmentMasterComponent implements OnInit {
                         audit_unit_display: item.audit_unit_code
                             ? `(${item.name}) ${item.audit_unit_code}`
                             : item.name,
-                        audit_status_display: this.auditStatusMap[item.audit_status_id] || 'Unknown'
+                        audit_status_display: this.auditStatusMap[item.audit_status_id] || 'Unknown',
+                        formatted_audit_due_date: this.formatDate(item.audit_due_date) || '-',
+                        formatted_compliance_due_date: this.formatDate(item.compliance_due_date) || '-'
                     }));
 
                     this.manageAssessments.set(formattedRows);
@@ -325,6 +388,47 @@ export class ManageAssessmentMasterComponent implements OnInit {
         if (event.name === 'edit') {
             this.openForm(event.row);
         }
+    }
+
+    applyBulkUpdate() {
+        const ids = this.manageAssessments().map((item: any) => Number(item.id));
+        if (ids.length === 0) return;
+
+        if (!this.bulkAuditDueDate() && !this.bulkComplianceDueDate()) {
+            this.messageService.add({
+                severity: 'warn',
+                summary: 'Validation',
+                detail: 'Please select at least one date to update'
+            });
+            return;
+        }
+
+        this.bulkUpdating.set(true);
+
+        const auditDateStr = this.bulkAuditDueDate() ? this.formatDate(this.bulkAuditDueDate()) : undefined;
+        const complianceDateStr = this.bulkComplianceDueDate() ? this.formatDate(this.bulkComplianceDueDate()) : undefined;
+
+        this.manageAssessmentService.bulkUpdateDates(ids, auditDateStr, complianceDateStr).subscribe({
+            next: (res: any) => {
+                this.messageService.add({
+                    severity: 'success',
+                    summary: 'Success',
+                    detail: `Successfully updated ${ids.length} assessments`
+                });
+                this.bulkAuditDueDate.set(null);
+                this.bulkComplianceDueDate.set(null);
+                this.bulkUpdating.set(false);
+                this.loadManageAssessments();
+            },
+            error: () => {
+                this.bulkUpdating.set(false);
+                this.messageService.add({
+                    severity: 'error',
+                    summary: 'Error',
+                    detail: 'Failed to apply bulk update'
+                });
+            }
+        });
     }
 
     async openForm(row?: any) {

@@ -2,6 +2,7 @@ import { Component, inject, signal } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MessageService } from 'primeng/api';
+import { TagModule } from 'primeng/tag';
 
 import { FormDrawerRef } from '../../../core/services/drawer/form-drawer.ref';
 
@@ -24,7 +25,8 @@ import {
     FormsModule,
     SelectFieldComponent,
     DateFieldComponent,
-    ButtonModule
+    ButtonModule,
+    TagModule
   ],
   providers: [DatePipe],
 
@@ -55,230 +57,188 @@ import {
     </div>
 
     @if (activeTab() === 'details') {
-      <!-- Main Table -->
-      <div
-        class="border-1 border-gray-300 border-round overflow-hidden"
-      >
+      <!-- Modern Dashboard Layout -->
+      <div class="flex flex-column gap-4">
 
-      <table class="w-full border-collapse">
-
-        <!-- Header -->
-        <thead>
-
-          <tr class="bg-gray-100">
-
-            <th
-              class="border-1 border-gray-300 p-3 text-left"
-              width="5%"
-            >
-              Sr. No.
-            </th>
-
-            <th
-              class="border-1 border-gray-300 p-3 text-left"
-              width="40%"
-            >
-              Assessment Details
-            </th>
-
-            <th
-              class="border-1 border-gray-300 p-3 text-left"
-              width="25%"
-            >
-              Audit Status
-            </th>
-
-            <th
-              class="border-1 border-gray-300 p-3 text-left"
-              width="30%"
-            >
-              Compliance Status
-            </th>
-
-          </tr>
-
-        </thead>
-
-        <!-- Body -->
-        <tbody>
-
-          <!-- Main Row -->
-          <tr>
-
-            <!-- Sr -->
-            <td
-              class="border-1 border-gray-300 p-3 align-top"
-            >
-              1
-            </td>
-
-            <!-- Assessment -->
-            <td
-              class="border-1 border-gray-300 p-3 align-top"
-            >
-
-              <div
-                class="text-blue-600 font-bold text-xl"
-              >
-
-                {{
-                  assessment()?.audit_unit_display
-                }}
-
+        <!-- Row 1: Overview Cards -->
+        <div class="grid w-full m-0 p-0">
+          
+          <!-- Card 1: Branch Details -->
+          <div class="col-12 md:col-6 lg:col-4 p-2">
+            <div class="p-3 border-round surface-card border-1 border-gray-200 shadow-1 h-full flex flex-column justify-content-between">
+              <div>
+                <div class="flex align-items-center justify-content-between mb-3">
+                  <span class="text-gray-500 font-semibold text-sm uppercase tracking-wider">Assessment Unit</span>
+                  <i class="pi pi-home text-blue-500 text-xl"></i>
+                </div>
+                <div class="text-2xl font-bold text-blue-700 mb-2">
+                  {{ assessment()?.audit_unit_display }}
+                </div>
+                <div class="text-sm text-600 mb-2">
+                  <i class="pi pi-calendar mr-1"></i>
+                  {{ formatDate(assessment()?.assesment_period_from) }} to {{ formatDate(assessment()?.assesment_period_to) }}
+                </div>
               </div>
-
-              <div class="mt-3">
-
-                {{
-                  formatDate(
-                    assessment()?.assesment_period_from
-                  )
-                }}
-
-                -
-
-                {{
-                  formatDate(
-                    assessment()?.assesment_period_to
-                  )
-                }}
-
-                <span class="text-gray-500">
-
-                  (
-                  Frequency -
-                  {{
-                    assessment()?.frequency || '-'
-                  }}
-                  Months
-                  )
-
-                </span>
-
+              <div class="inline-flex align-items-center bg-blue-50 text-blue-700 border-round p-2 text-xs font-semibold w-max">
+                <i class="pi pi-sync mr-1"></i>
+                Frequency: {{ assessment()?.frequency || '-' }} Months
               </div>
+            </div>
+          </div>
 
-              <div
-                class="mt-3 text-red-500 font-semibold"
-              >
-
-                Compliance Due Date:
-                {{
-                  formatDate(
-                    assessment()?.compliance_due_date
-                  )
-                }}
-
+          <!-- Card 2: Status Panel -->
+          <div class="col-12 md:col-6 lg:col-4 p-2">
+            <div class="p-3 border-round surface-card border-1 border-gray-200 shadow-1 h-full flex flex-column justify-content-between">
+              <div>
+                <div class="flex align-items-center justify-content-between mb-3">
+                  <span class="text-gray-500 font-semibold text-sm uppercase tracking-wider">Current Status</span>
+                  <i class="pi pi-chart-bar text-green-500 text-xl"></i>
+                </div>
+                <div class="flex flex-column gap-3">
+                  <div class="flex align-items-center justify-content-between">
+                    <span class="font-medium text-700">Audit Status:</span>
+                    <p-tag [value]="assessment()?.audit_status_display" 
+                           [severity]="getSeverity(assessment()?.audit_status_id)"></p-tag>
+                  </div>
+                  <div class="flex align-items-center justify-content-between">
+                    <span class="font-medium text-700">Compliance Status:</span>
+                    <p-tag [value]="assessment()?.compliance_status_display" 
+                           [severity]="getComplianceSeverity(assessment()?.audit_status_id)"></p-tag>
+                  </div>
+                  <div class="flex align-items-center justify-content-between">
+                    <span class="font-medium text-700">Limits Status:</span>
+                    <p-tag [value]="assessment()?.is_limit_blocked === 1 ? 'COMPLIANCE BLOCKED' : 'ACTIVE'" 
+                           [severity]="assessment()?.is_limit_blocked === 1 ? 'danger' : 'success'"></p-tag>
+                  </div>
+                </div>
               </div>
+            </div>
+          </div>
 
-            </td>
-
-            <!-- Audit Status -->
-            <td
-              class="border-1 border-gray-300 p-3 align-top"
-            >
-
-              <div class="font-semibold">
-
-                {{
-                  assessment()?.audit_status_display
-                }}
-
+          <!-- Card 3: Key Deadlines -->
+          <div class="col-12 md:col-6 lg:col-4 p-2">
+            <div class="p-3 border-round surface-card border-1 border-gray-200 shadow-1 h-full flex flex-column justify-content-between">
+              <div>
+                <div class="flex align-items-center justify-content-between mb-3">
+                  <span class="text-gray-500 font-semibold text-sm uppercase tracking-wider">Deadlines & Alerts</span>
+                  <i class="pi pi-bell text-yellow-500 text-xl"></i>
+                </div>
+                
+                <div class="flex flex-column gap-3">
+                  <div class="flex align-items-center justify-content-between">
+                    <span class="font-medium text-700">Audit Due:</span>
+                    <span [class.text-red-500]="isExpired(assessment()?.audit_due_date)" class="font-semibold text-800">
+                      {{ formatDate(assessment()?.audit_due_date) }}
+                      @if (isExpired(assessment()?.audit_due_date)) {
+                        <span class="text-xs text-red-500 block">Expired</span>
+                      }
+                    </span>
+                  </div>
+                  <div class="flex align-items-center justify-content-between">
+                    <span class="font-medium text-700">Compliance Due:</span>
+                    <span [class.text-red-500]="isExpired(assessment()?.compliance_due_date)" class="font-semibold text-800">
+                      {{ formatDate(assessment()?.compliance_due_date) }}
+                      @if (isExpired(assessment()?.compliance_due_date)) {
+                        <span class="text-xs text-red-500 block">Expired</span>
+                      }
+                    </span>
+                  </div>
+                </div>
               </div>
+            </div>
+          </div>
 
-              @if (
-                isExpired(
-                  assessment()?.audit_due_date
-                )
-              ) {
+        </div>
 
-              <div class="mt-3 text-red-500">
-
-                Audit Expired
-
+        <!-- Row 2: Dates Details and Stakeholders Grid -->
+        <div class="grid w-full m-0 p-0">
+          
+          <!-- Dates Grid -->
+          <div class="col-12 md:col-6 p-2">
+            <div class="p-4 border-round surface-card border-1 border-gray-200 shadow-1 h-full">
+              <h3 class="m-0 mb-3 text-lg font-bold text-800 border-bottom-1 border-gray-100 pb-2">
+                <i class="pi pi-calendar mr-2 text-primary"></i>Assessment Timeline
+              </h3>
+              <div class="grid">
+                <div class="col-6 mb-3">
+                  <span class="text-500 text-sm block mb-1">Audit Start Date</span>
+                  <span class="font-medium text-900">{{ formatDate(assessment()?.audit_start_date) }}</span>
+                </div>
+                <div class="col-6 mb-3">
+                  <span class="text-500 text-sm block mb-1">Audit End Date</span>
+                  <span class="font-medium text-900">{{ formatDate(assessment()?.audit_end_date) }}</span>
+                </div>
+                <div class="col-6">
+                  <span class="text-500 text-sm block mb-1">Compliance Start Date</span>
+                  <span class="font-medium text-900">{{ formatDate(assessment()?.compliance_start_date) }}</span>
+                </div>
+                <div class="col-6">
+                  <span class="text-500 text-sm block mb-1">Compliance End Date</span>
+                  <span class="font-medium text-900">{{ formatDate(assessment()?.compliance_end_date) }}</span>
+                </div>
               </div>
+            </div>
+          </div>
 
-              }
+          <!-- Stakeholders Grid -->
+          <div class="col-12 md:col-6 p-2">
+            <div class="p-4 border-round surface-card border-1 border-gray-200 shadow-1 h-full">
+              <h3 class="m-0 mb-3 text-lg font-bold text-800 border-bottom-1 border-gray-100 pb-2">
+                <i class="pi pi-users mr-2 text-primary"></i>Stakeholders & Team
+              </h3>
+              <div class="flex flex-column gap-3">
+                <div class="flex align-items-center gap-3">
+                  <div class="w-2rem h-2rem border-round bg-blue-50 flex align-items-center justify-content-center">
+                    <i class="pi pi-user text-blue-700"></i>
+                  </div>
+                  <div class="flex flex-column">
+                    <span class="text-xs text-500">Auditor</span>
+                    <span class="font-semibold text-800">
+                      {{ getEmployeeDisplay(assessment()?.auditor_name, assessment()?.auditor_code) }}
+                    </span>
+                  </div>
+                </div>
 
-            </td>
+                <div class="flex align-items-center gap-3">
+                  <div class="w-2rem h-2rem border-round bg-blue-50 flex align-items-center justify-content-center">
+                    <i class="pi pi-user text-blue-700"></i>
+                  </div>
+                  <div class="flex flex-column">
+                    <span class="text-xs text-500">Branch Head</span>
+                    <span class="font-semibold text-800">
+                      {{ getEmployeeDisplay(assessment()?.branch_head_name, assessment()?.branch_head_code) }}
+                    </span>
+                  </div>
+                </div>
 
-            <!-- Compliance Status -->
-            <td
-              class="border-1 border-gray-300 p-3 align-top"
-            >
+                <div class="flex align-items-center gap-3">
+                  <div class="w-2rem h-2rem border-round bg-blue-50 flex align-items-center justify-content-center">
+                    <i class="pi pi-user text-blue-700"></i>
+                  </div>
+                  <div class="flex flex-column">
+                    <span class="text-xs text-500">Branch Sub-Head</span>
+                    <span class="font-semibold text-800">
+                      {{ getEmployeeDisplay(assessment()?.branch_subhead_name, assessment()?.branch_subhead_code) }}
+                    </span>
+                  </div>
+                </div>
 
-              <div class="font-semibold">
-
-                {{
-                  assessment()
-                    ?.compliance_status_display
-                }}
-
+                <div class="flex align-items-center gap-3">
+                  <div class="w-2rem h-2rem border-round bg-blue-50 flex align-items-center justify-content-center">
+                    <i class="pi pi-users text-blue-700"></i>
+                  </div>
+                  <div class="flex flex-column">
+                    <span class="text-xs text-500">Other Compliance Employees</span>
+                    <span class="font-semibold text-800">{{ assessment()?.other_compliance_employees || '-' }}</span>
+                  </div>
+                </div>
               </div>
+            </div>
+          </div>
 
-              @if (
-                isExpired(
-                  assessment()
-                    ?.compliance_due_date
-                )
-              ) {
+        </div>
 
-              <div class="mt-3 text-red-500">
-
-                Compliance Expired
-
-              </div>
-
-              }
-
-              <div
-                class="mt-3 text-red-500 font-semibold"
-              >
-
-                Status:
-                {{
-                  assessment()?.is_limit_blocked === 1
-                    ? 'COMPLIANCE BLOCKED'
-                    : 'ACTIVE'
-                }}
-
-              </div>
-
-            </td>
-
-          </tr>
-
-          <!-- Detail Rows -->
-          <tr *ngFor="let item of detailRows()">
-
-            <td
-              class="border-1 border-gray-300 p-3"
-            >
-            </td>
-
-            <td
-              class="border-1 border-gray-300 p-3 font-medium"
-            >
-
-              {{ item.label }}
-
-            </td>
-
-            <td
-              colspan="2"
-              class="border-1 border-gray-300 p-3"
-            >
-
-              {{ item.value }}
-
-            </td>
-
-          </tr>
-
-        </tbody>
-
-      </table>
-
-    </div>
+      </div>
 
     <!-- LIMIT BLOCK -->
 
@@ -688,6 +648,11 @@ export class AssessmentDetailsFormComponent {
     type: 'audit' | 'compliance' | 'limit'
   ) {
 
+    const formatDateForPayload = (date: Date | null): string | null => {
+      if (!date) return null;
+      return this.datePipe.transform(date, 'yyyy-MM-dd');
+    };
+
     const payload: any = {};
 
     // AUDIT
@@ -698,7 +663,7 @@ export class AssessmentDetailsFormComponent {
       }
 
       payload.audit_due_date =
-        this.auditDueDate();
+        formatDateForPayload(this.auditDueDate());
 
       payload.is_limit_blocked = 0;
     }
@@ -711,7 +676,7 @@ export class AssessmentDetailsFormComponent {
       }
 
       payload.compliance_due_date =
-        this.complianceDueDate();
+        formatDateForPayload(this.complianceDueDate());
 
       payload.is_limit_blocked = 0;
     }
@@ -857,6 +822,28 @@ export class AssessmentDetailsFormComponent {
     };
 
     return map[id] || '-';
+  }
+
+  getSeverity(id: number): 'success' | 'info' | 'warn' | 'danger' | 'secondary' {
+    const map: Record<number, 'success' | 'info' | 'warn' | 'danger' | 'secondary'> = {
+      1: 'warn',
+      2: 'info',
+      3: 'warn',
+      4: 'info',
+      5: 'info',
+      6: 'warn',
+      7: 'success',
+    };
+    return map[id] || 'secondary';
+  }
+
+  getComplianceSeverity(id: number): 'success' | 'info' | 'warn' | 'danger' | 'secondary' {
+    const map: Record<number, 'success' | 'info' | 'warn' | 'danger' | 'secondary'> = {
+      4: 'warn',
+      5: 'info',
+      6: 'warn',
+    };
+    return map[id] || 'secondary';
   }
 
 
