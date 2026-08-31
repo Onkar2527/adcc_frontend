@@ -3,14 +3,8 @@
 <div class="login-page">
   <!-- Theme Toggle Button in Top Right Corner -->
   <div class="login-theme-toggle">
-    <button
-      pButton
-      type="button"
-      [icon]="layoutService.layoutConfig().darkTheme ? 'pi pi-moon' : 'pi pi-sun'"
-      severity="secondary"
-      (click)="toggleTheme()"
-      aria-label="Toggle theme"
-    ></button>
+    <button pButton type="button" [icon]="layoutService.layoutConfig().darkTheme ? 'pi pi-moon' : 'pi pi-sun'"
+      severity="secondary" (click)="toggleTheme()" aria-label="Toggle theme"></button>
   </div>
 
   <!-- Fixed Banner -->
@@ -119,6 +113,10 @@
               <button type="button" class="user-btn" [class.active]="selectedRole === 'subhead'" [disabled]="loading()"
                 (click)="setCredentials('subhead')">
                 Sub-Head
+              </button>
+              <button type="button" class="user-btn" [class.active]="selectedRole === 'SuperReviewer'"
+                [disabled]="loading()" (click)="setCredentials('SuperReviewer')">
+                Super Reviewer
               </button>
             </div>
           </form>
