@@ -878,6 +878,8 @@ export class AppTopbar implements OnInit, OnDestroy {
         return 'Top Level Management';
       case 10:
         return 'Sub-Head';
+      case 11:
+        return 'Super Reviewer';
       default:
         return '';
     }

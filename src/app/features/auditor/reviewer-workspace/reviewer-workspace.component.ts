@@ -23,7 +23,7 @@ import { NotificationService } from '../../../core/services/notification/notific
 import { AuditDashboardService } from '../services/auditor-main.service';
 import { AuditUnitDashboardComponent } from '../../../shared/components/audit-unit-dashboard/audit-unit-dashboard.component';
 import { InternalAuditNavService } from '../services/internal-audit-nav.service';
-import { audit_flow_config } from '../../admin/services/required-data';
+import { audit_flow_config, ESCALATE_FLOW } from '../../admin/services/required-data';
 
 @Component({
     selector: 'app-reviewer-workspace',
@@ -198,7 +198,9 @@ export class ReviewerWorkspaceComponent implements OnInit {
                         review_pending:
                             Number(assessment.total_points || 0),
                         compliance_pending:
-                            Number(assessment.compliance_points || 0),
+                            this.isSuperReviewer()
+                                ? Number(assessment.rejected_points || 0)
+                                : Number(assessment.compliance_points || 0),
                         audit_completed:
                             0,
                         not_started_count:
@@ -288,7 +290,7 @@ export class ReviewerWorkspaceComponent implements OnInit {
         this.modeAssessments()
             .reduce(
                 (sum, item: any) =>
-                    sum + Number(item.compliance_points || 0),
+                    sum + Number(item.compliance_pending || 0),
                 0,
             ),
     );
@@ -304,24 +306,24 @@ export class ReviewerWorkspaceComponent implements OnInit {
             className: 'text-info',
         },
         {
-            label: 'Compliance Marked',
+            label: this.isSuperReviewer() ? 'Escalated' : 'Compliance Marked',
             value: this.totalCompliancePending(),
             className: 'text-danger',
         },
     ]);
 
-    reviewerCardMetrics = [
+    reviewerCardMetrics = computed(() => [
         {
             label: 'Total Questions',
             key: 'review_pending',
             className: 'text-info',
         },
         {
-            label: 'Compliance',
+            label: this.isSuperReviewer() ? 'Escalated' : 'Compliance',
             key: 'compliance_pending',
             className: 'text-danger',
         },
-    ];
+    ]);
 
     reviewerCardMetaItems = [
         {
@@ -611,7 +613,7 @@ export class ReviewerWorkspaceComponent implements OnInit {
 
     isReviewActionDisabled(
         observation: any,
-        action: 2 | 3 | 5 | 7,
+        action: 2 | 3 | 5 | 7 | 8,
     ) {
         const status =
             Number(
@@ -635,7 +637,7 @@ export class ReviewerWorkspaceComponent implements OnInit {
             if (
                 action === 3
             ) {
-                return status === 12;
+                return this.isSuperReviewer() ? status === 11 : status === 12;
             }
 
             if (
@@ -648,6 +650,12 @@ export class ReviewerWorkspaceComponent implements OnInit {
                 action === 7
             ) {
                 return status === 9;
+            }
+
+            if (
+                action === 8
+            ) {
+                return status === 17;
             }
 
             return false;
@@ -691,9 +699,21 @@ export class ReviewerWorkspaceComponent implements OnInit {
     reviewComment(
         observation: any,
     ) {
+        if (this.isSuperReviewer() && this.isComplianceReview()) {
+            return observation.super_reviewer_comment || '';
+        }
         return this.isComplianceReview()
             ? observation.compliance_reviewer_comment || ''
             : observation.audit_reviewer_comment || '';
+    }
+
+    isSuperReviewer() {
+        const user = JSON.parse(localStorage.getItem('user') || '{}');
+        return Number(user.user_type_id || 0) === 11;
+    }
+
+    isEscalateFlowActive() {
+        return Number(ESCALATE_FLOW) === 1;
     }
 
     statusLabel(
@@ -721,6 +741,10 @@ export class ReviewerWorkspaceComponent implements OnInit {
 
             if (Number(status) === 14) {
                 return 'Settled By Reviewer';
+            }
+
+            if (Number(status) === 17) {
+                return 'Escalated to Super Reviewer';
             }
         }
 
@@ -812,6 +836,10 @@ export class ReviewerWorkspaceComponent implements OnInit {
 
             if (Number(status) === 10) {
                 return 'info';
+            }
+
+            if (Number(status) === 17) {
+                return 'warn';
             }
 
             return 'secondary';
@@ -934,6 +962,10 @@ export class ReviewerWorkspaceComponent implements OnInit {
             this.isLiveManagerComplianceReview()
             && this.isComplianceReview()
         ) {
+            const pendingStatuses = this.isSuperReviewer()
+                ? [17]
+                : [0, 4, 10, 11, 12];
+
             return this.allReviewAnswers()
                 .flatMap(
                     (answer: any) => [
@@ -943,7 +975,7 @@ export class ReviewerWorkspaceComponent implements OnInit {
                 )
                 .filter(
                     (observation: any) =>
-                        [0, 4, 10, 11, 12, 13].includes(
+                        pendingStatuses.includes(
                             Number(
                                 this.reviewStatus(observation) || 0,
                             ),
@@ -989,7 +1021,7 @@ export class ReviewerWorkspaceComponent implements OnInit {
             )
             .some(
                 (observation: any) =>
-                    [5, 9, 11, 12, 14].includes(
+                    [5, 9, 11, 12, 14, 17].includes(
                         Number(
                             this.reviewStatus(observation) || 0,
                         ),
@@ -998,7 +1030,30 @@ export class ReviewerWorkspaceComponent implements OnInit {
     }
 
     allReviewAnswers() {
-        return this.detail()?.answers || [];
+        const answers = this.detail()?.answers || [];
+        if (this.isSuperReviewer()) {
+            return answers
+                .map((answer: any) => {
+                    if (answer?.annexure_rows && answer.annexure_rows.length > 0) {
+                        const filteredRows = answer.annexure_rows.filter(
+                            (row: any) => Number(this.reviewStatus(row) || 0) === 17
+                        );
+                        return {
+                            ...answer,
+                            annexure_rows: filteredRows
+                        };
+                    }
+                    return answer;
+                })
+                .filter((answer: any) => {
+                    const status = Number(this.reviewStatus(answer) || 0);
+                    if (status === 17) {
+                        return true;
+                    }
+                    return answer?.annexure_rows && answer.annexure_rows.length > 0;
+                });
+        }
+        return answers;
     }
 
     filteredReviewAnswers() {
@@ -1182,6 +1237,21 @@ export class ReviewerWorkspaceComponent implements OnInit {
                 || observation?.audit_commpliance
                 || '',
             ).trim();
+
+        if (this.isSuperReviewer()) {
+            if (status === 17) {
+                return true;
+            }
+            return (observation?.annexure_rows || [])
+                .some(
+                    (row: any) =>
+                        this.canTakeLiveComplianceReviewerAction(row),
+                );
+        }
+
+        if (status === 17) {
+            return false;
+        }
 
         if (
             status === 14

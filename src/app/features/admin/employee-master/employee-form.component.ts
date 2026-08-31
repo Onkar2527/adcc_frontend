@@ -254,12 +254,13 @@ export class EmployeeFormComponent {
     { label: 'Reviewer', value: 4 },
     { label: 'Top Level Management', value: 5 },
     { label: 'Division', value: 6 },
-    { label: 'Sub-Head', value: 10 }
+    { label: 'Sub-Head', value: 10 },
+    { label: 'Super Reviewer', value: 11 }
   ];
 
   showAuditUnits = computed(() => {
     const userTypeId = Number(this.userTypeId());
-    return userTypeId === 2 || userTypeId === 4;
+    return userTypeId === 2 || userTypeId === 4 || userTypeId === 11;
   });
 
   showRegion = computed(() => {

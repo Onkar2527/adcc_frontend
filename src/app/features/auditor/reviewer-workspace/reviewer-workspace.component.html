@@ -35,7 +35,7 @@
     [search]="search()" [selectedStatus]="selectedStatus()" [statusOptions]="statusOptions"
     [totalUnits]="modeAssessments().length" [totalAuditPending]="0" [totalReviewPending]="totalReviewPending()"
     [totalCompliancePending]="totalCompliancePending()" [totalCompleted]="0" [summaryItems]="reviewerSummaryItems()"
-    [cardMetrics]="reviewerCardMetrics" [cardMetaItems]="reviewerCardMetaItems" [groupAssessments]="true"
+    [cardMetrics]="reviewerCardMetrics()" [cardMetaItems]="reviewerCardMetaItems" [groupAssessments]="true"
     (searchChange)="search.set($event)" (selectedStatusChange)="selectedStatus.set($event)" (refresh)="loadQueue()"
     (openUnit)="openAssessment($event)" (viewDetails)="viewAssessmentDetails($event)"></app-audit-unit-dashboard>
 
@@ -185,24 +185,35 @@
         </div>
       </section>
 
-      <div class="review-metrics">
+      <div class="review-metrics" *ngIf="isSuperReviewer(); else normalMetrics">
         <div>
-          <span>Total Questions Applicable</span><strong>{{ review.counts.total }}</strong>
+          <span>TOTAL QUESTIONS</span><strong>{{ review.counts.total }}</strong>
         </div>
         <div>
-          <span>Branch Complied Points</span><strong class="red">{{ review.counts.compliance }}</strong>
-        </div>
-        <div>
-          <span>Reviewer Accepted Questions</span><strong>{{ review.counts.accepted }}</strong>
-        </div>
-        <div>
-          <span>{{ isComplianceReview() ? 'Re-Compliance Needed Questions' : 'Re-Audit Needed Questions'
-            }}</span><strong class="red">{{ review.counts.rejected }}</strong>
-        </div>
-        <div *ngIf="isComplianceReview()">
-          <span>Partially Pass Questions</span><strong>{{ review.counts.partially_passed || 0 }}</strong>
+          <span>ESCALATED</span><strong class="red">{{ allReviewAnswers().length }}</strong>
         </div>
       </div>
+
+      <ng-template #normalMetrics>
+        <div class="review-metrics">
+          <div>
+            <span>Total Questions Applicable</span><strong>{{ review.counts.total }}</strong>
+          </div>
+          <div>
+            <span>Branch Complied Points</span><strong class="red">{{ review.counts.compliance }}</strong>
+          </div>
+          <div>
+            <span>Reviewer Accepted Questions</span><strong>{{ review.counts.accepted }}</strong>
+          </div>
+          <div>
+            <span>{{ isComplianceReview() ? 'Re-Compliance Needed Questions' : 'Re-Audit Needed Questions'
+              }}</span><strong class="red">{{ review.counts.rejected }}</strong>
+          </div>
+          <div *ngIf="isComplianceReview()">
+            <span>Partially Pass Questions</span><strong>{{ review.counts.partially_passed || 0 }}</strong>
+          </div>
+        </div>
+      </ng-template>
 
       <div class="review-filter-panel">
         <div>
@@ -248,12 +259,12 @@
         </div>
       </div>
 
-      <div class="bulk-review-actions">
+      <div *ngIf="!isSuperReviewer()" class="bulk-review-actions">
         <div>
           <strong>Review Actions</strong>
           <small>{{ pendingReviewCount() }} pending observation(s)</small>
         </div>
-
+ 
         <div class="bulk-review-buttons">
           <button pButton type="button" [label]="
               isLiveManagerComplianceReview()
@@ -261,7 +272,7 @@
                 : 'Accept All Observations'
             " severity="success" [loading]="bulkSaving()" [disabled]="submitting() || bulkSaving()"
             (click)="saveBulkAction(2)"></button>
-
+ 
           <button pButton type="button" [label]="
               isLiveManagerComplianceReview()
                 ? 'Send All Pending Points to Manager'
@@ -270,10 +281,15 @@
             (click)="saveBulkAction(3)"></button>
         </div>
       </div>
-
-      <div *ngIf="pendingReviewCount() > 0" class="review-submit-warning">
+ 
+      <div *ngIf="pendingReviewCount() > 0 && !isSuperReviewer()" class="review-submit-warning">
         <i class="pi pi-info-circle"></i>
         Accept or reject all observations before submitting the review.
+      </div>
+
+      <div *ngIf="pendingReviewCount() > 0 && isSuperReviewer()" class="review-submit-warning">
+        <i class="pi pi-info-circle"></i>
+        Settle all escalated points before submitting the review.
       </div>
 
       <div *ngIf="!isComplianceReview()" class="review-key">
@@ -509,22 +525,26 @@
                         <span class="timeline-author font-bold">Auditor Feedback<span class="timeline-date" *ngIf="item.answer_given"> (Answer: {{ item.answer_given }})</span>:</span>
                         <span class="timeline-text ml-1" *ngIf="item.audit_comment">{{ item.audit_comment }}</span>
                       </div>
-                      <div *ngIf="
-                          item.compliance_reviewer_comment ||
-                          item.audit_reviewer_comment ||
-                          item.comment ||
-                          item.reviewer_comment
-                        " class="timeline-entry reviewer-entry">
-                        <span class="timeline-author font-bold">Reviewer Feedback:</span>
-                        <span class="timeline-text ml-1">
-                          {{
-                          item.compliance_reviewer_comment ||
-                          item.audit_reviewer_comment ||
-                          item.comment ||
-                          item.reviewer_comment
-                          }}
-                        </span>
-                      </div>
+                       <div *ngIf="
+                           item.compliance_reviewer_comment ||
+                           item.audit_reviewer_comment ||
+                           item.comment ||
+                           item.reviewer_comment
+                         " class="timeline-entry reviewer-entry">
+                         <span class="timeline-author font-bold">Reviewer Feedback:</span>
+                         <span class="timeline-text ml-1">
+                           {{
+                           item.compliance_reviewer_comment ||
+                           item.audit_reviewer_comment ||
+                           item.comment ||
+                           item.reviewer_comment
+                           }}
+                         </span>
+                       </div>
+                       <div *ngIf="item.super_reviewer_comment" class="timeline-entry reviewer-entry">
+                         <span class="timeline-author font-bold">Super Reviewer Feedback:</span>
+                         <span class="timeline-text ml-1">{{ item.super_reviewer_comment }}</span>
+                       </div>
                       <div *ngIf="item.compliance_response || item.response"
                         class="timeline-entry manager-entry">
                         <span class="timeline-author font-bold">Manager Response:</span>
@@ -557,8 +577,10 @@
             <textarea *ngIf="!isComplianceReview()" rows="2" [(ngModel)]="answer.audit_reviewer_comment"
               placeholder="Reviewer comment"></textarea>
 
-            <textarea *ngIf="isComplianceReview() && reviewStatus(answer) !== 13" rows="2" [(ngModel)]="answer.compliance_reviewer_comment"
-              placeholder="Reviewer Remark"></textarea>
+            <textarea *ngIf="isComplianceReview() && reviewStatus(answer) !== 13" rows="2"
+              [ngModel]="isSuperReviewer() ? answer.super_reviewer_comment : answer.compliance_reviewer_comment"
+              (ngModelChange)="isSuperReviewer() ? (answer.super_reviewer_comment = $event) : (answer.compliance_reviewer_comment = $event)"
+              [placeholder]="isSuperReviewer() ? 'Super Reviewer Remark' : 'Reviewer Remark'"></textarea>
 
             <div class="review-buttons">
               <div *ngIf="
@@ -580,31 +602,41 @@
                   [title]="'View manager supporting document ' + (ei + 1)" (click)="viewEvidence(evidence)"></button>
               </div>
 
-              <ng-container *ngIf="
-                  answer.is_compliance == 1 &&
-                  (!isLiveManagerComplianceReview() || canTakeLiveComplianceReviewerAction(answer))
-                ">
-                <button pButton type="button" label="Accept" severity="success"
-                  [loading]="actionSaving()[actionKey('answer', answer.id)]"
-                  [disabled]="isReviewActionDisabled(answer, 2)" (click)="saveAction('answer', answer, 2)"></button>
+                <ng-container *ngIf="
+                    answer.is_compliance == 1 &&
+                    (!isLiveManagerComplianceReview() || canTakeLiveComplianceReviewerAction(answer))
+                  ">
+                  <button *ngIf="!isSuperReviewer()" pButton type="button" label="Accept" severity="success"
+                    [loading]="actionSaving()[actionKey('answer', answer.id)]"
+                    [disabled]="isReviewActionDisabled(answer, 2)" (click)="saveAction('answer', answer, 2)"></button>
+ 
+                  <button pButton type="button" [label]="
+                      isSuperReviewer()
+                        ? 'Reject'
+                        : isLiveManagerComplianceReview()
+                          ? 'Send To Manager'
+                          : isComplianceReview()
+                            ? 'Re-Compliance'
+                            : 'Re-Audit'
+                    " severity="danger" [loading]="actionSaving()[actionKey('answer', answer.id)]"
+                    [disabled]="isReviewActionDisabled(answer, 3)" (click)="saveAction('answer', answer, 3)"></button>
+ 
+                  <ng-container *ngIf="isLiveManagerComplianceReview() && isEscalateFlowActive() && !isSuperReviewer()">
+                    <button pButton type="button" label="Escalate" severity="help"
+                      [loading]="actionSaving()[actionKey('answer', answer.id)]"
+                      [disabled]="isReviewActionDisabled(answer, 8)" (click)="saveAction('answer', answer, 8)"></button>
+                  </ng-container>
 
-                <button pButton type="button" [label]="
-                    isLiveManagerComplianceReview()
-                      ? 'Send To Manager'
-                      : isComplianceReview()
-                        ? 'Re-Compliance'
-                        : 'Re-Audit'
-                  " severity="danger" [loading]="actionSaving()[actionKey('answer', answer.id)]"
-                  [disabled]="isReviewActionDisabled(answer, 3)" (click)="saveAction('answer', answer, 3)"></button>
-
-                <button *ngIf="isComplianceReview()" pButton type="button" label="Carry Forward" severity="info"
-                  [loading]="actionSaving()[actionKey('answer', answer.id)]"
-                  [disabled]="isReviewActionDisabled(answer, 5)" (click)="saveAction('answer', answer, 5)"></button>
-
-                <button *ngIf="isComplianceReview()" pButton type="button" label="Partially Pass" severity="warn"
-                  [loading]="actionSaving()[actionKey('answer', answer.id)]"
-                  [disabled]="isReviewActionDisabled(answer, 7)" (click)="saveAction('answer', answer, 7)"></button>
-              </ng-container>
+                  <ng-container *ngIf="isSuperReviewer() || (!isLiveManagerComplianceReview() || !isEscalateFlowActive())">
+                    <button *ngIf="isComplianceReview()" pButton type="button" label="Carry Forward" severity="info"
+                      [loading]="actionSaving()[actionKey('answer', answer.id)]"
+                      [disabled]="isReviewActionDisabled(answer, 5)" (click)="saveAction('answer', answer, 5)"></button>
+ 
+                    <button *ngIf="isComplianceReview()" pButton type="button" label="Partially Pass" severity="warn"
+                      [loading]="actionSaving()[actionKey('answer', answer.id)]"
+                      [disabled]="isReviewActionDisabled(answer, 7)" (click)="saveAction('answer', answer, 7)"></button>
+                  </ng-container>
+                </ng-container>
             </div>
           </div>
 
@@ -671,6 +703,10 @@
                               item.reviewer_comment
                               }}
                             </div>
+                            <div *ngIf="item.super_reviewer_comment" class="row-comment text-red">
+                              <strong>Super Rev:</strong>
+                              {{ item.super_reviewer_comment }}
+                            </div>
                             <div *ngIf="item.compliance_response || item.response"
                               class="row-comment text-blue">
                               <strong>Mgr:</strong>
@@ -720,8 +756,10 @@
                       <textarea *ngIf="!isComplianceReview()" rows="1" [(ngModel)]="row.audit_reviewer_comment"
                         placeholder="Reviewer comment"></textarea>
 
-                      <textarea *ngIf="isComplianceReview() && reviewStatus(row) !== 13" rows="1" [(ngModel)]="row.compliance_reviewer_comment"
-                        placeholder="Reviewer Remark"></textarea>
+                      <textarea *ngIf="isComplianceReview() && reviewStatus(row) !== 13" rows="1"
+                        [ngModel]="isSuperReviewer() ? row.super_reviewer_comment : row.compliance_reviewer_comment"
+                        (ngModelChange)="isSuperReviewer() ? (row.super_reviewer_comment = $event) : (row.compliance_reviewer_comment = $event)"
+                        [placeholder]="isSuperReviewer() ? 'Super Reviewer Remark' : 'Reviewer Remark'"></textarea>
                     </td>
                     <td>
                       <p-tag [value]="liveComplianceStatusLabel(row)"
@@ -733,22 +771,29 @@
                           reviewStatus(row) === 9
                         " style="min-width: 140px; padding: 0.25rem">
                         <option value="">Select Action</option>
-                        <option [value]="2">Accept</option>
+                        <option *ngIf="!isSuperReviewer()" [value]="2">Accept</option>
                         <option [value]="3">
                           {{
-                          isLiveManagerComplianceReview()
-                          ? 'Send To Manager'
-                          : isComplianceReview()
-                          ? 'Re-Compliance'
-                          : 'Re-Audit'
+                          isSuperReviewer()
+                          ? 'Reject'
+                          : isLiveManagerComplianceReview()
+                            ? 'Send To Manager'
+                            : isComplianceReview()
+                              ? 'Re-Compliance'
+                              : 'Re-Audit'
                           }}
                         </option>
-                        <option [value]="5" *ngIf="isComplianceReview()">
-                          Carry Forward
-                        </option>
-                        <option [value]="7" *ngIf="isComplianceReview()">
-                          Partially Pass
-                        </option>
+                        <ng-container *ngIf="isLiveManagerComplianceReview() && isEscalateFlowActive() && !isSuperReviewer()">
+                          <option [value]="8">Escalate</option>
+                        </ng-container>
+                        <ng-container *ngIf="isSuperReviewer() || (!isLiveManagerComplianceReview() || !isEscalateFlowActive())">
+                          <option [value]="5" *ngIf="isComplianceReview()">
+                            Carry Forward
+                          </option>
+                          <option [value]="7" *ngIf="isComplianceReview()">
+                            Partially Pass
+                          </option>
+                        </ng-container>
                       </select>
                     </td>
                   </tr>

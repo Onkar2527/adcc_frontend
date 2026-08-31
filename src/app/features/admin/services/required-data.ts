@@ -5,6 +5,7 @@ export const user_types = [
   { label: 'Reviewer', value: '4' },
   { label: 'Top Level Management', value: '5' },
   { label: 'Division', value: '6' },
+  { label: 'Super Reviewer', value: '11' },
 ];
 
 export const audit_due_array = [
@@ -189,6 +190,7 @@ export const approvedByOptions = [
 ];
 export const FREE_AUDIT_FLOW = false;
 export const ENABLE_2FA = false;
+export const ESCALATE_FLOW = 1;
 export const audit_flow_config = {
   liveManagerCompliance: true,
   showApplyDefaultsAndSaveAll: 0, // 1 for show, 0 for hide

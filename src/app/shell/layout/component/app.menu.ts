@@ -79,7 +79,7 @@ export class AppMenu implements OnInit, OnDestroy {
     },
     {
       label: 'Audit Review',
-      authority: ['4'],
+      authority: ['4', '11'],
       items: [
         {
           label: 'Pending Reviews',
@@ -106,12 +106,12 @@ export class AppMenu implements OnInit, OnDestroy {
     },
     {
       label: 'Reports',
-      authority: ['1', '2', '3', '4', '6', '5', '10'],
+      authority: ['1', '2', '3', '4', '6', '5', '10', '11'],
       items: [{ label: 'Reports', icon: 'pi pi-fw pi-file', routerLink: ['/reports'] }],
     },
     {
       label: 'Policies',
-      authority: ['1', '2', '3', '4', '5', '6', '9', '10'],
+      authority: ['1', '2', '3', '4', '5', '6', '9', '10', '11'],
       items: [
         {
           label: 'Policy Documents',
@@ -122,7 +122,7 @@ export class AppMenu implements OnInit, OnDestroy {
     },
     {
       label: 'Incident Management',
-      authority: ['1', '2', '3', '4', '5', '9', '10'],
+      authority: ['1', '2', '3', '4', '5', '9', '10', '11'],
       items: [
         {
           label: 'Incidents',
