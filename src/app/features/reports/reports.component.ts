@@ -104,6 +104,12 @@ export class ReportsComponent implements OnInit {
       category: '2_audit',
     },
     {
+      srNo: 28.1,
+      name: 'Questionnaire Tracking Report',
+      route: '/reports/questionnaire-tracking-report',
+      category: '2_audit',
+    },
+    {
       srNo: 29,
       name: 'Assement Not Started Yet Report',
       route: '/reports/assement-not-started-yet-report',
@@ -302,6 +308,7 @@ export class ReportsComponent implements OnInit {
         '/reports/executive-summary-compliance-report',
         '/reports/audit-complete-report',
         '/reports/compliance-report',
+        '/reports/questionnaire-tracking-report',
       ];
       rawList = rawList.filter((r) => allowedRoutes.includes(r.route));
     }
