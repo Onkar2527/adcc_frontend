@@ -242,6 +242,12 @@ export class ReportsComponent implements OnInit {
       name: 'Risk Category Summary Report',
       route: '/reports/risk-category-summary',
       category: '3_advanced',
+    },
+    {
+      srNo: 50,
+      name: 'Questionwise Consolidate Summary',
+      route: '/reports/questionwise-consolidate-summary',
+      category: '3_advanced',
     }
   ];
 

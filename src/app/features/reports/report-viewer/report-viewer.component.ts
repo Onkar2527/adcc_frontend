@@ -137,6 +137,7 @@ export class ReportViewerComponent implements OnInit {
   reportHeader = signal<Record<string, any> | null>(null);
   reportMeta = signal<Record<string, any> | null>(null);
   exeReportData = signal<any>(null);
+  assessmentGroups = signal<any[]>([]);
   generatedAt = signal<string | null>(null);
   loading = signal(false);
   searched = signal(false);
@@ -515,6 +516,7 @@ export class ReportViewerComponent implements OnInit {
         this.reportHeader.set(res?.header || null);
         this.reportMeta.set(res?.meta || null);
         this.exeReportData.set(res?.exeData || null);
+        this.assessmentGroups.set(res?.assessmentGroups || []);
         this.generatedAt.set(res?.generatedAt || new Date().toISOString());
         this.loading.set(false);
       },
@@ -526,6 +528,7 @@ export class ReportViewerComponent implements OnInit {
         this.reportHeader.set(null);
         this.reportMeta.set(null);
         this.exeReportData.set(null);
+        this.assessmentGroups.set([]);
         this.error.set(err?.error?.message || 'Unable to generate report.');
         this.loading.set(false);
       },
@@ -553,6 +556,7 @@ export class ReportViewerComponent implements OnInit {
     this.reportHeader.set(null);
     this.reportMeta.set(null);
     this.exeReportData.set(null);
+    this.assessmentGroups.set([]);
     this.generatedAt.set(null);
     this.searched.set(false);
     this.error.set('');
@@ -741,6 +745,11 @@ export class ReportViewerComponent implements OnInit {
   isQuestionWiseScoringReport() {
     const slug = this.definition()?.slug;
     return slug === 'question-wise-scoring-report';
+  }
+
+  isQuestionwiseConsolidateSummaryReport() {
+    const slug = this.definition()?.slug;
+    return slug === 'questionwise-consolidate-summary';
   }
 
   /** Escape text so it is safe to inject into innerHTML */
