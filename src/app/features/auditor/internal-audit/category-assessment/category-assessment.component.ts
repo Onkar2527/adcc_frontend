@@ -676,7 +676,6 @@ export class CategoryAssessmentComponent
                     question.showSuggestions = false;
 
                     question.is_compliance =
-                        !this.isTextAnswer(question) &&
                         Boolean(
                             Number(
                                 question.answer?.is_compliance || 0,
@@ -1377,6 +1376,10 @@ export class CategoryAssessmentComponent
             question.showSuggestions = true;
         }
 
+        if (this.isTextAnswer(question) && String(question.audit_comment || '').trim() !== '') {
+            question.is_compliance = true;
+        }
+
         this.syncSidebarCategoryCounts();
     }
 
@@ -1386,6 +1389,11 @@ export class CategoryAssessmentComponent
         }
         question.audit_comment = suggestion;
         question.showSuggestions = false;
+
+        if (this.isTextAnswer(question)) {
+            question.is_compliance = true;
+        }
+
         this.syncSidebarCategoryCounts();
     }
 
@@ -1444,12 +1452,14 @@ export class CategoryAssessmentComponent
     private applyComplianceSelectionRule(
         question: any,
     ) {
-        if (
-            this.isTextAnswer(
-                question,
-            )
-            || Number(question?.option_id) === 5
-        ) {
+        if (this.isTextAnswer(question)) {
+            if (String(question.audit_comment || '').trim() !== '') {
+                question.is_compliance = true;
+            }
+            return;
+        }
+
+        if (Number(question?.option_id) === 5) {
             return;
         }
 
@@ -1511,8 +1521,15 @@ export class CategoryAssessmentComponent
                 controlRisk,
             );
 
-        question.is_compliance =
-            shouldMarkCompliance;
+        if (shouldMarkCompliance) {
+            question.is_compliance = true;
+        }
+    }
+
+    onComplianceCheckboxChange(
+        _question: any,
+    ) {
+        this.syncSidebarCategoryCounts();
     }
 
     private syncSidebarCategoryCounts() {
@@ -2030,7 +2047,7 @@ export class CategoryAssessmentComponent
                         question.audit_comment || '',
 
                     is_compliance:
-                        !this.isTextAnswer(question) && question.is_compliance === true,
+                        question.is_compliance === true,
 
                     audit_compulsary_ev_upload:
                         question.audit_compulsary_ev_upload === true,
@@ -2070,7 +2087,7 @@ export class CategoryAssessmentComponent
                     audit_comment:
                         question.audit_comment || '',
                     is_compliance:
-                        (!this.isTextAnswer(question) && question.is_compliance === true) ? 1 : 0,
+                        question.is_compliance === true ? 1 : 0,
                     audit_compulsary_ev_upload:
                         question.audit_compulsary_ev_upload === true ? 1 : 0,
                 };
@@ -3202,8 +3219,7 @@ export class CategoryAssessmentComponent
         }
 
         this.samplingLoading.set(true);
-        this.samplingSelection = (detail?.accounts || [])
-            .map((account: any) => Number(account.id));
+        this.samplingSelection = [];
 
         this.service
             .getInternalAuditAccountSampling(
@@ -3219,20 +3235,6 @@ export class CategoryAssessmentComponent
                     this.samplingData.set(
                         res,
                     );
-                    if (res?.candidates) {
-                        const candidateIds = new Set(res.candidates.map((c: any) => Number(c.id)));
-
-                        // Keep current selections that are not in the new candidates list
-                        const nonCandidateSelections = this.samplingSelection
-                            .filter(id => !candidateIds.has(id));
-
-                        // Get selections from the candidate list that are sampled
-                        const sampledCandidateIds = res.candidates
-                            .filter((c: any) => Number(c.sampling_filter) === 1)
-                            .map((c: any) => Number(c.id));
-
-                        this.samplingSelection = [...nonCandidateSelections, ...sampledCandidateIds];
-                    }
                     this.samplingLoading.set(false);
                 },
                 error: (err) => {
@@ -3338,7 +3340,7 @@ export class CategoryAssessmentComponent
                         || 'Sampled accounts applied successfully.',
                     );
                     this.markSaved();
-                    this.loadSampling();
+                    this.samplingOpen.set(false);
                     this.loadCategory(
                         Number(detail.overview.id),
                         Number(detail.category.id),

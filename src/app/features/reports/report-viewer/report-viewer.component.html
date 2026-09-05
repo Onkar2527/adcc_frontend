@@ -679,10 +679,32 @@
         </tfoot>
       </table>
 
+      <!-- Closure Report Branch & Assessment Period Header Banner -->
+      <table class="official-report-table performance-report-summary-table mb-3" *ngIf="isClosureReport()">
+        <tbody>
+          <tr style="background-color: #f8f9fa;">
+            <td style="font-weight: 600; font-size: 0.92rem; color: #1e293b; padding: 8px 14px; border: 1px solid #cbd5e1;">
+              <strong>Branch:</strong> {{ reportAuditUnit() || '-' }}
+              <span style="margin: 0 10px; color: #94a3b8;">|</span>
+              <strong>Assessment Period:</strong> {{ reportAssessmentPeriod() || '-' }}
+              <span style="font-weight: 500; color: #475569; margin-left: 6px;">
+                (Sampled Accounts: {{ summary()?.['sampled_accounts_count'] || 0 }} | Unsampled Accounts: {{ summary()?.['unsampled_accounts_count'] || 0 }})
+              </span>
+            </td>
+          </tr>
+          <tr style="background-color: #ffffff;">
+            <td style="font-weight: 600; font-size: 0.90rem; color: #0f172a; padding: 7px 14px; border: 1px solid #cbd5e1;">
+              <strong>Total Weighted Score:</strong> {{ summary()?.['total_weighted_score'] || '0.00' }}
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
       <table class="official-report-table"
         *ngIf="!isExecutiveSummary() && !isInternalAssessmentReport() && !isQuestionWiseScoringReport() && !isAuditObservationCountReport() && !isQuestionwiseConsolidateSummaryReport()"
         [class.risk-wise-report-table]="isRiskWiseReport()"
-        [class.performance-risk-report-table]="isPerformanceRiskWeightageReport()">
+        [class.performance-risk-report-table]="isPerformanceRiskWeightageReport()"
+        [class.closure-report-compact]="isClosureReport()">
         <colgroup *ngIf="!isRiskWiseReport() && definition()?.columns">
           <col *ngFor="let column of definition()?.columns" [style.width]="column.width || null">
         </colgroup>
@@ -725,7 +747,7 @@
 
           <ng-template #plainReportHeader>
             <thead
-              *ngIf="!hasGroupedRows() && definition()?.slug !== 'broader-areawise-scoring-report' && definition()?.slug !== 'questionwsie-broader-areawise-report'">
+              *ngIf="isClosureReport() || (!hasGroupedRows() && definition()?.slug !== 'broader-areawise-scoring-report' && definition()?.slug !== 'questionwsie-broader-areawise-report')">
               <tr>
                 <th *ngFor="let column of definition()?.columns" [style.width]="column.width || null"
                   [class.text-center]="column.align === 'center'" [class.text-right]="column.align === 'right'">
@@ -814,7 +836,7 @@
           </tr>
         </thead>
         <tbody>
-          <ng-container *ngFor="let row of rows(); let rowIndex = index">
+          <ng-container *ngFor="let row of rows(); let rowIndex = index; trackBy: trackByRow">
             <tr *ngIf="row.__report_group" class="report-group-row" [class]="'report-group-' + row.__group_level">
               <td [attr.colspan]="definition()?.columns?.length || 1">
                 <ng-container *ngIf="row.__group_level !== 'account'; else accountDetailsBlock">
@@ -904,9 +926,44 @@
                   </tbody>
                 </table>
               </td>
+            <tr *ngIf="row.__report_unsampled_table" class="report-annexure-row">
+              <td [attr.colspan]="definition()?.columns?.length || 1">
+                <div class="table-responsive">
+                  <table class="report-annexure-table official-report-table my-1" style="width: 100%; border: 1px solid #dee2e6;">
+                    <thead>
+                      <tr style="background-color: #f4f6f9;">
+                        <th style="width: 3%" class="text-center">#</th>
+                        <th style="width: 14%">Account Number</th>
+                        <th style="width: 18%">Account Holder Name</th>
+                        <th style="width: 7%" class="text-center">Scheme</th>
+                        <th style="width: 16%">Scheme Name</th>
+                        <th style="width: 9%" class="text-center">UCIC</th>
+                        <th style="width: 9%" class="text-center">Open Date</th>
+                        <th style="width: 9%" class="text-right">Sanction / Principal Amt</th>
+                        <th style="width: 5%" class="text-center">Rate (%)</th>
+                        <th style="width: 10%" class="text-right">Outstanding Bal</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr *ngFor="let acc of row.__unsampled_rows; let accIdx = index">
+                        <td class="text-center">{{ accIdx + 1 }}</td>
+                        <td><strong>{{ acc.account_no || '-' }}</strong></td>
+                        <td>{{ acc.account_holder_name || '-' }}</td>
+                        <td class="text-center">{{ acc.scheme_code || '-' }}</td>
+                        <td>{{ acc.scheme_name || '-' }}</td>
+                        <td class="text-center">{{ acc.ucic || '-' }}</td>
+                        <td class="text-center">{{ acc.account_opening_date || '-' }}</td>
+                        <td class="text-right">{{ acc.account_amount || '-' }}</td>
+                        <td class="text-center">{{ acc.interest_rate || '-' }}</td>
+                        <td class="text-right">{{ acc.outstanding_balance || '-' }}</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </td>
             </tr>
 
-            <tr *ngIf="!row.__report_group && !row.__report_annexure && !row.__report_vouching">
+            <tr *ngIf="!row.__report_group && !row.__report_annexure && !row.__report_vouching && !row.__report_unsampled_table">
               <td *ngFor="let column of definition()?.columns" [class.text-center]="column.align === 'center'"
                 [class.text-right]="column.align === 'right'">
                 <ng-container [ngSwitch]="column.type">
@@ -960,6 +1017,47 @@
           </tr>
         </tfoot>
       </table>
+
+      <!-- Closure Report Broader Area Scoring Table (New Table at Last) -->
+      <div *ngIf="isClosureReport() && broaderAreaScoringRows().length" class="mt-4 mb-4">
+        <div style="font-weight: bold; font-size: 1.05rem; color: #1e293b; margin-bottom: 8px; border-bottom: 2px solid #3b82f6; padding-bottom: 4px;">
+          Broader Area-wise Scoring Summary
+        </div>
+        <table class="official-report-table" width="100%">
+          <thead>
+            <tr class="bg-light-gray" style="background-color: #f4f6f9;">
+              <th style="width: 18%">Broader Area</th>
+              <th style="width: 7%" class="text-right">Qualitative Score</th>
+              <th style="width: 7%" class="text-right">Quantitative Score</th>
+              <th style="width: 8%" class="text-right">Total Score Before Averaging</th>
+              <th style="width: 7%" class="text-center">No. Of Accounts Non-Compliant</th>
+              <th style="width: 7%" class="text-center">No Of Accounts Checked</th>
+              <th style="width: 8%" class="text-right">Averaged Quantitative Score</th>
+              <th style="width: 8%" class="text-right">Total Averaged Score</th>
+              <th style="width: 7%" class="text-center">Number of Audits Conducted</th>
+              <th style="width: 8%" class="text-right">Averaged Total Score Per Audit</th>
+              <th style="width: 7%" class="text-center">Risk Weight</th>
+              <th style="width: 10%" class="text-right">Weighted Score</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let item of broaderAreaScoringRows()">
+              <td>{{ item.broader_area_name || item.broader_area || '-' }}</td>
+              <td class="text-right">{{ item.qual_tot }}</td>
+              <td class="text-right">{{ item.quan_tot }}</td>
+              <td class="text-right">{{ item.total_qual_quan }}</td>
+              <td class="text-center">{{ item.acc_non_compliant }}</td>
+              <td class="text-center">{{ item.no_of_acc_checked }}</td>
+              <td class="text-right">{{ item.avg_quan_score }}</td>
+              <td class="text-right">{{ item.tot_avg_score }}</td>
+              <td class="text-center">{{ item.no_of_audit_conduct }}</td>
+              <td class="text-right">{{ item.avg_tot_score_per_audit }}</td>
+              <td class="text-center">{{ item.risk_weight }}</td>
+              <td class="text-right font-bold">{{ item.weighted_score }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
 
       <!-- Question Wise Scoring Report Table -->
       <table class="official-report-table question-wise-scoring-table"

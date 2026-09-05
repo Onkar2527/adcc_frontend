@@ -248,6 +248,12 @@ export class ReportsComponent implements OnInit {
       name: 'Questionwise Consolidate Summary',
       route: '/reports/questionwise-consolidate-summary',
       category: '3_advanced',
+    },
+    {
+      srNo: 51,
+      name: 'Closure Report',
+      route: '/reports/closure-report',
+      category: '3_advanced',
     }
   ];
 

@@ -360,6 +360,8 @@
 .report-account-table td {
   width: 33.333%;
   background: #f6f6f6;
+  word-break: normal !important;
+  vertical-align: middle !important;
 }
 
 .report-annexure-row>td {
@@ -810,5 +812,79 @@
     font-size: 0.75rem;
     font-weight: bold;
     border: 1px solid #dee2e6;
+  }
+}
+
+.official-report-table.closure-report-compact {
+  font-size: 0.72rem !important;
+  line-height: 1.25 !important;
+  width: 100% !important;
+  min-width: 1400px !important;
+
+  th, td {
+    padding: 0.25rem 0.35rem !important;
+    vertical-align: middle !important;
+    word-break: break-word;
+  }
+
+  th {
+    font-size: 0.68rem !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.1px;
+    padding: 0.35rem 0.25rem !important;
+    background-color: #f1f5f9 !important;
+    white-space: nowrap !important;
+    word-break: normal !important;
+  }
+
+  .report-group-row td {
+    padding: 0.25rem 0.35rem !important;
+    font-size: 0.78rem !important;
+  }
+
+  .report-author-info {
+    font-size: 0.65rem !important;
+    margin-top: 0.08rem;
+  }
+
+  .report-account-table {
+    width: 100% !important;
+    table-layout: fixed !important;
+    border-collapse: collapse !important;
+
+    td {
+      width: 33.333% !important;
+      font-size: 0.72rem !important;
+      padding: 0.3rem 0.45rem !important;
+      word-break: normal !important;
+      white-space: normal !important;
+      vertical-align: middle !important;
+      background-color: #f8fafc !important;
+    }
+  }
+}
+
+@media print {
+  .official-report-table.closure-report-compact {
+    min-width: auto !important;
+    width: 100% !important;
+    font-size: 0.62rem !important;
+
+    th {
+      font-size: 0.60rem !important;
+      padding: 0.2rem 0.15rem !important;
+      white-space: nowrap !important;
+      word-break: normal !important;
+    }
+
+    td {
+      padding: 0.18rem 0.2rem !important;
+      font-size: 0.62rem !important;
+    }
+
+    .report-account-table td {
+      font-size: 0.62rem !important;
+      padding: 0.2rem 0.3rem !important;
+    }
   }
 }

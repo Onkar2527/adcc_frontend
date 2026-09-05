@@ -138,6 +138,7 @@ export class ReportViewerComponent implements OnInit {
   reportMeta = signal<Record<string, any> | null>(null);
   exeReportData = signal<any>(null);
   assessmentGroups = signal<any[]>([]);
+  broaderAreaScoringRows = signal<any[]>([]);
   generatedAt = signal<string | null>(null);
   loading = signal(false);
   searched = signal(false);
@@ -517,6 +518,7 @@ export class ReportViewerComponent implements OnInit {
         this.reportMeta.set(res?.meta || null);
         this.exeReportData.set(res?.exeData || null);
         this.assessmentGroups.set(res?.assessmentGroups || []);
+        this.broaderAreaScoringRows.set(res?.broaderAreaScoringTable || []);
         this.generatedAt.set(res?.generatedAt || new Date().toISOString());
         this.loading.set(false);
       },
@@ -529,6 +531,7 @@ export class ReportViewerComponent implements OnInit {
         this.reportMeta.set(null);
         this.exeReportData.set(null);
         this.assessmentGroups.set([]);
+        this.broaderAreaScoringRows.set([]);
         this.error.set(err?.error?.message || 'Unable to generate report.');
         this.loading.set(false);
       },
@@ -750,6 +753,11 @@ export class ReportViewerComponent implements OnInit {
   isQuestionwiseConsolidateSummaryReport() {
     const slug = this.definition()?.slug;
     return slug === 'questionwise-consolidate-summary';
+  }
+
+  isClosureReport() {
+    const slug = this.definition()?.slug;
+    return slug === 'closure-report';
   }
 
   /** Escape text so it is safe to inject into innerHTML */
@@ -1001,10 +1009,25 @@ export class ReportViewerComponent implements OnInit {
   }
 
   reportAssessmentPeriod() {
+    if (this.isClosureReport()) {
+      const firstRow = this.rows()?.find((r) => r.branch_name || r.assessment_period || r.assesment_period_from);
+      if (firstRow?.assessment_period) return firstRow.assessment_period;
+      if (firstRow?.assesment_period_from && firstRow?.assesment_period_to) {
+        return `${this.formatDate(firstRow.assesment_period_from)} to ${this.formatDate(firstRow.assesment_period_to)}`;
+      }
+      const firstGroup = this.assessmentGroups()?.[0];
+      if (firstGroup?.assessment_period) return firstGroup.assessment_period;
+    }
     return this.reportHeader()?.['assessmentPeriod'] || '';
   }
 
   reportAuditUnit() {
+    if (this.isClosureReport()) {
+      const firstRow = this.rows()?.find((r) => r.branch_name);
+      if (firstRow?.branch_name) return firstRow.branch_name;
+      const firstGroup = this.assessmentGroups()?.[0];
+      if (firstGroup?.branch_name) return firstGroup.branch_name;
+    }
     return this.reportHeader()?.['auditUnit'] || '';
   }
 
@@ -1028,6 +1051,15 @@ export class ReportViewerComponent implements OnInit {
   }
 
   showInlineHeader(row: any, rowIndex: number) {
+    if (this.isClosureReport()) {
+      if (row.__report_group && (row.__group_level === 'branch' || row.__group_level === 'header')) {
+        const rowsBefore = this.rows().slice(0, rowIndex);
+        const lastGroup = [...rowsBefore].reverse().find((item) => item.__report_group);
+        return lastGroup === row;
+      }
+      return false;
+    }
+
     if (!row.__report_group || row.__group_level !== 'header') {
       return false;
     }
@@ -1473,5 +1505,9 @@ export class ReportViewerComponent implements OnInit {
     };
 
     return def;
+  }
+
+  trackByRow(index: number, item: any) {
+    return item.id || item.sr_no || item.__group_label || item.__unsampled_table_title || index;
   }
 }

@@ -685,10 +685,11 @@
                       </ng-container>
 
                       <div class="answer-checks">
-                        <label class="compliance-check" *ngIf="!isTextAnswer(question)">
+                        <label class="compliance-check">
                           <input
                             type="checkbox"
                             [(ngModel)]="question.is_compliance"
+                            (change)="onComplianceCheckboxChange(question)"
                             [disabled]="question.is_editable === false"
                           />
                           <span>Compliance required</span>
