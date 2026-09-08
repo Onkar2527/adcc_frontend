@@ -28,7 +28,9 @@
           (filter.key === 'startMonth' ||
             filter.key === 'endMonth' ||
             filter.key === 'startMonth2' ||
-            filter.key === 'endMonth2')
+            filter.key === 'endMonth2' ||
+            filter.key === 'period1_quarter' ||
+            filter.key === 'period2_quarter')
         " [class.field-half]="
           ((filter.key === 'reportAuditUnit' || filter.key === 'reportAuditAssesment') &&
             definition()?.slug !== 'risk-weightage-report' &&
@@ -700,8 +702,91 @@
         </tbody>
       </table>
 
+      <!-- Audit Committee Board Report - 1 (Trend Report & Summary) -->
+      <div *ngIf="isAuditCommitteeBoardReport1()" class="mb-4">
+        <div class="mb-3">
+          <h5 class="font-medium" style="font-weight: 600; margin-bottom: 8px; color: #1e293b;">Trend of Risk</h5>
+          <p class="mb-1" style="font-size: 0.95rem; color: #334155;">
+            A. Overall Trend: <strong>{{ (summary()?.['overallTrend'] || '-') | uppercase }}</strong>
+          </p>
+          <p class="mb-2" style="font-size: 0.95rem; color: #334155;">B. Audit Unit Wise</p>
+          <table class="official-report-table mb-3" style="width: auto; min-width: 360px;">
+            <thead>
+              <tr class="bg-light-gray" style="background-color: #f1f5f9;">
+                <th class="text-center" style="padding: 6px 16px; border: 1px solid #cbd5e1;">INCREASING</th>
+                <th class="text-center" style="padding: 6px 16px; border: 1px solid #cbd5e1;">DECREASING</th>
+                <th class="text-center" style="padding: 6px 16px; border: 1px solid #cbd5e1;">STABLE</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="text-center" style="padding: 6px 16px; border: 1px solid #cbd5e1; font-weight: 600;">
+                  {{ summary()?.['increasing'] || 0 }}
+                </td>
+                <td class="text-center" style="padding: 6px 16px; border: 1px solid #cbd5e1; font-weight: 600;">
+                  {{ summary()?.['decreasing'] || 0 }}
+                </td>
+                <td class="text-center" style="padding: 6px 16px; border: 1px solid #cbd5e1; font-weight: 600;">
+                  {{ summary()?.['stable'] || 0 }}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h5 class="font-medium mb-2" style="font-weight: 600; color: #1e293b;">Audit Unit Wise Trend</h5>
+        <table class="official-report-table audit-committee-report-table">
+          <thead>
+            <tr class="bg-light-gray" style="background-color: #f1f5f9;">
+              <th style="width: 5%" class="text-center" rowspan="2">Sr. No.</th>
+              <th style="width: 18%" rowspan="2">Audit Unit Details</th>
+              <th style="width: 8%" class="text-right" rowspan="2">Total Risk</th>
+              <th style="width: 20%" class="text-center" colspan="2">
+                Period 1 ({{ filters['period1_quarter'] ? (filters['period1_quarter'] + ' - ') : '' }}{{ filters['startMonth'] || '-' }} to {{ filters['endMonth'] || '-' }})
+              </th>
+              <th style="width: 20%" class="text-center" colspan="2">
+                Period 2 ({{ filters['period2_quarter'] ? (filters['period2_quarter'] + ' - ') : '' }}{{ filters['startMonth2'] || '-' }} to {{ filters['endMonth2'] || '-' }})
+              </th>
+              <th style="width: 8%" class="text-right" rowspan="2">Total Risk</th>
+              <th style="width: 12%" class="text-center" rowspan="2">Trend</th>
+              <th style="width: 10%" class="text-right" rowspan="2">Change in Risk Score</th>
+            </tr>
+            <tr class="bg-light-gray" style="background-color: #f1f5f9;">
+              <th class="text-right" style="width: 10%">% To All Branch Risk</th>
+              <th class="text-center" style="width: 10%">Risk Rating</th>
+              <th class="text-right" style="width: 10%">% To All Branch Risk</th>
+              <th class="text-center" style="width: 10%">Risk Rating</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let row of rows()">
+              <td class="text-center">{{ row.sr_no }}</td>
+              <td>{{ row.audit_unit_details }}</td>
+              <td class="text-right">{{ row.period1_total_risk }}</td>
+              <td class="text-right">{{ row.period1_percent }}%</td>
+              <td class="text-center">{{ row.period1_risk }}</td>
+              <td class="text-right">{{ row.period2_percent }}%</td>
+              <td class="text-center">{{ row.period2_risk }}</td>
+              <td class="text-right">{{ row.period2_total_risk }}</td>
+              <td class="text-center font-medium">{{ (row.trend_label || '-') | uppercase }}</td>
+              <td class="text-right">{{ row.change_in_risk_score }}</td>
+            </tr>
+          </tbody>
+          <tfoot>
+            <tr class="bg-light-gray font-medium" style="font-weight: 600; background-color: #f8fafc;">
+              <td colspan="2" class="text-center">Total</td>
+              <td class="text-right">{{ summary()?.['period1TotalRisk'] || '0.00' }}</td>
+              <td colspan="4"></td>
+              <td class="text-right">{{ summary()?.['period2TotalRisk'] || '0.00' }}</td>
+              <td class="text-center">{{ (summary()?.['overallTrend'] || '-') | uppercase }}</td>
+              <td class="text-right">{{ summary()?.['changeInRiskScore'] || '0.00' }}</td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+
       <table class="official-report-table"
-        *ngIf="!isExecutiveSummary() && !isInternalAssessmentReport() && !isQuestionWiseScoringReport() && !isAuditObservationCountReport() && !isQuestionwiseConsolidateSummaryReport()"
+        *ngIf="!isExecutiveSummary() && !isInternalAssessmentReport() && !isQuestionWiseScoringReport() && !isAuditObservationCountReport() && !isQuestionwiseConsolidateSummaryReport() && !isAuditCommitteeBoardReport1()"
         [class.risk-wise-report-table]="isRiskWiseReport()"
         [class.performance-risk-report-table]="isPerformanceRiskWeightageReport()"
         [class.closure-report-compact]="isClosureReport()">
