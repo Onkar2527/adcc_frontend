@@ -254,6 +254,12 @@ export class ReportsComponent implements OnInit {
       name: 'Closure Report',
       route: '/reports/closure-report',
       category: '3_advanced',
+    },
+    {
+      srNo: 52,
+      name: 'Risk Mitigation Report',
+      route: '/reports/risk-mitigation-report',
+      category: '3_advanced',
     }
   ];
 
