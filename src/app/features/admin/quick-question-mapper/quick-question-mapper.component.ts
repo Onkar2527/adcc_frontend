@@ -106,6 +106,8 @@ export class QuickQuestionMapperComponent implements OnInit {
 
   editingQuestionId = signal<number | null>(null);
   questionText = signal('');
+  mrQuestionText = signal('');
+  suggestionsText = signal('');
   questionTypeId = signal<number | null>(null);
   optionId = signal<number | null>(null);
   selectedAnnexureId = signal<number | null>(null);
@@ -503,6 +505,8 @@ export class QuickQuestionMapperComponent implements OnInit {
   clearQuestionForm() {
     this.editingQuestionId.set(null);
     this.questionText.set('');
+    this.mrQuestionText.set('');
+    this.suggestionsText.set('');
     this.questionTypeId.set(null);
     this.optionId.set(null);
     this.selectedAnnexureId.set(null);
@@ -532,6 +536,8 @@ export class QuickQuestionMapperComponent implements OnInit {
       next: (data: any) => {
         this.editingQuestionId.set(data.id);
         this.questionText.set(data.question ?? '');
+        this.mrQuestionText.set(data.mr_question ?? '');
+        this.suggestionsText.set(data.suggestions ?? '');
         this.questionTypeId.set(Number(data.question_type_id) || null);
         this.optionId.set(Number(data.option_id) || null);
         this.selectedAnnexureId.set(data.annexure_id != null ? Number(data.annexure_id) : null);
@@ -656,6 +662,8 @@ export class QuickQuestionMapperComponent implements OnInit {
       annexure_id: this.optionId() === 4 ? Number(this.selectedAnnexureId()) : 0,
       subset_multi_id: this.optionId() === 5 ? this.selectedSubsetIds().join(',') : '',
       question,
+      mr_question: this.mrQuestionText().trim() || undefined,
+      suggestions: this.suggestionsText().trim() || undefined,
       question_type_id: Number(this.questionTypeId()),
       option_id: Number(this.optionId()),
       applicable_id: Number(this.applicableId()),
@@ -742,6 +750,8 @@ export class QuickQuestionMapperComponent implements OnInit {
       'Set Type',
       'Header Name',
       'Question',
+      'MR Question',
+      'Suggestions',
       'Question Type',
       'Input Method',
       'Annexure Name',
@@ -755,6 +765,7 @@ export class QuickQuestionMapperComponent implements OnInit {
       'Show Instances',
       'Auditor Evidence Upload',
       'Compliance Evidence Upload',
+      'Status',
       'Risk Type',
       'Mapping Business Risk',
       'Mapping Control Risk'
@@ -768,6 +779,8 @@ export class QuickQuestionMapperComponent implements OnInit {
       'Main Set',
       'Cash Counter Security',
       'Is the daily cash balance verified by the Branch Manager at end of day?',
+      'Please confirm whether daily cash verification is done by Branch Manager.',
+      'Verify physical cash balance register and Branch Manager signatures.',
       'Qualitative',
       'Yes/No',
       '',
@@ -781,6 +794,7 @@ export class QuickQuestionMapperComponent implements OnInit {
       '0',
       'Yes',
       'Yes',
+      'Active',
       'Yes;No;Not Applicable',
       'LOW RISK;HIGH RISK;MEDIUM RISK',
       'LOW RISK;HIGH RISK;MEDIUM RISK'
@@ -794,6 +808,8 @@ export class QuickQuestionMapperComponent implements OnInit {
       'Main Set',
       'Vault Security',
       'Are vaults locked using dual control keys and codes recorded safely?',
+      'Please verify if dual control keys system is strictly adhered to for vault access.',
+      'Check key movement register and physical custodian logbook.',
       'Qualitative',
       'Yes/No',
       '',
@@ -807,6 +823,7 @@ export class QuickQuestionMapperComponent implements OnInit {
       '0',
       'Yes',
       'Yes',
+      'Active',
       'Yes;No',
       'LOW RISK;HIGH RISK',
       'LOW RISK;HIGH RISK'
@@ -1164,13 +1181,13 @@ export class QuickQuestionMapperComponent implements OnInit {
           const applicableTo = rowMap['applicable to'] || '';
           const appId = applicableMap[applicableTo.toLowerCase()] || 1; // Default Auditor
 
-          const broaderArea = rowMap['broader area'] || '';
+          const broaderArea = rowMap['broader area'] || rowMap['broader area of audit'] || rowMap['area of audit'] || '';
           const areaId = auditAreaMap[broaderArea.toLowerCase()] ?? 0;
 
-          const bRiskCat = rowMap['business risk category'] || '';
+          const bRiskCat = rowMap['business risk category'] || rowMap['business risk'] || '';
           const bRiskId = businessRiskMap[bRiskCat.toLowerCase()] ?? 0;
 
-          const cRiskCat = rowMap['control risk category'] || '';
+          const cRiskCat = rowMap['control risk category'] || rowMap['control risk'] || '';
           const cRiskId = controlRiskMap[cRiskCat.toLowerCase()] ?? 0;
 
           const keyAspect = rowMap['key aspect'] || '';
@@ -1182,11 +1199,14 @@ export class QuickQuestionMapperComponent implements OnInit {
           const rawInstances = rowMap['show instances'] || '';
           const instances = Number(rawInstances) || 0;
 
-          const auditorUpload = rowMap['auditor evidence upload'] || '';
-          const audEv = auditorUpload.toLowerCase() === 'yes' || auditorUpload === '1' ? 1 : 0;
+          const auditorUpload = rowMap['auditor evidence upload'] || rowMap['auditor upload'] || '';
+          const audEv = auditorUpload.toLowerCase() === 'yes' || auditorUpload === '1' || auditorUpload.toLowerCase() === 'true' ? 1 : 0;
 
-          const complianceUpload = rowMap['compliance evidence upload'] || '';
-          const compEv = complianceUpload.toLowerCase() === 'yes' || complianceUpload === '1' ? 1 : 0;
+          const complianceUpload = rowMap['compliance evidence upload'] || rowMap['compliance upload'] || '';
+          const compEv = complianceUpload.toLowerCase() === 'yes' || complianceUpload === '1' || complianceUpload.toLowerCase() === 'true' ? 1 : 0;
+
+          const rawStatus = rowMap['status'] || rowMap['is active'] || rowMap['active status'] || '';
+          const isActiveStatus = rawStatus ? (rawStatus.toLowerCase() === 'no' || rawStatus === '0' || rawStatus.toLowerCase() === 'inactive' || rawStatus.toLowerCase() === 'false' ? 0 : 1) : 1;
 
           // 4. Resolve if Question Already Exists to Prevent Duplication (Supports single character edits)
           const rawQuestionIdStr = rowMap['question id'] || '';
@@ -1236,12 +1256,17 @@ export class QuickQuestionMapperComponent implements OnInit {
             parametersJson = JSON.stringify(paramsList);
           }
 
+          const rawMrQuestion = rowMap['mr question'] || rowMap['management response question'] || rowMap['mr_question'] || '';
+          const rawSuggestions = rowMap['suggestions'] || rowMap['suggestion'] || rowMap['comments'] || '';
+
           const questionPayload: any = {
             set_id: setId!,
             header_id: headerId!,
             annexure_id: annId,
             subset_multi_id: subIds,
             question: rawQuestion,
+            mr_question: rawMrQuestion || undefined,
+            suggestions: rawSuggestions || undefined,
             question_type_id: qTypeId,
             option_id: optId,
             applicable_id: appId,
@@ -1253,7 +1278,7 @@ export class QuickQuestionMapperComponent implements OnInit {
             audit_ev_upload: audEv,
             compliance_ev_upload: compEv,
             risk_category_id: bRiskId,
-            is_active: 1
+            is_active: isActiveStatus
           };
 
           if (matchedQuestion) {

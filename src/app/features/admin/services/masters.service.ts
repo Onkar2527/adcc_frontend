@@ -513,6 +513,8 @@ export interface CreateQuestionDto {
   audit_ev_upload: number;
   compliance_ev_upload: number;
   risk_category_id: number;
+  mr_question?: string;
+  suggestions?: string;
   is_active?: number;
   admin_id?: number;
 }

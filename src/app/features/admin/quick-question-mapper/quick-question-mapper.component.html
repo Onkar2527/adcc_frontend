@@ -100,7 +100,23 @@
               <app-textarea-field
                 label="Question Description *"
                 [field]="questionText"
-                [rows]="4"
+                [rows]="3"
+                class="w-full">
+              </app-textarea-field>
+
+              <!-- MR Question Text Area -->
+              <app-textarea-field
+                label="Management Response Question (MR Question)"
+                [field]="mrQuestionText"
+                [rows]="2"
+                class="w-full">
+              </app-textarea-field>
+
+              <!-- Suggestions Text Area -->
+              <app-textarea-field
+                label="Audit Suggestions / Comments"
+                [field]="suggestionsText"
+                [rows]="2"
                 class="w-full">
               </app-textarea-field>
 
