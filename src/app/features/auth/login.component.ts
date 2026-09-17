@@ -230,13 +230,13 @@ export class LoginComponent {
     this.selectedRole = type;
 
     if (type === 'auditor') {
-      this.username = '132';
+      this.username = '5555';
       this.password = 'Emp@2025';
     } else if (type === 'reviewer') {
-      this.username = '139';
+      this.username = '4444';
       this.password = 'Emp@2025';
     } else if (type === 'manager') {
-      this.username = '140';
+      this.username = '79';
       this.password = 'Emp@2025';
     } else if (type === 'subhead') {
       this.username = '150';

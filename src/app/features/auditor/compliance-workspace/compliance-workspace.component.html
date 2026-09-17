@@ -738,7 +738,7 @@
                     </td>
 
                     <td>
-                      <div *ngIf="responseRequired(row) && (isComplianceEvidenceUploadRequired(answer) || evidenceList(row, 'compliance_evidence').length)" class="supporting-docs-box supporting-docs-box--table">
+                      <div *ngIf="responseRequired(row) && (isComplianceEvidenceUploadRequired(row) || isComplianceEvidenceUploadRequired(answer) || evidenceList(row, 'compliance_evidence').length)" class="supporting-docs-box supporting-docs-box--table">
                         <span class="supporting-docs-label">Supporting Documents</span>
                         <span class="evidence-chip" *ngFor="
                             let evidence of evidenceList(row, 'compliance_evidence');
@@ -758,12 +758,12 @@
                           accept=".jpg,.jpeg,.png,.pdf,image/jpeg,image/png,application/pdf" style="display: none"
                           (change)="uploadEvidence('annexure', row, $event)" />
 
-                        <button *ngIf="isComplianceEvidenceUploadRequired(answer)" pButton type="button" icon="pi pi-upload" severity="secondary"
+                        <button *ngIf="isComplianceEvidenceUploadRequired(row) || isComplianceEvidenceUploadRequired(answer)" pButton type="button" icon="pi pi-upload" severity="secondary"
                           title="Upload compliance supporting document"
                           [loading]="uploadingEvidenceKey() === evidenceKey('annexure', row.id)"
                           (click)="rowEvidenceInput.click()"></button>
                       </div>
-                      <span *ngIf="!responseRequired(row) || (!isComplianceEvidenceUploadRequired(answer) && !evidenceList(row, 'compliance_evidence').length)">-</span>
+                      <span *ngIf="!responseRequired(row) || (!isComplianceEvidenceUploadRequired(row) && !isComplianceEvidenceUploadRequired(answer) && !evidenceList(row, 'compliance_evidence').length)">-</span>
                     </td>
 
                     <td>

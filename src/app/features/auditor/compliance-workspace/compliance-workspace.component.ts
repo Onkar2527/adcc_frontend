@@ -604,7 +604,12 @@ export class ComplianceWorkspaceComponent implements OnInit {
     isComplianceEvidenceUploadRequired(
         answer: any,
     ) {
-        return Number(answer?.compliance_evidence_upload || 0) === 1;
+        return (
+            Number(answer?.compliance_evidence_upload || 0) === 1 ||
+            Number(answer?.audit_compulsary_ev_upload || 0) === 1 ||
+            [1, 2].includes(Number(answer?.compliance_compulsary_ev_upload || 0)) ||
+            Number(answer?.compliance_ev_upload || 0) === 1
+        );
     }
 
     isPartiallyPass(
