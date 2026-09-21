@@ -24,6 +24,9 @@ export const AUDITOR_ROUTES: Routes = [
     { path: 'internal-audit/unit/:auditUnitId', component: AuditUnitDashboardComponent },
     { path: 'internal-audit/:assessmentId/category/:categoryId', component: CategoryAssessmentComponent },
     { path: 'internal-audit/:assessmentId', component: AssessmentWorkspaceComponent },
-    {path:'internal-audit/executive-summary/:assessmentId', component: ExecutiveSummaryComponent },
-
+    { path: 'internal-audit/executive-summary/:assessmentId', component: ExecutiveSummaryComponent },
+    { path: 'internal-audit/non-agri-statement/:assessmentId', loadComponent: () => import('./non-agri-statement/non-agri-statement.component').then(m => m.NonAgriStatementComponent) },
+    { path: 'internal-audit/non-agri-statement', loadComponent: () => import('./non-agri-statement/non-agri-statement.component').then(m => m.NonAgriStatementComponent) },
+    { path: 'non-agri-statement/:assessmentId', loadComponent: () => import('./non-agri-statement/non-agri-statement.component').then(m => m.NonAgriStatementComponent) },
+    { path: 'non-agri-statement', loadComponent: () => import('./non-agri-statement/non-agri-statement.component').then(m => m.NonAgriStatementComponent) },
 ];

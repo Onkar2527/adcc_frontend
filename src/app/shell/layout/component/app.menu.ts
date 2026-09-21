@@ -440,6 +440,12 @@ export class AppMenu implements OnInit, OnDestroy {
         icon: 'pi pi-fw pi-file-edit',
         routerLink: ['/auditor/internal-audit/executive-summary', assessmentId],
       });
+
+      dynamicItems.push({
+        label: 'बिगर शेती सहकारी संस्था माहिती पत्रक (ADCC Non-Agri Statement)',
+        icon: 'pi pi-fw pi-file-excel',
+        routerLink: ['/auditor/internal-audit/non-agri-statement', assessmentId],
+      });
     }
 
     if (!isComplianceActive) {
@@ -450,7 +456,7 @@ export class AppMenu implements OnInit, OnDestroy {
         const categoryItems = (menu.categories || [])
           .filter(
             (category: any) =>
-              !['executive summary', 'assessment info'].includes(normalized(category?.name)),
+              !['executive summary', 'assessment info', 'बिगर शेती सहकारी संस्था माहिती पत्रक', 'non-agri statement'].includes(normalized(category?.name)),
           )
           .map((category: any) => {
             const isCarryForward = category?.carry_forward || Number(category?.id) === 0;
@@ -500,7 +506,7 @@ export class AppMenu implements OnInit, OnDestroy {
 
         if (
           !categoryItems.length ||
-          ['executive summary', 'assessment info'].includes(normalized(menu?.name))
+          ['executive summary', 'assessment info', 'बिगर शेती सहकारी संस्था माहिती पत्रक', 'non-agri statement'].includes(normalized(menu?.name))
         ) {
           continue;
         }
@@ -567,7 +573,23 @@ export class AppMenu implements OnInit, OnDestroy {
 
     match = url.match(/\/auditor\/internal-audit\/executive-summary\/(\d+)(?:\?|$)/);
 
-    return match?.[1] ? Number(match[1]) : 0;
+    if (match?.[1]) {
+      return Number(match[1]);
+    }
+
+    match = url.match(/\/auditor\/internal-audit\/non-agri-statement\/(\d+)(?:\?|$)/);
+
+    if (match?.[1]) {
+      return Number(match[1]);
+    }
+
+    match = url.match(/\/auditor\/non-agri-statement\/(\d+)(?:\?|$)/);
+
+    if (match?.[1]) {
+      return Number(match[1]);
+    }
+
+    return 0;
   }
 
   private shouldShowCurrentAssessmentMenu(currentAssessmentId: number) {

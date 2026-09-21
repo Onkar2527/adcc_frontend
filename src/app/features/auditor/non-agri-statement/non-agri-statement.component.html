@@ -1,0 +1,383 @@
+<!-- Toast Notifications -->
+<p-toast position="top-right"></p-toast>
+
+<!-- Action Toolbar -->
+<div class="action-toolbar no-print">
+  <div class="toolbar-title">
+    <i class="pi pi-file-edit"></i>
+    <span>{{ t.toolbarTitle }}</span>
+    <span *ngIf="assessmentId" class="context-badge">Assessment #{{ assessmentId }}</span>
+  </div>
+  <div class="toolbar-actions">
+    <button *ngIf="assessmentId" pButton type="button" [label]="t.backBtn" icon="pi pi-arrow-left"
+      class="p-button-outlined p-button-secondary p-button-sm" (click)="goBack()"></button>
+    <button pButton type="button" [label]="t.sampleDataBtn" icon="pi pi-sparkles"
+      class="p-button-outlined p-button-sm" (click)="fillSampleData()"></button>
+    <button pButton type="button" [label]="t.resetBtn" icon="pi pi-refresh"
+      class="p-button-outlined p-button-secondary p-button-sm" (click)="resetForm()"></button>
+    <button pButton type="button" [label]="t.saveBtn" icon="pi pi-save" [loading]="saving"
+      class="p-button-success p-button-sm" (click)="saveStatement()"></button>
+    <button pButton type="button" [label]="t.printBtn" icon="pi pi-print" class="p-button-primary p-button-sm"
+      (click)="print()"></button>
+  </div>
+</div>
+
+<!-- Main Printable Document Container -->
+<div class="document-wrapper">
+  <div class="document-page" id="statement-print-area">
+
+    <!-- Header Section -->
+    <header class="doc-header">
+      <h1 class="bank-title">{{ t.bankName }}</h1>
+      <p class="bank-sub">{{ t.headOffice }}</p>
+
+      <div class="statement-title-row">
+        <span class="statement-main-title">
+          {{ t.titlePrefix }}
+          <input type="text" class="inline-header-input" [(ngModel)]="statementDate" placeholder="३१.३.२०२५" />
+          {{ t.titleMiddle }}
+          <span class="highlight-text">{{ t.statementType }}</span>
+          {{ t.titleSuffix }}
+        </span>
+      </div>
+
+      <div class="amount-unit">
+        {{ t.unitText }}
+      </div>
+    </header>
+
+    <!-- Main Table Grid -->
+    <div class="table-container">
+      <table class="adcc-form-table">
+        <colgroup>
+          <col class="col-sr" />
+          <col class="col-sub-name" />
+          <col class="col-share-val" />
+          <col class="col-share-val" />
+          <col class="col-share-cnt" />
+          <col class="col-share-val" />
+          <col class="col-stat-cnt" />
+          <col class="col-stat-amt" />
+          <col class="col-stat-cnt" />
+          <col class="col-stat-amt" />
+        </colgroup>
+
+        <tbody>
+          <!-- TOP HEADER ROW: अ.नं and स्टेटमेंट प्रकार -->
+          <tr class="top-header-row">
+            <th class="cell-center font-bold col-border">{{ t.srNo }}</th>
+            <th colspan="5" class="cell-center font-bold col-border">{{ t.statementTypeHeader }}</th>
+            <th colspan="4" class="no-border-top-right"></th>
+          </tr>
+
+          <!-- ROW 1: संस्था तपासणी पात्र -->
+          <tr class="inspection-row">
+            <td class="cell-center font-bold col-border">{{ getSrNo(1) }}</td>
+            <td colspan="5" class="cell-inspection col-border">
+              <span class="insp-label">{{ t.inspectionLabel }}</span>
+              <input type="number" class="cell-input inline-num" [(ngModel)]="inspection.patra" />
+              <span class="insp-label">{{ t.inspectionOfWhich }}</span>
+              <input type="number" class="cell-input inline-num" [(ngModel)]="inspection.purna" />
+              <span class="insp-label font-bold">{{ t.inspectionCompleted }}</span>
+              <input type="number" class="cell-input inline-num" [(ngModel)]="inspection.apoorna" />
+              <span class="insp-label font-bold">{{ t.inspectionPending }}</span>
+            </td>
+            <th colspan="4" class="no-border-top-right"></th>
+          </tr>
+
+          <!-- ROW 2: Bank Shares Header Row (Level 1) -->
+          <tr class="shares-header-row-1">
+            <td rowspan="5" class="cell-center font-bold align-middle col-border">{{ getSrNo(2) }}</td>
+            <td rowspan="2" class="font-bold align-middle col-border">{{ t.bankShares }}</td>
+            <td rowspan="2" class="cell-center font-bold align-middle text-nowrap col-border">{{ t.sharesRequired }}</td>
+            <td rowspan="2" class="cell-center font-bold align-middle text-nowrap col-border">{{ t.sharesSubscribed }}</td>
+            <td colspan="2" class="cell-center font-bold col-border">{{ t.sharesDeficit }}</td>
+            <th colspan="4" class="no-border-top-right"></th>
+          </tr>
+
+          <!-- ROW 2 SUB-HEADER: अपूर्ण (संख्या, रु.) -->
+          <tr class="shares-header-row-2">
+            <td class="cell-center font-bold col-border">{{ t.sharesCount }}</td>
+            <td class="cell-center font-bold col-border">{{ t.sharesAmount }}</td>
+            <th colspan="4" class="no-border-top-right"></th>
+          </tr>
+
+          <!-- 2.a Sanstha Shares -->
+          <tr class="shares-data-row">
+            <td class="pl-3 col-border">{{ t.sharesSanstha }}</td>
+            <td class="col-border"><input type="number" class="cell-input" [(ngModel)]="shares.sanstha.ghyayache"
+                placeholder="-" /></td>
+            <td class="col-border"><input type="number" class="cell-input" [(ngModel)]="shares.sanstha.ghetlele"
+                placeholder="-" /></td>
+            <td class="col-border"><input type="number" class="cell-input" [(ngModel)]="shares.sanstha.apoornaSankhya"
+                placeholder="-" /></td>
+            <td class="col-border"><input type="number" class="cell-input" [(ngModel)]="shares.sanstha.apoornaRs"
+                placeholder="-" /></td>
+            <td colspan="4" class="no-border-top-right"></td>
+          </tr>
+
+          <!-- 2.b Sakhar Karkhane Shares -->
+          <tr class="shares-data-row">
+            <td class="pl-3 col-border">{{ t.sharesSakhar }}</td>
+            <td class="col-border"><input type="number" class="cell-input" [(ngModel)]="shares.sakhar.ghyayache"
+                placeholder="-" /></td>
+            <td class="col-border"><input type="number" class="cell-input" [(ngModel)]="shares.sakhar.ghetlele"
+                placeholder="-" /></td>
+            <td class="col-border"><input type="number" class="cell-input" [(ngModel)]="shares.sakhar.apoornaSankhya"
+                placeholder="-" /></td>
+            <td class="col-border"><input type="number" class="cell-input" [(ngModel)]="shares.sakhar.apoornaRs"
+                placeholder="-" /></td>
+            <td colspan="4" class="no-border-top-right"></td>
+          </tr>
+
+          <!-- 2 Total Shares (एकूण) in line with येणेबाकी स्टेटमेंट रक्कम and थकबाकी -->
+          <tr class="shares-total-row subtotal-row">
+            <td class="font-bold text-center col-border">{{ t.sharesTotal }}</td>
+            <td class="cell-calc-val col-border">{{ displayVal(sharesTotalGhyayache) }}</td>
+            <td class="cell-calc-val col-border">{{ displayVal(sharesTotalGhetlele) }}</td>
+            <td class="cell-calc-val col-border">{{ displayVal(sharesTotalApoornaSankhya) }}</td>
+            <td class="cell-calc-val col-border">{{ displayVal(sharesTotalApoornaRs) }}</td>
+            <th colspan="2" class="cell-center font-bold header-group col-border">{{ t.yeanebakiHeader }}</th>
+            <th colspan="2" class="cell-center font-bold header-group col-border">{{ t.thakbakiHeader }}</th>
+          </tr>
+
+          <!-- ROW 3: रि.फंड in line with सभा./संस्था and रक्कम लाख -->
+          <tr>
+            <td class="cell-center font-bold col-border">{{ getSrNo(3) }}</td>
+            <td class="font-bold col-border">{{ t.reFund }}</td>
+            <td class="col-border"><input type="number" class="cell-input" [(ngModel)]="reFund.ghyayache"
+                placeholder="-" /></td>
+            <td class="col-border"><input type="number" class="cell-input" [(ngModel)]="reFund.ghetlele"
+                placeholder="-" /></td>
+            <td class="col-border"><input type="number" class="cell-input" [(ngModel)]="reFund.apoornaSankhya"
+                placeholder="-" /></td>
+            <td class="col-border"><input type="number" class="cell-input" [(ngModel)]="reFund.apoornaRs"
+                placeholder="-" /></td>
+            <th class="cell-center font-bold sub-col-header col-border">{{ t.membersHeader }}</th>
+            <th class="cell-center font-bold sub-col-header col-border">{{ t.amountLakhHeader }}</th>
+            <th class="cell-center font-bold sub-col-header col-border">{{ t.membersHeader }}</th>
+            <th class="cell-center font-bold sub-col-header col-border">{{ t.amountLakhHeader }}</th>
+          </tr>
+
+          <!-- ROW 4: पगारदार सहकारी पत संस्था -->
+          <tr>
+            <td class="cell-center font-bold col-border">{{ getSrNo(4) }}</td>
+            <td colspan="5" class="font-bold col-border">{{ t.pagardar }}</td>
+            <td class="col-border"><input type="number" class="cell-input" [(ngModel)]="pagardar.yeanebakiMembers"
+                placeholder="-" /></td>
+            <td class="col-border"><input type="number" class="cell-input" [(ngModel)]="pagardar.yeanebakiAmount"
+                step="0.01" placeholder="-" /></td>
+            <td class="col-border"><input type="number" class="cell-input" [(ngModel)]="pagardar.thakbakiMembers"
+                placeholder="-" /></td>
+            <td class="col-border"><input type="number" class="cell-input" [(ngModel)]="pagardar.thakbakiAmount"
+                step="0.01" placeholder="-" /></td>
+          </tr>
+
+          <!-- ROW 5: नागरी सहकारी पत संस्था -->
+          <tr>
+            <td class="cell-center font-bold col-border">{{ getSrNo(5) }}</td>
+            <td colspan="5" class="font-bold col-border">{{ t.nagari }}</td>
+            <td class="col-border"><input type="number" class="cell-input" [(ngModel)]="nagari.yeanebakiMembers"
+                placeholder="-" /></td>
+            <td class="col-border"><input type="number" class="cell-input" [(ngModel)]="nagari.yeanebakiAmount"
+                step="0.01" placeholder="-" /></td>
+            <td class="col-border"><input type="number" class="cell-input" [(ngModel)]="nagari.thakbakiMembers"
+                placeholder="-" /></td>
+            <td class="col-border"><input type="number" class="cell-input" [(ngModel)]="nagari.thakbakiAmount"
+                step="0.01" placeholder="-" /></td>
+          </tr>
+
+          <!-- ROW 6: जिनिंग प्रेसिंग सुतगिरणी मुद्रणालय -->
+          <tr>
+            <td rowspan="4" class="cell-center font-bold align-top pt-2 col-border">{{ getSrNo(6) }}</td>
+            <td colspan="5" class="font-bold col-border">{{ t.ginningHeader }}</td>
+            <td class="col-border"></td>
+            <td class="col-border"></td>
+            <td class="col-border"></td>
+            <td class="col-border"></td>
+          </tr>
+          <tr>
+            <td colspan="5" class="pl-4 col-border">{{ t.ginningClean }}</td>
+            <td class="col-border"><input type="number" class="cell-input" [(ngModel)]="ginningClean.yeanebakiMembers"
+                placeholder="-" /></td>
+            <td class="col-border"><input type="number" class="cell-input" [(ngModel)]="ginningClean.yeanebakiAmount"
+                step="0.01" placeholder="-" /></td>
+            <td class="col-border"><input type="number" class="cell-input" [(ngModel)]="ginningClean.thakbakiMembers"
+                placeholder="-" /></td>
+            <td class="col-border"><input type="number" class="cell-input" [(ngModel)]="ginningClean.thakbakiAmount"
+                step="0.01" placeholder="-" /></td>
+          </tr>
+          <tr>
+            <td colspan="5" class="pl-4 col-border">{{ t.ginningNajarGahan }}</td>
+            <td class="col-border"><input type="number" class="cell-input"
+                [(ngModel)]="ginningNajarGahan.yeanebakiMembers" placeholder="-" /></td>
+            <td class="col-border"><input type="number" class="cell-input"
+                [(ngModel)]="ginningNajarGahan.yeanebakiAmount" step="0.01" placeholder="-" /></td>
+            <td class="col-border"><input type="number" class="cell-input"
+                [(ngModel)]="ginningNajarGahan.thakbakiMembers" placeholder="-" /></td>
+            <td class="col-border"><input type="number" class="cell-input"
+                [(ngModel)]="ginningNajarGahan.thakbakiAmount" step="0.01" placeholder="-" /></td>
+          </tr>
+          <tr class="subtotal-row">
+            <td colspan="5" class="font-bold text-right pr-6 col-border">{{ t.subTotalGinning }}</td>
+            <td class="cell-calc-val col-border">{{ displayVal(ginningTotal.yeanebakiMembers) }}</td>
+            <td class="cell-calc-val col-border">{{ displayVal(ginningTotal.yeanebakiAmount) }}</td>
+            <td class="cell-calc-val col-border">{{ displayVal(ginningTotal.thakbakiMembers) }}</td>
+            <td class="cell-calc-val col-border">{{ displayVal(ginningTotal.thakbakiAmount) }}</td>
+          </tr>
+
+          <!-- ROW 7: खरेदी विक्री संघ- नजरगहाण खाते/ तेले -->
+          <tr>
+            <td class="cell-center font-bold col-border">{{ getSrNo(7) }}</td>
+            <td colspan="5" class="font-bold col-border">{{ t.kharediVikri }}</td>
+            <td class="col-border"><input type="number" class="cell-input" [(ngModel)]="kharediVikri.yeanebakiMembers"
+                placeholder="-" /></td>
+            <td class="col-border"><input type="number" class="cell-input" [(ngModel)]="kharediVikri.yeanebakiAmount"
+                step="0.01" placeholder="-" /></td>
+            <td class="col-border"><input type="number" class="cell-input" [(ngModel)]="kharediVikri.thakbakiMembers"
+                placeholder="-" /></td>
+            <td class="col-border"><input type="number" class="cell-input" [(ngModel)]="kharediVikri.thakbakiAmount"
+                step="0.01" placeholder="-" /></td>
+          </tr>
+
+          <!-- ROW 8: दूध उत्पादक सहकारी संस्था - क्लिन कॅश क्रेडीट -->
+          <tr>
+            <td class="cell-center font-bold col-border">{{ getSrNo(8) }}</td>
+            <td colspan="5" class="font-bold col-border">{{ t.dudhUtpadak }}</td>
+            <td class="col-border"><input type="number" class="cell-input" [(ngModel)]="dudhUtpadak.yeanebakiMembers"
+                placeholder="-" /></td>
+            <td class="col-border"><input type="number" class="cell-input" [(ngModel)]="dudhUtpadak.yeanebakiAmount"
+                step="0.01" placeholder="-" /></td>
+            <td class="col-border"><input type="number" class="cell-input" [(ngModel)]="dudhUtpadak.thakbakiMembers"
+                placeholder="-" /></td>
+            <td class="col-border"><input type="number" class="cell-input" [(ngModel)]="dudhUtpadak.thakbakiAmount"
+                step="0.01" placeholder="-" /></td>
+          </tr>
+
+          <!-- ROW 9: मध्यम मुदत बिगर शेती संस्था -->
+          <tr>
+            <td class="cell-center font-bold col-border">{{ getSrNo(9) }}</td>
+            <td colspan="5" class="font-bold col-border">{{ t.madhyamMudatNonAgri }}</td>
+            <td class="col-border"><input type="number" class="cell-input"
+                [(ngModel)]="madhyamMudatNonAgri.yeanebakiMembers" placeholder="-" /></td>
+            <td class="col-border"><input type="number" class="cell-input"
+                [(ngModel)]="madhyamMudatNonAgri.yeanebakiAmount" step="0.01" placeholder="-" /></td>
+            <td class="col-border"><input type="number" class="cell-input"
+                [(ngModel)]="madhyamMudatNonAgri.thakbakiMembers" placeholder="-" /></td>
+            <td class="col-border"><input type="number" class="cell-input"
+                [(ngModel)]="madhyamMudatNonAgri.thakbakiAmount" step="0.01" placeholder="-" /></td>
+          </tr>
+
+          <!-- ROW 10: नॉन फॉर्म सेक्टर -->
+          <tr>
+            <td rowspan="3" class="cell-center font-bold align-top pt-2 col-border">{{ getSrNo(10) }}</td>
+            <td colspan="5" class="pl-1 col-border"><span class="font-bold">{{ t.nonFarmHeader }}</span>{{ t.nonFarmMediumTerm }}</td>
+            <td class="col-border"><input type="number" class="cell-input"
+                [(ngModel)]="nonFarmMediumTerm.yeanebakiMembers" placeholder="-" /></td>
+            <td class="col-border"><input type="number" class="cell-input"
+                [(ngModel)]="nonFarmMediumTerm.yeanebakiAmount" step="0.01" placeholder="-" /></td>
+            <td class="col-border"><input type="number" class="cell-input"
+                [(ngModel)]="nonFarmMediumTerm.thakbakiMembers" placeholder="-" /></td>
+            <td class="col-border"><input type="number" class="cell-input"
+                [(ngModel)]="nonFarmMediumTerm.thakbakiAmount" step="0.01" placeholder="-" /></td>
+          </tr>
+          <tr>
+            <td colspan="5" class="text-center font-medium col-border">{{ t.nonFarmWorkingCapital }}</td>
+            <td class="col-border"><input type="number" class="cell-input"
+                [(ngModel)]="nonFarmWorkingCapital.yeanebakiMembers" placeholder="-" /></td>
+            <td class="col-border"><input type="number" class="cell-input"
+                [(ngModel)]="nonFarmWorkingCapital.yeanebakiAmount" step="0.01" placeholder="-" /></td>
+            <td class="col-border"><input type="number" class="cell-input"
+                [(ngModel)]="nonFarmWorkingCapital.thakbakiMembers" placeholder="-" /></td>
+            <td class="col-border"><input type="number" class="cell-input"
+                [(ngModel)]="nonFarmWorkingCapital.thakbakiAmount" step="0.01" placeholder="-" /></td>
+          </tr>
+          <tr class="subtotal-row">
+            <td colspan="5" class="font-bold text-right pr-6 col-border">{{ t.subTotalNonFarm }}</td>
+            <td class="cell-calc-val col-border">{{ displayVal(nonFarmTotal.yeanebakiMembers) }}</td>
+            <td class="cell-calc-val col-border">{{ displayVal(nonFarmTotal.yeanebakiAmount) }}</td>
+            <td class="cell-calc-val col-border">{{ displayVal(nonFarmTotal.thakbakiMembers) }}</td>
+            <td class="cell-calc-val col-border">{{ displayVal(nonFarmTotal.thakbakiAmount) }}</td>
+          </tr>
+
+          <!-- ROW 11: शैक्षणिक कर्ज - -->
+          <tr>
+            <td class="cell-center font-bold col-border">{{ getSrNo(11) }}</td>
+            <td colspan="5" class="font-bold col-border">{{ t.shaikshanikKarj }}</td>
+            <td class="col-border"><input type="number" class="cell-input"
+                [(ngModel)]="shaikshanikKarj.yeanebakiMembers" placeholder="-" /></td>
+            <td class="col-border"><input type="number" class="cell-input" [(ngModel)]="shaikshanikKarj.yeanebakiAmount"
+                step="0.01" placeholder="-" /></td>
+            <td class="col-border"><input type="number" class="cell-input" [(ngModel)]="shaikshanikKarj.thakbakiMembers"
+                placeholder="-" /></td>
+            <td class="col-border"><input type="number" class="cell-input" [(ngModel)]="shaikshanikKarj.thakbakiAmount"
+                step="0.01" placeholder="-" /></td>
+          </tr>
+
+          <!-- ROW 12: ग्रामोद्योग संघ कंपोझीट नाबार्ड (१३ संघ) -->
+          <tr>
+            <td class="cell-center font-bold col-border">{{ getSrNo(12) }}</td>
+            <td colspan="5" class="font-bold col-border">{{ t.gramodyog }}</td>
+            <td class="col-border"><input type="number" class="cell-input" [(ngModel)]="gramodyog.yeanebakiMembers"
+                placeholder="-" /></td>
+            <td class="col-border"><input type="number" class="cell-input" [(ngModel)]="gramodyog.yeanebakiAmount"
+                step="0.01" placeholder="-" /></td>
+            <td class="col-border"><input type="number" class="cell-input" [(ngModel)]="gramodyog.thakbakiMembers"
+                placeholder="-" /></td>
+            <td class="col-border"><input type="number" class="cell-input" [(ngModel)]="gramodyog.thakbakiAmount"
+                step="0.01" placeholder="-" /></td>
+          </tr>
+
+          <!-- ROW 13: सह. साखर कारखाने - (10 Sub-items) -->
+          <tr>
+            <td rowspan="12" class="cell-center font-bold align-top pt-2 col-border">{{ getSrNo(13) }}</td>
+            <td colspan="5" class="font-bold col-border">{{ t.sugarFactoriesHeader }}</td>
+            <td class="col-border"></td>
+            <td class="col-border"></td>
+            <td class="col-border"></td>
+            <td class="col-border"></td>
+          </tr>
+          <tr *ngFor="let item of sugarFactories; let i = index">
+            <td colspan="5" class="pl-4 col-border">{{ getSugarLabel(i) }}</td>
+            <td class="col-border"><input type="number" class="cell-input" [(ngModel)]="item.yeanebakiMembers"
+                placeholder="-" /></td>
+            <td class="col-border"><input type="number" class="cell-input" [(ngModel)]="item.yeanebakiAmount"
+                step="0.01" placeholder="-" /></td>
+            <td class="col-border"><input type="number" class="cell-input" [(ngModel)]="item.thakbakiMembers"
+                placeholder="-" /></td>
+            <td class="col-border"><input type="number" class="cell-input" [(ngModel)]="item.thakbakiAmount" step="0.01"
+                placeholder="-" /></td>
+          </tr>
+          <tr class="subtotal-row">
+            <td colspan="5" class="font-bold text-right pr-6 col-border">{{ t.subTotalSugar }}</td>
+            <td class="cell-calc-val col-border">{{ displayVal(sugarFactoriesTotal.yeanebakiMembers) }}</td>
+            <td class="cell-calc-val col-border">{{ displayVal(sugarFactoriesTotal.yeanebakiAmount) }}</td>
+            <td class="cell-calc-val col-border">{{ displayVal(sugarFactoriesTotal.thakbakiMembers) }}</td>
+            <td class="cell-calc-val col-border">{{ displayVal(sugarFactoriesTotal.thakbakiAmount) }}</td>
+          </tr>
+
+          <!-- GRAND TOTAL ROW: बिगर शेती कर्ज पुरवठा सर्व एकूण -->
+          <tr class="grand-total-row">
+            <td colspan="6" class="cell-center font-bold grand-total-label col-border">
+              {{ t.grandTotal }}
+            </td>
+            <td class="cell-calc-val font-bold col-border">{{ displayVal(grandTotal.yeanebakiMembers) }}</td>
+            <td class="cell-calc-val font-bold col-border">{{ displayVal(grandTotal.yeanebakiAmount) }}</td>
+            <td class="cell-calc-val font-bold col-border">{{ displayVal(grandTotal.thakbakiMembers) }}</td>
+            <td class="cell-calc-val font-bold col-border">{{ displayVal(grandTotal.thakbakiAmount) }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Signatory / Footer Section -->
+    <footer class="doc-footer">
+      <div class="signature-box">
+        <div class="signature-space"></div>
+        <p class="designation-title">{{ t.designation1 }}</p>
+        <p class="designation-sub">{{ t.designation2 }}</p>
+      </div>
+    </footer>
+
+  </div>
+</div>
