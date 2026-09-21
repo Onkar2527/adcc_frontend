@@ -1352,7 +1352,7 @@
                       </div>
                     </div>
 
-                    <div *ngIf="question.annexure_rows?.length" class="annexure-saved-panel">
+                    <div *ngIf="question.annexure_rows?.length && (!isVerticalFormAnnexure(question) || isOtherDiscrepanciesSelected(question))" class="annexure-saved-panel">
                       <div class="annexure-saved-title">
                         <span>Saved Annexure Rows</span>
                         <small>{{ question.annexure_rows?.length || 0 }} record(s)</small>
@@ -2416,7 +2416,7 @@
                           </div>
 
                           <div
-                            *ngIf="subsetQuestion.annexure_rows?.length"
+                            *ngIf="subsetQuestion.annexure_rows?.length && (!isVerticalFormAnnexure(subsetQuestion) || isOtherDiscrepanciesSelected(subsetQuestion))"
                             class="annexure-scroll-frame annexure-table-frame compact-annexure-table"
                           >
                             <table
