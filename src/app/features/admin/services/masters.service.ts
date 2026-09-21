@@ -722,6 +722,7 @@ export interface CreateAnnexureDto {
   risk_category_id: number;
   business_risk: number;
   control_risk: number;
+  layout_type?: string;
   is_active?: number;
   admin_id?: number;
 }

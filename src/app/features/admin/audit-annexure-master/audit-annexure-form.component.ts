@@ -53,6 +53,20 @@ import {
           ></app-text-field>
         </div>
 
+        <!-- Layout Type (Grid vs Vertical Form) -->
+
+        <div>
+          <app-select-field
+            label="Annexure Layout Type"
+            [field]="layoutType"
+            [options]="layoutOptions"
+            optionLabel="label"
+            optionValue="value"
+            [required]="true"
+            [virtualScroll]="false"
+          ></app-select-field>
+        </div>
+
         <!-- Risk Definition + Risk Category -->
 
         <div class="grid">
@@ -169,6 +183,8 @@ export class AuditAnnexureFormComponent {
     null,
   );
 
+  layoutType = signal<string>('grid');
+
   isActive = signal(true);
 
   saving = signal(false);
@@ -176,6 +192,17 @@ export class AuditAnnexureFormComponent {
   riskCategories = signal<
     { label: string; value: number }[]
   >([]);
+
+  layoutOptions = [
+    {
+      label: 'Table Grid (Horizontal Multi-Row List)',
+      value: 'grid',
+    },
+    {
+      label: 'Vertical Form (तपशिल & शेरा 2-Column Key-Value)',
+      value: 'form',
+    },
+  ];
 
   riskDefinitionOptions = [
     {
@@ -210,6 +237,7 @@ export class AuditAnnexureFormComponent {
 
     if (data) {
       this.name.set(data.name ?? '');
+      this.layoutType.set(data.layout_type || 'grid');
 
       this.riskDefinationId.set(
         data.risk_defination_id !== null &&
@@ -329,6 +357,8 @@ export class AuditAnnexureFormComponent {
       business_risk,
 
       control_risk,
+
+      layout_type: this.layoutType() || 'grid',
 
       is_active,
     };

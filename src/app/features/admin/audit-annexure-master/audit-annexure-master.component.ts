@@ -135,6 +135,12 @@ export class AuditAnnexureMasterComponent
         },
 
         {
+            field: 'layout_type_label',
+            header: 'Layout Type',
+            width: '180px',
+        },
+
+        {
             field: 'risk_definition_name',
             header: 'Risk Definition',
             width: '180px',
@@ -209,7 +215,12 @@ export class AuditAnnexureMasterComponent
                             ? res.rows
                             : [];
 
-                this.annexures.set(rows);
+                const mappedRows = rows.map((r: any) => ({
+                    ...r,
+                    layout_type_label: r.layout_type === 'form' ? 'Vertical Form (तपशिल/शेरा)' : 'Table Grid',
+                }));
+
+                this.annexures.set(mappedRows);
 
                 this.loading.set(false);
             },

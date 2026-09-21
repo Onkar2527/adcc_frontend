@@ -693,7 +693,7 @@
     font-size: .75rem;
 }
 
-.completion-section-title > span {
+.completion-section-title>span {
     min-width: 2rem;
     padding: .25rem .5rem;
     border-radius: .35rem;
@@ -703,7 +703,7 @@
     text-align: center;
 }
 
-.completion-section-title.compliance-title > span {
+.completion-section-title.compliance-title>span {
     background: var(--green-50);
     color: var(--green-700);
 }
@@ -1186,8 +1186,8 @@
 }
 
 :host ::ng-deep .evidence-chip .p-button,
-:host ::ng-deep .inline-evidence > .p-button,
-:host ::ng-deep .evidence-cell > .p-button {
+:host ::ng-deep .inline-evidence>.p-button,
+:host ::ng-deep .evidence-cell>.p-button {
     width: 2rem;
     height: 2rem;
     padding: 0;
@@ -2749,4 +2749,77 @@ textarea.answer-control1 {
     font-size: 0.75rem;
 }
 
+/* ─── VERTICAL KEY-VALUE FORM ANNEXURE (तपशिल व शेरा) ─── */
+.annexure-vertical-form-container {
+    margin-top: .6rem;
+    padding: .85rem;
+    border: 1px solid var(--surface-300);
+    border-radius: .5rem;
+    background: #ffffff;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
 
+    .annexure-table-frame {
+        width: 100%;
+        overflow-x: auto;
+        border: 1px solid #e2e8f0;
+        border-radius: 0.5rem;
+        background: #ffffff;
+    }
+
+    .annexure-vertical-table {
+        width: 100%;
+        min-width: 100%;
+        border-collapse: collapse;
+        background: #ffffff;
+    }
+
+    .annexure-vertical-table th {
+        background: #f1f5f9;
+        color: #1e293b;
+        font-weight: 700;
+        font-size: 0.85rem;
+        padding: 0.6rem 0.75rem;
+        border-bottom: 2px solid #cbd5e1;
+        text-align: left;
+        white-space: nowrap;
+    }
+
+    .annexure-vertical-table td {
+        padding: 0.5rem 0.75rem;
+        border-bottom: 1px solid #e2e8f0;
+        vertical-align: middle;
+    }
+
+    .annexure-vertical-table tr:hover td {
+        background: #f8fafc;
+    }
+
+    .annexure-vertical-table .particular-cell {
+        color: #334155;
+        font-weight: 600;
+        font-size: 0.88rem;
+        min-width: 180px;
+    }
+
+    .annexure-vertical-table .value-cell {
+        min-width: 130px;
+    }
+
+    .annexure-vertical-table .form-table-control {
+        width: 100%;
+        min-height: 2.3rem;
+        padding: 0.4rem 0.6rem;
+        font-size: 0.85rem;
+        border: 1px solid #cbd5e1;
+        border-radius: 0.35rem;
+        transition: all 0.2s;
+        background: #ffffff;
+    }
+
+    .annexure-vertical-table .form-table-control:focus {
+        border-color: var(--primary-color, #2563eb);
+        box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
+        outline: none;
+    }
+
+}

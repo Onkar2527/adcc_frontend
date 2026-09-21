@@ -908,194 +908,448 @@
                   </div>
 
                   <div *ngIf="buildIsAnnexureSelected(question)" class="annexure-preview">
-                    <div class="annexure-entry-panel">
-                      <div class="annexure-scroll-frame">
-                        <div
-                          class="annexure-grid annexure-entry-grid"
-                          [style.grid-template-columns]="annexureEntryGridTemplate(question)"
-                          [style.min-width]="annexureEntryMinWidth(question)"
-                        >
-                          <!-- DYNAMIC COLUMNS -->
 
+                    <!-- 1. OTHER DISCREPANCIES LAYOUT (4 Fields: Discrepancies, Business Risk, Control Risk, Risk Type) -->
+                    <div *ngIf="isOtherDiscrepanciesSelected(question)">
+                      <div class="annexure-entry-panel">
+                        <div class="annexure-scroll-frame">
                           <div
-                            class="annexure-field"
-                            *ngFor="let column of question.annexure.columns; let ci = index; trackBy: trackByColumn"
+                            class="annexure-grid annexure-entry-grid"
+                            style="grid-template-columns: minmax(280px, 2fr) minmax(140px, 1fr) minmax(140px, 1fr) minmax(160px, 1fr);"
                           >
-                            <label class="answer-label">
-                              {{ column.name }}
-                            </label>
-
-                            <!-- TEXTAREA -->
-
-                            <textarea
-                              *ngIf="column.column_type_id == 2; else annexureInput"
-                              class="answer-control"
-                              rows="1"
-                              [(ngModel)]="question.annexure_draft.values[ci]"
-                              [disabled]="question.is_editable === false"
-                            ></textarea>
-
-                            <ng-template #annexureInput>
-                              <!-- SELECT -->
-
-                              <select
-                                *ngIf="column.column_type_id == 3; else annexureText"
+                            <!-- DISCREPANCIES -->
+                            <div class="annexure-field">
+                              <label class="answer-label">Discrepancies</label>
+                              <textarea
                                 class="answer-control"
-                                [(ngModel)]="question.annexure_draft.values[ci]"
+                                rows="1"
+                                [(ngModel)]="question.annexure_draft.values[0]"
+                                [disabled]="question.is_editable === false"
+                                placeholder="Enter Discrepancy details"
+                              ></textarea>
+                            </div>
+
+                            <!-- BUSINESS RISK -->
+                            <div class="annexure-field">
+                              <label class="answer-label">Business Risk</label>
+                              <select
+                                class="answer-control"
+                                [(ngModel)]="question.annexure_draft.business_risk"
                                 [disabled]="question.is_editable === false"
                               >
                                 <option value="">Please select</option>
-
-                                <option
-                                  *ngFor="let option of annexureColumnOptions(column); trackBy: trackByOption"
-                                  [value]="option.option_label"
-                                >
-                                  {{ option.option_label }}
+                                <option *ngFor="let risk of annexureRiskOptions().business_risks; trackBy: trackBySet" [value]="risk.id">
+                                  {{ risk.label }}
                                 </option>
                               </select>
+                            </div>
 
-                              <!-- INPUT -->
-
-                              <ng-template #annexureText>
-                                <input
-                                  type="text"
-                                  class="answer-control"
-                                  [(ngModel)]="question.annexure_draft.values[ci]"
-                                  [disabled]="question.is_editable === false"
-                                />
-                              </ng-template>
-                            </ng-template>
-                          </div>
-
-                          <!-- BUSINESS RISK -->
-
-                          <div class="annexure-field">
-                            <label class="answer-label"> Business Risk </label>
-
-                            <select
-                              class="answer-control"
-                              [(ngModel)]="question.annexure_draft.business_risk"
-                              [disabled]="
-                                !isCustomAnnexureRisk(question) || question.is_editable === false
-                              "
-                            >
-                              <option value="">Please select</option>
-
-                              <option
-                                *ngFor="let risk of annexureRiskOptions().business_risks; trackBy: trackBySet"
-                                [value]="risk.id"
+                            <!-- CONTROL RISK -->
+                            <div class="annexure-field">
+                              <label class="answer-label">Control Risk</label>
+                              <select
+                                class="answer-control"
+                                [(ngModel)]="question.annexure_draft.control_risk"
+                                [disabled]="question.is_editable === false"
                               >
-                                {{ risk.label }}
-                              </option>
-                            </select>
-                          </div>
+                                <option value="">Please select</option>
+                                <option *ngFor="let risk of annexureRiskOptions().control_risks; trackBy: trackBySet" [value]="risk.id">
+                                  {{ risk.label }}
+                                </option>
+                              </select>
+                            </div>
 
-                          <!-- CONTROL RISK -->
-
-                          <div class="annexure-field">
-                            <label class="answer-label"> Control Risk </label>
-
-                            <select
-                              class="answer-control"
-                              [(ngModel)]="question.annexure_draft.control_risk"
-                              [disabled]="
-                                !isCustomAnnexureRisk(question) || question.is_editable === false
-                              "
-                            >
-                              <option value="">Please select</option>
-
-                              <option
-                                *ngFor="let risk of annexureRiskOptions().control_risks; trackBy: trackBySet"
-                                [value]="risk.id"
+                            <!-- RISK TYPE -->
+                            <div class="annexure-field">
+                              <label class="answer-label">Risk Type</label>
+                              <select
+                                class="answer-control"
+                                [(ngModel)]="question.annexure_draft.risk_cat_id"
+                                [disabled]="question.is_editable === false"
                               >
-                                {{ risk.label }}
-                              </option>
-                            </select>
+                                <option value="">Please select</option>
+                                <option *ngFor="let risk of annexureRiskOptions().risk_categories; trackBy: trackBySet" [value]="risk.id">
+                                  {{ risk.risk_category }}
+                                </option>
+                              </select>
+                            </div>
                           </div>
+                        </div>
 
-                          <!-- RISK TYPE -->
+                        <!-- ACTIONS FOR OTHER DISCREPANCIES -->
+                        <div class="annexure-actions-row">
+                          <input
+                            type="file"
+                            #otherAnnexCsvInput
+                            class="hidden"
+                            accept=".csv,text/csv"
+                            (change)="uploadAnnexureCsv(question, $event)"
+                          />
+                          <button
+                            pButton
+                            type="button"
+                            icon="pi pi-download"
+                            label="Sample CSV"
+                            severity="secondary"
+                            [outlined]="true"
+                            [disabled]="question.is_editable === false"
+                            (click)="downloadAnnexureSample(question)"
+                          ></button>
 
-                          <div class="annexure-field">
-                            <label class="answer-label"> Risk Type </label>
+                          <button
+                            pButton
+                            type="button"
+                            icon="pi pi-upload"
+                            label="Upload CSV"
+                            severity="secondary"
+                            [outlined]="true"
+                            [disabled]="question.is_editable === false"
+                            (click)="otherAnnexCsvInput.click()"
+                          ></button>
 
-                            <select
-                              class="answer-control"
-                              [(ngModel)]="question.annexure_draft.risk_cat_id"
-                              [disabled]="
-                                !isCustomAnnexureRisk(question) || question.is_editable === false
-                              "
-                            >
-                              <option value="">Please select</option>
+                          <button
+                            pButton
+                            type="button"
+                            icon="pi pi-times"
+                            label="Clear"
+                            severity="secondary"
+                            [disabled]="isSavingAnnexureQuestion(question) || question.is_editable === false"
+                            (click)="clearAnnexureDraft(question)"
+                          ></button>
 
-                              <option
-                                *ngFor="let risk of annexureRiskOptions().risk_categories; trackBy: trackBySet"
-                                [value]="risk.id"
-                              >
-                                {{ risk.risk_category }}
-                              </option>
-                            </select>
-                          </div>
+                          <button
+                            pButton
+                            type="button"
+                            icon="pi pi-plus"
+                            [label]="question.annexure_draft.id ? 'Update Row' : 'Add Row'"
+                            [loading]="isSavingAnnexureQuestion(question)"
+                            [disabled]="isSavingAnnexureQuestion(question) || question.is_editable === false"
+                            (click)="saveAnnexureRow(question)"
+                          ></button>
                         </div>
                       </div>
                     </div>
 
-                    <div class="annexure-actions">
-                      <input
-                        #annexCsvInput
-                        type="file"
-                        accept=".csv,text/csv"
-                        style="display: none"
-                        (change)="uploadAnnexureCsv(question, $event)"
-                      />
+                    <!-- 2. VERTICAL FORM LAYOUT (तपशिल & शेरा) -->
+                    <div *ngIf="!isOtherDiscrepanciesSelected(question) && isVerticalFormAnnexure(question)" class="annexure-vertical-form-container">
+                      <div class="flex justify-content-between align-items-center mb-2 pb-2 border-bottom-1 border-200">
+                        <div class="font-semibold text-primary text-sm flex align-items-center gap-2">
+                          <i class="pi pi-list"></i>
+                          <span>{{ question.annexure?.name || 'तपशिल व शेरा माहिती पत्रक' }}</span>
+                        </div>
+                        <span class="text-xs text-500 font-medium">Vertical Form Format</span>
+                      </div>
 
-                      <button
-                        pButton
-                        type="button"
-                        icon="pi pi-download"
-                        label="Sample CSV"
-                        severity="secondary"
-                        [disabled]="question.is_editable === false"
-                        (click)="downloadAnnexureSample(question)"
-                      ></button>
+                      <div class="annexure-table-frame">
+                        <table class="annexure-vertical-table">
+                          <thead>
+                            <tr>
+                              <th style="width: 50px; text-align: center;">अ.क्र.</th>
+                              <th [style.width]="getFormColumns(question).length > 2 ? '28%' : '35%'">तपशिल (Particulars)</th>
+                              <th *ngFor="let col of getFormColumns(question); trackBy: trackByFormCol">
+                                {{ col.label || col.name }}
+                              </th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <tr *ngFor="let column of question.annexure.columns; let ci = index; trackBy: trackByColumn">
+                              <td style="text-align: center; font-weight: 700; color: #64748b; font-size: 0.85rem;">{{ ci + 1 }}</td>
+                              <td class="particular-cell">
+                                {{ column.name }}
+                              </td>
+                              <td *ngFor="let col of getFormColumns(question); let colIdx = index; trackBy: trackByFormCol" class="value-cell">
+                                <!-- SELECT DROPDOWN -->
+                                <select
+                                  *ngIf="col.type === 'select' || (getFormColumns(question).length === 1 && column.column_type_id == 3); else notSelect"
+                                  class="answer-control form-table-control"
+                                  [ngModel]="getFormCellValue(question, ci, col.key || colIdx, colIdx)"
+                                  (ngModelChange)="setFormCellValue(question, ci, col.key || colIdx, colIdx, $event)"
+                                  [disabled]="question.is_editable === false"
+                                >
+                                  <option value="">Please select</option>
+                                  <ng-container *ngIf="col.options; else defaultColumnOptions">
+                                    <option *ngFor="let opt of col.options" [value]="opt.value !== undefined ? opt.value : opt">
+                                      {{ opt.label !== undefined ? opt.label : opt }}
+                                    </option>
+                                  </ng-container>
+                                  <ng-template #defaultColumnOptions>
+                                    <option *ngFor="let option of annexureColumnOptions(column); trackBy: trackByOption" [value]="option.option_label">
+                                      {{ option.option_label }}
+                                    </option>
+                                  </ng-template>
+                                </select>
 
-                      <button
-                        pButton
-                        type="button"
-                        icon="pi pi-upload"
-                        label="Upload CSV"
-                        severity="secondary"
-                        [loading]="isUploadingAnnexureQuestion(question)"
-                        [disabled]="
-                          isSavingAnnexureQuestion(question) || question.is_editable === false
-                        "
-                        (click)="annexCsvInput.click()"
-                      ></button>
+                                <ng-template #notSelect>
+                                  <!-- TEXTAREA -->
+                                  <textarea
+                                    *ngIf="col.type === 'textarea' || (getFormColumns(question).length === 1 && column.column_type_id == 2); else notTextArea"
+                                    class="answer-control form-table-control"
+                                    rows="2"
+                                    [ngModel]="getFormCellValue(question, ci, col.key || colIdx, colIdx)"
+                                    (ngModelChange)="setFormCellValue(question, ci, col.key || colIdx, colIdx, $event)"
+                                    [disabled]="question.is_editable === false"
+                                    placeholder="Enter {{ col.label || column.name }}"
+                                  ></textarea>
 
-                      <button
-                        pButton
-                        type="button"
-                        icon="pi pi-times"
-                        label="Clear"
-                        severity="secondary"
-                        [disabled]="
-                          isSavingAnnexureQuestion(question) || question.is_editable === false
-                        "
-                        (click)="clearAnnexureDraft(question)"
-                      ></button>
+                                  <ng-template #notTextArea>
+                                    <!-- INPUT (TEXT / NUMBER / DATE) -->
+                                    <input
+                                      [type]="col.type || 'text'"
+                                      class="answer-control form-table-control"
+                                      [ngModel]="getFormCellValue(question, ci, col.key || colIdx, colIdx)"
+                                      (ngModelChange)="setFormCellValue(question, ci, col.key || colIdx, colIdx, $event)"
+                                      [disabled]="question.is_editable === false"
+                                      placeholder="Enter {{ col.label || column.name }}"
+                                    />
+                                  </ng-template>
+                                </ng-template>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
 
-                      <button
-                        pButton
-                        type="button"
-                        icon="pi pi-save"
-                        [label]="question.annexure_draft.id ? 'Update Row' : 'Add Row'"
-                        [loading]="isSavingAnnexureQuestion(question)"
-                        [disabled]="
-                          isSavingAnnexureQuestion(question) ||
-                          isUploadingAnnexureQuestion(question) ||
-                          question.is_editable === false
-                        "
-                        (click)="saveAnnexureRow(question)"
-                      ></button>
+                      <!-- RISK & ACTIONS FOR VERTICAL FORM -->
+                      <div class="flex flex-wrap justify-content-between align-items-center gap-2 mt-3 pt-2 border-top-1 border-200">
+                        <div class="flex gap-2 align-items-center" *ngIf="question.is_compliance">
+                          <div>
+                            <label class="text-xs font-semibold text-600 block mb-1">Business Risk</label>
+                            <select class="answer-control text-xs" [(ngModel)]="question.annexure_draft.business_risk" [disabled]="question.is_editable === false">
+                              <option value="">Select</option>
+                              <option *ngFor="let r of annexureRiskOptions().business_risks" [value]="r.id">{{ r.label }}</option>
+                            </select>
+                          </div>
+                          <div>
+                            <label class="text-xs font-semibold text-600 block mb-1">Control Risk</label>
+                            <select class="answer-control text-xs" [(ngModel)]="question.annexure_draft.control_risk" [disabled]="question.is_editable === false">
+                              <option value="">Select</option>
+                              <option *ngFor="let r of annexureRiskOptions().control_risks" [value]="r.id">{{ r.label }}</option>
+                            </select>
+                          </div>
+                          <div>
+                            <label class="text-xs font-semibold text-600 block mb-1">Risk Type</label>
+                            <select class="answer-control text-xs" [(ngModel)]="question.annexure_draft.risk_cat_id" [disabled]="question.is_editable === false">
+                              <option value="">Select</option>
+                              <option *ngFor="let r of annexureRiskOptions().risk_categories" [value]="r.id">{{ r.risk_category }}</option>
+                            </select>
+                          </div>
+                        </div>
+
+                        <div class="flex gap-2 ml-auto">
+                          <button
+                            pButton
+                            type="button"
+                            icon="pi pi-times"
+                            label="Clear"
+                            severity="secondary"
+                            [disabled]="isSavingAnnexureQuestion(question) || question.is_editable === false"
+                            (click)="clearAnnexureDraft(question)"
+                          ></button>
+
+                          <button
+                            pButton
+                            type="button"
+                            icon="pi pi-save"
+                            [label]="question.annexure_draft.id || question.annexure_rows?.length ? 'Update Form' : 'Save Form'"
+                            [loading]="isSavingAnnexureQuestion(question)"
+                            [disabled]="isSavingAnnexureQuestion(question) || question.is_editable === false"
+                            (click)="saveAnnexureRow(question)"
+                          ></button>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- 3. STANDARD HORIZONTAL GRID LAYOUT -->
+                    <div *ngIf="!isOtherDiscrepanciesSelected(question) && !isVerticalFormAnnexure(question)">
+                      <div class="annexure-entry-panel">
+                        <div class="annexure-scroll-frame">
+                          <div
+                            class="annexure-grid annexure-entry-grid"
+                            [style.grid-template-columns]="annexureEntryGridTemplate(question)"
+                            [style.min-width]="annexureEntryMinWidth(question)"
+                          >
+                            <!-- DYNAMIC COLUMNS -->
+
+                            <div
+                              class="annexure-field"
+                              *ngFor="let column of question.annexure.columns; let ci = index; trackBy: trackByColumn"
+                            >
+                              <label class="answer-label">
+                                {{ column.name }}
+                              </label>
+
+                              <!-- TEXTAREA -->
+
+                              <textarea
+                                *ngIf="column.column_type_id == 2; else annexureInput"
+                                class="answer-control"
+                                rows="1"
+                                [(ngModel)]="question.annexure_draft.values[ci]"
+                                [disabled]="question.is_editable === false"
+                              ></textarea>
+
+                              <ng-template #annexureInput>
+                                <!-- SELECT -->
+
+                                <select
+                                  *ngIf="column.column_type_id == 3; else annexureText"
+                                  class="answer-control"
+                                  [(ngModel)]="question.annexure_draft.values[ci]"
+                                  [disabled]="question.is_editable === false"
+                                >
+                                  <option value="">Please select</option>
+
+                                  <option
+                                    *ngFor="let option of annexureColumnOptions(column); trackBy: trackByOption"
+                                    [value]="option.option_label"
+                                  >
+                                    {{ option.option_label }}
+                                  </option>
+                                </select>
+
+                                <!-- INPUT -->
+
+                                <ng-template #annexureText>
+                                  <input
+                                    type="text"
+                                    class="answer-control"
+                                    [(ngModel)]="question.annexure_draft.values[ci]"
+                                    [disabled]="question.is_editable === false"
+                                  />
+                                </ng-template>
+                              </ng-template>
+                            </div>
+
+                            <!-- BUSINESS RISK -->
+
+                            <div class="annexure-field">
+                              <label class="answer-label"> Business Risk </label>
+
+                              <select
+                                class="answer-control"
+                                [(ngModel)]="question.annexure_draft.business_risk"
+                                [disabled]="
+                                  !isCustomAnnexureRisk(question) || question.is_editable === false
+                                "
+                              >
+                                <option value="">Please select</option>
+
+                                <option
+                                  *ngFor="let risk of annexureRiskOptions().business_risks; trackBy: trackBySet"
+                                  [value]="risk.id"
+                                >
+                                  {{ risk.label }}
+                                </option>
+                              </select>
+                            </div>
+
+                            <!-- CONTROL RISK -->
+
+                            <div class="annexure-field">
+                              <label class="answer-label"> Control Risk </label>
+
+                              <select
+                                class="answer-control"
+                                [(ngModel)]="question.annexure_draft.control_risk"
+                                [disabled]="
+                                  !isCustomAnnexureRisk(question) || question.is_editable === false
+                                "
+                              >
+                                <option value="">Please select</option>
+
+                                <option
+                                  *ngFor="let risk of annexureRiskOptions().control_risks; trackBy: trackBySet"
+                                  [value]="risk.id"
+                                >
+                                  {{ risk.label }}
+                                </option>
+                              </select>
+                            </div>
+
+                            <!-- RISK TYPE -->
+
+                            <div class="annexure-field">
+                              <label class="answer-label"> Risk Type </label>
+
+                              <select
+                                class="answer-control"
+                                [(ngModel)]="question.annexure_draft.risk_cat_id"
+                                [disabled]="
+                                  !isCustomAnnexureRisk(question) || question.is_editable === false
+                                "
+                              >
+                                <option value="">Please select</option>
+
+                                <option
+                                  *ngFor="let risk of annexureRiskOptions().risk_categories; trackBy: trackBySet"
+                                  [value]="risk.id"
+                                >
+                                  {{ risk.risk_category }}
+                                </option>
+                              </select>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div class="annexure-actions">
+                        <input
+                          #annexCsvInput
+                          type="file"
+                          accept=".csv,text/csv"
+                          style="display: none"
+                          (change)="uploadAnnexureCsv(question, $event)"
+                        />
+
+                        <button
+                          pButton
+                          type="button"
+                          icon="pi pi-download"
+                          label="Sample CSV"
+                          severity="secondary"
+                          [disabled]="question.is_editable === false"
+                          (click)="downloadAnnexureSample(question)"
+                        ></button>
+
+                        <button
+                          pButton
+                          type="button"
+                          icon="pi pi-upload"
+                          label="Upload CSV"
+                          severity="secondary"
+                          [loading]="isUploadingAnnexureQuestion(question)"
+                          [disabled]="
+                            isSavingAnnexureQuestion(question) || question.is_editable === false
+                          "
+                          (click)="annexCsvInput.click()"
+                        ></button>
+
+                        <button
+                          pButton
+                          type="button"
+                          icon="pi pi-times"
+                          label="Clear"
+                          severity="secondary"
+                          [disabled]="
+                            isSavingAnnexureQuestion(question) || question.is_editable === false
+                          "
+                          (click)="clearAnnexureDraft(question)"
+                        ></button>
+
+                        <button
+                          pButton
+                          type="button"
+                          icon="pi pi-save"
+                          [label]="question.annexure_draft.id ? 'Update Row' : 'Add Row'"
+                          [loading]="isSavingAnnexureQuestion(question)"
+                          [disabled]="
+                            isSavingAnnexureQuestion(question) ||
+                            isUploadingAnnexureQuestion(question) ||
+                            question.is_editable === false
+                          "
+                          (click)="saveAnnexureRow(question)"
+                        ></button>
+                      </div>
                     </div>
 
                     <div *ngIf="question.annexure_rows?.length" class="annexure-saved-panel">
@@ -1786,177 +2040,379 @@
                           *ngIf="subsetQuestion.annexure?.columns?.length"
                           class="annexure-editor"
                         >
-                          <div class="annexure-grid">
-                            <div
-                              class="annexure-field"
-                              *ngFor="let column of subsetQuestion.annexure.columns; let ci = index; trackBy: trackByColumn"
-                            >
-                              <label class="answer-label">
-                                {{ column.name }}
-                              </label>
+                          <!-- 1. SUBSET OTHER DISCREPANCIES LAYOUT -->
+                          <div *ngIf="isOtherDiscrepanciesSelected(subsetQuestion)">
+                            <div class="annexure-entry-panel">
+                              <div class="annexure-scroll-frame">
+                                <div
+                                  class="annexure-grid annexure-entry-grid"
+                                  style="grid-template-columns: minmax(280px, 2fr) minmax(140px, 1fr) minmax(140px, 1fr) minmax(160px, 1fr);"
+                                >
+                                  <div class="annexure-field">
+                                    <label class="answer-label">Discrepancies</label>
+                                    <textarea
+                                      class="answer-control"
+                                      rows="1"
+                                      [(ngModel)]="subsetQuestion.annexure_draft.values[0]"
+                                      [disabled]="subsetQuestion.is_editable === false"
+                                      placeholder="Enter Discrepancy details"
+                                    ></textarea>
+                                  </div>
 
-                              <textarea
-                                *ngIf="column.column_type_id == 2; else subsetAnnexureInput"
-                                class="answer-control"
-                                rows="1"
-                                [(ngModel)]="subsetQuestion.annexure_draft.values[ci]"
-                                [disabled]="subsetQuestion.is_editable === false"
-                              ></textarea>
+                                  <div class="annexure-field">
+                                    <label class="answer-label">Business Risk</label>
+                                    <select
+                                      class="answer-control"
+                                      [(ngModel)]="subsetQuestion.annexure_draft.business_risk"
+                                      [disabled]="subsetQuestion.is_editable === false"
+                                    >
+                                      <option value="">Please select</option>
+                                      <option *ngFor="let risk of annexureRiskOptions().business_risks; trackBy: trackBySet" [value]="risk.id">
+                                        {{ risk.label }}
+                                      </option>
+                                    </select>
+                                  </div>
 
-                              <ng-template #subsetAnnexureInput>
-                                <select
-                                  *ngIf="column.column_type_id == 3; else subsetAnnexureText"
+                                  <div class="annexure-field">
+                                    <label class="answer-label">Control Risk</label>
+                                    <select
+                                      class="answer-control"
+                                      [(ngModel)]="subsetQuestion.annexure_draft.control_risk"
+                                      [disabled]="subsetQuestion.is_editable === false"
+                                    >
+                                      <option value="">Please select</option>
+                                      <option *ngFor="let risk of annexureRiskOptions().control_risks; trackBy: trackBySet" [value]="risk.id">
+                                        {{ risk.label }}
+                                      </option>
+                                    </select>
+                                  </div>
+
+                                  <div class="annexure-field">
+                                    <label class="answer-label">Risk Type</label>
+                                    <select
+                                      class="answer-control"
+                                      [(ngModel)]="subsetQuestion.annexure_draft.risk_cat_id"
+                                      [disabled]="subsetQuestion.is_editable === false"
+                                    >
+                                      <option value="">Please select</option>
+                                      <option *ngFor="let risk of annexureRiskOptions().risk_categories; trackBy: trackBySet" [value]="risk.id">
+                                        {{ risk.risk_category }}
+                                      </option>
+                                    </select>
+                                  </div>
+                                </div>
+                              </div>
+
+                              <div class="annexure-actions-row">
+                                <input
+                                  type="file"
+                                  #subsetOtherAnnexCsvInput
+                                  class="hidden"
+                                  accept=".csv,text/csv"
+                                  (change)="uploadAnnexureCsv(subsetQuestion, $event)"
+                                />
+                                <button pButton type="button" icon="pi pi-download" label="Sample CSV" severity="secondary" [outlined]="true" [disabled]="subsetQuestion.is_editable === false" (click)="downloadAnnexureSample(subsetQuestion)"></button>
+                                <button pButton type="button" icon="pi pi-upload" label="Upload CSV" severity="secondary" [outlined]="true" [disabled]="subsetQuestion.is_editable === false" (click)="subsetOtherAnnexCsvInput.click()"></button>
+                                <button pButton type="button" icon="pi pi-times" label="Clear" severity="secondary" [disabled]="isSavingAnnexureQuestion(subsetQuestion) || subsetQuestion.is_editable === false" (click)="clearAnnexureDraft(subsetQuestion)"></button>
+                                <button pButton type="button" icon="pi pi-plus" [label]="subsetQuestion.annexure_draft.id ? 'Update Row' : 'Add Row'" [loading]="isSavingAnnexureQuestion(subsetQuestion)" [disabled]="isSavingAnnexureQuestion(subsetQuestion) || subsetQuestion.is_editable === false" (click)="saveAnnexureRow(subsetQuestion)"></button>
+                              </div>
+                            </div>
+                          </div>
+
+                          <!-- 2. SUBSET VERTICAL FORM LAYOUT -->
+                          <div *ngIf="!isOtherDiscrepanciesSelected(subsetQuestion) && isVerticalFormAnnexure(subsetQuestion)" class="annexure-vertical-form-container">
+                            <div class="annexure-table-frame">
+                              <table class="annexure-vertical-table">
+                                <thead>
+                                  <tr>
+                                    <th style="width: 50px; text-align: center;">अ.क्र.</th>
+                                    <th [style.width]="getFormColumns(subsetQuestion).length > 2 ? '28%' : '35%'">तपशिल (Particulars)</th>
+                                    <th *ngFor="let col of getFormColumns(subsetQuestion); trackBy: trackByFormCol">
+                                      {{ col.label || col.name }}
+                                    </th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  <tr *ngFor="let column of subsetQuestion.annexure.columns; let ci = index; trackBy: trackByColumn">
+                                    <td style="text-align: center; font-weight: 700; color: #64748b; font-size: 0.85rem;">{{ ci + 1 }}</td>
+                                    <td class="particular-cell">
+                                      {{ column.name }}
+                                    </td>
+                                    <td *ngFor="let col of getFormColumns(subsetQuestion); let colIdx = index; trackBy: trackByFormCol" class="value-cell">
+                                      <!-- SELECT DROPDOWN -->
+                                      <select
+                                        *ngIf="col.type === 'select' || (getFormColumns(subsetQuestion).length === 1 && column.column_type_id == 3); else notSubsetSelect"
+                                        class="answer-control form-table-control"
+                                        [ngModel]="getFormCellValue(subsetQuestion, ci, col.key || colIdx, colIdx)"
+                                        (ngModelChange)="setFormCellValue(subsetQuestion, ci, col.key || colIdx, colIdx, $event)"
+                                        [disabled]="subsetQuestion.is_editable === false"
+                                      >
+                                        <option value="">Please select</option>
+                                        <ng-container *ngIf="col.options; else defaultSubsetColumnOptions">
+                                          <option *ngFor="let opt of col.options" [value]="opt.value !== undefined ? opt.value : opt">
+                                            {{ opt.label !== undefined ? opt.label : opt }}
+                                          </option>
+                                        </ng-container>
+                                        <ng-template #defaultSubsetColumnOptions>
+                                          <option *ngFor="let option of annexureColumnOptions(column); trackBy: trackByOption" [value]="option.option_label">
+                                            {{ option.option_label }}
+                                          </option>
+                                        </ng-template>
+                                      </select>
+
+                                      <ng-template #notSubsetSelect>
+                                        <!-- TEXTAREA -->
+                                        <textarea
+                                          *ngIf="col.type === 'textarea' || (getFormColumns(subsetQuestion).length === 1 && column.column_type_id == 2); else notSubsetTextArea"
+                                          class="answer-control form-table-control"
+                                          rows="2"
+                                          [ngModel]="getFormCellValue(subsetQuestion, ci, col.key || colIdx, colIdx)"
+                                          (ngModelChange)="setFormCellValue(subsetQuestion, ci, col.key || colIdx, colIdx, $event)"
+                                          [disabled]="subsetQuestion.is_editable === false"
+                                          placeholder="Enter {{ col.label || column.name }}"
+                                        ></textarea>
+
+                                        <ng-template #notSubsetTextArea>
+                                          <!-- INPUT (TEXT / NUMBER / DATE) -->
+                                          <input
+                                            [type]="col.type || 'text'"
+                                            class="answer-control form-table-control"
+                                            [ngModel]="getFormCellValue(subsetQuestion, ci, col.key || colIdx, colIdx)"
+                                            (ngModelChange)="setFormCellValue(subsetQuestion, ci, col.key || colIdx, colIdx, $event)"
+                                            [disabled]="subsetQuestion.is_editable === false"
+                                            placeholder="Enter {{ col.label || column.name }}"
+                                          />
+                                        </ng-template>
+                                      </ng-template>
+                                    </td>
+                                  </tr>
+                                </tbody>
+                              </table>
+                            </div>
+
+                            <div class="flex flex-wrap justify-content-between align-items-center gap-2 mt-3 pt-2 border-top-1 border-200">
+                              <div class="flex gap-2 align-items-center" *ngIf="subsetQuestion.is_compliance">
+                                <div>
+                                  <label class="text-xs font-semibold text-600 block mb-1">Business Risk</label>
+                                  <select class="answer-control text-xs" [(ngModel)]="subsetQuestion.annexure_draft.business_risk" [disabled]="subsetQuestion.is_editable === false">
+                                    <option value="">Select</option>
+                                    <option *ngFor="let r of annexureRiskOptions().business_risks" [value]="r.id">{{ r.label }}</option>
+                                  </select>
+                                </div>
+                                <div>
+                                  <label class="text-xs font-semibold text-600 block mb-1">Control Risk</label>
+                                  <select class="answer-control text-xs" [(ngModel)]="subsetQuestion.annexure_draft.control_risk" [disabled]="subsetQuestion.is_editable === false">
+                                    <option value="">Select</option>
+                                    <option *ngFor="let r of annexureRiskOptions().control_risks" [value]="r.id">{{ r.label }}</option>
+                                  </select>
+                                </div>
+                                <div>
+                                  <label class="text-xs font-semibold text-600 block mb-1">Risk Type</label>
+                                  <select class="answer-control text-xs" [(ngModel)]="subsetQuestion.annexure_draft.risk_cat_id" [disabled]="subsetQuestion.is_editable === false">
+                                    <option value="">Select</option>
+                                    <option *ngFor="let r of annexureRiskOptions().risk_categories" [value]="r.id">{{ r.risk_category }}</option>
+                                  </select>
+                                </div>
+                              </div>
+
+                              <div class="flex gap-2 ml-auto">
+                                <button
+                                  pButton
+                                  type="button"
+                                  icon="pi pi-times"
+                                  label="Clear"
+                                  severity="secondary"
+                                  [disabled]="isSavingAnnexureQuestion(subsetQuestion) || subsetQuestion.is_editable === false"
+                                  (click)="clearAnnexureDraft(subsetQuestion)"
+                                ></button>
+
+                                <button
+                                  pButton
+                                  type="button"
+                                  icon="pi pi-save"
+                                  [label]="subsetQuestion.annexure_draft.id || subsetQuestion.annexure_rows?.length ? 'Update Form' : 'Save Form'"
+                                  [loading]="isSavingAnnexureQuestion(subsetQuestion)"
+                                  [disabled]="isSavingAnnexureQuestion(subsetQuestion) || subsetQuestion.is_editable === false"
+                                  (click)="saveAnnexureRow(subsetQuestion)"
+                                ></button>
+                              </div>
+                            </div>
+                          </div>
+
+                          <!-- 3. SUBSET STANDARD HORIZONTAL GRID LAYOUT -->
+                          <div *ngIf="!isOtherDiscrepanciesSelected(subsetQuestion) && !isVerticalFormAnnexure(subsetQuestion)">
+                            <div class="annexure-grid">
+                              <div
+                                class="annexure-field"
+                                *ngFor="let column of subsetQuestion.annexure.columns; let ci = index; trackBy: trackByColumn"
+                              >
+                                <label class="answer-label">
+                                  {{ column.name }}
+                                </label>
+
+                                <textarea
+                                  *ngIf="column.column_type_id == 2; else subsetAnnexureInput"
                                   class="answer-control"
+                                  rows="1"
                                   [(ngModel)]="subsetQuestion.annexure_draft.values[ci]"
                                   [disabled]="subsetQuestion.is_editable === false"
+                                ></textarea>
+
+                                <ng-template #subsetAnnexureInput>
+                                  <select
+                                    *ngIf="column.column_type_id == 3; else subsetAnnexureText"
+                                    class="answer-control"
+                                    [(ngModel)]="subsetQuestion.annexure_draft.values[ci]"
+                                    [disabled]="subsetQuestion.is_editable === false"
+                                  >
+                                    <option value="">Please select</option>
+
+                                    <option
+                                      *ngFor="let option of annexureColumnOptions(column); trackBy: trackByOption"
+                                      [value]="option.option_label"
+                                    >
+                                      {{ option.option_label }}
+                                    </option>
+                                  </select>
+
+                                  <ng-template #subsetAnnexureText>
+                                    <input
+                                      type="text"
+                                      class="answer-control"
+                                      [(ngModel)]="subsetQuestion.annexure_draft.values[ci]"
+                                      [disabled]="subsetQuestion.is_editable === false"
+                                    />
+                                  </ng-template>
+                                </ng-template>
+                              </div>
+
+                              <div class="annexure-field">
+                                <label class="answer-label"> Business Risk </label>
+
+                                <select
+                                  class="answer-control"
+                                  [(ngModel)]="subsetQuestion.annexure_draft.business_risk"
+                                  [disabled]="
+                                    !isCustomAnnexureRisk(subsetQuestion) ||
+                                    subsetQuestion.is_editable === false
+                                  "
                                 >
                                   <option value="">Please select</option>
 
                                   <option
-                                    *ngFor="let option of annexureColumnOptions(column); trackBy: trackByOption"
-                                    [value]="option.option_label"
+                                    *ngFor="let risk of annexureRiskOptions().business_risks; trackBy: trackBySet"
+                                    [value]="risk.id"
                                   >
-                                    {{ option.option_label }}
+                                    {{ risk.label }}
                                   </option>
                                 </select>
+                              </div>
 
-                                <ng-template #subsetAnnexureText>
-                                  <input
-                                    type="text"
-                                    class="answer-control"
-                                    [(ngModel)]="subsetQuestion.annexure_draft.values[ci]"
-                                    [disabled]="subsetQuestion.is_editable === false"
-                                  />
-                                </ng-template>
-                              </ng-template>
+                              <div class="annexure-field">
+                                <label class="answer-label"> Control Risk </label>
+
+                                <select
+                                  class="answer-control"
+                                  [(ngModel)]="subsetQuestion.annexure_draft.control_risk"
+                                  [disabled]="
+                                    !isCustomAnnexureRisk(subsetQuestion) ||
+                                    subsetQuestion.is_editable === false
+                                  "
+                                >
+                                  <option value="">Please select</option>
+
+                                  <option
+                                    *ngFor="let risk of annexureRiskOptions().control_risks; trackBy: trackBySet"
+                                    [value]="risk.id"
+                                  >
+                                    {{ risk.label }}
+                                  </option>
+                                </select>
+                              </div>
+
+                              <div class="annexure-field">
+                                <label class="answer-label"> Risk Type </label>
+
+                                <select
+                                  class="answer-control"
+                                  [(ngModel)]="subsetQuestion.annexure_draft.risk_cat_id"
+                                  [disabled]="
+                                    !isCustomAnnexureRisk(subsetQuestion) ||
+                                    subsetQuestion.is_editable === false
+                                  "
+                                >
+                                  <option value="">Please select</option>
+
+                                  <option
+                                    *ngFor="let risk of annexureRiskOptions().risk_categories; trackBy: trackBySet"
+                                    [value]="risk.id"
+                                  >
+                                    {{ risk.risk_category }}
+                                  </option>
+                                </select>
+                              </div>
                             </div>
 
-                            <div class="annexure-field">
-                              <label class="answer-label"> Business Risk </label>
+                            <div class="flex flex-wrap justify-content-end gap-2 mt-3">
+                              <input
+                                #subsetAnnexCsvInput
+                                type="file"
+                                accept=".csv,text/csv"
+                                style="display: none"
+                                (change)="uploadAnnexureCsv(subsetQuestion, $event)"
+                              />
 
-                              <select
-                                class="answer-control"
-                                [(ngModel)]="subsetQuestion.annexure_draft.business_risk"
+                              <button
+                                pButton
+                                type="button"
+                                icon="pi pi-download"
+                                label="Sample CSV"
+                                severity="secondary"
+                                [disabled]="subsetQuestion.is_editable === false"
+                                (click)="downloadAnnexureSample(subsetQuestion)"
+                              ></button>
+
+                              <button
+                                pButton
+                                type="button"
+                                icon="pi pi-upload"
+                                label="Upload CSV"
+                                severity="secondary"
+                                [loading]="isUploadingAnnexureQuestion(subsetQuestion)"
                                 [disabled]="
-                                  !isCustomAnnexureRisk(subsetQuestion) ||
+                                  isSavingAnnexureQuestion(subsetQuestion) ||
                                   subsetQuestion.is_editable === false
                                 "
-                              >
-                                <option value="">Please select</option>
+                                (click)="subsetAnnexCsvInput.click()"
+                              ></button>
 
-                                <option
-                                  *ngFor="let risk of annexureRiskOptions().business_risks; trackBy: trackBySet"
-                                  [value]="risk.id"
-                                >
-                                  {{ risk.label }}
-                                </option>
-                              </select>
-                            </div>
-
-                            <div class="annexure-field">
-                              <label class="answer-label"> Control Risk </label>
-
-                              <select
-                                class="answer-control"
-                                [(ngModel)]="subsetQuestion.annexure_draft.control_risk"
+                              <button
+                                pButton
+                                type="button"
+                                icon="pi pi-times"
+                                label="Clear"
+                                severity="secondary"
                                 [disabled]="
-                                  !isCustomAnnexureRisk(subsetQuestion) ||
+                                  isSavingAnnexureQuestion(subsetQuestion) ||
                                   subsetQuestion.is_editable === false
                                 "
-                              >
-                                <option value="">Please select</option>
+                                (click)="clearAnnexureDraft(subsetQuestion)"
+                              ></button>
 
-                                <option
-                                  *ngFor="let risk of annexureRiskOptions().control_risks; trackBy: trackBySet"
-                                  [value]="risk.id"
-                                >
-                                  {{ risk.label }}
-                                </option>
-                              </select>
-                            </div>
-
-                            <div class="annexure-field">
-                              <label class="answer-label"> Risk Type </label>
-
-                              <select
-                                class="answer-control"
-                                [(ngModel)]="subsetQuestion.annexure_draft.risk_cat_id"
+                              <button
+                                pButton
+                                type="button"
+                                icon="pi pi-save"
+                                [label]="subsetQuestion.annexure_draft.id ? 'Update Row' : 'Add Row'"
+                                [loading]="isSavingAnnexureQuestion(subsetQuestion)"
                                 [disabled]="
-                                  !isCustomAnnexureRisk(subsetQuestion) ||
+                                  isSavingAnnexureQuestion(subsetQuestion) ||
+                                  isUploadingAnnexureQuestion(subsetQuestion) ||
                                   subsetQuestion.is_editable === false
                                 "
-                              >
-                                <option value="">Please select</option>
-
-                                <option
-                                  *ngFor="let risk of annexureRiskOptions().risk_categories; trackBy: trackBySet"
-                                  [value]="risk.id"
-                                >
-                                  {{ risk.risk_category }}
-                                </option>
-                              </select>
+                                (click)="saveAnnexureRow(subsetQuestion)"
+                              ></button>
                             </div>
-                          </div>
-
-                          <div class="flex flex-wrap justify-content-end gap-2 mt-3">
-                            <input
-                              #subsetAnnexCsvInput
-                              type="file"
-                              accept=".csv,text/csv"
-                              style="display: none"
-                              (change)="uploadAnnexureCsv(subsetQuestion, $event)"
-                            />
-
-                            <button
-                              pButton
-                              type="button"
-                              icon="pi pi-download"
-                              label="Sample CSV"
-                              severity="secondary"
-                              [disabled]="subsetQuestion.is_editable === false"
-                              (click)="downloadAnnexureSample(subsetQuestion)"
-                            ></button>
-
-                            <button
-                              pButton
-                              type="button"
-                              icon="pi pi-upload"
-                              label="Upload CSV"
-                              severity="secondary"
-                              [loading]="isUploadingAnnexureQuestion(subsetQuestion)"
-                              [disabled]="
-                                isSavingAnnexureQuestion(subsetQuestion) ||
-                                subsetQuestion.is_editable === false
-                              "
-                              (click)="subsetAnnexCsvInput.click()"
-                            ></button>
-
-                            <button
-                              pButton
-                              type="button"
-                              icon="pi pi-times"
-                              label="Clear"
-                              severity="secondary"
-                              [disabled]="
-                                isSavingAnnexureQuestion(subsetQuestion) ||
-                                subsetQuestion.is_editable === false
-                              "
-                              (click)="clearAnnexureDraft(subsetQuestion)"
-                            ></button>
-
-                            <button
-                              pButton
-                              type="button"
-                              icon="pi pi-save"
-                              [label]="subsetQuestion.annexure_draft.id ? 'Update Row' : 'Add Row'"
-                              [loading]="isSavingAnnexureQuestion(subsetQuestion)"
-                              [disabled]="
-                                isSavingAnnexureQuestion(subsetQuestion) ||
-                                isUploadingAnnexureQuestion(subsetQuestion) ||
-                                subsetQuestion.is_editable === false
-                              "
-                              (click)="saveAnnexureRow(subsetQuestion)"
-                            ></button>
                           </div>
 
                           <div

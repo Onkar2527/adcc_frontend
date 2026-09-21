@@ -770,6 +770,15 @@ export class CategoryAssessmentComponent
                 label:
                     'As per annexure',
             });
+
+            options.push({
+
+                value:
+                    'OTHER_DISCREPANCIES',
+
+                label:
+                    'Other Discrepancies',
+            });
         }
 
         if (
@@ -1093,14 +1102,22 @@ export class CategoryAssessmentComponent
     buildIsAnnexureSelected(
         question: any,
     ) {
-
+        const val = String(question?.answer_value || '');
         return Number(question?.option_id) === 4
-            &&
-            question?.annexure_id
-            &&
-            String(question.answer_value || '')
-            ===
-            String(question.annexure_id);
+            && (
+                (question?.annexure_id && val === String(question.annexure_id))
+                ||
+                val.toUpperCase() === 'OTHER_DISCREPANCIES'
+                ||
+                val.toUpperCase() === 'OTHER DISCREPANCIES'
+            );
+    }
+
+    isOtherDiscrepanciesSelected(
+        question: any,
+    ): boolean {
+        const val = String(question?.answer_value || '').toUpperCase();
+        return val === 'OTHER_DISCREPANCIES' || val === 'OTHER DISCREPANCIES';
     }
 
     selectDefaultAnswers(
@@ -1466,18 +1483,6 @@ export class CategoryAssessmentComponent
         if (
             Number(question?.option_id) === 4
         ) {
-            question.is_compliance =
-                Boolean(
-                    question?.annexure_id,
-                )
-                &&
-                String(
-                    question?.answer_value || '',
-                )
-                ===
-                String(
-                    question?.annexure_id || '',
-                );
             return;
         }
 
@@ -2524,29 +2529,109 @@ export class CategoryAssessmentComponent
                 riskOptions,
             );
 
+        const isOther = this.isOtherDiscrepanciesSelected(question);
+        const isForm = !isOther && this.isVerticalFormAnnexure(question);
+        const targetRow =
+            row || (isForm ? question?.annexure_rows?.[0] : null);
+
+        const colCount = isOther ? Math.max(columns.length, 1) : columns.length;
+        const valueCount = colCount > 0 ? colCount : 1;
+        const valuesList = [];
+        for (let i = 0; i < valueCount; i++) {
+            const raw = targetRow?.values?.[i];
+            if (raw === undefined || raw === null) {
+                valuesList.push('');
+            } else if (typeof raw === 'string' && raw.startsWith('{') && raw.endsWith('}')) {
+                try { valuesList.push(JSON.parse(raw)); } catch (e) { valuesList.push(raw); }
+            } else {
+                valuesList.push(raw);
+            }
+        }
+
         return {
             id:
-                row?.id || 0,
+                targetRow?.id || 0,
             values:
-                columns.map(
-                    (
-                        _column: any,
-                        index: number,
-                    ) =>
-                        row?.values?.[index] || '',
-                ),
+                valuesList,
             business_risk:
-                row?.business_risk || defaults.business_risk,
+                targetRow?.business_risk || defaults.business_risk,
             control_risk:
-                row?.control_risk || defaults.control_risk,
+                targetRow?.control_risk || defaults.control_risk,
             risk_cat_id:
-                row?.risk_cat_id || defaults.risk_cat_id,
+                targetRow?.risk_cat_id || defaults.risk_cat_id,
         };
+    }
+
+    private defaultSingleColumn = [
+        { key: 'value', label: 'शेरा / माहिती (Details / Remarks)', type: 'text' }
+    ];
+
+    getFormColumns(question: any): any[] {
+        if (!question?.annexure) {
+            return this.defaultSingleColumn;
+        }
+        if (question.annexure._cached_form_columns) {
+            return question.annexure._cached_form_columns;
+        }
+        const matrix = question.annexure.matrix_columns;
+        if (matrix) {
+            try {
+                const cols = typeof matrix === 'string' ? JSON.parse(matrix) : matrix;
+                if (Array.isArray(cols) && cols.length > 0) {
+                    question.annexure._cached_form_columns = cols;
+                    return cols;
+                }
+            } catch (e) { }
+        }
+        question.annexure._cached_form_columns = this.defaultSingleColumn;
+        return this.defaultSingleColumn;
+    }
+
+    trackByFormCol(_index: number, col: any): string | number {
+        return col?.key || _index;
+    }
+
+    getFormCellValue(question: any, rowIndex: number, colKey: string, colIndex: number): string {
+        const rowVal = question?.annexure_draft?.values?.[rowIndex];
+        if (rowVal === undefined || rowVal === null) return '';
+        if (typeof rowVal === 'object' && !Array.isArray(rowVal)) {
+            return rowVal[colKey] !== undefined ? rowVal[colKey] : (rowVal[colIndex] || '');
+        }
+        if (Array.isArray(rowVal)) {
+            return rowVal[colIndex] || '';
+        }
+        return colIndex === 0 || colKey === 'value' ? String(rowVal) : '';
+    }
+
+    setFormCellValue(question: any, rowIndex: number, colKey: string, colIndex: number, val: any): void {
+        if (!question.annexure_draft) return;
+        if (!Array.isArray(question.annexure_draft.values)) {
+            question.annexure_draft.values = [];
+        }
+        const cols = this.getFormColumns(question);
+        if (cols.length === 1) {
+            question.annexure_draft.values[rowIndex] = val;
+            return;
+        }
+        let current = question.annexure_draft.values[rowIndex];
+        if (typeof current !== 'object' || current === null || Array.isArray(current)) {
+            current = {};
+            question.annexure_draft.values[rowIndex] = current;
+        }
+        current[colKey] = val;
     }
 
     annexureRiskOptions() {
         return this.categoryDetail()
             ?.annexure_risk_options || {};
+    }
+
+    isVerticalFormAnnexure(
+        question: any,
+    ) {
+        const layout = question?.annexure?.layout_type;
+        const annexId = Number(question?.annexure?.id || question?.annexure_id || 0);
+        return layout === 'form' || annexId === 36;
     }
 
     isCustomAnnexureRisk(
@@ -2798,12 +2883,13 @@ export class CategoryAssessmentComponent
                         ],
                     };
 
-                    question.is_compliance =
-                        true;
-
-                    this.clearAnnexureDraft(
-                        question,
-                    );
+                    if (this.isVerticalFormAnnexure(question)) {
+                        question.annexure_draft.id = res?.row?.id || res?.id || question.annexure_draft.id;
+                    } else {
+                        this.clearAnnexureDraft(
+                            question,
+                        );
+                    }
                 },
                 error: (err) => {
                     this.savingAnnexureQuestion.set(
