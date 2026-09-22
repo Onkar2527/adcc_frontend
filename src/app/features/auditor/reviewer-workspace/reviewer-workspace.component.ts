@@ -24,6 +24,7 @@ import { AuditDashboardService } from '../services/auditor-main.service';
 import { AuditUnitDashboardComponent } from '../../../shared/components/audit-unit-dashboard/audit-unit-dashboard.component';
 import { InternalAuditNavService } from '../services/internal-audit-nav.service';
 import { audit_flow_config, ESCALATE_FLOW } from '../../admin/services/required-data';
+import { OfflineTranslationService } from '../../../core/services/offline-translation.service';
 
 @Component({
     selector: 'app-reviewer-workspace',
@@ -61,6 +62,17 @@ export class ReviewerWorkspaceComponent implements OnInit {
 
     private route =
         inject(ActivatedRoute);
+
+    private translationService =
+        inject(OfflineTranslationService);
+
+    getQuestionText(answer: any): string {
+        const lang = this.translationService?.getCurrentLanguage() || localStorage.getItem('selected_lang') || 'en';
+        if (lang === 'mr' && answer?.mr_question) {
+            return answer.mr_question;
+        }
+        return answer?.question || 'Assessment observation';
+    }
 
     loadingQueue =
         signal(false);
@@ -535,6 +547,26 @@ export class ReviewerWorkspaceComponent implements OnInit {
 
         this.router.navigate([
             '/auditor/internal-audit/executive-summary',
+            assessmentId,
+        ], {
+            queryParams: {
+                mode: 'reviewer',
+            },
+        });
+    }
+
+    viewNonAgriStatement() {
+        const assessmentId =
+            Number(
+                this.selected()?.id || 0,
+            );
+
+        if (!assessmentId) {
+            return;
+        }
+
+        this.router.navigate([
+            '/auditor/internal-audit/non-agri-statement',
             assessmentId,
         ], {
             queryParams: {
@@ -1446,6 +1478,79 @@ export class ReviewerWorkspaceComponent implements OnInit {
                     `Column ${index + 1}`,
             }),
         );
+    }
+
+    private defaultSingleColumn = [
+        { key: 'value', label: 'शेरा / माहिती (Details / Remarks)', type: 'text' }
+    ];
+
+    isVerticalFormAnnexure(answer: any): boolean {
+        const layout = answer?.annexure_layout_type || answer?.annexure?.layout_type;
+        const annexId = Number(answer?.annexure_id || answer?.annexure?.id || 0);
+        return layout === 'form' || annexId === 36;
+    }
+
+    getFormColumns(answer: any): any[] {
+        if (!answer) {
+            return this.defaultSingleColumn;
+        }
+        if (answer._cached_form_columns) {
+            return answer._cached_form_columns;
+        }
+        const matrix = answer.annexure_matrix_columns || answer.annexure?.matrix_columns;
+        if (matrix) {
+            try {
+                const cols = typeof matrix === 'string' ? JSON.parse(matrix) : matrix;
+                if (Array.isArray(cols) && cols.length > 0) {
+                    answer._cached_form_columns = cols;
+                    return cols;
+                }
+            } catch (e) { }
+        }
+        answer._cached_form_columns = this.defaultSingleColumn;
+        return this.defaultSingleColumn;
+    }
+
+    getFormCellValue(row: any, rowIndex: number, colKey: string, colIndex: number): string {
+        const rowVal = row?.values?.[rowIndex];
+        if (rowVal === undefined || rowVal === null) return '-';
+        if (typeof rowVal === 'object' && !Array.isArray(rowVal)) {
+            const v = rowVal[colKey] !== undefined ? rowVal[colKey] : (rowVal[colIndex] !== undefined ? rowVal[colIndex] : '-');
+            return v !== '' && v !== null && v !== undefined ? String(v) : '-';
+        }
+        if (Array.isArray(rowVal)) {
+            const v = rowVal[colIndex];
+            return v !== '' && v !== null && v !== undefined ? String(v) : '-';
+        }
+        return (colIndex === 0 || colKey === 'value') && rowVal !== '' ? String(rowVal) : '-';
+    }
+
+    formatAnnexureCellValue(val: any): string {
+        if (val === null || val === undefined || val === '') return '-';
+        if (typeof val === 'object') {
+            if (Array.isArray(val)) {
+                return val.join(', ') || '-';
+            }
+            return Object.values(val).filter(v => v !== null && v !== undefined && v !== '').join(' | ') || '-';
+        }
+        return String(val);
+    }
+
+    formatTimelineAuditText(item: any): string {
+        if (item?.audit_comment && String(item.audit_comment).trim()) {
+            return item.audit_comment;
+        }
+        const ans = item?.answer_given;
+        if (!ans) return '';
+        const s = String(ans).trim();
+        if (s.startsWith('[') || s.startsWith('{')) {
+            return '';
+        }
+        return s;
+    }
+
+    hasAnnexureRows(answer: any): boolean {
+        return Array.isArray(answer?.annexure_rows) && answer.annexure_rows.length > 0;
     }
 
     saveBulkAction(

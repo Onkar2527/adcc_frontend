@@ -949,7 +949,50 @@
 
             <tr *ngIf="row.__report_annexure" class="report-annexure-row">
               <td [attr.colspan]="definition()?.columns?.length || 1">
-                <table class="report-annexure-table">
+                <!-- 1. FORM ANNEXURE MATRIX VIEW -->
+                <table *ngIf="isFormAnnexureRow(row)" class="report-annexure-table report-form-annexure-table">
+                  <thead>
+                    <tr>
+                      <th style="width: 45px; text-align: center;">अ.क्र.</th>
+                      <th [style.width]="getFormMatrixColumns(row).length > 2 ? '28%' : '38%'">तपशिल (Particulars)</th>
+                      <th *ngFor="let mcol of getFormMatrixColumns(row)">
+                        {{ mcol.label || mcol.name || mcol.key }}
+                      </th>
+                      <th *ngIf="showsNestedComplianceColumn()">Compliance</th>
+                      <th>Business Risk</th>
+                      <th>Control Risk</th>
+                      <th>Risk Type</th>
+                      <th *ngIf="showsNestedReviewerCommentColumn()">Reviewer Comment</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr *ngFor="let part of getFormParticulars(row); let pi = index">
+                      <td style="text-align: center; font-weight: 700; color: #475569;">{{ part.sr_no || (pi + 1) }}</td>
+                      <td class="font-medium" style="color: #1e293b;">{{ part.particular }}</td>
+                      <td *ngFor="let mcol of getFormMatrixColumns(row)">
+                        {{ getFormParticularCellValue(part, mcol) }}
+                      </td>
+                      <td *ngIf="showsNestedComplianceColumn() && pi === 0" [attr.rowspan]="getFormParticulars(row).length">
+                        {{ row.__annexure_rows?.[0]?.audit_commpliance || '-' }}
+                      </td>
+                      <td *ngIf="pi === 0" [attr.rowspan]="getFormParticulars(row).length">
+                        {{ row.__annexure_rows?.[0]?.business_risk_label || '-' }}
+                      </td>
+                      <td *ngIf="pi === 0" [attr.rowspan]="getFormParticulars(row).length">
+                        {{ row.__annexure_rows?.[0]?.control_risk_label || '-' }}
+                      </td>
+                      <td *ngIf="pi === 0" [attr.rowspan]="getFormParticulars(row).length">
+                        {{ row.__annexure_rows?.[0]?.risk_category || '-' }}
+                      </td>
+                      <td *ngIf="showsNestedReviewerCommentColumn() && pi === 0" [attr.rowspan]="getFormParticulars(row).length">
+                        {{ row.__annexure_rows?.[0]?.compliance_reviewer_comment || '-' }}
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+
+                <!-- 2. STANDARD HORIZONTAL GRID ANNEXURE VIEW -->
+                <table *ngIf="!isFormAnnexureRow(row)" class="report-annexure-table">
                   <thead>
                     <tr>
                       <th>{{ row.__annexure_title }}</th>
@@ -1011,6 +1054,7 @@
                   </tbody>
                 </table>
               </td>
+            </tr>
             <tr *ngIf="row.__report_unsampled_table" class="report-annexure-row">
               <td [attr.colspan]="definition()?.columns?.length || 1">
                 <div class="table-responsive">

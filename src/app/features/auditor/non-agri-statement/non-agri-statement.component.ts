@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+import { CommonModule, Location } from '@angular/common';
 import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -50,6 +50,7 @@ export class NonAgriStatementComponent implements OnInit {
   private translationService = inject(OfflineTranslationService);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
+  private location = inject(Location);
   private messageService = inject(MessageService);
   private cdr = inject(ChangeDetectorRef);
 
@@ -58,6 +59,14 @@ export class NonAgriStatementComponent implements OnInit {
   assessmentId: number | null = null;
   yearId: number | null = null;
   auditUnitId: number | null = null;
+  overview: any = null;
+  auditorComment: string = '';
+  isReviewMode: boolean = false;
+
+  // Reviewer State
+  reviewerAction: number = 2; // 2: Accept, 3: Re-assessment
+  reviewerComment: string = '';
+  savingReview: boolean = false;
 
   saving = false;
   loading = false;
@@ -361,6 +370,9 @@ export class NonAgriStatementComponent implements OnInit {
 
     // Read contextual route query parameters
     this.route.queryParams.subscribe(params => {
+      if (params['mode'] === 'reviewer' || params['mode'] === 'compliance-view' || params['mode'] === 'view') {
+        this.isReviewMode = true;
+      }
       if (params['assessment_id'] || params['assessmentId']) {
         this.assessmentId = Number(params['assessment_id'] || params['assessmentId']);
         this.loadAssessmentContext();
@@ -395,6 +407,7 @@ export class NonAgriStatementComponent implements OnInit {
             menuRes?.overview || null
           );
           if (menuRes?.overview) {
+            this.overview = menuRes.overview;
             if (!this.auditUnitId && menuRes.overview.audit_unit_id) {
               this.auditUnitId = Number(menuRes.overview.audit_unit_id);
             }
@@ -412,6 +425,10 @@ export class NonAgriStatementComponent implements OnInit {
   }
 
   goBack(): void {
+    if (this.isReviewMode) {
+      this.location.back();
+      return;
+    }
     if (this.assessmentId) {
       this.router.navigate(['/auditor/internal-audit', this.assessmentId]);
     } else {
@@ -442,6 +459,7 @@ export class NonAgriStatementComponent implements OnInit {
   hydrateFormData(data: any): void {
     if (!data) return;
     this.id = data.id || null;
+    this.auditorComment = data.auditor_comment || data.statement_data?.auditor_comment || '';
     if (data.statement_date) this.statementDate = data.statement_date;
     if (data.statement_type) this.statementType = data.statement_type;
     if (data.bank_name) this.bankName = data.bank_name;
@@ -517,12 +535,18 @@ export class NonAgriStatementComponent implements OnInit {
           }
         });
       }
+      if (s.reviewer_action !== undefined && s.reviewer_action !== null) {
+        this.reviewerAction = Number(s.reviewer_action);
+      }
+      if (s.reviewer_comment !== undefined && s.reviewer_comment !== null) {
+        this.reviewerComment = s.reviewer_comment || '';
+      }
     }
 
     this.cdr.detectChanges();
   }
 
-  // --- Save to Database ---
+  // --- Save to Database (Auditor) ---
   saveStatement(): void {
     this.saving = true;
 
@@ -567,12 +591,16 @@ export class NonAgriStatementComponent implements OnInit {
         shaikshanikKarj: this.shaikshanikKarj,
         gramodyog: this.gramodyog,
         sugarFactories: this.sugarFactories,
-        sugarFactoriesTotal: this.sugarFactoriesTotal
+        sugarFactoriesTotal: this.sugarFactoriesTotal,
+        auditor_comment: this.auditorComment,
+        reviewer_action: this.reviewerAction,
+        reviewer_comment: this.reviewerComment
       },
       total_yeanebaki_members: this.grandTotal.yeanebakiMembers || 0,
       total_yeanebaki_amount: this.grandTotal.yeanebakiAmount || 0,
       total_thakbaki_members: this.grandTotal.thakbakiMembers || 0,
-      total_thakbaki_amount: this.grandTotal.thakbakiAmount || 0
+      total_thakbaki_amount: this.grandTotal.thakbakiAmount || 0,
+      auditor_comment: this.auditorComment
     };
 
     this.statementService.saveStatement(payload).subscribe({
@@ -590,6 +618,88 @@ export class NonAgriStatementComponent implements OnInit {
       },
       error: (err: any) => {
         this.saving = false;
+        this.messageService.add({
+          severity: 'warn',
+          summary: 'स्थानिक पातळीवर जतन केले (Saved Locally)',
+          detail: 'डेटा स्थानिक स्टोरेजमध्ये जतन केला गेला आहे.'
+        });
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  // --- Save Review Action (Reviewer) ---
+  saveReviewAction(): void {
+    this.savingReview = true;
+
+    const payload: NonAgriStatementPayload = {
+      id: this.id || undefined,
+      assessment_id: this.assessmentId,
+      year_id: this.yearId,
+      audit_unit_id: this.auditUnitId,
+      statement_date: this.statementDate,
+      statement_type: this.statementType,
+      bank_name: this.bankName,
+      head_office: this.headOffice,
+      unit_text: this.unitText,
+      inspection_patra: this.inspection.patra,
+      inspection_purna: this.inspection.purna,
+      inspection_apoorna: this.inspection.apoorna,
+      designation1: this.designation1,
+      designation2: this.designation2,
+      shares_data: {
+        sanstha: this.shares.sanstha,
+        sakhar: this.shares.sakhar,
+        reFund: this.reFund,
+        total: {
+          ghyayache: this.sharesTotalGhyayache,
+          ghetlele: this.sharesTotalGhetlele,
+          apoornaSankhya: this.sharesTotalApoornaSankhya,
+          apoornaRs: this.sharesTotalApoornaRs
+        }
+      },
+      statement_data: {
+        pagardar: this.pagardar,
+        nagari: this.nagari,
+        ginningClean: this.ginningClean,
+        ginningNajarGahan: this.ginningNajarGahan,
+        ginningTotal: this.ginningTotal,
+        kharediVikri: this.kharediVikri,
+        dudhUtpadak: this.dudhUtpadak,
+        madhyamMudatNonAgri: this.madhyamMudatNonAgri,
+        nonFarmMediumTerm: this.nonFarmMediumTerm,
+        nonFarmWorkingCapital: this.nonFarmWorkingCapital,
+        nonFarmTotal: this.nonFarmTotal,
+        shaikshanikKarj: this.shaikshanikKarj,
+        gramodyog: this.gramodyog,
+        sugarFactories: this.sugarFactories,
+        sugarFactoriesTotal: this.sugarFactoriesTotal,
+        auditor_comment: this.auditorComment,
+        reviewer_action: this.reviewerAction,
+        reviewer_comment: this.reviewerComment
+      },
+      total_yeanebaki_members: this.grandTotal.yeanebakiMembers || 0,
+      total_yeanebaki_amount: this.grandTotal.yeanebakiAmount || 0,
+      total_thakbaki_members: this.grandTotal.thakbakiMembers || 0,
+      total_thakbaki_amount: this.grandTotal.thakbakiAmount || 0,
+      auditor_comment: this.auditorComment
+    };
+
+    this.statementService.saveStatement(payload).subscribe({
+      next: (res) => {
+        this.savingReview = false;
+        if (res?.data?.id) {
+          this.id = res.data.id;
+        }
+        this.messageService.add({
+          severity: 'success',
+          summary: 'तपासणी जतन झाली (Review Saved)',
+          detail: 'तपासणी अधिकारी शेरा व निर्णय यशस्वीरीत्या जतन केला गेला आहे.'
+        });
+        this.cdr.detectChanges();
+      },
+      error: (err: any) => {
+        this.savingReview = false;
         this.messageService.add({
           severity: 'warn',
           summary: 'स्थानिक पातळीवर जतन केले (Saved Locally)',
@@ -735,6 +845,9 @@ export class NonAgriStatementComponent implements OnInit {
       item.thakbakiMembers = null;
       item.thakbakiAmount = null;
     });
+    this.auditorComment = '';
+    this.reviewerAction = 2;
+    this.reviewerComment = '';
   }
 
   fillSampleData(): void {
@@ -742,6 +855,7 @@ export class NonAgriStatementComponent implements OnInit {
     this.shares.sanstha = { ghyayache: 250000, ghetlele: 200000, apoornaSankhya: 2, apoornaRs: 50000 };
     this.shares.sakhar = { ghyayache: 1500000, ghetlele: 1200000, apoornaSankhya: 1, apoornaRs: 300000 };
     this.reFund = { ghyayache: 100000, ghetlele: 80000, apoornaSankhya: 1, apoornaRs: 20000 };
+    this.auditorComment = 'सर्व बिगर शेती संस्थांचे कर्ज खाते व भागभांडवल तपासणी पूर्ण करण्यात आलेली आहे.';
     
     this.pagardar = { srNo: '४', label: 'पगारदार सहकारी पत संस्था', yeanebakiMembers: 48, yeanebakiAmount: 320.75, thakbakiMembers: 5, thakbakiAmount: 18.40 };
     this.nagari = { srNo: '५', label: 'नागरी सहकारी पत संस्था', yeanebakiMembers: 35, yeanebakiAmount: 512.60, thakbakiMembers: 8, thakbakiAmount: 42.10 };

@@ -34,6 +34,18 @@
       border-radius: 12px;
       border: 1px solid #bae6fd;
     }
+
+    .review-badge {
+      background-color: #fef3c7;
+      color: #92400e;
+      font-size: 0.78rem;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 12px;
+      border: 1px solid #fde68a;
+      display: inline-flex;
+      align-items: center;
+    }
   }
 
   .toolbar-actions {
@@ -65,6 +77,33 @@
 
   * {
     color: #000000;
+  }
+
+  &.view-only-mode {
+    input.cell-input,
+    input.inline-header-input,
+    .auditor-comment-section textarea {
+      pointer-events: none;
+      border-color: transparent !important;
+      background-color: transparent !important;
+      box-shadow: none !important;
+      user-select: text;
+    }
+  }
+
+  .reviewer-textarea {
+    pointer-events: auto !important;
+    background-color: #ffffff !important;
+    border: 1px solid #cbd5e1 !important;
+    cursor: text !important;
+    user-select: auto !important;
+    color: #1e293b !important;
+
+    &:focus {
+      outline: none;
+      border-color: #0284c7 !important;
+      box-shadow: 0 0 0 2px rgba(2, 132, 199, 0.2) !important;
+    }
   }
 }
 
@@ -279,6 +318,14 @@
       margin: 0;
     }
     -moz-appearance: textfield;
+
+    &[disabled] {
+      background-color: transparent !important;
+      border-color: transparent !important;
+      color: #000000 !important;
+      cursor: default;
+      box-shadow: none !important;
+    }
   }
 
   .cell-calc-val {
@@ -372,13 +419,16 @@
     -webkit-text-fill-color: #000000 !important;
   }
 
-  // Hide application shell navigation, topbar, sidebar, toolbars
+  // Hide application shell navigation, topbar, sidebar, toolbars, comments and actions
   .layout-topbar,
   .layout-sidebar,
   .layout-mask,
   .layout-footer,
   .layout-breadcrumb,
   .action-toolbar,
+  .auditor-comment-section,
+  .reviewer-action-section,
+  .bottom-action-bar,
   .no-print {
     display: none !important;
     visibility: hidden !important;
@@ -578,4 +628,47 @@
       }
     }
   }
+
+  .auditor-comment-section {
+    page-break-inside: avoid !important;
+    
+    .comment-card {
+      border: 1px solid #000000 !important;
+      background: #ffffff !important;
+      border-radius: 4px !important;
+    }
+
+    .comment-textarea {
+      border: 1px solid #666666 !important;
+      font-size: 0.82rem !important;
+    }
+  }
 }
+
+.auditor-comment-section {
+  .comment-card {
+    background-color: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 1rem;
+  }
+
+  .comment-textarea {
+    font-family: inherit;
+    font-size: 0.9rem;
+    line-height: 1.4;
+    resize: vertical;
+    border-color: #cbd5e1;
+
+    &:focus {
+      border-color: #0284c7;
+      box-shadow: 0 0 0 2px rgba(2, 132, 199, 0.2);
+    }
+  }
+}
+
+.bottom-action-bar {
+  padding-top: 1rem;
+  margin-top: 1.5rem;
+}
+

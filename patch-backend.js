@@ -1,57 +1,26 @@
 const fs = require('fs');
 
-function patchFile(filePath) {
+function patchFile(filePath, handler) {
   if (!fs.existsSync(filePath)) {
-    console.log('File does not exist:', filePath);
+    console.log('File not found:', filePath);
     return;
   }
   let content = fs.readFileSync(filePath, 'utf8');
-
-  // 1. Add am.matrix_columns to SQL queries
-  content = content.replaceAll(
-    "COALESCE(am.layout_type, 'grid') AS annexure_layout_type,",
-    "COALESCE(am.layout_type, 'grid') AS annexure_layout_type,\n              am.matrix_columns AS annexure_matrix_columns,"
-  );
-
-  // 2. Map layout_type and matrix_columns in groupCategoryQuestions
-  if (filePath.endsWith('.ts')) {
-    content = content.replace(
-      `              id:
-                row.annexure_id,
-              name:
-                row.annexure_name,
-              risk_defination_id:
-                row.annexure_risk_defination_id,
-              columns:
-                row.annexure_columns || [],`,
-      `              id:
-                row.annexure_id,
-              name:
-                row.annexure_name,
-              layout_type:
-                row.annexure_layout_type || 'grid',
-              matrix_columns:
-                row.annexure_matrix_columns
-                  ? (typeof row.annexure_matrix_columns === 'string'
-                      ? JSON.parse(row.annexure_matrix_columns)
-                      : row.annexure_matrix_columns)
-                  : [],
-              risk_defination_id:
-                row.annexure_risk_defination_id,
-              columns:
-                row.annexure_columns || [],`
-    );
-  } else if (filePath.endsWith('.js')) {
-    // For compiled JS in dist
-    content = content.replace(
-      `id: row.annexure_id, name: row.annexure_name, risk_defination_id: row.annexure_risk_defination_id, columns: row.annexure_columns || []`,
-      `id: row.annexure_id, name: row.annexure_name, layout_type: row.annexure_layout_type || 'grid', matrix_columns: row.annexure_matrix_columns ? (typeof row.annexure_matrix_columns === 'string' ? JSON.parse(row.annexure_matrix_columns) : row.annexure_matrix_columns) : [], risk_defination_id: row.annexure_risk_defination_id, columns: row.annexure_columns || []`
-    );
-  }
-
+  content = handler(content);
   fs.writeFileSync(filePath, content, 'utf8');
   console.log('Successfully patched:', filePath);
 }
 
-patchFile('d:/adcc-auditpro/adcc_audit_backend/src/modules/auditor/internal-audit/internal-audit.service.ts');
-patchFile('d:/adcc-auditpro/adcc_audit_backend/dist/modules/auditor/internal-audit/internal-audit.service.js');
+const complianceEvidenceSqlFix = (c) => {
+  return c.replace(
+    /CASE\s+WHEN\s+COALESCE\(ad\.audit_compulsary_ev_upload,\s*0\)\s*=\s*1\s+THEN\s*1\s+WHEN\s+COALESCE\(ad\.compliance_compulsary_ev_upload,\s*0\)\s+IN\s+\(1,\s*2\)\s+THEN\s*1\s+WHEN\s+COALESCE\(qm\.compliance_ev_upload,\s*0\)\s*=\s*1\s+THEN\s*1\s+ELSE\s*0\s+END\s+AS\s+compliance_evidence_upload/g,
+    `CASE
+                WHEN COALESCE(ad.audit_compulsary_ev_upload, 0) = 1 THEN 1
+                WHEN COALESCE(ad.compliance_compulsary_ev_upload, 0) IN (1, 2) THEN 1
+                ELSE 0
+            END AS compliance_evidence_upload`
+  );
+};
+
+patchFile('d:/adcc-auditpro/adcc_audit_backend/src/modules/auditor/internal-audit/services/compliance.service.ts', complianceEvidenceSqlFix);
+patchFile('d:/adcc-auditpro/adcc_audit_backend/dist/modules/auditor/internal-audit/services/compliance.service.js', complianceEvidenceSqlFix);

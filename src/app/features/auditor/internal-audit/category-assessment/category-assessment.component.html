@@ -1409,7 +1409,7 @@
                                 <div>{{ row.compliance_reviewer_comment || '-' }}</div>
 
                                 <!-- Inline tiny timeline for annexure row -->
-                                <div *ngIf="getTimeline(row).length" class="row-timeline-inline">
+                                <div *ngIf="getTimeline(row).length > 2" class="row-timeline-inline">
                                   <div
                                     *ngFor="let item of getTimeline(row); let index = index; trackBy: trackByIndex"
                                     class="row-timeline-item"
@@ -1422,11 +1422,11 @@
                                     </div>
                                     <div class="row-timeline-body">
                                       <div
-                                        *ngIf="item.audit_comment || item.answer_given"
+                                        *ngIf="formatTimelineAuditText(item)"
                                         class="row-comment text-purple"
                                       >
                                         <strong>Aud:</strong>
-                                        {{ item.audit_comment || item.answer_given }}
+                                        {{ formatTimelineAuditText(item) }}
                                       </div>
                                       <div
                                         *ngIf="
@@ -2465,7 +2465,7 @@
 
                                     <!-- Inline tiny timeline for annexure row -->
                                     <div
-                                      *ngIf="getTimeline(row).length"
+                                      *ngIf="getTimeline(row).length > 2"
                                       class="row-timeline-inline"
                                     >
                                       <div
@@ -2480,11 +2480,11 @@
                                         </div>
                                         <div class="row-timeline-body">
                                           <div
-                                            *ngIf="item.audit_comment || item.answer_given"
+                                            *ngIf="formatTimelineAuditText(item)"
                                             class="row-comment text-purple"
                                           >
                                             <strong>Aud:</strong>
-                                            {{ item.audit_comment || item.answer_given }}
+                                            {{ formatTimelineAuditText(item) }}
                                           </div>
                                           <div
                                             *ngIf="

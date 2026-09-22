@@ -25,6 +25,7 @@ export interface NonAgriStatementPayload {
   total_yeanebaki_amount?: number;
   total_thakbaki_members?: number;
   total_thakbaki_amount?: number;
+  auditor_comment?: string;
 }
 
 @Injectable({

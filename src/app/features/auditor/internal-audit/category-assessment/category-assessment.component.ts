@@ -1626,6 +1626,19 @@ export class CategoryAssessmentComponent
         return Array.isArray(timeline) ? timeline : [];
     }
 
+    formatTimelineAuditText(item: any): string {
+        if (item?.audit_comment && String(item.audit_comment).trim()) {
+            return item.audit_comment;
+        }
+        const ans = item?.answer_given;
+        if (!ans) return '';
+        const s = String(ans).trim();
+        if (s.startsWith('[') || s.startsWith('{')) {
+            return '';
+        }
+        return s;
+    }
+
     viewComplianceEvidence(
         evidence: any,
     ) {
@@ -2807,7 +2820,11 @@ export class CategoryAssessmentComponent
                 Number(detail.category.id),
                 Number(question.id),
                 this.employeeId,
-                question.annexure_draft,
+                {
+                    ...question.annexure_draft,
+                    audit_compulsary_ev_upload: question.audit_compulsary_ev_upload === true ? 1 : 0,
+                    is_compliance: question.is_compliance === true ? 1 : 0,
+                },
                 this.selectedDumpId(),
             )
             .subscribe({

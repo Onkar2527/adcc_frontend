@@ -375,6 +375,36 @@
   text-align: left;
 }
 
+.report-form-annexure-table {
+  background: #ffffff;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+
+  th {
+    background: #f8fafc;
+    color: #1e293b;
+    font-weight: 700;
+    font-size: 0.78rem;
+    border-color: #cbd5e1;
+    padding: 0.4rem 0.5rem;
+  }
+
+  td {
+    border-color: #cbd5e1;
+    font-size: 0.78rem;
+    padding: 0.4rem 0.5rem;
+    vertical-align: middle;
+  }
+
+  tbody tr:nth-child(even) {
+    background-color: #f8fafc;
+  }
+
+  tbody tr:hover {
+    background-color: #f1f5f9;
+  }
+}
+
+
 .report-inline-header-row th {
   background: #f7f8fa;
   border: 1px solid #9a9a9a;

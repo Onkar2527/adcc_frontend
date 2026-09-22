@@ -7,24 +7,24 @@
     <i class="pi pi-file-edit"></i>
     <span>{{ t.toolbarTitle }}</span>
     <span *ngIf="assessmentId" class="context-badge">Assessment #{{ assessmentId }}</span>
+    <span *ngIf="isReviewMode" class="review-badge"><i class="pi pi-eye mr-1"></i>Review Mode</span>
   </div>
   <div class="toolbar-actions">
-    <button *ngIf="assessmentId" pButton type="button" [label]="t.backBtn" icon="pi pi-arrow-left"
+    <button *ngIf="assessmentId || isReviewMode" pButton type="button" [label]="isReviewMode ? 'Back to Review' : t.backBtn" icon="pi pi-arrow-left"
       class="p-button-outlined p-button-secondary p-button-sm" (click)="goBack()"></button>
-    <button pButton type="button" [label]="t.sampleDataBtn" icon="pi pi-sparkles"
+    <button *ngIf="!isReviewMode" pButton type="button" [label]="t.sampleDataBtn" icon="pi pi-sparkles"
       class="p-button-outlined p-button-sm" (click)="fillSampleData()"></button>
-    <button pButton type="button" [label]="t.resetBtn" icon="pi pi-refresh"
+    <button *ngIf="!isReviewMode" pButton type="button" [label]="t.resetBtn" icon="pi pi-refresh"
       class="p-button-outlined p-button-secondary p-button-sm" (click)="resetForm()"></button>
-    <button pButton type="button" [label]="t.saveBtn" icon="pi pi-save" [loading]="saving"
-      class="p-button-success p-button-sm" (click)="saveStatement()"></button>
     <button pButton type="button" [label]="t.printBtn" icon="pi pi-print" class="p-button-primary p-button-sm"
       (click)="print()"></button>
   </div>
 </div>
 
+
 <!-- Main Printable Document Container -->
 <div class="document-wrapper">
-  <div class="document-page" id="statement-print-area">
+  <div class="document-page" [class.view-only-mode]="isReviewMode" id="statement-print-area">
 
     <!-- Header Section -->
     <header class="doc-header">
@@ -378,6 +378,91 @@
         <p class="designation-sub">{{ t.designation2 }}</p>
       </div>
     </footer>
+
+    <!-- Auditor Observation / Comment Box (No Print) -->
+    <div class="auditor-comment-section no-print mt-4 mb-3">
+      <div class="comment-card p-3 border-round-lg border-1 surface-border surface-50">
+        <label class="block font-bold text-900 mb-2">
+          <i class="pi pi-comment mr-2 text-primary"></i>
+          {{ currentLang === 'en' ? 'Auditor Observation / Remarks' : 'लेखापरीक्षक शेरा / टिप्पणी (Auditor Comment)' }}
+        </label>
+        <textarea
+          rows="3"
+          class="p-inputtext w-full comment-textarea"
+          [(ngModel)]="auditorComment"
+          [disabled]="isReviewMode"
+          [placeholder]="currentLang === 'en' ? 'Enter auditor observations / remarks for this Non-Agricultural statement...' : 'बिगर शेती माहिती पत्रकाबाबत लेखापरीक्षक शेरा येथे नोंदवा...'"
+        ></textarea>
+      </div>
+    </div>
+
+    <!-- Reviewer Action & Observation Box (No Print) -->
+    <div class="reviewer-action-section no-print mb-4">
+      <!-- When in Reviewer Mode -->
+      <div *ngIf="isReviewMode" class="comment-card p-3 border-round-lg border-1 surface-border surface-50">
+        <div class="flex flex-column md:flex-row md:align-items-center justify-content-between gap-3 mb-3">
+          <label class="font-bold text-900 m-0">
+            <i class="pi pi-verified mr-2 text-orange-600"></i>
+            {{ currentLang === 'en' ? 'Reviewer Action & Remarks' : 'तपासणी अधिकारी निर्णय व शेरा (Reviewer Action)' }}
+          </label>
+
+          <!-- Review Action Toggle Buttons -->
+          <div class="flex gap-2">
+            <button
+              pButton
+              type="button"
+              label="Accept (मान्य / स्वीकृत)"
+              icon="pi pi-check"
+              [class]="reviewerAction === 2 ? 'p-button-success p-button-sm' : 'p-button-outlined p-button-secondary p-button-sm'"
+              (click)="reviewerAction = 2"
+            ></button>
+            <button
+              pButton
+              type="button"
+              label="Re-assessment (पुनर्तपासणी)"
+              icon="pi pi-replay"
+              [class]="reviewerAction === 3 ? 'p-button-warning p-button-sm' : 'p-button-outlined p-button-secondary p-button-sm'"
+              (click)="reviewerAction = 3"
+            ></button>
+          </div>
+        </div>
+
+        <textarea
+          rows="3"
+          class="p-inputtext w-full reviewer-textarea"
+          [(ngModel)]="reviewerComment"
+          [placeholder]="currentLang === 'en' ? 'Enter reviewer comments / feedback for this statement...' : 'तपासणी अधिकाऱ्याचा शेरा / सूचना येथे नोंदवा...'"
+        ></textarea>
+      </div>
+
+      <!-- When in Auditor Mode & Reviewer has reviewed -->
+      <div *ngIf="!isReviewMode && (reviewerComment || reviewerAction)" class="reviewer-feedback-card p-3 border-round-lg border-1"
+        [class]="reviewerAction === 3 ? 'surface-orange-50 border-orange-200' : 'surface-green-50 border-green-200'">
+        <div class="flex align-items-center justify-content-between gap-2 mb-2">
+          <span class="font-bold text-900">
+            <i class="pi pi-shield mr-2" [class]="reviewerAction === 3 ? 'text-orange-600' : 'text-green-600'"></i>
+            {{ currentLang === 'en' ? 'Reviewer Status & Feedback' : 'तपासणी अधिकारी शेरा (Reviewer Feedback)' }}
+          </span>
+          <span class="text-xs font-bold px-2 py-1 border-round uppercase"
+            [class]="reviewerAction === 3 ? 'bg-orange-100 text-orange-800' : 'bg-green-100 text-green-800'">
+            {{ reviewerAction === 3 ? 'Re-assessment Required (पुनर्तपासणी)' : 'Accepted (मान्य / स्वीकृत)' }}
+          </span>
+        </div>
+        <p class="m-0 text-sm text-800 font-medium whitespace-pre-wrap">{{ reviewerComment || (reviewerAction === 2 ? 'Statement accepted by Reviewer.' : 'Re-assessment requested by Reviewer.') }}</p>
+      </div>
+    </div>
+
+    <!-- Bottom Save Action Bar (No Print) -->
+    <div class="bottom-action-bar no-print mt-4 pt-3 flex justify-content-center gap-3 border-top-1 surface-border">
+      <button pButton type="button" [label]="isReviewMode ? 'Back to Review' : 'Back to Assessment'" icon="pi pi-arrow-left"
+        class="p-button-outlined p-button-secondary" (click)="goBack()"></button>
+
+      <button *ngIf="!isReviewMode" pButton type="button" [label]="t.saveBtn" icon="pi pi-save" [loading]="saving"
+        class="p-button-success" (click)="saveStatement()"></button>
+
+      <button *ngIf="isReviewMode" pButton type="button" label="Save Review Action (तपासणी जतन करा)" icon="pi pi-check-circle" [loading]="savingReview"
+        class="p-button-success" (click)="saveReviewAction()"></button>
+    </div>
 
   </div>
 </div>

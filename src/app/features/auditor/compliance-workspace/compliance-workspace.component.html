@@ -60,6 +60,9 @@
         <button pButton type="button" label="View Executive Summary" icon="pi pi-file-edit" severity="info"
           (click)="viewExecutiveSummary()"></button>
 
+        <button pButton type="button" label="View Non-Agri Statement" icon="pi pi-file-excel" severity="info"
+          class="p-button-outlined" (click)="viewNonAgriStatement()"></button>
+
         <button pButton type="button" label="Check Completion" icon="pi pi-check-square" severity="secondary"
           [loading]="checkingSubmission()" (click)="checkCompletion()"></button>
 
@@ -323,7 +326,7 @@
                 <small>
                   {{ answer.menu_name }} / {{ answer.category_name }} / {{ answer.header_name }}
                 </small>
-                <h4>{{ answer.question || 'Assessment observation' }}</h4>
+                <h4>{{ getQuestionText(answer) }}</h4>
               </div>
             </div>
 
@@ -359,7 +362,7 @@
           </div>
 
           <!-- Timeline of older comments -->
-          <div *ngIf="getTimeline(answer).length" class="answers-timeline">
+          <div *ngIf="getTimeline(answer).length > 2" class="answers-timeline">
             <label class="timeline-title"><i class="pi pi-history"></i> Compliance History</label>
 
             <div class="timeline-toggle-container" *ngIf="getTimeline(answer).length > 1">
@@ -643,14 +646,123 @@
           <div *ngIf="answer.annexure_rows?.length" class="annexure-section">
             <div class="annexure-title flex align-items-center justify-content-between mb-2">
               <div class="flex align-items-center gap-2">
-                <span>Annexure Rows</span>
-                <small>{{ answer.annexure_rows.length }} row(s)</small>
+                <span>{{ isVerticalFormAnnexure(answer) ? (answer.annexure_name || 'Annexure Form') : 'Annexure Rows' }}</span>
+                <small>{{ answer.annexure_rows.length }} {{ isVerticalFormAnnexure(answer) ? 'form' : 'row(s)' }}</small>
               </div>
-              <button pButton type="button" label="Fill 'Complied' For All Rows" icon="pi pi-check-square"
+              <button *ngIf="!isVerticalFormAnnexure(answer)" pButton type="button" label="Fill 'Complied' For All Rows" icon="pi pi-check-square"
                 severity="secondary" class="p-button-sm" (click)="fillCompliedForAllAnnexureRows(answer)"></button>
             </div>
 
-            <div class="annexure-table-wrap">
+            <!-- 1. VERTICAL FORM ANNEXURE LAYOUT -->
+            <div *ngIf="isVerticalFormAnnexure(answer)">
+              <div class="annexure-table-wrap mb-3">
+                <table class="annexure-vertical-table">
+                  <thead>
+                    <tr>
+                      <th style="width: 50px; text-align: center;">अ.क्र.</th>
+                      <th [style.width]="getFormColumns(answer).length > 2 ? '28%' : '35%'">तपशिल (Particulars)</th>
+                      <th *ngFor="let col of getFormColumns(answer)">
+                        {{ col.label || col.name }}
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr *ngFor="let column of annexureColumns(answer); let ci = index">
+                      <td style="text-align: center; font-weight: 700; color: #64748b;">{{ ci + 1 }}</td>
+                      <td class="font-medium text-800">{{ column.name || column.column_name }}</td>
+                      <td *ngFor="let col of getFormColumns(answer); let colIdx = index">
+                        {{ getFormCellValue(answer.annexure_rows[0], ci, col.key || colIdx, colIdx) }}
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <!-- Form Compliance Response Action Box -->
+              <div class="form-annexure-compliance-panel p-3 border-round mb-3" *ngFor="let row of answer.annexure_rows">
+                <div class="grid align-items-center">
+                  <div class="col-12 md:col-3" *ngIf="isReCompliance()">
+                    <label class="text-xs font-semibold text-500 block mb-1">Reviewer Feedback</label>
+                    <p-tag *ngIf="isPartiallyPass(row)" value="Partially Pass" severity="warn" class="mr-2"></p-tag>
+                    <div class="text-sm">{{ row.compliance_reviewer_comment || '-' }}</div>
+                  </div>
+
+                  <div class="col-12 md:col-2">
+                    <label class="text-xs font-semibold text-500 block mb-1">Auditor Evidence</label>
+                    <button *ngFor="let evidence of evidenceList(row); let ei = index" pButton type="button"
+                      icon="pi pi-paperclip" severity="secondary" class="mr-1 mb-1"
+                      [title]="'View auditor supporting document ' + (ei + 1)"
+                      (click)="viewEvidence(evidence)"></button>
+                    <span *ngIf="!evidenceList(row).length" class="text-secondary text-sm">-</span>
+                  </div>
+
+                  <div class="col-12 md:col-3">
+                    <label class="text-xs font-semibold text-500 block mb-1">Compliance Evidence</label>
+                    <div *ngIf="responseRequired(row) && (isComplianceEvidenceUploadRequired(row) || isComplianceEvidenceUploadRequired(answer) || evidenceList(row, 'compliance_evidence').length)" class="supporting-docs-box supporting-docs-box--table">
+                      <span class="evidence-chip" *ngFor="let evidence of evidenceList(row, 'compliance_evidence'); let ei = index">
+                        <button pButton type="button" icon="pi pi-eye" severity="secondary"
+                          [title]="'View compliance supporting document ' + (ei + 1)"
+                          (click)="viewComplianceEvidence(evidence)"></button>
+                        <button pButton type="button" icon="pi pi-trash" severity="danger"
+                          [title]="'Remove compliance supporting document ' + (ei + 1)"
+                          [loading]="deletingEvidenceKey() === evidenceDeleteKey(evidence)"
+                          [disabled]="deletingEvidenceKey() === evidenceDeleteKey(evidence)"
+                          (click)="deleteEvidence(evidence)"></button>
+                      </span>
+
+                      <input #formRowEvidenceInput type="file" multiple
+                        accept=".jpg,.jpeg,.png,.pdf,image/jpeg,image/png,application/pdf" style="display: none"
+                        (change)="uploadEvidence('annexure', row, $event)" />
+
+                      <button *ngIf="isComplianceEvidenceUploadRequired(row) || isComplianceEvidenceUploadRequired(answer)" pButton type="button" icon="pi pi-upload" severity="secondary"
+                        title="Upload compliance supporting document"
+                        [loading]="uploadingEvidenceKey() === evidenceKey('annexure', row.id)"
+                        (click)="formRowEvidenceInput.click()"></button>
+                    </div>
+                    <span *ngIf="!responseRequired(row) || (!isComplianceEvidenceUploadRequired(row) && !isComplianceEvidenceUploadRequired(answer) && !evidenceList(row, 'compliance_evidence').length)" class="text-secondary text-sm">-</span>
+                  </div>
+
+                  <div class="col-12 md:col-3">
+                    <label class="text-xs font-semibold text-500 block mb-1">Manager Response</label>
+                    <!-- Maker-Checker active -->
+                    <ng-container *ngIf="isMakerCheckerEnabled() && responseRequired(row)">
+                      <textarea *ngIf="isMaker() && row.compliance_status_id === 15" rows="2" class="w-full"
+                        [(ngModel)]="row.compliance_maker_comment" placeholder="Maker response"></textarea>
+                      <span *ngIf="isMaker() && row.compliance_status_id === 16" class="text-secondary text-sm">
+                        Draft: {{ row.compliance_maker_comment || '-' }} (Awaiting Checker review)
+                      </span>
+                      <span *ngIf="isChecker() && row.compliance_status_id === 15" class="text-secondary text-sm">
+                        Assigned to Maker (Awaiting Response)
+                      </span>
+                      <div *ngIf="isChecker() && row.compliance_status_id === 16" class="flex flex-column gap-1">
+                        <small class="text-blue-600 block">Draft: {{ row.compliance_maker_comment || '-' }}</small>
+                        <textarea rows="2" class="w-full" [(ngModel)]="row.compliance_response" placeholder="Final response"></textarea>
+                        <a href="javascript:void(0)" class="text-xs text-blue-500 underline" (click)="copyMakerResponse(row)">Use Draft</a>
+                      </div>
+                      <textarea *ngIf="isChecker() && [0, 3, 4, 12].includes(row.compliance_status_id)" rows="2" class="w-full"
+                        [(ngModel)]="row.compliance_response" placeholder="Compliance response"></textarea>
+                    </ng-container>
+
+                    <ng-container *ngIf="(!isMakerCheckerEnabled() || (!isMaker() && !isChecker())) && responseRequired(row)">
+                      <textarea rows="2" class="w-full" [(ngModel)]="row.compliance_response"
+                        [placeholder]="isReCompliance() ? 'Corrected response' : 'Compliance response'"></textarea>
+                    </ng-container>
+
+                    <span *ngIf="!responseRequired(row)" class="text-sm">{{ row.compliance_response || '-' }}</span>
+                  </div>
+
+                  <div class="col-12 md:col-1 text-right">
+                    <label class="text-xs font-semibold text-500 block mb-1">Status</label>
+                    <p-tag *ngIf="responseRequired(row)" [value]="isSaved(row) ? 'Saved' : 'Pending'"
+                      [severity]="isSaved(row) ? 'success' : 'warn'"></p-tag>
+                    <span *ngIf="!responseRequired(row)" class="text-sm">-</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 2. STANDARD HORIZONTAL GRID ANNEXURE LAYOUT -->
+            <div *ngIf="!isVerticalFormAnnexure(answer)" class="annexure-table-wrap">
               <table class="annexure-table">
                 <thead>
                   <tr>
@@ -668,7 +780,7 @@
                 <tbody>
                   <tr *ngFor="let row of answer.annexure_rows">
                     <td *ngFor="let column of annexureColumns(answer); let ci = index">
-                      {{ row.values?.[ci] || '-' }}
+                      {{ formatAnnexureCellValue(row.values?.[ci]) }}
                     </td>
 
                     <td *ngIf="isReCompliance()" class="reviewer-feedback-cell">
@@ -676,7 +788,7 @@
                       <div>{{ row.compliance_reviewer_comment || '-' }}</div>
 
                       <!-- Inline tiny timeline for annexure row -->
-                      <div *ngIf="getTimeline(row).length" class="row-timeline-inline">
+                      <div *ngIf="getTimeline(row).length > 2" class="row-timeline-inline">
                         <div *ngFor="let item of getTimeline(row); let index = index" class="row-timeline-item">
                           <div class="row-timeline-header">
                             <span class="round-badge">R{{ index + 1 }}</span>
@@ -685,9 +797,9 @@
                               }}</span>
                           </div>
                           <div class="row-timeline-body">
-                            <div *ngIf="item.audit_comment || item.answer_given" class="row-comment text-purple">
+                            <div *ngIf="formatTimelineAuditText(item)" class="row-comment text-purple">
                               <strong>Aud:</strong>
-                              {{ item.audit_comment || item.answer_given }}
+                              {{ formatTimelineAuditText(item) }}
                             </div>
                             <div *ngIf="
                                 item.compliance_reviewer_comment ||

@@ -53,6 +53,9 @@
         <button pButton type="button" label="View Executive Summary" icon="pi pi-file-edit" severity="info"
           (click)="viewExecutiveSummary()"></button>
 
+        <button pButton type="button" label="View Non-Agri Statement" icon="pi pi-file-excel" severity="info"
+          class="p-button-outlined" (click)="viewNonAgriStatement()"></button>
+
         <button *ngIf="canUseRemarks(detail()?.overview)" pButton type="button"
           [label]="remarks()?.unread_count ? 'Remarks (' + remarks().unread_count + ')' : 'Remarks'"
           [icon]="remarks()?.unread_count ? 'pi pi-bell' : 'pi pi-comments'"
@@ -404,7 +407,7 @@
                 <small>
                   {{ answer.menu_name }} / {{ answer.category_name }} / {{ answer.header_name }}
                 </small>
-                <h4>{{ answer.question || 'Assessment observation' }}</h4>
+                <h4>{{ getQuestionText(answer) }}</h4>
               </div>
             </div>
 
@@ -499,7 +502,7 @@
           </div>
 
           <!-- Timeline of older comments -->
-          <div *ngIf="getTimeline(answer).length" class="answers-timeline">
+          <div *ngIf="getTimeline(answer).length > 2" class="answers-timeline">
             <label class="timeline-title"><i class="pi pi-history"></i> Compliance History</label>
             
             <div class="timeline-toggle-container" *ngIf="getTimeline(answer).length > 1">
@@ -573,7 +576,7 @@
             </div>
           </div>
 
-          <div class="review-action">
+          <div class="review-action" *ngIf="!hasAnnexureRows(answer)">
             <textarea *ngIf="!isComplianceReview()" rows="2" [(ngModel)]="answer.audit_reviewer_comment"
               placeholder="Reviewer comment"></textarea>
 
@@ -643,14 +646,111 @@
           <div *ngIf="answer.annexure_rows?.length" class="annexure-review">
             <div class="annexure-title">
               <div class="flex align-items-center gap-2">
-                <span>Annexure Rows</span>
-                <small>{{ answer.annexure_rows.length }} row(s)</small>
+                <span>{{ isVerticalFormAnnexure(answer) ? (answer.annexure_name || 'Annexure Form') : 'Annexure Rows' }}</span>
+                <small>{{ answer.annexure_rows.length }} {{ isVerticalFormAnnexure(answer) ? 'form' : 'row(s)' }}</small>
               </div>
-              <button pButton type="button" label="Select Accept For All Rows" icon="pi pi-check" severity="secondary"
+              <button *ngIf="!isVerticalFormAnnexure(answer)" pButton type="button" label="Select Accept For All Rows" icon="pi pi-check" severity="secondary"
                 class="p-button-sm" (click)="selectAcceptForAllAnnexureRows(answer)"></button>
             </div>
 
-            <div class="annexure-review-table-wrap">
+            <!-- 1. VERTICAL FORM ANNEXURE LAYOUT -->
+            <div *ngIf="isVerticalFormAnnexure(answer)">
+              <div class="annexure-review-table-wrap mb-3">
+                <table class="annexure-vertical-table">
+                  <thead>
+                    <tr>
+                      <th style="width: 50px; text-align: center;">अ.क्र.</th>
+                      <th [style.width]="getFormColumns(answer).length > 2 ? '28%' : '35%'">तपशिल (Particulars)</th>
+                      <th *ngFor="let col of getFormColumns(answer)">
+                        {{ col.label || col.name }}
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr *ngFor="let column of annexureColumns(answer); let ci = index">
+                      <td style="text-align: center; font-weight: 700; color: #64748b;">{{ ci + 1 }}</td>
+                      <td class="font-medium text-800">{{ column.name || column.column_name }}</td>
+                      <td *ngFor="let col of getFormColumns(answer); let colIdx = index">
+                        {{ getFormCellValue(answer.annexure_rows[0], ci, col.key || colIdx, colIdx) }}
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <!-- Form Review Action Box -->
+              <div class="form-annexure-compliance-panel p-3 border-round mb-3" *ngFor="let row of answer.annexure_rows; trackBy: trackByRow" [class.re-compliance-needed-tr]="reviewStatus(row) === 3">
+                <div class="flex flex-wrap gap-3 align-items-start">
+                  <div class="flex-1" style="min-width: 220px;" *ngIf="isComplianceReview()">
+                    <label class="text-xs font-semibold text-500 block mb-1">Branch Remark</label>
+                    <div class="text-sm font-medium">{{ row.compliance_response || '-' }}</div>
+                  </div>
+
+                  <div style="min-width: 130px;">
+                    <label class="text-xs font-semibold text-500 block mb-1">Evidence</label>
+                    <div class="annexure-evidence-actions">
+                      <button *ngFor="let evidence of evidenceList(row); let ei = index; trackBy: trackByEvidence"
+                        pButton type="button" icon="pi pi-paperclip" severity="secondary" class="mr-1 mb-1"
+                        [title]="(isComplianceReview() ? 'View auditor supporting document ' : 'View evidence ') + (ei + 1)"
+                        (click)="viewEvidence(evidence)"></button>
+                      <button *ngFor="let evidence of isComplianceReview() ? evidenceList(row, 'compliance_evidence') : []; let ei = index; trackBy: trackByEvidence"
+                        pButton type="button" icon="pi pi-eye" severity="secondary" class="mr-1 mb-1"
+                        [title]="'View manager supporting document ' + (ei + 1)"
+                        (click)="viewEvidence(evidence)"></button>
+                    </div>
+                    <span *ngIf="!evidenceList(row).length && !evidenceList(row, 'compliance_evidence').length" class="text-secondary text-sm">-</span>
+                  </div>
+
+                  <div class="flex-1" style="min-width: 220px;">
+                    <label class="text-xs font-semibold text-500 block mb-1">Reviewer Comment</label>
+                    <textarea *ngIf="!isComplianceReview()" rows="2" class="w-full" [(ngModel)]="row.audit_reviewer_comment"
+                      placeholder="Reviewer comment"></textarea>
+
+                    <textarea *ngIf="isComplianceReview() && reviewStatus(row) !== 13" rows="2" class="w-full"
+                      [ngModel]="isSuperReviewer() ? row.super_reviewer_comment : row.compliance_reviewer_comment"
+                      (ngModelChange)="isSuperReviewer() ? (row.super_reviewer_comment = $event) : (row.compliance_reviewer_comment = $event)"
+                      [placeholder]="isSuperReviewer() ? 'Super Reviewer Remark' : 'Reviewer Remark'"></textarea>
+                  </div>
+
+                  <div style="min-width: 140px;">
+                    <label class="text-xs font-semibold text-500 block mb-1">Status</label>
+                    <p-tag [value]="liveComplianceStatusLabel(row)" [severity]="statusSeverity(reviewStatus(row))"></p-tag>
+                  </div>
+
+                  <div style="min-width: 160px;">
+                    <label class="text-xs font-semibold text-500 block mb-1">Action</label>
+                    <select class="answer-control w-full" [(ngModel)]="row.temp_action" [disabled]="
+                        (isLiveManagerComplianceReview() && !canTakeLiveComplianceReviewerAction(row)) ||
+                        reviewStatus(row) === 9
+                      " style="padding: 0.35rem">
+                      <option value="">Select Action</option>
+                      <option *ngIf="!isSuperReviewer()" [value]="2">Accept</option>
+                      <option [value]="3">
+                        {{
+                        isSuperReviewer()
+                        ? 'Reject'
+                        : isLiveManagerComplianceReview()
+                          ? 'Send To Manager'
+                          : isComplianceReview()
+                            ? 'Re-Compliance'
+                            : 'Re-Audit'
+                        }}
+                      </option>
+                      <ng-container *ngIf="isLiveManagerComplianceReview() && isEscalateFlowActive() && !isSuperReviewer()">
+                        <option [value]="8">Escalate</option>
+                      </ng-container>
+                      <ng-container *ngIf="isSuperReviewer() || (!isLiveManagerComplianceReview() || !isEscalateFlowActive())">
+                        <option [value]="5" *ngIf="isComplianceReview()">Carry Forward</option>
+                        <option [value]="7" *ngIf="isComplianceReview()">Partially Pass</option>
+                      </ng-container>
+                    </select>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 2. STANDARD HORIZONTAL GRID ANNEXURE LAYOUT -->
+            <div *ngIf="!isVerticalFormAnnexure(answer)" class="annexure-review-table-wrap">
               <table class="annexure-review-table">
                 <thead>
                   <tr>
@@ -669,13 +769,13 @@
                   <tr *ngFor="let row of answer.annexure_rows; trackBy: trackByRow"
                     [class.re-compliance-needed-tr]="reviewStatus(row) === 3">
                     <td *ngFor="let column of annexureColumns(answer); let ci = index; trackBy: trackByColumn">
-                      {{ row.values?.[ci] || '-' }}
+                      {{ formatAnnexureCellValue(row.values?.[ci]) }}
                     </td>
                     <td *ngIf="isComplianceReview()">
                       <div>{{ row.compliance_response || '-' }}</div>
 
                       <!-- Inline tiny timeline for annexure row -->
-                      <div *ngIf="getTimeline(row).length" class="row-timeline-inline">
+                      <div *ngIf="getTimeline(row).length > 2" class="row-timeline-inline">
                         <div *ngFor="let item of getTimeline(row); let index = index; trackBy: trackByIndex"
                           class="row-timeline-item">
                           <div class="row-timeline-header">
@@ -685,9 +785,9 @@
                               }}</span>
                           </div>
                           <div class="row-timeline-body">
-                            <div *ngIf="item.audit_comment || item.answer_given" class="row-comment text-purple">
+                            <div *ngIf="formatTimelineAuditText(item)" class="row-comment text-purple">
                               <strong>Aud:</strong>
-                              {{ item.audit_comment || item.answer_given }}
+                              {{ formatTimelineAuditText(item) }}
                             </div>
                             <div *ngIf="
                                 item.compliance_reviewer_comment ||

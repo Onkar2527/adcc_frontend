@@ -189,6 +189,28 @@ export class ReportViewerComponent implements OnInit {
     );
   }
 
+  isFormAnnexureRow(row: any): boolean {
+    return !!(row?.__is_form_annexure || row?.__annexure_rows?.[0]?.is_form || (row?.__form_particulars && row.__form_particulars.length > 0));
+  }
+
+  getFormMatrixColumns(row: any): any[] {
+    const cols = row?.__matrix_columns || row?.__annexure_rows?.[0]?.matrix_columns;
+    if (Array.isArray(cols) && cols.length > 0) return cols;
+    return [{ key: 'value', label: 'शेरा / माहिती (Details / Remarks)' }];
+  }
+
+  getFormParticulars(row: any): any[] {
+    return row?.__form_particulars || row?.__annexure_rows?.[0]?.form_particulars || [];
+  }
+
+  getFormParticularCellValue(part: any, mcol: any): string {
+    if (!part || !part.cell_values) return '-';
+    const key = mcol.key !== undefined ? mcol.key : mcol.name;
+    const v = part.cell_values[key] !== undefined ? part.cell_values[key] : part.cell_values[String(key)];
+    return v !== null && v !== undefined && String(v).trim() !== '' ? String(v).trim() : '-';
+  }
+
+
   getRiskWeightageTotalScore(): number {
     return this.rows().reduce((sum: number, row: any) => sum + Number(row.weighted_score || 0), 0);
   }
