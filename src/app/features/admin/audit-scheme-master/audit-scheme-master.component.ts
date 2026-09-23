@@ -20,6 +20,7 @@ import { FormDrawerService } from '../../../core/services/drawer/form-drawer.ser
 import { AuditSchemeMasterService } from '../services/masters.service';
 
 import { AuditSchemeFormComponent } from './audit-scheme-form.component';
+import { AuditSchemeQuestionMappingComponent } from './audit-scheme-question-mapping.component';
 import { MasterBulkUploadComponent } from '../shared/master-bulk-upload/master-bulk-upload.component';
 import { MasterBulkUploadService } from '../services/master-bulk-upload.service';
 
@@ -132,6 +133,17 @@ export class AuditSchemeMasterComponent implements OnInit {
         },
 
         {
+            field: '_mapping',
+            header: '',
+            type: 'action',
+            actionIcon: 'pi pi-link',
+            actionName: 'mapping',
+            width: '50px',
+            align: 'center',
+            tooltip: 'Question Mapping',
+        },
+
+        {
             field: '_status',
             header: '',
             type: 'action',
@@ -216,6 +228,26 @@ export class AuditSchemeMasterComponent implements OnInit {
         }
     }
 
+    async openQuestionMapping(row: any) {
+        const res = await this.drawer.open(
+            AuditSchemeQuestionMappingComponent,
+            {
+                header: 'Scheme Question Set Mapping',
+                data: row,
+                width: 'min(900px, 100vw)',
+            },
+        );
+
+        if (res?.saved) {
+            this.loadSchemes();
+            this.messageService.add({
+                severity: 'success',
+                summary: 'Success',
+                detail: 'Scheme question mapping updated successfully',
+            });
+        }
+    }
+
     async openBulkUpload() {
         const res = await this.drawer.open(MasterBulkUploadComponent, {
             header: 'Audit Scheme Bulk Upload',
@@ -236,6 +268,11 @@ export class AuditSchemeMasterComponent implements OnInit {
     }) {
         if (event.name === 'edit') {
             this.openForm(event.row);
+            return;
+        }
+
+        if (event.name === 'mapping') {
+            this.openQuestionMapping(event.row);
             return;
         }
 

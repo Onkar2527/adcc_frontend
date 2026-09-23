@@ -472,6 +472,16 @@ export class AuditSchemeMasterService {
   getCategories(schemeTypeId: number) {
     return this.http.get<any>(`${this.apiUrl}/categories/${schemeTypeId}`);
   }
+
+  getQuestionMapping(id: string | number) {
+    return this.http.get<any>(`${this.apiUrl}/question-mapping/${id}`);
+  }
+
+  updateQuestionMapping(id: string | number, question_set_ids: string) {
+    return this.http.patch<any>(`${this.apiUrl}/question-mapping/${id}`, {
+      question_set_ids,
+    });
+  }
 }
 
 export interface CreateQuestionSetDto {
