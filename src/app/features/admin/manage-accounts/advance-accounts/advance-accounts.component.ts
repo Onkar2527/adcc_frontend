@@ -48,8 +48,7 @@ import { AdvanceUploadDumpsComponent } from './advance-upload-dumps.component';
         TableComponent,
         TextFieldComponent,
         SelectFieldComponent,
-        DateFieldComponent,
-        DatePipe
+        DateFieldComponent
     ],
 
     providers: [

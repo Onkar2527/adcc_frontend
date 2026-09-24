@@ -6,6 +6,7 @@ import {
 } from '@angular/core';
 
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
+import { CommonModule } from '@angular/common';
 
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
@@ -26,6 +27,7 @@ import { ButtonModule } from 'primeng/button';
     selector: 'app-question-set-header-master',
     standalone: true,
     imports: [
+        CommonModule,
         RouterModule,
         TableComponent,
         ToastModule,

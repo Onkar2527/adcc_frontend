@@ -190,24 +190,209 @@ export class ReportViewerComponent implements OnInit {
   }
 
   isFormAnnexureRow(row: any): boolean {
-    return !!(row?.__is_form_annexure || row?.__annexure_rows?.[0]?.is_form || (row?.__form_particulars && row.__form_particulars.length > 0));
+    const layout = row?.annexure_layout_type || row?.__layout_type || row?.__annexure_rows?.[0]?.layout_type;
+    const annexId = Number(row?.annexure_id || row?.__annexure_id || row?.__annexure_rows?.[0]?.annexure_id || 0);
+    const rawMatrix = row?.__matrix_columns || row?.__annexure_rows?.[0]?.matrix_columns || row?.annexure_matrix_columns;
+
+    let hasCustomMatrix = false;
+    if (rawMatrix) {
+      try {
+        const parsed = typeof rawMatrix === 'string' ? JSON.parse(rawMatrix) : rawMatrix;
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          hasCustomMatrix = true;
+        }
+      } catch {}
+    }
+
+    return layout === 'form' || annexId === 36 || (!!row?.__is_form_annexure && hasCustomMatrix);
   }
 
   getFormMatrixColumns(row: any): any[] {
-    const cols = row?.__matrix_columns || row?.__annexure_rows?.[0]?.matrix_columns;
+    let cols =
+      row?.__matrix_columns ||
+      row?.__annexure_rows?.[0]?.matrix_columns ||
+      row?.__vouching_rows?.[0]?.matrix_columns ||
+      row?.annexure_matrix_columns;
+    if (typeof cols === 'string') {
+      try {
+        cols = JSON.parse(cols);
+      } catch {
+        cols = null;
+      }
+    }
     if (Array.isArray(cols) && cols.length > 0) return cols;
     return [{ key: 'value', label: 'शेरा / माहिती (Details / Remarks)' }];
   }
 
-  getFormParticulars(row: any): any[] {
-    return row?.__form_particulars || row?.__annexure_rows?.[0]?.form_particulars || [];
+  extractFormParticulars(row: any, questionRow?: any): any[] {
+    const mCols = this.getFormMatrixColumns({ ...questionRow, ...row });
+
+    // 1. Check if backend already formatted form_particulars with answers
+    const existingParts =
+      questionRow?.__annexure_rows?.[0]?.form_particulars ||
+      row?.__annexure_rows?.[0]?.form_particulars ||
+      row?.__form_particulars ||
+      questionRow?.__form_particulars;
+
+    if (Array.isArray(existingParts) && existingParts.length > 0) {
+      return existingParts.map((p: any, pIdx: number) => {
+        const cv: Record<string, any> = { ...(p.cell_values || {}) };
+        mCols.forEach((mc: any, mIdx: number) => {
+          const k = mc.key !== undefined ? mc.key : mc.name;
+          let val = cv[k];
+          if (val === undefined || val === null || val === '') {
+            val = cv[String(k)] ?? cv[mc.label] ?? cv[mc.name] ?? cv[mIdx] ?? cv[String(mIdx)];
+          }
+          if (val !== undefined && val !== null) {
+            cv[k] = val;
+            if (mc.label) cv[mc.label] = val;
+            if (mc.name) cv[mc.name] = val;
+            cv[mIdx] = val;
+            cv[String(mIdx)] = val;
+          }
+        });
+        return {
+          sr_no: p.sr_no || (pIdx + 1),
+          particular: p.particular || p.name || `Particular ${pIdx + 1}`,
+          cell_values: cv,
+          display_text: p.display_text,
+        };
+      });
+    }
+
+    // 2. Fallback: Parse from raw answer_given or vouching rows
+    let annexCols = questionRow?.annexure_columns || row?.annexure_columns || row?.__vouching_columns;
+    if (typeof annexCols === 'string') {
+      try {
+        annexCols = JSON.parse(annexCols);
+      } catch {}
+    }
+
+    const vRow = row.__vouching_rows?.[0] || row.__annexure_rows?.[0] || questionRow?.__vouching_rows?.[0] || questionRow?.__annexure_rows?.[0];
+    let rawAnswers = vRow?.answer_given || questionRow?.answer_given;
+    if (typeof rawAnswers === 'string') {
+      try {
+        rawAnswers = JSON.parse(rawAnswers);
+      } catch {}
+    }
+    if (!rawAnswers || !Array.isArray(rawAnswers)) {
+      rawAnswers = vRow?.values || vRow?.cells || [];
+    }
+
+    if (Array.isArray(annexCols) && annexCols.length > 0) {
+      return annexCols.map((col: any, ci: number) => {
+        let cellVal = Array.isArray(rawAnswers) ? rawAnswers[ci] : rawAnswers?.[ci];
+        if (typeof cellVal === 'string' && (cellVal.startsWith('{') || cellVal.startsWith('['))) {
+          try {
+            cellVal = JSON.parse(cellVal);
+          } catch {}
+        }
+        if (typeof cellVal === 'string' && /^\d+\)\s*/.test(cellVal)) {
+          cellVal = cellVal.replace(/^\d+\)\s*/, '');
+        }
+
+        const cellValues: Record<string, string> = {};
+
+        mCols.forEach((mCol: any, mIdx: number) => {
+          let v: any = '-';
+          if (cellVal !== undefined && cellVal !== null) {
+            if (typeof cellVal === 'object' && !Array.isArray(cellVal)) {
+              v = cellVal[mCol.key] !== undefined
+                ? cellVal[mCol.key]
+                : (cellVal[mCol.name] !== undefined
+                  ? cellVal[mCol.name]
+                  : (cellVal[mCol.label] !== undefined
+                    ? cellVal[mCol.label]
+                    : (cellVal[mIdx] !== undefined
+                      ? cellVal[mIdx]
+                      : (cellVal[String(mIdx)] !== undefined ? cellVal[String(mIdx)] : '-'))));
+            } else if (Array.isArray(cellVal)) {
+              v = cellVal[mIdx] !== undefined ? cellVal[mIdx] : '-';
+            } else if (mIdx === 0 || mCol.key === 'value') {
+              v = cellVal;
+            }
+          }
+          if (typeof v === 'object' && v !== null) {
+            v = (v as any).value || Object.values(v).filter((x: any) => x !== null && x !== undefined && String(x).trim() !== '').join(', ') || '-';
+          }
+          const valStr = v !== null && v !== undefined && String(v).trim() !== '' && String(v).trim() !== '[object Object]' ? String(v).trim() : '-';
+          cellValues[mCol.key || String(mIdx)] = valStr;
+          if (mCol.name) cellValues[mCol.name] = valStr;
+          if (mCol.label) cellValues[mCol.label] = valStr;
+          cellValues[mIdx] = valStr;
+          cellValues[String(mIdx)] = valStr;
+          cellValues['value'] = cellValues['value'] || valStr;
+        });
+
+        return {
+          sr_no: ci + 1,
+          particular: col.label || col.name || col.column_name || `Particular ${ci + 1}`,
+          cell_values: cellValues,
+        };
+      });
+    }
+
+    return [];
   }
 
-  getFormParticularCellValue(part: any, mcol: any): string {
+  getFormParticulars(row: any): any[] {
+    return this.extractFormParticulars(row);
+  }
+
+  getFormParticularCellValue(part: any, mcol: any, mIdx?: number): string {
     if (!part || !part.cell_values) return '-';
-    const key = mcol.key !== undefined ? mcol.key : mcol.name;
-    const v = part.cell_values[key] !== undefined ? part.cell_values[key] : part.cell_values[String(key)];
-    return v !== null && v !== undefined && String(v).trim() !== '' ? String(v).trim() : '-';
+    const cv = part.cell_values;
+    const key = mcol?.key !== undefined ? mcol.key : mcol?.name;
+
+    let v = cv[key];
+    if (v === undefined || v === null || String(v).trim() === '' || String(v).trim() === '[object Object]') {
+      v = cv[String(key)];
+    }
+    if (v === undefined || v === null || String(v).trim() === '' || String(v).trim() === '[object Object]') {
+      if (mcol?.label && cv[mcol.label] !== undefined) v = cv[mcol.label];
+    }
+    if (v === undefined || v === null || String(v).trim() === '' || String(v).trim() === '[object Object]') {
+      if (mcol?.name && cv[mcol.name] !== undefined) v = cv[mcol.name];
+    }
+    if (v === undefined || v === null || String(v).trim() === '' || String(v).trim() === '[object Object]') {
+      if (mIdx !== undefined && cv[mIdx] !== undefined) v = cv[mIdx];
+    }
+    if (v === undefined || v === null || String(v).trim() === '' || String(v).trim() === '[object Object]') {
+      if (mIdx !== undefined && cv[String(mIdx)] !== undefined) v = cv[String(mIdx)];
+    }
+
+    if (v !== undefined && v !== null) {
+      if (typeof v === 'object') {
+        const joined = Object.values(v).filter((x: any) => x !== null && x !== undefined && String(x).trim() !== '').join(', ');
+        return joined || '-';
+      }
+      const s = String(v).trim();
+      return s !== '' && s !== '[object Object]' ? s : '-';
+    }
+
+    return '-';
+  }
+
+  formatVouchingCell(cell: any): string {
+    if (cell === null || cell === undefined) return '-';
+    if (typeof cell === 'object') {
+      const val = cell.value || Object.values(cell).filter((x: any) => x !== null && x !== undefined && String(x).trim() !== '').join(', ');
+      return String(val || '-').trim() || '-';
+    }
+    const str = String(cell).trim();
+    if (str === '[object Object]' || str === '') return '-';
+    return str;
+  }
+
+  formatAnnexureDescription(desc: any): string {
+    if (desc === null || desc === undefined) return '-';
+    if (typeof desc === 'object') {
+      const val = desc.value || Object.values(desc).filter((x: any) => x !== null && x !== undefined && String(x).trim() !== '').join(' | ');
+      return String(val || '-').trim() || '-';
+    }
+    const str = String(desc).trim();
+    if (str === '[object Object]' || str === '') return '-';
+    return str;
   }
 
 
@@ -525,12 +710,80 @@ export class ReportViewerComponent implements OnInit {
           this.qwsTotals.set(this.calcQwsTotals(res?.rows || []));
           this.rows.set([{ _placeholder: true }]); // non-empty so the sheet shows
         } else {
+          let lastQuestionRow: any = null;
           const processedRows = (res?.rows || []).map((row: any) => {
             const isMultiple = isHeaderMultiple || !!row.is_multiple_auditors;
+            let updatedRow = { ...row };
             if (isMultiple && row.question && row.auditor_emp_code && row.auditor_emp_code !== '-') {
-              return { ...row, question: `[${row.auditor_emp_code}] ${row.question}` };
+              updatedRow.question = `[${row.auditor_emp_code}] ${row.question}`;
             }
-            return row;
+
+            if (!updatedRow.__report_group && !updatedRow.__report_annexure && !updatedRow.__report_vouching && !updatedRow.__report_unsampled_table) {
+              lastQuestionRow = updatedRow;
+            }
+
+            const layout = updatedRow.annexure_layout_type || updatedRow.__layout_type || lastQuestionRow?.annexure_layout_type;
+            const annexId = Number(updatedRow.annexure_id || lastQuestionRow?.annexure_id || lastQuestionRow?.question_annexure_id || 0);
+            const rawMatrix = updatedRow.annexure_matrix_columns || updatedRow.__matrix_columns || updatedRow.__annexure_rows?.[0]?.matrix_columns || lastQuestionRow?.annexure_matrix_columns;
+            let matrixCols: any[] | null = null;
+            if (rawMatrix) {
+              try {
+                const parsed = typeof rawMatrix === 'string' ? JSON.parse(rawMatrix) : rawMatrix;
+                if (Array.isArray(parsed) && parsed.length > 0) {
+                  matrixCols = parsed;
+                }
+              } catch {}
+            }
+
+            const isForm = layout === 'form' || annexId === 36 || (!!matrixCols && matrixCols.length > 0);
+
+            if (isForm && (updatedRow.__report_vouching || updatedRow.__report_annexure)) {
+              // True Form Annexure with matrix columns
+              const particulars = this.extractFormParticulars(updatedRow, lastQuestionRow);
+              return {
+                ...updatedRow,
+                __report_annexure: true,
+                __report_vouching: false,
+                __is_form_annexure: true,
+                __annexure_id: annexId,
+                __layout_type: 'form',
+                annexure_layout_type: 'form',
+                __form_particulars: particulars,
+                __matrix_columns: matrixCols || [{ key: 'value', label: 'शेरा / माहिती (Details / Remarks)' }],
+                __annexure_rows: updatedRow.__annexure_rows || updatedRow.__vouching_rows,
+              };
+            }
+
+            // Standard Horizontal Grid Annexure: clean up cells in vouching rows
+            if (updatedRow.__report_vouching && Array.isArray(updatedRow.__vouching_rows)) {
+              const particulars = updatedRow.__annexure_rows?.[0]?.form_particulars || [];
+              const cleanedVouchingRows = updatedRow.__vouching_rows.map((vr: any, rIdx: number) => {
+                const cells = (vr.cells || []).map((cell: any, cIdx: number) => {
+                  let str = typeof cell === 'object' && cell !== null
+                    ? ((cell as any).value !== undefined ? (cell as any).value : Object.values(cell).filter(Boolean).join(', '))
+                    : String(cell || '');
+
+                  if (str.includes('[object Object]')) {
+                    const recovered = particulars[cIdx]?.cell_values?.value ||
+                      (particulars[cIdx]?.cell_values ? Object.values(particulars[cIdx].cell_values)[0] : null);
+                    if (recovered && recovered !== '-' && String(recovered) !== '[object Object]') {
+                      str = cIdx === 0 ? `${rIdx + 1}) ${recovered}` : String(recovered);
+                    } else {
+                      str = cIdx === 0 ? `${rIdx + 1}) -` : '-';
+                    }
+                  }
+                  return str;
+                });
+                return { ...vr, cells };
+              });
+
+              return {
+                ...updatedRow,
+                __vouching_rows: cleanedVouchingRows,
+              };
+            }
+
+            return updatedRow;
           });
           this.rows.set(processedRows);
         }

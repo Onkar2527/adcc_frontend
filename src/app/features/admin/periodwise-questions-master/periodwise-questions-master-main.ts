@@ -6,7 +6,6 @@ import {
     TextFieldComponent,
     FormActionsComponent,
     SelectFieldComponent,
-    CheckboxFieldComponent,
     MultiSelectFieldComponent
 } from '../../../shared/components/form';
 
@@ -26,7 +25,6 @@ import { MessageService } from 'primeng/api';
         CommonModule,
         TextFieldComponent,
         SelectFieldComponent,
-        CheckboxFieldComponent,
         MultiSelectFieldComponent,
         FormActionsComponent
     ],

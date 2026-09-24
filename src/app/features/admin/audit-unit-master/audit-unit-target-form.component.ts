@@ -3,8 +3,6 @@ import { CommonModule } from '@angular/common';
 import { MessageService } from 'primeng/api';
 import { FormDrawerRef } from '../../../core/services/drawer/form-drawer.ref';
 import {
-  CheckboxFieldComponent,
-  DateFieldComponent,
   FormActionsComponent,
   SelectFieldComponent,
   TextFieldComponent
@@ -18,8 +16,6 @@ import { AuditSectionService, AuditUnitService, CreateAuditUnitDto, EmployeeServ
     CommonModule,
     TextFieldComponent,
     SelectFieldComponent,
-    DateFieldComponent,
-    CheckboxFieldComponent,
     FormActionsComponent
   ],
   template: `

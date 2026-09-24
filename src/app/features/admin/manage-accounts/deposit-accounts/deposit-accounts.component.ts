@@ -48,8 +48,7 @@ import { DepositUploadDumpsComponent } from './deposit-upload-dumps.component';
         TableComponent,
         TextFieldComponent,
         SelectFieldComponent,
-        DateFieldComponent,
-        DatePipe
+        DateFieldComponent
     ],
 
     providers: [

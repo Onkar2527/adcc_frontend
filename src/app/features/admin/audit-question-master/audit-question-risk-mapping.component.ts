@@ -20,8 +20,6 @@ import {
 } from '../../../shared/components/table/table.component';
 
 import {
-    CheckboxFieldComponent,
-    FormActionsComponent,
     SelectFieldComponent,
     TextFieldComponent,
 } from '../../../shared/components/form';
@@ -49,8 +47,6 @@ import { ButtonModule } from 'primeng/button';
 
         TextFieldComponent,
         SelectFieldComponent,
-        CheckboxFieldComponent,
-        FormActionsComponent,
         ButtonModule
     ],
 

@@ -12,7 +12,6 @@ import {
 import {
     DateFieldComponent,
     SelectFieldComponent,
-    TextFieldComponent
 } from '../../../shared/components/form';
 
 import { FormDrawerService } from '../../../core/services/drawer/form-drawer.service';
@@ -34,7 +33,6 @@ import { AssessmentDetailsFormComponent } from './assement-details.component';
         ToastModule,
         ButtonModule,
         SelectFieldComponent,
-        TextFieldComponent,
         DateFieldComponent
     ],
     providers: [MessageService],

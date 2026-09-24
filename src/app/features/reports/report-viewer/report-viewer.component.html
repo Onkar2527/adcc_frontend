@@ -969,23 +969,23 @@
                     <tr *ngFor="let part of getFormParticulars(row); let pi = index">
                       <td style="text-align: center; font-weight: 700; color: #475569;">{{ part.sr_no || (pi + 1) }}</td>
                       <td class="font-medium" style="color: #1e293b;">{{ part.particular }}</td>
-                      <td *ngFor="let mcol of getFormMatrixColumns(row)">
-                        {{ getFormParticularCellValue(part, mcol) }}
+                      <td *ngFor="let mcol of getFormMatrixColumns(row); let mi = index">
+                        {{ getFormParticularCellValue(part, mcol, mi) }}
                       </td>
                       <td *ngIf="showsNestedComplianceColumn() && pi === 0" [attr.rowspan]="getFormParticulars(row).length">
-                        {{ row.__annexure_rows?.[0]?.audit_commpliance || '-' }}
+                        {{ (row.__annexure_rows?.[0] || row.__vouching_rows?.[0])?.audit_commpliance || '-' }}
                       </td>
                       <td *ngIf="pi === 0" [attr.rowspan]="getFormParticulars(row).length">
-                        {{ row.__annexure_rows?.[0]?.business_risk_label || '-' }}
+                        {{ (row.__annexure_rows?.[0] || row.__vouching_rows?.[0])?.business_risk_label || '-' }}
                       </td>
                       <td *ngIf="pi === 0" [attr.rowspan]="getFormParticulars(row).length">
-                        {{ row.__annexure_rows?.[0]?.control_risk_label || '-' }}
+                        {{ (row.__annexure_rows?.[0] || row.__vouching_rows?.[0])?.control_risk_label || '-' }}
                       </td>
                       <td *ngIf="pi === 0" [attr.rowspan]="getFormParticulars(row).length">
-                        {{ row.__annexure_rows?.[0]?.risk_category || '-' }}
+                        {{ (row.__annexure_rows?.[0] || row.__vouching_rows?.[0])?.risk_category || '-' }}
                       </td>
                       <td *ngIf="showsNestedReviewerCommentColumn() && pi === 0" [attr.rowspan]="getFormParticulars(row).length">
-                        {{ row.__annexure_rows?.[0]?.compliance_reviewer_comment || '-' }}
+                        {{ (row.__annexure_rows?.[0] || row.__vouching_rows?.[0])?.compliance_reviewer_comment || '-' }}
                       </td>
                     </tr>
                   </tbody>
@@ -1005,15 +1005,15 @@
                   </thead>
                   <tbody>
                     <tr *ngFor="let annexureRow of row.__annexure_rows || []">
-                      <td>{{ annexureRow.description }}</td>
+                      <td>{{ formatAnnexureDescription(annexureRow.description) }}</td>
                       <td *ngIf="showsNestedComplianceColumn()">
-                        {{ annexureRow.audit_commpliance }}
+                        {{ annexureRow.audit_commpliance || '-' }}
                       </td>
-                      <td>{{ annexureRow.business_risk_label }}</td>
-                      <td>{{ annexureRow.control_risk_label }}</td>
-                      <td>{{ annexureRow.risk_category }}</td>
+                      <td>{{ annexureRow.business_risk_label || '-' }}</td>
+                      <td>{{ annexureRow.control_risk_label || '-' }}</td>
+                      <td>{{ annexureRow.risk_category || '-' }}</td>
                       <td *ngIf="showsNestedReviewerCommentColumn()">
-                        {{ annexureRow.compliance_reviewer_comment }}
+                        {{ annexureRow.compliance_reviewer_comment || '-' }}
                       </td>
                     </tr>
                   </tbody>
@@ -1039,7 +1039,7 @@
                   <tbody>
                     <tr *ngFor="let vouchingRow of row.__vouching_rows || []">
                       <td *ngFor="let cell of vouchingRow.cells || []">
-                        {{ cell }}
+                        {{ formatVouchingCell(cell) }}
                       </td>
                       <td *ngIf="showsNestedComplianceColumn()">
                         {{ vouchingRow.audit_commpliance }}

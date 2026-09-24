@@ -2,13 +2,13 @@ import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
-import { NumberFieldComponent, FormActionsComponent, TextFieldComponent } from '../../../shared/components/form';
+import { NumberFieldComponent, FormActionsComponent } from '../../../shared/components/form';
 import { PasswordPolicy, PasswordPolicyService } from '../services/masters.service';
 
 @Component({
   selector: 'app-password-policy-master',
   standalone: true,
-  imports: [CommonModule, ToastModule, NumberFieldComponent, FormActionsComponent, TextFieldComponent],
+  imports: [CommonModule, ToastModule, NumberFieldComponent, FormActionsComponent],
   providers: [MessageService],
   template: `
     <div class="card">

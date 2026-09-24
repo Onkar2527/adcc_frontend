@@ -15,7 +15,6 @@ import { FormDrawerRef } from '../../../core/services/drawer/form-drawer.ref';
 import {
     CheckboxFieldComponent,
     FormActionsComponent,
-    NumberFieldComponent,
     SelectFieldComponent,
     TextFieldComponent,
 } from '../../../shared/components/form';
@@ -38,7 +37,7 @@ import { ToastModule } from 'primeng/toast';
         SelectFieldComponent,
         TextFieldComponent,
         CheckboxFieldComponent,
-        FormActionsComponent, NumberFieldComponent
+        FormActionsComponent
     ],
 
     template: `

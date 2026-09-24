@@ -5,8 +5,6 @@ import { FormDrawerRef } from '../../../core/services/drawer/form-drawer.ref';
 import {
   TextFieldComponent,
   FormActionsComponent,
-  SelectFieldComponent,
-  CheckboxFieldComponent
 } from '../../../shared/components/form';
 
 import {
@@ -21,8 +19,6 @@ import {
   imports: [
     CommonModule,
     TextFieldComponent,
-    SelectFieldComponent,
-    CheckboxFieldComponent,
     FormActionsComponent
   ],
   template: `
