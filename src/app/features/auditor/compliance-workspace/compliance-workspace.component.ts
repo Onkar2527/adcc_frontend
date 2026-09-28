@@ -809,6 +809,11 @@ export class ComplianceWorkspaceComponent implements OnInit {
     annexureColumns(
         answer: any,
     ) {
+        const val = String(answer?.answer_given || '').toUpperCase();
+        if (val === '72' || val === 'OTHER_DISCREPANCIES' || val === 'OTHER DISCREPANCIES') {
+            return [{ id: 234, name: 'Discrepancies' }];
+        }
+
         const columns =
             Array.isArray(answer?.annexure_columns)
                 ? answer.annexure_columns
@@ -901,6 +906,24 @@ export class ComplianceWorkspaceComponent implements OnInit {
         return String(val);
     }
 
+    formatAnswerGiven(answer: any): string {
+        const val = String(answer?.answer_given || '').trim();
+        if (!val) {
+            return '-';
+        }
+        const upper = val.toUpperCase();
+        if (upper === '72' || upper === 'OTHER_DISCREPANCIES' || upper === 'OTHER DISCREPANCIES') {
+            return 'Other Discrepancies';
+        }
+        if (answer?.annexure_id && val === String(answer.annexure_id)) {
+            return 'As per annexure';
+        }
+        if (Number(answer?.option_id) === 4 && (!isNaN(Number(val)) && Number(val) > 0)) {
+            return 'As per annexure';
+        }
+        return val;
+    }
+
     formatTimelineAuditText(item: any): string {
         if (item?.audit_comment && String(item.audit_comment).trim()) {
             return item.audit_comment;
@@ -910,6 +933,9 @@ export class ComplianceWorkspaceComponent implements OnInit {
         const s = String(ans).trim();
         if (s.startsWith('[') || s.startsWith('{')) {
             return '';
+        }
+        if (s === '72' || s.toUpperCase() === 'OTHER_DISCREPANCIES' || s.toUpperCase() === 'OTHER DISCREPANCIES') {
+            return 'Other Discrepancies';
         }
         return s;
     }

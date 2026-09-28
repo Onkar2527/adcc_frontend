@@ -487,7 +487,7 @@
           <div class="answer-body">
             <div>
               <label>Auditor Answer</label>
-              <p>{{ answer.answer_given || '-' }}</p>
+              <p>{{ formatAnswerGiven(answer) }}</p>
             </div>
 
             <div>
@@ -525,7 +525,7 @@
                     </div>
                     <div class="flex flex-row flex-wrap gap-4 align-items-center w-full mt-2">
                       <div *ngIf="item.audit_comment || item.answer_given" class="timeline-entry auditor-entry">
-                        <span class="timeline-author font-bold">Auditor Feedback<span class="timeline-date" *ngIf="item.answer_given"> (Answer: {{ item.answer_given }})</span>:</span>
+                        <span class="timeline-author font-bold">Auditor Feedback<span class="timeline-date" *ngIf="item.answer_given"> (Answer: {{ formatAnswerGiven(item) }})</span>:</span>
                         <span class="timeline-text ml-1" *ngIf="item.audit_comment">{{ item.audit_comment }}</span>
                       </div>
                        <div *ngIf="

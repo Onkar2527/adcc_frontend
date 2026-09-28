@@ -1307,7 +1307,7 @@
                   </ng-container>
                   <ng-template #noAccount>-</ng-template>
                 </td>
-                <td>{{ item.answer_given || '-' }}</td>
+                <td>{{ formatAnswerGiven(item) }}</td>
                 <td>{{ item.audit_comment || '-' }}</td>
                 <td>{{ item.compliance || '-' }}</td>
                 <td>{{ item.business_risk_label }}</td>

@@ -1367,7 +1367,7 @@
                         >
                           <thead>
                             <tr>
-                              <th *ngFor="let column of question.annexure.columns; trackBy: trackByColumn">
+                              <th *ngFor="let column of getAnnexureDisplayColumns(question); trackBy: trackByColumn">
                                 {{ column.name }}
                               </th>
                               <th>Business Risk</th>
@@ -1389,7 +1389,7 @@
 
                           <tbody>
                             <tr *ngFor="let row of question.annexure_rows; trackBy: trackByRow">
-                              <td *ngFor="let column of question.annexure.columns; let ci = index; trackBy: trackByColumn">
+                              <td *ngFor="let column of getAnnexureDisplayColumns(question); let ci = index; trackBy: trackByColumn">
                                 {{ row.values?.[ci] || '-' }}
                               </td>
 
@@ -2027,7 +2027,7 @@
                           "
                           class="annexure-column-list"
                         >
-                          <span *ngFor="let column of subsetQuestion.annexure.columns; trackBy: trackByColumn">
+                          <span *ngFor="let column of getAnnexureDisplayColumns(subsetQuestion); trackBy: trackByColumn">
                             {{ column.name }}
                           </span>
                         </div>
@@ -2425,7 +2425,7 @@
                             >
                               <thead>
                                 <tr>
-                                  <th *ngFor="let column of subsetQuestion.annexure.columns; trackBy: trackByColumn">
+                                  <th *ngFor="let column of getAnnexureDisplayColumns(subsetQuestion); trackBy: trackByColumn">
                                     {{ column.name }}
                                   </th>
                                   <th>Business Risk</th>
@@ -2449,7 +2449,7 @@
                                 <tr *ngFor="let row of subsetQuestion.annexure_rows; trackBy: trackByRow">
                                   <td
                                     *ngFor="
-                                      let column of subsetQuestion.annexure.columns;
+                                      let column of getAnnexureDisplayColumns(subsetQuestion);
                                       let ci = index;
                                       trackBy: trackByColumn
                                     "

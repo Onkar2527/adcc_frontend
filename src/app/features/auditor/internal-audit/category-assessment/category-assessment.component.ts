@@ -774,7 +774,7 @@ export class CategoryAssessmentComponent
             options.push({
 
                 value:
-                    'OTHER_DISCREPANCIES',
+                    '72',
 
                 label:
                     'Other Discrepancies',
@@ -1107,6 +1107,8 @@ export class CategoryAssessmentComponent
             && (
                 (question?.annexure_id && val === String(question.annexure_id))
                 ||
+                val === '72'
+                ||
                 val.toUpperCase() === 'OTHER_DISCREPANCIES'
                 ||
                 val.toUpperCase() === 'OTHER DISCREPANCIES'
@@ -1116,8 +1118,8 @@ export class CategoryAssessmentComponent
     isOtherDiscrepanciesSelected(
         question: any,
     ): boolean {
-        const val = String(question?.answer_value || '').toUpperCase();
-        return val === 'OTHER_DISCREPANCIES' || val === 'OTHER DISCREPANCIES';
+        const val = String(question?.answer_value || question?.answer?.answer_given || '').toUpperCase();
+        return val === '72' || val === 'OTHER_DISCREPANCIES' || val === 'OTHER DISCREPANCIES';
     }
 
     selectDefaultAnswers(
@@ -1480,9 +1482,14 @@ export class CategoryAssessmentComponent
             return;
         }
 
-        if (
-            Number(question?.option_id) === 4
-        ) {
+        if (Number(question?.option_id) === 4) {
+            const isAnnexureSelected = this.buildIsAnnexureSelected(question);
+            const isOther = this.isOtherDiscrepanciesSelected(question);
+            const isGrid = isOther || question?.annexure?.layout_type === 'grid' || !this.isVerticalFormAnnexure(question);
+
+            if (isAnnexureSelected && isGrid) {
+                question.is_compliance = true;
+            }
             return;
         }
 
@@ -2547,7 +2554,7 @@ export class CategoryAssessmentComponent
         const targetRow =
             row || (isForm ? question?.annexure_rows?.[0] : null);
 
-        const colCount = isOther ? Math.max(columns.length, 1) : columns.length;
+        const colCount = isOther ? 1 : columns.length;
         const valueCount = colCount > 0 ? colCount : 1;
         const valuesList = [];
         for (let i = 0; i < valueCount; i++) {
@@ -2642,6 +2649,9 @@ export class CategoryAssessmentComponent
     isVerticalFormAnnexure(
         question: any,
     ) {
+        if (this.isOtherDiscrepanciesSelected(question)) {
+            return false;
+        }
         const layout = question?.annexure?.layout_type;
         const annexId = Number(question?.annexure?.id || question?.annexure_id || 0);
         return layout === 'form' || annexId === 36;
@@ -2727,10 +2737,22 @@ export class CategoryAssessmentComponent
     annexureColumnCount(
         question: any,
     ) {
+        if (this.isOtherDiscrepanciesSelected(question)) {
+            return 1;
+        }
         return Math.max(
             question?.annexure?.columns?.length || 0,
             1,
         );
+    }
+
+    getAnnexureDisplayColumns(
+        question: any,
+    ): any[] {
+        if (this.isOtherDiscrepanciesSelected(question)) {
+            return [{ id: 234, name: 'Discrepancies' }];
+        }
+        return question?.annexure?.columns || [];
     }
 
     annexureEntryGridTemplate(
@@ -2822,6 +2844,9 @@ export class CategoryAssessmentComponent
                 this.employeeId,
                 {
                     ...question.annexure_draft,
+                    annexure_id: this.isOtherDiscrepanciesSelected(question) ? 72 : Number(question.annexure_id),
+                    answer_value: this.isOtherDiscrepanciesSelected(question) ? '72' : String(question.answer_value || question.annexure_id),
+                    is_other_discrepancies: this.isOtherDiscrepanciesSelected(question),
                     audit_compulsary_ev_upload: question.audit_compulsary_ev_upload === true ? 1 : 0,
                     is_compliance: question.is_compliance === true ? 1 : 0,
                 },

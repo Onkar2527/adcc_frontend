@@ -11,7 +11,7 @@ import {
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
-import { forkJoin } from 'rxjs';
+import { concat, forkJoin, toArray } from 'rxjs';
 import { ConfirmationService } from 'primeng/api';
 import { ButtonModule } from 'primeng/button';
 import { SkeletonModule } from 'primeng/skeleton';
@@ -1444,6 +1444,11 @@ export class ReviewerWorkspaceComponent implements OnInit {
     annexureColumns(
         answer: any,
     ) {
+        const val = String(answer?.answer_given || '').toUpperCase();
+        if (val === '72' || val === 'OTHER_DISCREPANCIES' || val === 'OTHER DISCREPANCIES') {
+            return [{ id: 234, name: 'Discrepancies' }];
+        }
+
         const columns =
             Array.isArray(answer?.annexure_columns)
                 ? answer.annexure_columns
@@ -1536,6 +1541,24 @@ export class ReviewerWorkspaceComponent implements OnInit {
         return String(val);
     }
 
+    formatAnswerGiven(answer: any): string {
+        const val = String(answer?.answer_given || '').trim();
+        if (!val) {
+            return '-';
+        }
+        const upper = val.toUpperCase();
+        if (upper === '72' || upper === 'OTHER_DISCREPANCIES' || upper === 'OTHER DISCREPANCIES') {
+            return 'Other Discrepancies';
+        }
+        if (answer?.annexure_id && val === String(answer.annexure_id)) {
+            return 'As per annexure';
+        }
+        if (Number(answer?.option_id) === 4 && (!isNaN(Number(val)) && Number(val) > 0)) {
+            return 'As per annexure';
+        }
+        return val;
+    }
+
     formatTimelineAuditText(item: any): string {
         if (item?.audit_comment && String(item.audit_comment).trim()) {
             return item.audit_comment;
@@ -1545,6 +1568,9 @@ export class ReviewerWorkspaceComponent implements OnInit {
         const s = String(ans).trim();
         if (s.startsWith('[') || s.startsWith('{')) {
             return '';
+        }
+        if (s === '72' || s.toUpperCase() === 'OTHER_DISCREPANCIES' || s.toUpperCase() === 'OTHER DISCREPANCIES') {
+            return 'Other Discrepancies';
         }
         return s;
     }
@@ -1614,29 +1640,28 @@ export class ReviewerWorkspaceComponent implements OnInit {
                 () => {
                     this.bulkSaving.set(true);
 
-                    forkJoin(
-                        targets.map(
-                            (target) =>
-                                this.isComplianceReview()
-                                    ? this.service.saveReviewerComplianceAction(
-                                        assessmentId,
-                                        target.type,
-                                        Number(target.observation.id),
-                                        this.employeeId(),
-                                        action,
-                                        this.reviewComment(target.observation),
-                                    )
-                                    : this.service.saveReviewerAction(
-                                        assessmentId,
-                                        target.type,
-                                        Number(target.observation.id),
-                                        this.employeeId(),
-                                        action,
-                                        this.reviewComment(target.observation),
-                                    ),
-                        ),
-                    )
-                        .subscribe({
+                    const requests = targets.map(
+                        (target) =>
+                            this.isComplianceReview()
+                                ? this.service.saveReviewerComplianceAction(
+                                    assessmentId,
+                                    target.type,
+                                    Number(target.observation.id),
+                                    this.employeeId(),
+                                    action,
+                                    this.reviewComment(target.observation),
+                                )
+                                : this.service.saveReviewerAction(
+                                    assessmentId,
+                                    target.type,
+                                    Number(target.observation.id),
+                                    this.employeeId(),
+                                    action,
+                                    this.reviewComment(target.observation),
+                                ),
+                    );
+
+                    concat(...requests).pipe(toArray()).subscribe({
                             next: () => {
                                 this.notification.success(
                                     action === 2
@@ -1770,7 +1795,7 @@ export class ReviewerWorkspaceComponent implements OnInit {
                 );
         });
 
-        forkJoin(requests).subscribe({
+        concat(...requests).pipe(toArray()).subscribe({
             next: () => {
                 this.notification.success(
                     'All annexure review actions saved successfully.',

@@ -1785,4 +1785,22 @@ export class ReportViewerComponent implements OnInit {
   trackByRow(index: number, item: any) {
     return item.id || item.sr_no || item.__group_label || item.__unsampled_table_title || index;
   }
+
+  formatAnswerGiven(answer: any): string {
+    const val = String(answer?.answer_given || '').trim();
+    if (!val) {
+      return '-';
+    }
+    const upper = val.toUpperCase();
+    if (upper === '72' || upper === 'OTHER_DISCREPANCIES' || upper === 'OTHER DISCREPANCIES') {
+      return 'Other Discrepancies';
+    }
+    if (answer?.annexure_id && val === String(answer.annexure_id)) {
+      return 'As per annexure';
+    }
+    if (Number(answer?.option_id) === 4 && (!isNaN(Number(val)) && Number(val) > 0)) {
+      return 'As per annexure';
+    }
+    return val;
+  }
 }
