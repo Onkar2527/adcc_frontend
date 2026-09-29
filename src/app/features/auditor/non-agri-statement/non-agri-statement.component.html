@@ -436,7 +436,7 @@
       </div>
 
       <!-- When in Auditor Mode & Reviewer has reviewed -->
-      <div *ngIf="!isReviewMode && (reviewerComment || reviewerAction)" class="reviewer-feedback-card p-3 border-round-lg border-1"
+      <div *ngIf="!isReviewMode && (reviewerAction === 2 || reviewerAction === 3 || reviewerComment)" class="reviewer-feedback-card p-3 border-round-lg border-1"
         [class]="reviewerAction === 3 ? 'surface-orange-50 border-orange-200' : 'surface-green-50 border-green-200'">
         <div class="flex align-items-center justify-content-between gap-2 mb-2">
           <span class="font-bold text-900">
@@ -445,10 +445,10 @@
           </span>
           <span class="text-xs font-bold px-2 py-1 border-round uppercase"
             [class]="reviewerAction === 3 ? 'bg-orange-100 text-orange-800' : 'bg-green-100 text-green-800'">
-            {{ reviewerAction === 3 ? 'Re-assessment Required (पुनर्तपासणी)' : 'Accepted (मान्य / स्वीकृत)' }}
+            {{ reviewerAction === 3 ? (currentLang === 'en' ? 'Re-assessment Required' : 'पुनर्तपासणी') : (currentLang === 'en' ? 'Accepted' : 'मान्य / स्वीकृत') }}
           </span>
         </div>
-        <p class="m-0 text-sm text-800 font-medium whitespace-pre-wrap">{{ reviewerComment || (reviewerAction === 2 ? 'Statement accepted by Reviewer.' : 'Re-assessment requested by Reviewer.') }}</p>
+        <p class="m-0 text-sm text-800 font-medium whitespace-pre-wrap">{{ reviewerComment || (reviewerAction === 2 ? (currentLang === 'en' ? 'Statement accepted by Reviewer.' : 'तपासणी अधिकाऱ्याने माहिती पत्रक मान्य केले आहे.') : (currentLang === 'en' ? 'Re-assessment requested by Reviewer.' : 'तपासणी अधिकाऱ्याने पुनर्तपासणीची सूचना दिली आहे.')) }}</p>
       </div>
     </div>
 

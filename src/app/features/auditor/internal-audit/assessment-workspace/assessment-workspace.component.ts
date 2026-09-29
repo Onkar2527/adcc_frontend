@@ -210,6 +210,15 @@ export class AssessmentWorkspaceComponent implements OnInit {
             assessmentId,
         );
 
+        if (typeof window !== 'undefined') {
+            window.addEventListener('app-language-changed', () => {
+                const currentAssessmentId = Number(this.route.snapshot.paramMap.get('assessmentId'));
+                if (currentAssessmentId) {
+                    this.loadMenu(currentAssessmentId, false, false);
+                }
+            });
+        }
+
         this.route.queryParamMap.subscribe(
             (params) =>
                 this.applyRouteSelection(

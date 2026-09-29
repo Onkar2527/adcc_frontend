@@ -64,7 +64,7 @@ export class NonAgriStatementComponent implements OnInit {
   isReviewMode: boolean = false;
 
   // Reviewer State
-  reviewerAction: number = 2; // 2: Accept, 3: Re-assessment
+  reviewerAction: number | null = null; // 2: Accept, 3: Re-assessment
   reviewerComment: string = '';
   savingReview: boolean = false;
 
@@ -535,8 +535,10 @@ export class NonAgriStatementComponent implements OnInit {
           }
         });
       }
-      if (s.reviewer_action !== undefined && s.reviewer_action !== null) {
+      if (s.reviewer_action !== undefined && s.reviewer_action !== null && (Number(s.reviewer_action) === 2 || Number(s.reviewer_action) === 3)) {
         this.reviewerAction = Number(s.reviewer_action);
+      } else {
+        this.reviewerAction = this.isReviewMode ? 2 : null;
       }
       if (s.reviewer_comment !== undefined && s.reviewer_comment !== null) {
         this.reviewerComment = s.reviewer_comment || '';
@@ -846,7 +848,7 @@ export class NonAgriStatementComponent implements OnInit {
       item.thakbakiAmount = null;
     });
     this.auditorComment = '';
-    this.reviewerAction = 2;
+    this.reviewerAction = this.isReviewMode ? 2 : null;
     this.reviewerComment = '';
   }
 

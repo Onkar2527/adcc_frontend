@@ -160,19 +160,18 @@ export class AuditDashboardService {
     assessmentId: number,
     employeeId: number,
   ) {
+    const params: any = {
+      employee_id: employeeId,
+      live_manager_compliance: audit_flow_config.liveManagerCompliance,
+    };
+    const langId = this.getLanguageId();
+    if (langId) {
+      params.language_id = langId;
+    }
 
     return this.http.get<any>(
-
       `${this.config.apiUrl}/internal-audit/${assessmentId}/menu`,
-
-      {
-        params: {
-          employee_id:
-            employeeId,
-          live_manager_compliance:
-            audit_flow_config.liveManagerCompliance,
-        },
-      },
+      { params },
     );
   }
 

@@ -49,6 +49,7 @@ import {
 import {
     InternalAuditNavService,
 } from '../../services/internal-audit-nav.service';
+import { OfflineTranslationService } from '../../../../core/services/offline-translation.service';
 import { audit_flow_config } from '../../../admin/services/required-data';
 import { TableModule } from 'primeng/table';
 import { AccordionModule } from 'primeng/accordion';
@@ -94,6 +95,9 @@ export class CategoryAssessmentComponent
 
     private auditNavService =
         inject(InternalAuditNavService);
+
+    private translationService =
+        inject(OfflineTranslationService, { optional: true });
 
     private notification =
         inject(NotificationService);
@@ -318,6 +322,18 @@ export class CategoryAssessmentComponent
             return;
         }
 
+        if (this.translationService) {
+            this.translationService.language$.subscribe(() => {
+                this.onLanguageChanged();
+            });
+        }
+
+        if (typeof window !== 'undefined') {
+            window.addEventListener('app-language-changed', () => {
+                this.onLanguageChanged();
+            });
+        }
+
         if (
             this.workspaceMode
             &&
@@ -332,6 +348,37 @@ export class CategoryAssessmentComponent
             assessmentId,
             categoryId,
         );
+    }
+
+    private onLanguageChanged() {
+        this.activeLoadKey = '';
+        const assessmentId = Number(
+            this.assessmentIdInput
+            || this.route.snapshot.paramMap.get('assessmentId')
+            || 0
+        );
+        const categoryId = Number(
+            this.categoryIdInput
+            || this.route.snapshot.queryParamMap.get('categoryId')
+            || this.route.snapshot.paramMap.get('categoryId')
+            || 0
+        );
+
+        if (assessmentId && categoryId) {
+            this.loadCategory(assessmentId, categoryId, false);
+        }
+
+        const currentDetail = this.categoryDetail();
+        if (currentDetail?.question_sets) {
+            for (const set of currentDetail.question_sets) {
+                for (const header of set.headers || []) {
+                    for (const question of header.questions || []) {
+                        question.options = this.buildAnswerOptions(question);
+                    }
+                }
+            }
+        }
+        this.cdr.markForCheck();
     }
 
     ngOnChanges(
@@ -427,8 +474,10 @@ export class CategoryAssessmentComponent
         showLoader = true,
         dumpId = this.selectedDumpId(),
     ) {
+        const selectedLang = localStorage.getItem('selected_lang') || 'en';
         const loadKey =
             [
+                selectedLang,
                 Number(assessmentId) || 0,
                 Number(categoryId) || 0,
                 Number(dumpId) || 0,
@@ -496,11 +545,7 @@ export class CategoryAssessmentComponent
                         ),
                     );
 
-                    if (
-                        showLoader
-                    ) {
-                        this.loading.set(false);
-                    }
+                    this.loading.set(false);
                 },
 
                 error: (err) => {
@@ -563,6 +608,7 @@ export class CategoryAssessmentComponent
     prepareCategoryDetail(
         detail: any,
     ) {
+        this.sortSetsByAssessmentSequence(detail);
 
         if (
             this.pendingOnly()
@@ -579,6 +625,94 @@ export class CategoryAssessmentComponent
         );
 
         return detail;
+    }
+
+    private isReferenceSet(set: any): boolean {
+        if (!set) return false;
+        const setId = Number(set.id || 0);
+        // 1. Filter by Reference Set IDs (993 to 1002)
+        if (setId >= 993 && setId <= 1002) return true;
+
+        // 2. Filter by Reference Header IDs (9940 to 9949) or Question IDs (17266 to 17275)
+        return (set.headers || []).some((h: any) => {
+            const hId = Number(h.id || 0);
+            if (hId >= 9940 && hId <= 9949) return true;
+            return (h.questions || []).some((q: any) => {
+                const qId = Number(q.id || 0);
+                return (qId >= 17266 && qId <= 17275);
+            });
+        });
+    }
+
+    private sortSetsByAssessmentSequence(detail: any): void {
+        if (!detail?.sets || !Array.isArray(detail.sets)) return;
+
+        const headerOrder = (detail?.overview?.header_ids || '')
+            .split(',')
+            .map((s: string) => Number(s.trim()))
+            .filter((n: number) => !isNaN(n) && n > 0);
+
+        const questionOrder = (detail?.overview?.question_ids || '')
+            .split(',')
+            .map((s: string) => Number(s.trim()))
+            .filter((n: number) => !isNaN(n) && n > 0);
+
+        // 1. Sort Sets: Statically place Reference / Matrix Sets at the START, followed by natural / assessment order
+        detail.sets.sort((a: any, b: any) => {
+            const aRef = this.isReferenceSet(a);
+            const bRef = this.isReferenceSet(b);
+            if (aRef && !bRef) return -1;
+            if (!aRef && bRef) return 1;
+
+            if (headerOrder.length > 0) {
+                const aHeaders = a.headers || [];
+                const bHeaders = b.headers || [];
+                const aMinIdx = aHeaders.length > 0
+                    ? Math.min(...aHeaders.map((h: any) => {
+                        const idx = headerOrder.indexOf(Number(h.id));
+                        return idx !== -1 ? idx : 999999;
+                    }))
+                    : 999999;
+                const bMinIdx = bHeaders.length > 0
+                    ? Math.min(...bHeaders.map((h: any) => {
+                        const idx = headerOrder.indexOf(Number(h.id));
+                        return idx !== -1 ? idx : 999999;
+                    }))
+                    : 999999;
+                if (aMinIdx !== bMinIdx) return aMinIdx - bMinIdx;
+            }
+            return (a.id || 0) - (b.id || 0);
+        });
+
+        // 2. Sort Headers within each set by headerOrder
+        for (const set of detail.sets) {
+            if (Array.isArray(set.headers)) {
+                if (headerOrder.length > 0) {
+                    set.headers.sort((a: any, b: any) => {
+                        const aIdx = headerOrder.indexOf(Number(a.id));
+                        const bIdx = headerOrder.indexOf(Number(b.id));
+                        const aPos = aIdx !== -1 ? aIdx : 999999;
+                        const bPos = bIdx !== -1 ? bIdx : 999999;
+                        return aPos - bPos;
+                    });
+                }
+
+                // 3. Sort Questions within each header by questionOrder
+                if (questionOrder.length > 0) {
+                    for (const header of set.headers) {
+                        if (Array.isArray(header.questions)) {
+                            header.questions.sort((a: any, b: any) => {
+                                const aIdx = questionOrder.indexOf(Number(a.id));
+                                const bIdx = questionOrder.indexOf(Number(b.id));
+                                const aPos = aIdx !== -1 ? aIdx : 999999;
+                                const bPos = bIdx !== -1 ? bIdx : 999999;
+                                return aPos - bPos;
+                            });
+                        }
+                    }
+                }
+            }
+        }
     }
 
     filterPendingSets(
@@ -733,10 +867,161 @@ export class CategoryAssessmentComponent
         }
     }
 
+    isMarathi(): boolean {
+        return (localStorage.getItem('selected_lang') || 'en') === 'mr';
+    }
+
+    getCategoryMenuName(detail: any): string {
+        if (!detail?.category) return '';
+        if (this.isMarathi()) {
+            return detail.category.mr_menu_name || (detail.category.menu_name === 'Banking' ? 'बँकिंग' : detail.category.menu_name);
+        }
+        return detail.category.menu_name || '';
+    }
+
+    getCategoryName(detail: any): string {
+        if (!detail?.category) return '';
+        if (this.isMarathi()) {
+            return detail.category.mr_name || detail.category.name;
+        }
+        return detail.category.name || '';
+    }
+
+    getSetDisplayName(set: any): string {
+        if (!set) return '';
+        if (this.isMarathi()) {
+            return set.mr_name || set.name;
+        }
+        return set.name || '';
+    }
+
+    getHeaderDisplayName(header: any): string {
+        if (!header) return '';
+        if (this.isMarathi()) {
+            return header.mr_name || header.name;
+        }
+        return header.name || '';
+    }
+
+    private annexureMarathiMap: Record<string, string> = {
+        'Deposits Position Matrix': 'ठेवींची स्थिती माहिती पत्रक',
+        'Inoperative & Unclaimed Accounts': 'इनऑपरेटिव्ह व अनक्लेम्ड खाते',
+        'TDS Accounts Balance': 'टी.डी.एस. खाती शिल्लक',
+        'BC / IB / IBP Pending Position': 'बी.सी. / आय.बी. / आय.बी.पी. प्रलंबित स्थिती',
+        'R.C. Reconciliation Sent Dates': 'आर.सी. पाठविल्याचे दिनांक',
+        'Branch Inspection Register': 'शाखा तपासणी रजिस्टर',
+        'Lockers Status': 'लॉकरस् स्थिती',
+        'KYC Status': 'के.वाय.सी. स्थिती',
+        'Branch Staff Strength': 'शाखेतील सेवक संख्या',
+        'Gold Loan Physical Verification': 'सोने तारण कर्ज प्रत्यक्ष तपासणी',
+    };
+
+    private annexureColumnMarathiMap: Record<string, string> = {
+        // Deposits (Cat3_Deposits)
+        'Current Deposits': 'करंट ठेवी',
+        'Savings': 'सेव्हिंग्ज',
+        'Term Deposits': 'मुदत ठेवी',
+        'Cash Certificate': 'कॅश सर्टिफिकेट',
+        'Recurring': 'रिकरिंग',
+        'Total': 'एकूण',
+
+        // Inoperative (Cat3_Inoperative)
+        'Inoperative Accounts': 'इनऑपरेटिव्ह खाते',
+        'Unclaimed Accounts': 'अनक्लेम्ड खाते',
+        'Deposit Amount (₹)': 'जमा रक्कम रु.',
+        'No. of Accounts': 'खाते संख्या',
+
+        // TDS (Cat10_TDS)
+        'TDS Payable (422)': 'टी.डी.एस. पेएबल (४२२)',
+        'TDS Recovery (421)': 'टी.डी.एस. रिकव्हरी (४२१)',
+        'Balance (₹)': 'बाकी रु.',
+
+        // BC / IB / IBP (CTS_LC_OBC)
+        'BC': 'बी.सी.',
+        'IB': 'आय.बी.',
+        'IBP': 'आय.बी.पी.',
+        'Pending Count': 'प्रलंबित संख्या',
+        'Amount (₹)': 'रक्कम रु.',
+
+        // Reconciliation (Cat19_Reconciliation)
+        'Head Office': 'हेड ऑफिस',
+        'M.S.C. Bank': 'एम.एस.सी. बँक',
+        'State Bank': 'स्टेट बँक',
+        'Date R.C. Sent to Head Office': 'दिनांक – आर.सी. मुख्यालयास पाठविला',
+
+        // Inspection Register (Cat16_Inspection)
+        'C.A. Statutory Audit': 'सी.ए. वैधानिक तपासणी',
+        'Continuous & Concurrent Audit': 'सतत व समवर्ती लेखापरीक्षण',
+        'Serious Defects in Continuous & Concurrent Audit': 'समवर्ती गंभीर दोष',
+        'State Bank Inspection': 'राज्य बँक तपासणी',
+        'Managerial Inspection': 'व्यवस्थापकीय तपासणी',
+        'T.V.A. Inspection': 'ता.वि.अ. तपासणी',
+        'Balance Sheet Inspection': 'ताळेबंद तपासणी',
+        'Surprise Visit': 'अचानक भेट',
+        'Other Inspection': 'इतर तपासणी',
+        'Inspection Period': 'तपासणी कालावधी',
+        'Date Report Received by Branch': 'शाखेस अहवाल प्राप्त दिनांक',
+        'Date Branch Sent Rectification Report': 'शाखेने दोष दुरुस्ती अहवाल पाठविल्याचा दिनांक',
+
+        // Lockers (Cat13_Lockers)
+        'Total Lockers': 'एकूण लॉकरस्',
+        'Lockers Rented Out': 'भाड्याने दिलेले',
+        'Vacant Lockers': 'शिल्लक लॉकरस्',
+        'Defective Lockers': 'नादुरुस्त लॉकरस्',
+        'Outstanding Rent (₹)': 'थकित भाडे रु.',
+        'Locker Holders with Outstanding Rent': 'थकितभाडे लॉकर धारक संख्या',
+
+        // KYC (Cat6_KYC)
+        'Total Account Holders': 'एकूण खातेदार',
+        'Operative Accounts': 'ऑपरेटिव्ह खाते',
+        'KYC Completed Accounts': 'के.वाय.सी. पूर्ण खाते',
+        'KYC Incomplete Accounts': 'के.वाय.सी. अपूर्ण खाते',
+
+        // Staff Strength (Cat16_Staff)
+        'Branch Manager / Officer': 'शाखाधिकारी',
+        'Accountant': 'अकाउंटंट',
+        'Inspector': 'इन्स्पेक्टर',
+        'Cashier': 'कॅशिअर',
+        'Clerk': 'क्लार्क',
+        'Permanent Peon': 'कायम शिपाई',
+        'Non-Permanent Peon': 'कायम नसलेला शिपाई',
+
+        // Gold Loan (Cat12_GoldLoan)
+        'Bag No.': 'पिशवी नं.',
+        'Found Correct as per Register (Yes/No)': 'रजिस्टरप्रमाणे बरोबर आढळल्या आहेत/नाहीत',
+        'Amount Receivable (₹)': 'येणे बाकी रु.',
+        'Outstanding Amount as on Date (₹)': 'थकबाकी रु. दि. अखेर',
+    };
+
+    getAnnexureDisplayName(annexure: any): string {
+        if (!annexure) return this.isMarathi() ? 'तपशील माहिती पत्रक' : 'Statement / Annexure';
+        if (this.isMarathi()) {
+            if (annexure.mr_name) return annexure.mr_name;
+            if (annexure.name && this.annexureMarathiMap[annexure.name]) {
+                return this.annexureMarathiMap[annexure.name];
+            }
+            return annexure.name || 'तपशील माहिती पत्रक';
+        }
+        return annexure.name || 'Statement / Annexure';
+    }
+
+    getAnnexureColumnDisplayName(column: any): string {
+        if (!column) return '';
+        const name = typeof column === 'string' ? column : column.name;
+        if (this.isMarathi()) {
+            if (column && typeof column === 'object' && column.mr_name) return column.mr_name;
+            if (name && this.annexureColumnMarathiMap[name]) {
+                return this.annexureColumnMarathiMap[name];
+            }
+            return name || '';
+        }
+        return name || '';
+    }
+
     buildAnswerOptions(
         question: any,
     ) {
-
+        const isMr = this.isMarathi();
         const parameters =
             Array.isArray(
                 question?.parameters,
@@ -746,14 +1031,24 @@ export class CategoryAssessmentComponent
 
         const options =
             parameters.map(
-                (item: any) => ({
-
-                    value:
-                        item.rt,
-
-                    label:
-                        item.rt,
-                }),
+                (item: any) => {
+                    let label = item.rt;
+                    if (isMr) {
+                        if (item.mr_rt) {
+                            label = item.mr_rt;
+                        } else if (item.rt === 'YES') {
+                            label = 'होय';
+                        } else if (item.rt === 'NO') {
+                            label = 'नाही';
+                        } else if (item.rt === 'NOT APPLICABLE') {
+                            label = 'लागू नाही';
+                        }
+                    }
+                    return {
+                        value: item.rt,
+                        label,
+                    };
+                },
             );
 
         if (
@@ -761,23 +1056,18 @@ export class CategoryAssessmentComponent
             &&
             question?.annexure_id
         ) {
-
             options.push({
-
                 value:
                     String(question.annexure_id),
-
                 label:
-                    'As per annexure',
+                    isMr ? 'परिशिष्टानुसार' : 'As per annexure',
             });
 
             options.push({
-
                 value:
                     '72',
-
                 label:
-                    'Other Discrepancies',
+                    isMr ? 'इतर त्रुटी' : 'Other Discrepancies',
             });
         }
 
@@ -2583,7 +2873,7 @@ export class CategoryAssessmentComponent
     }
 
     private defaultSingleColumn = [
-        { key: 'value', label: 'शेरा / माहिती (Details / Remarks)', type: 'text' }
+        { key: 'value', label: 'Details / Remarks', mr_label: 'शेरा / माहिती', type: 'text' }
     ];
 
     getFormColumns(question: any): any[] {
@@ -2728,10 +3018,45 @@ export class CategoryAssessmentComponent
 
     annexureColumnOptions(
         column: any,
-    ) {
-        return Array.isArray(column?.options)
-            ? column.options
-            : [];
+    ): any[] {
+        if (!column) return [];
+        let rawOptions = column.options || column.column_options || [];
+        if (typeof rawOptions === 'string') {
+            try {
+                rawOptions = JSON.parse(rawOptions);
+            } catch (e) {
+                rawOptions = [];
+            }
+        }
+        if (!Array.isArray(rawOptions)) return [];
+
+        return rawOptions
+            .map((opt: any) => {
+                if (typeof opt === 'string') {
+                    const clean = opt.trim();
+                    if (!clean) return null;
+                    const isYes = clean.toUpperCase() === 'YES';
+                    const isNo = clean.toUpperCase() === 'NO';
+                    return {
+                        option_label: clean,
+                        mr_option_label: isYes ? 'होय' : isNo ? 'नाही' : clean,
+                        value: clean
+                    };
+                }
+                if (typeof opt === 'object' && opt !== null) {
+                    const label = (opt.option_label || opt.column_option || opt.label || opt.name || opt.value || '').toString().trim();
+                    if (!label) return null;
+                    const isYes = label.toUpperCase() === 'YES';
+                    const isNo = label.toUpperCase() === 'NO';
+                    return {
+                        option_label: label,
+                        mr_option_label: opt.mr_option_label || (isYes ? 'होय' : isNo ? 'नाही' : label),
+                        value: opt.value !== undefined ? opt.value : label
+                    };
+                }
+                return null;
+            })
+            .filter((opt: any) => opt && opt.option_label);
     }
 
     annexureColumnCount(

@@ -6,6 +6,7 @@ import { AppMenuitem } from './app.menuitem';
 import { LayoutService } from '../service/layout.service';
 import { filter, Subscription } from 'rxjs';
 import { InternalAuditNavService } from '../../../features/auditor/services/internal-audit-nav.service';
+import { OfflineTranslationService } from '../../../core/services/offline-translation.service';
 
 @Component({
   selector: 'app-menu',
@@ -24,9 +25,11 @@ export class AppMenu implements OnInit, OnDestroy {
   private layoutService = inject(LayoutService);
   private router = inject(Router);
   private auditNavService = inject(InternalAuditNavService);
+  private translationService = inject(OfflineTranslationService, { optional: true });
   private cdr = inject(ChangeDetectorRef);
 
   private routeSubscription?: Subscription;
+  private langSubscription?: Subscription;
 
   private refreshTimer?: ReturnType<typeof setTimeout>;
 
@@ -44,6 +47,22 @@ export class AppMenu implements OnInit, OnDestroy {
     this.routeSubscription = this.router.events
       .pipe(filter((event) => event instanceof NavigationEnd))
       .subscribe(() => this.queueRefreshModel());
+
+    if (this.translationService) {
+      this.langSubscription = this.translationService.language$.subscribe(() => {
+        this.lastAssessmentMenuKey = '';
+        this.refreshModel();
+        this.cdr.markForCheck();
+      });
+    }
+
+    if (typeof window !== 'undefined') {
+      window.addEventListener('app-language-changed', () => {
+        this.lastAssessmentMenuKey = '';
+        this.refreshModel();
+        this.cdr.markForCheck();
+      });
+    }
   }
   model: MenuItem[] = [];
 
@@ -376,15 +395,18 @@ export class AppMenu implements OnInit, OnDestroy {
 
     const shouldShowAssessmentMenu = this.shouldShowCurrentAssessmentMenu(currentAssessmentId);
 
+    const selectedLang = localStorage.getItem('selected_lang') || 'en';
     const assessmentMenuKey = JSON.stringify({
+      selectedLang,
       currentAssessmentId,
       shouldShowAssessmentMenu,
       navAssessmentId: this.auditNavService.assessmentId(),
       menus: this.auditNavService.menus().map((menu: any) => ({
         name: menu?.name,
+        mr_name: menu?.mr_name,
         categories: (menu?.categories || []).map(
           (category: any) =>
-            `${category?.id}:${category?.name}:${category?.carry_forward}:${category?.account_based}:${category?.completed_account_count}:${category?.account_count}:${category?.answered_count}:${category?.question_count}:${category?.live_pending_count}`,
+            `${category?.id}:${category?.name}:${category?.mr_name}:${category?.mr_category_name}:${category?.carry_forward}:${category?.account_based}:${category?.completed_account_count}:${category?.account_count}:${category?.answered_count}:${category?.question_count}:${category?.live_pending_count}`,
         ),
       })),
     });
@@ -406,6 +428,7 @@ export class AppMenu implements OnInit, OnDestroy {
   }
 
   private buildAssessmentMenu(assessmentId: number): MenuItem {
+    const isMr = (localStorage.getItem('selected_lang') || 'en') === 'mr';
     const normalized = (value: any) =>
       String(value || '')
         .trim()
@@ -416,7 +439,7 @@ export class AppMenu implements OnInit, OnDestroy {
 
     const dynamicItems: MenuItem[] = [
       {
-        label: 'Assessment Info',
+        label: isMr ? 'मूल्यांकन माहिती' : 'Assessment Info',
         icon: 'pi pi-fw pi-info-circle',
         routerLink: ['/auditor/internal-audit', assessmentId],
         queryParams: {
@@ -436,13 +459,13 @@ export class AppMenu implements OnInit, OnDestroy {
 
     if (!isComplianceActive) {
       dynamicItems.push({
-        label: 'Executive Summary',
+        label: isMr ? 'कार्यकारी सारांश' : 'Executive Summary',
         icon: 'pi pi-fw pi-file-edit',
         routerLink: ['/auditor/internal-audit/executive-summary', assessmentId],
       });
 
       dynamicItems.push({
-        label: 'बिगर शेती सहकारी संस्था माहिती पत्रक (ADCC Non-Agri Statement)',
+        label: isMr ? 'बिगर शेती सहकारी संस्था माहिती पत्रक' : 'बिगर शेती सहकारी संस्था माहिती पत्रक (ADCC Non-Agri Statement)',
         icon: 'pi pi-fw pi-file-excel',
         routerLink: ['/auditor/internal-audit/non-agri-statement', assessmentId],
       });
@@ -473,8 +496,13 @@ export class AppMenu implements OnInit, OnDestroy {
             menuTotal += total;
             menuAnswered += answered;
 
+            const isMr = (localStorage.getItem('selected_lang') || 'en') === 'mr';
+            const catLabel = (isMr && (category?.mr_name || category?.mr_category_name))
+              ? (category.mr_name || category.mr_category_name)
+              : category.name;
+
             return {
-              label: category.name,
+              label: catLabel,
               meta: this.categoryProgressText(category),
               badgeClass:
                 Number(category?.live_pending_count || 0) > 0 ? 'live-compliance-pending' : '',
@@ -517,8 +545,13 @@ export class AppMenu implements OnInit, OnDestroy {
           0
         );
 
+        const isMr = (localStorage.getItem('selected_lang') || 'en') === 'mr';
+        const menuLabel = (isMr && (menu?.mr_name || menu?.mr_menu_name))
+          ? (menu.mr_name || menu.mr_menu_name)
+          : (isMr && (menu?.name === 'Banking' || menu?.name === 'BANKING') ? 'बँकिंग' : menu.name);
+
         dynamicItems.push({
-          label: menu.name,
+          label: menuLabel,
           icon: 'pi pi-fw pi-folder',
           progress: menuProgress,
           items: categoryItems,
@@ -530,13 +563,14 @@ export class AppMenu implements OnInit, OnDestroy {
     }
 
     return {
-      label: 'Current Assessment',
+      label: isMr ? 'वर्तमान मूल्यांकन' : 'Current Assessment',
       authority: ['2'],
       items: dynamicItems,
     } as MenuItem;
   }
 
   private categoryProgressText(category: any) {
+    const isMr = (localStorage.getItem('selected_lang') || 'en') === 'mr';
     if (category?.account_based) {
       const completed = Number(category?.completed_account_count || 0);
       const total = Number(category?.account_count || 0);
@@ -547,7 +581,9 @@ export class AppMenu implements OnInit, OnDestroy {
 
       const remaining = Math.max(total - completed, 0);
 
-      return `${completed}/${total} accounts completed, ${remaining} remaining`;
+      return isMr
+        ? `${completed}/${total} खाती पूर्ण, ${remaining} शिल्लक`
+        : `${completed}/${total} accounts completed, ${remaining} remaining`;
     }
 
     const answered = Number(category?.answered_count || 0);
@@ -559,7 +595,9 @@ export class AppMenu implements OnInit, OnDestroy {
 
     const remaining = Math.max(total - answered, 0);
 
-    return `${answered}/${total} answered, ${remaining} remaining`;
+    return isMr
+      ? `${answered}/${total} उत्तरे दिली, ${remaining} शिल्लक`
+      : `${answered}/${total} answered, ${remaining} remaining`;
   }
 
   private currentAssessmentIdFromRoute() {

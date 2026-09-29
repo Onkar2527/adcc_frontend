@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { APP_CONFIG } from './config/config.token';
-import { firstValueFrom } from 'rxjs';
+import { firstValueFrom, BehaviorSubject } from 'rxjs';
 import { MessageService, ConfirmationService } from 'primeng/api';
 
 @Injectable({
@@ -12,6 +12,7 @@ export class OfflineTranslationService {
   private config = inject(APP_CONFIG);
 
   private currentLang = localStorage.getItem('selected_lang') || 'en';
+  public language$ = new BehaviorSubject<string>(this.currentLang);
   private originalTexts = new Map<Node, string>();
   private originalPlaceholders = new Map<HTMLInputElement | HTMLTextAreaElement, string>();
   private translationCache = new Map<string, string>();
@@ -91,13 +92,13 @@ export class OfflineTranslationService {
   }
 
   async setLanguage(lang: string) {
-    if (this.currentLang === lang) {
-      localStorage.setItem('selected_lang', lang);
-      return;
-    }
     this.currentLang = lang;
     localStorage.setItem('selected_lang', lang);
     this.updateBodyClass();
+    this.language$.next(lang);
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('app-language-changed', { detail: { lang } }));
+    }
 
     if (this.observer) {
       this.observer.disconnect();

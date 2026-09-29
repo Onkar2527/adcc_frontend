@@ -54,11 +54,11 @@
       >
         <div>
           <div class="text-sm text-600 mb-2">
-            {{ detail.category?.menu_name }}
+            {{ getCategoryMenuName(detail) }}
           </div>
 
           <h3 class="text-xl font-bold text-900 m-0">
-            {{ detail.category?.name }}
+            {{ getCategoryName(detail) }}
           </h3>
 
           <p
@@ -523,8 +523,8 @@
 
     <div *ngIf="visibleQuestionSets(detail).length" class="category-question-actions">
       <div>
-        <strong>Category Questions</strong>
-        <small>Apply defaults or save all headers in this category.</small>
+        <strong>{{ isMarathi() ? 'श्रेणी प्रश्न' : 'Category Questions' }}</strong>
+        <small>{{ isMarathi() ? 'या श्रेणीतील सर्व शीर्षकांवर डीफॉल्ट लागू करा किंवा जतन करा.' : 'Apply defaults or save all headers in this category.' }}</small>
       </div>
 
       <div class="category-question-action-buttons">
@@ -533,7 +533,7 @@
           pButton
           type="button"
           icon="pi pi-check-square"
-          label="Apply Defaults to All Headers"
+          [label]="isMarathi() ? 'सर्व हेडरवर डीफॉल्ट लागू करा' : 'Apply Defaults to All Headers'"
           severity="secondary"
           [disabled]="savingAllHeaders()"
           (click)="selectDefaultAnswersForCategory()"
@@ -543,7 +543,7 @@
           pButton
           type="button"
           icon="pi pi-save"
-          label="Save All Headers"
+          [label]="isMarathi() ? 'सर्व हेडर जतन करा' : 'Save All Headers'"
           [loading]="savingAllHeaders()"
           (click)="saveAllHeaders()"
         ></button>
@@ -552,7 +552,7 @@
 
     <div class="question-set" *ngFor="let set of visibleQuestionSets(detail); let setIndex = index; trackBy: trackBySet">
       <div class="question-set-title">
-        {{ set.name }}
+        {{ getSetDisplayName(set) }}
       </div>
 
       <p-accordion
@@ -567,21 +567,21 @@
               (click)="$event.stopPropagation()"
             >
               <div class="question-header-title m-0">
-                {{ header.name }}
+                {{ getHeaderDisplayName(header) }}
               </div>
               <div class="header-answer-actions flex align-items-center gap-2">
                 <span class="badge-answered">
-                  Answered: {{ getAnsweredCount(header) }} / {{ getHeaderQuestionCount(header) }}
+                  {{ isMarathi() ? 'उत्तरे दिली: ' : 'Answered: ' }}{{ getAnsweredCount(header) }} / {{ getHeaderQuestionCount(header) }}
                 </span>
                 <span class="badge-remaining">
-                  Remaining: {{ getHeaderQuestionCount(header) - getAnsweredCount(header) }}
+                  {{ isMarathi() ? 'शिल्लक: ' : 'Remaining: ' }}{{ getHeaderQuestionCount(header) - getAnsweredCount(header) }}
                 </span>
                 @if (canApplyDefaults()) {
                   <button
                     pButton
                     type="button"
                     icon="pi pi-check-square"
-                    label="Apply Defaults"
+                    [label]="isMarathi() ? 'डीफॉल्ट लागू करा' : 'Apply Defaults'"
                     severity="secondary"
                     class="p-button-sm"
                     [disabled]="savingHeader() === header.id"
@@ -676,7 +676,7 @@
                           (ngModelChange)="onQuestionAnswerChange(question)"
                           [disabled]="question.is_editable === false"
                         >
-                          <option value="">Please select</option>
+                          <option value="">{{ isMarathi() ? 'कृपया निवडा' : 'Please select' }}</option>
 
                           <option *ngFor="let option of question.options; trackBy: trackByOption" [value]="option.value">
                             {{ option.label }}
@@ -692,7 +692,7 @@
                             (change)="onComplianceCheckboxChange(question)"
                             [disabled]="question.is_editable === false"
                           />
-                          <span>Compliance required</span>
+                          <span>{{ isMarathi() ? 'अनुपालन आवश्यक' : 'Compliance required' }}</span>
                         </label>
 
                         <div class="inline-evidence">
@@ -702,7 +702,7 @@
                               [(ngModel)]="question.audit_compulsary_ev_upload"
                               [disabled]="question.is_editable === false"
                             />
-                            <span>Evidence to be uploaded</span>
+                            <span>{{ isMarathi() ? 'पुरावा अपलोड करणे आवश्यक' : 'Evidence to be uploaded' }}</span>
                           </label>
 
                           <ng-container
@@ -771,14 +771,14 @@
 
                     <div class="answer-field">
                       <label *ngIf="buildIsAnnexureSelected(question)" class="answer-label">
-                        Audit Comment
+                        {{ isMarathi() ? 'ऑडिट टिप्पणी' : 'Audit Comment' }}
                       </label>
 
                       <div class="audit-comment-wrapper">
                         <textarea
                           class="answer-control"
                           rows="4"
-                          placeholder="Audit Comment"
+                          [placeholder]="isMarathi() ? 'ऑडिट टिप्पणी' : 'Audit Comment'"
                           [(ngModel)]="question.audit_comment"
                           [disabled]="question.is_editable === false"
                           (focus)="onCommentFocus(question)"
@@ -1035,19 +1035,19 @@
                       <div class="flex justify-content-between align-items-center mb-2 pb-2 border-bottom-1 border-200">
                         <div class="font-semibold text-primary text-sm flex align-items-center gap-2">
                           <i class="pi pi-list"></i>
-                          <span>{{ question.annexure?.name || 'तपशिल व शेरा माहिती पत्रक' }}</span>
+                          <span>{{ getAnnexureDisplayName(question.annexure) }}</span>
                         </div>
-                        <span class="text-xs text-500 font-medium">Vertical Form Format</span>
+                        <span class="text-xs text-500 font-medium">{{ isMarathi() ? 'माहिती पत्रक' : 'Vertical Form Format' }}</span>
                       </div>
 
                       <div class="annexure-table-frame">
                         <table class="annexure-vertical-table">
                           <thead>
                             <tr>
-                              <th style="width: 50px; text-align: center;">अ.क्र.</th>
-                              <th [style.width]="getFormColumns(question).length > 2 ? '28%' : '35%'">तपशिल (Particulars)</th>
+                              <th style="width: 50px; text-align: center;">{{ isMarathi() ? 'अ.क्र.' : 'Sr. No.' }}</th>
+                              <th [style.width]="getFormColumns(question).length > 2 ? '28%' : '35%'">{{ isMarathi() ? 'तपशील' : 'Particulars' }}</th>
                               <th *ngFor="let col of getFormColumns(question); trackBy: trackByFormCol">
-                                {{ col.label || col.name }}
+                                {{ (isMarathi() && col.mr_label) ? col.mr_label : (col.label || col.name) }}
                               </th>
                             </tr>
                           </thead>
@@ -1055,7 +1055,7 @@
                             <tr *ngFor="let column of question.annexure.columns; let ci = index; trackBy: trackByColumn">
                               <td style="text-align: center; font-weight: 700; color: #64748b; font-size: 0.85rem;">{{ ci + 1 }}</td>
                               <td class="particular-cell">
-                                {{ column.name }}
+                                {{ getAnnexureColumnDisplayName(column) }}
                               </td>
                               <td *ngFor="let col of getFormColumns(question); let colIdx = index; trackBy: trackByFormCol" class="value-cell">
                                 <!-- SELECT DROPDOWN -->
@@ -1066,7 +1066,7 @@
                                   (ngModelChange)="setFormCellValue(question, ci, col.key || colIdx, colIdx, $event)"
                                   [disabled]="question.is_editable === false"
                                 >
-                                  <option value="">Please select</option>
+                                  <option value="">{{ isMarathi() ? 'कृपया निवडा' : 'Please select' }}</option>
                                   <ng-container *ngIf="col.options; else defaultColumnOptions">
                                     <option *ngFor="let opt of col.options" [value]="opt.value !== undefined ? opt.value : opt">
                                       {{ opt.label !== undefined ? opt.label : opt }}
@@ -1088,7 +1088,7 @@
                                     [ngModel]="getFormCellValue(question, ci, col.key || colIdx, colIdx)"
                                     (ngModelChange)="setFormCellValue(question, ci, col.key || colIdx, colIdx, $event)"
                                     [disabled]="question.is_editable === false"
-                                    placeholder="Enter {{ col.label || column.name }}"
+                                    [placeholder]="isMarathi() ? 'नोंदवा ' + ((isMarathi() && col.mr_label) ? col.mr_label : (col.label || column.mr_name || column.name)) : 'Enter ' + (col.label || column.name)"
                                   ></textarea>
 
                                   <ng-template #notTextArea>
@@ -1099,7 +1099,7 @@
                                       [ngModel]="getFormCellValue(question, ci, col.key || colIdx, colIdx)"
                                       (ngModelChange)="setFormCellValue(question, ci, col.key || colIdx, colIdx, $event)"
                                       [disabled]="question.is_editable === false"
-                                      placeholder="Enter {{ col.label || column.name }}"
+                                      [placeholder]="isMarathi() ? 'नोंदवा ' + ((isMarathi() && col.mr_label) ? col.mr_label : (col.label || column.mr_name || column.name)) : 'Enter ' + (col.label || column.name)"
                                     />
                                   </ng-template>
                                 </ng-template>
@@ -1113,23 +1113,23 @@
                       <div class="flex flex-wrap justify-content-between align-items-center gap-2 mt-3 pt-2 border-top-1 border-200">
                         <div class="flex gap-2 align-items-center" *ngIf="question.is_compliance">
                           <div>
-                            <label class="text-xs font-semibold text-600 block mb-1">Business Risk</label>
+                            <label class="text-xs font-semibold text-600 block mb-1">{{ isMarathi() ? 'व्यवसाय जोखीम' : 'Business Risk' }}</label>
                             <select class="answer-control text-xs" [(ngModel)]="question.annexure_draft.business_risk" [disabled]="question.is_editable === false">
-                              <option value="">Select</option>
+                              <option value="">{{ isMarathi() ? 'निवडा' : 'Select' }}</option>
                               <option *ngFor="let r of annexureRiskOptions().business_risks" [value]="r.id">{{ r.label }}</option>
                             </select>
                           </div>
                           <div>
-                            <label class="text-xs font-semibold text-600 block mb-1">Control Risk</label>
+                            <label class="text-xs font-semibold text-600 block mb-1">{{ isMarathi() ? 'नियंत्रण जोखीम' : 'Control Risk' }}</label>
                             <select class="answer-control text-xs" [(ngModel)]="question.annexure_draft.control_risk" [disabled]="question.is_editable === false">
-                              <option value="">Select</option>
+                              <option value="">{{ isMarathi() ? 'निवडा' : 'Select' }}</option>
                               <option *ngFor="let r of annexureRiskOptions().control_risks" [value]="r.id">{{ r.label }}</option>
                             </select>
                           </div>
                           <div>
-                            <label class="text-xs font-semibold text-600 block mb-1">Risk Type</label>
+                            <label class="text-xs font-semibold text-600 block mb-1">{{ isMarathi() ? 'जोखीम प्रकार' : 'Risk Type' }}</label>
                             <select class="answer-control text-xs" [(ngModel)]="question.annexure_draft.risk_cat_id" [disabled]="question.is_editable === false">
-                              <option value="">Select</option>
+                              <option value="">{{ isMarathi() ? 'निवडा' : 'Select' }}</option>
                               <option *ngFor="let r of annexureRiskOptions().risk_categories" [value]="r.id">{{ r.risk_category }}</option>
                             </select>
                           </div>
@@ -1140,7 +1140,7 @@
                             pButton
                             type="button"
                             icon="pi pi-times"
-                            label="Clear"
+                            [label]="isMarathi() ? 'साफ करा' : 'Clear'"
                             severity="secondary"
                             [disabled]="isSavingAnnexureQuestion(question) || question.is_editable === false"
                             (click)="clearAnnexureDraft(question)"
@@ -1150,7 +1150,7 @@
                             pButton
                             type="button"
                             icon="pi pi-save"
-                            [label]="question.annexure_draft.id || question.annexure_rows?.length ? 'Update Form' : 'Save Form'"
+                            [label]="isMarathi() ? (question.annexure_draft.id || question.annexure_rows?.length ? 'माहिती पत्रक अद्यतनित करा' : 'माहिती पत्रक जतन करा') : (question.annexure_draft.id || question.annexure_rows?.length ? 'Update Form' : 'Save Form')"
                             [loading]="isSavingAnnexureQuestion(question)"
                             [disabled]="isSavingAnnexureQuestion(question) || question.is_editable === false"
                             (click)="saveAnnexureRow(question)"
@@ -1175,7 +1175,7 @@
                               *ngFor="let column of question.annexure.columns; let ci = index; trackBy: trackByColumn"
                             >
                               <label class="answer-label">
-                                {{ column.name }}
+                                {{ getAnnexureColumnDisplayName(column) }}
                               </label>
 
                               <!-- TEXTAREA -->
@@ -1197,13 +1197,13 @@
                                   [(ngModel)]="question.annexure_draft.values[ci]"
                                   [disabled]="question.is_editable === false"
                                 >
-                                  <option value="">Please select</option>
+                                  <option value="">{{ isMarathi() ? 'कृपया निवडा' : 'Please select' }}</option>
 
                                   <option
                                     *ngFor="let option of annexureColumnOptions(column); trackBy: trackByOption"
                                     [value]="option.option_label"
                                   >
-                                    {{ option.option_label }}
+                                    {{ (isMarathi() && option.mr_option_label) ? option.mr_option_label : option.option_label }}
                                   </option>
                                 </select>
 
@@ -1215,6 +1215,7 @@
                                     class="answer-control"
                                     [(ngModel)]="question.annexure_draft.values[ci]"
                                     [disabled]="question.is_editable === false"
+                                    [placeholder]="isMarathi() ? 'नोंदवा ' + getAnnexureColumnDisplayName(column) : 'Enter ' + column.name"
                                   />
                                 </ng-template>
                               </ng-template>
@@ -1223,7 +1224,7 @@
                             <!-- BUSINESS RISK -->
 
                             <div class="annexure-field">
-                              <label class="answer-label"> Business Risk </label>
+                              <label class="answer-label"> {{ isMarathi() ? 'व्यवसाय जोखीम' : 'Business Risk' }} </label>
 
                               <select
                                 class="answer-control"
@@ -1232,7 +1233,7 @@
                                   !isCustomAnnexureRisk(question) || question.is_editable === false
                                 "
                               >
-                                <option value="">Please select</option>
+                                <option value="">{{ isMarathi() ? 'कृपया निवडा' : 'Please select' }}</option>
 
                                 <option
                                   *ngFor="let risk of annexureRiskOptions().business_risks; trackBy: trackBySet"
@@ -1246,7 +1247,7 @@
                             <!-- CONTROL RISK -->
 
                             <div class="annexure-field">
-                              <label class="answer-label"> Control Risk </label>
+                              <label class="answer-label"> {{ isMarathi() ? 'नियंत्रण जोखीम' : 'Control Risk' }} </label>
 
                               <select
                                 class="answer-control"
@@ -1255,7 +1256,7 @@
                                   !isCustomAnnexureRisk(question) || question.is_editable === false
                                 "
                               >
-                                <option value="">Please select</option>
+                                <option value="">{{ isMarathi() ? 'कृपया निवडा' : 'Please select' }}</option>
 
                                 <option
                                   *ngFor="let risk of annexureRiskOptions().control_risks; trackBy: trackBySet"
@@ -1269,7 +1270,7 @@
                             <!-- RISK TYPE -->
 
                             <div class="annexure-field">
-                              <label class="answer-label"> Risk Type </label>
+                              <label class="answer-label"> {{ isMarathi() ? 'जोखीम प्रकार' : 'Risk Type' }} </label>
 
                               <select
                                 class="answer-control"
@@ -1278,7 +1279,7 @@
                                   !isCustomAnnexureRisk(question) || question.is_editable === false
                                 "
                               >
-                                <option value="">Please select</option>
+                                <option value="">{{ isMarathi() ? 'कृपया निवडा' : 'Please select' }}</option>
 
                                 <option
                                   *ngFor="let risk of annexureRiskOptions().risk_categories; trackBy: trackBySet"
@@ -1305,7 +1306,7 @@
                           pButton
                           type="button"
                           icon="pi pi-download"
-                          label="Sample CSV"
+                          [label]="isMarathi() ? 'नमुना CSV' : 'Sample CSV'"
                           severity="secondary"
                           [disabled]="question.is_editable === false"
                           (click)="downloadAnnexureSample(question)"
@@ -1315,7 +1316,7 @@
                           pButton
                           type="button"
                           icon="pi pi-upload"
-                          label="Upload CSV"
+                          [label]="isMarathi() ? 'CSV अपलोड करा' : 'Upload CSV'"
                           severity="secondary"
                           [loading]="isUploadingAnnexureQuestion(question)"
                           [disabled]="
@@ -1328,7 +1329,7 @@
                           pButton
                           type="button"
                           icon="pi pi-times"
-                          label="Clear"
+                          [label]="isMarathi() ? 'साफ करा' : 'Clear'"
                           severity="secondary"
                           [disabled]="
                             isSavingAnnexureQuestion(question) || question.is_editable === false
@@ -1354,8 +1355,8 @@
 
                     <div *ngIf="question.annexure_rows?.length && (!isVerticalFormAnnexure(question) || isOtherDiscrepanciesSelected(question))" class="annexure-saved-panel">
                       <div class="annexure-saved-title">
-                        <span>Saved Annexure Rows</span>
-                        <small>{{ question.annexure_rows?.length || 0 }} record(s)</small>
+                        <span>{{ isMarathi() ? 'जतन केलेल्या ओळी' : 'Saved Annexure Rows' }}</span>
+                        <small>{{ isMarathi() ? ((question.annexure_rows?.length || 0) + ' नोंदी') : ((question.annexure_rows?.length || 0) + ' record(s)') }}</small>
                       </div>
 
                       <div
@@ -1368,22 +1369,22 @@
                           <thead>
                             <tr>
                               <th *ngFor="let column of getAnnexureDisplayColumns(question); trackBy: trackByColumn">
-                                {{ column.name }}
+                                {{ getAnnexureColumnDisplayName(column) }}
                               </th>
-                              <th>Business Risk</th>
-                              <th>Control Risk</th>
-                              <th>Risk Type</th>
-                              <th *ngIf="isReAudit(detail)">Reviewer Feedback</th>
+                              <th>{{ isMarathi() ? 'व्यवसाय जोखीम' : 'Business Risk' }}</th>
+                              <th>{{ isMarathi() ? 'नियंत्रण जोखीम' : 'Control Risk' }}</th>
+                              <th>{{ isMarathi() ? 'जोखीम प्रकार' : 'Risk Type' }}</th>
+                              <th *ngIf="isReAudit(detail)">{{ isMarathi() ? 'तपासनीस अभिप्राय' : 'Reviewer Feedback' }}</th>
                               <th>
-                                Evidence
+                                {{ isMarathi() ? 'पुरावा' : 'Evidence' }}
                                 <small
                                   *ngIf="isEvidenceRequired(question)"
                                   class="evidence-required"
                                 >
-                                  Required
+                                  {{ isMarathi() ? 'आवश्यक' : 'Required' }}
                                 </small>
                               </th>
-                              <th>Action</th>
+                              <th>{{ isMarathi() ? 'कृती' : 'Action' }}</th>
                             </tr>
                           </thead>
 
@@ -2121,14 +2122,22 @@
 
                           <!-- 2. SUBSET VERTICAL FORM LAYOUT -->
                           <div *ngIf="!isOtherDiscrepanciesSelected(subsetQuestion) && isVerticalFormAnnexure(subsetQuestion)" class="annexure-vertical-form-container">
+                            <div class="flex justify-content-between align-items-center mb-2 pb-2 border-bottom-1 border-200">
+                              <div class="font-semibold text-primary text-sm flex align-items-center gap-2">
+                                <i class="pi pi-list"></i>
+                                <span>{{ getAnnexureDisplayName(subsetQuestion.annexure) }}</span>
+                              </div>
+                              <span class="text-xs text-500 font-medium">{{ isMarathi() ? 'माहिती पत्रक' : 'Vertical Form Format' }}</span>
+                            </div>
+
                             <div class="annexure-table-frame">
                               <table class="annexure-vertical-table">
                                 <thead>
                                   <tr>
-                                    <th style="width: 50px; text-align: center;">अ.क्र.</th>
-                                    <th [style.width]="getFormColumns(subsetQuestion).length > 2 ? '28%' : '35%'">तपशिल (Particulars)</th>
+                                    <th style="width: 50px; text-align: center;">{{ isMarathi() ? 'अ.क्र.' : 'Sr. No.' }}</th>
+                                    <th [style.width]="getFormColumns(subsetQuestion).length > 2 ? '28%' : '35%'">{{ isMarathi() ? 'तपशील' : 'Particulars' }}</th>
                                     <th *ngFor="let col of getFormColumns(subsetQuestion); trackBy: trackByFormCol">
-                                      {{ col.label || col.name }}
+                                      {{ (isMarathi() && col.mr_label) ? col.mr_label : (col.label || col.name) }}
                                     </th>
                                   </tr>
                                 </thead>
@@ -2136,7 +2145,7 @@
                                   <tr *ngFor="let column of subsetQuestion.annexure.columns; let ci = index; trackBy: trackByColumn">
                                     <td style="text-align: center; font-weight: 700; color: #64748b; font-size: 0.85rem;">{{ ci + 1 }}</td>
                                     <td class="particular-cell">
-                                      {{ column.name }}
+                                      {{ getAnnexureColumnDisplayName(column) }}
                                     </td>
                                     <td *ngFor="let col of getFormColumns(subsetQuestion); let colIdx = index; trackBy: trackByFormCol" class="value-cell">
                                       <!-- SELECT DROPDOWN -->
@@ -2147,7 +2156,7 @@
                                         (ngModelChange)="setFormCellValue(subsetQuestion, ci, col.key || colIdx, colIdx, $event)"
                                         [disabled]="subsetQuestion.is_editable === false"
                                       >
-                                        <option value="">Please select</option>
+                                        <option value="">{{ isMarathi() ? 'कृपया निवडा' : 'Please select' }}</option>
                                         <ng-container *ngIf="col.options; else defaultSubsetColumnOptions">
                                           <option *ngFor="let opt of col.options" [value]="opt.value !== undefined ? opt.value : opt">
                                             {{ opt.label !== undefined ? opt.label : opt }}
@@ -2155,7 +2164,7 @@
                                         </ng-container>
                                         <ng-template #defaultSubsetColumnOptions>
                                           <option *ngFor="let option of annexureColumnOptions(column); trackBy: trackByOption" [value]="option.option_label">
-                                            {{ option.option_label }}
+                                            {{ (isMarathi() && option.mr_option_label) ? option.mr_option_label : option.option_label }}
                                           </option>
                                         </ng-template>
                                       </select>
@@ -2169,7 +2178,7 @@
                                           [ngModel]="getFormCellValue(subsetQuestion, ci, col.key || colIdx, colIdx)"
                                           (ngModelChange)="setFormCellValue(subsetQuestion, ci, col.key || colIdx, colIdx, $event)"
                                           [disabled]="subsetQuestion.is_editable === false"
-                                          placeholder="Enter {{ col.label || column.name }}"
+                                          [placeholder]="isMarathi() ? 'नोंदवा ' + ((isMarathi() && col.mr_label) ? col.mr_label : (col.label || col.name)) : 'Enter ' + (col.label || column.name)"
                                         ></textarea>
 
                                         <ng-template #notSubsetTextArea>
@@ -2180,7 +2189,7 @@
                                             [ngModel]="getFormCellValue(subsetQuestion, ci, col.key || colIdx, colIdx)"
                                             (ngModelChange)="setFormCellValue(subsetQuestion, ci, col.key || colIdx, colIdx, $event)"
                                             [disabled]="subsetQuestion.is_editable === false"
-                                            placeholder="Enter {{ col.label || column.name }}"
+                                            [placeholder]="isMarathi() ? 'नोंदवा ' + ((isMarathi() && col.mr_label) ? col.mr_label : (col.label || col.name)) : 'Enter ' + (col.label || column.name)"
                                           />
                                         </ng-template>
                                       </ng-template>
@@ -2193,23 +2202,23 @@
                             <div class="flex flex-wrap justify-content-between align-items-center gap-2 mt-3 pt-2 border-top-1 border-200">
                               <div class="flex gap-2 align-items-center" *ngIf="subsetQuestion.is_compliance">
                                 <div>
-                                  <label class="text-xs font-semibold text-600 block mb-1">Business Risk</label>
+                                  <label class="text-xs font-semibold text-600 block mb-1">{{ isMarathi() ? 'व्यवसाय जोखीम' : 'Business Risk' }}</label>
                                   <select class="answer-control text-xs" [(ngModel)]="subsetQuestion.annexure_draft.business_risk" [disabled]="subsetQuestion.is_editable === false">
-                                    <option value="">Select</option>
+                                    <option value="">{{ isMarathi() ? 'निवडा' : 'Select' }}</option>
                                     <option *ngFor="let r of annexureRiskOptions().business_risks" [value]="r.id">{{ r.label }}</option>
                                   </select>
                                 </div>
                                 <div>
-                                  <label class="text-xs font-semibold text-600 block mb-1">Control Risk</label>
+                                  <label class="text-xs font-semibold text-600 block mb-1">{{ isMarathi() ? 'नियंत्रण जोखीम' : 'Control Risk' }}</label>
                                   <select class="answer-control text-xs" [(ngModel)]="subsetQuestion.annexure_draft.control_risk" [disabled]="subsetQuestion.is_editable === false">
-                                    <option value="">Select</option>
+                                    <option value="">{{ isMarathi() ? 'निवडा' : 'Select' }}</option>
                                     <option *ngFor="let r of annexureRiskOptions().control_risks" [value]="r.id">{{ r.label }}</option>
                                   </select>
                                 </div>
                                 <div>
-                                  <label class="text-xs font-semibold text-600 block mb-1">Risk Type</label>
+                                  <label class="text-xs font-semibold text-600 block mb-1">{{ isMarathi() ? 'जोखीम प्रकार' : 'Risk Type' }}</label>
                                   <select class="answer-control text-xs" [(ngModel)]="subsetQuestion.annexure_draft.risk_cat_id" [disabled]="subsetQuestion.is_editable === false">
-                                    <option value="">Select</option>
+                                    <option value="">{{ isMarathi() ? 'निवडा' : 'Select' }}</option>
                                     <option *ngFor="let r of annexureRiskOptions().risk_categories" [value]="r.id">{{ r.risk_category }}</option>
                                   </select>
                                 </div>
@@ -2220,7 +2229,7 @@
                                   pButton
                                   type="button"
                                   icon="pi pi-times"
-                                  label="Clear"
+                                  [label]="isMarathi() ? 'रद्द करा' : 'Clear'"
                                   severity="secondary"
                                   [disabled]="isSavingAnnexureQuestion(subsetQuestion) || subsetQuestion.is_editable === false"
                                   (click)="clearAnnexureDraft(subsetQuestion)"
@@ -2230,7 +2239,7 @@
                                   pButton
                                   type="button"
                                   icon="pi pi-save"
-                                  [label]="subsetQuestion.annexure_draft.id || subsetQuestion.annexure_rows?.length ? 'Update Form' : 'Save Form'"
+                                  [label]="subsetQuestion.annexure_draft.id || subsetQuestion.annexure_rows?.length ? (isMarathi() ? 'फॉर्म अपडेट करा' : 'Update Form') : (isMarathi() ? 'फॉर्म जतन करा' : 'Save Form')"
                                   [loading]="isSavingAnnexureQuestion(subsetQuestion)"
                                   [disabled]="isSavingAnnexureQuestion(subsetQuestion) || subsetQuestion.is_editable === false"
                                   (click)="saveAnnexureRow(subsetQuestion)"
@@ -2247,7 +2256,7 @@
                                 *ngFor="let column of subsetQuestion.annexure.columns; let ci = index; trackBy: trackByColumn"
                               >
                                 <label class="answer-label">
-                                  {{ column.name }}
+                                  {{ getAnnexureColumnDisplayName(column) }}
                                 </label>
 
                                 <textarea
@@ -2265,13 +2274,13 @@
                                     [(ngModel)]="subsetQuestion.annexure_draft.values[ci]"
                                     [disabled]="subsetQuestion.is_editable === false"
                                   >
-                                    <option value="">Please select</option>
+                                    <option value="">{{ isMarathi() ? 'कृपया निवडा' : 'Please select' }}</option>
 
                                     <option
                                       *ngFor="let option of annexureColumnOptions(column); trackBy: trackByOption"
                                       [value]="option.option_label"
                                     >
-                                      {{ option.option_label }}
+                                      {{ (isMarathi() && option.mr_option_label) ? option.mr_option_label : option.option_label }}
                                     </option>
                                   </select>
 
@@ -2281,13 +2290,14 @@
                                       class="answer-control"
                                       [(ngModel)]="subsetQuestion.annexure_draft.values[ci]"
                                       [disabled]="subsetQuestion.is_editable === false"
+                                      [placeholder]="isMarathi() ? 'नोंदवा ' + getAnnexureColumnDisplayName(column) : 'Enter ' + column.name"
                                     />
                                   </ng-template>
                                 </ng-template>
                               </div>
 
                               <div class="annexure-field">
-                                <label class="answer-label"> Business Risk </label>
+                                <label class="answer-label"> {{ isMarathi() ? 'व्यवसाय जोखीम' : 'Business Risk' }} </label>
 
                                 <select
                                   class="answer-control"
@@ -2297,7 +2307,7 @@
                                     subsetQuestion.is_editable === false
                                   "
                                 >
-                                  <option value="">Please select</option>
+                                  <option value="">{{ isMarathi() ? 'कृपया निवडा' : 'Please select' }}</option>
 
                                   <option
                                     *ngFor="let risk of annexureRiskOptions().business_risks; trackBy: trackBySet"
@@ -2309,7 +2319,7 @@
                               </div>
 
                               <div class="annexure-field">
-                                <label class="answer-label"> Control Risk </label>
+                                <label class="answer-label"> {{ isMarathi() ? 'नियंत्रण जोखीम' : 'Control Risk' }} </label>
 
                                 <select
                                   class="answer-control"
@@ -2319,7 +2329,7 @@
                                     subsetQuestion.is_editable === false
                                   "
                                 >
-                                  <option value="">Please select</option>
+                                  <option value="">{{ isMarathi() ? 'कृपया निवडा' : 'Please select' }}</option>
 
                                   <option
                                     *ngFor="let risk of annexureRiskOptions().control_risks; trackBy: trackBySet"
@@ -2331,7 +2341,7 @@
                               </div>
 
                               <div class="annexure-field">
-                                <label class="answer-label"> Risk Type </label>
+                                <label class="answer-label"> {{ isMarathi() ? 'जोखीम प्रकार' : 'Risk Type' }} </label>
 
                                 <select
                                   class="answer-control"
@@ -2341,7 +2351,7 @@
                                     subsetQuestion.is_editable === false
                                   "
                                 >
-                                  <option value="">Please select</option>
+                                  <option value="">{{ isMarathi() ? 'कृपया निवडा' : 'Please select' }}</option>
 
                                   <option
                                     *ngFor="let risk of annexureRiskOptions().risk_categories; trackBy: trackBySet"
@@ -2366,7 +2376,7 @@
                                 pButton
                                 type="button"
                                 icon="pi pi-download"
-                                label="Sample CSV"
+                                [label]="isMarathi() ? 'नमुना CSV' : 'Sample CSV'"
                                 severity="secondary"
                                 [disabled]="subsetQuestion.is_editable === false"
                                 (click)="downloadAnnexureSample(subsetQuestion)"
@@ -2376,7 +2386,7 @@
                                 pButton
                                 type="button"
                                 icon="pi pi-upload"
-                                label="Upload CSV"
+                                [label]="isMarathi() ? 'CSV अपलोड करा' : 'Upload CSV'"
                                 severity="secondary"
                                 [loading]="isUploadingAnnexureQuestion(subsetQuestion)"
                                 [disabled]="
@@ -2390,7 +2400,7 @@
                                 pButton
                                 type="button"
                                 icon="pi pi-times"
-                                label="Clear"
+                                [label]="isMarathi() ? 'रद्द करा' : 'Clear'"
                                 severity="secondary"
                                 [disabled]="
                                   isSavingAnnexureQuestion(subsetQuestion) ||
@@ -2403,7 +2413,7 @@
                                 pButton
                                 type="button"
                                 icon="pi pi-save"
-                                [label]="subsetQuestion.annexure_draft.id ? 'Update Row' : 'Add Row'"
+                                [label]="subsetQuestion.annexure_draft.id ? (isMarathi() ? 'ओळ अपडेट करा' : 'Update Row') : (isMarathi() ? 'ओळ जोडा' : 'Add Row')"
                                 [loading]="isSavingAnnexureQuestion(subsetQuestion)"
                                 [disabled]="
                                   isSavingAnnexureQuestion(subsetQuestion) ||
@@ -2426,22 +2436,22 @@
                               <thead>
                                 <tr>
                                   <th *ngFor="let column of getAnnexureDisplayColumns(subsetQuestion); trackBy: trackByColumn">
-                                    {{ column.name }}
+                                    {{ getAnnexureColumnDisplayName(column) }}
                                   </th>
-                                  <th>Business Risk</th>
-                                  <th>Control Risk</th>
-                                  <th>Risk Type</th>
-                                  <th *ngIf="isReAudit(detail)">Reviewer Feedback</th>
+                                  <th>{{ isMarathi() ? 'व्यवसाय जोखीम' : 'Business Risk' }}</th>
+                                  <th>{{ isMarathi() ? 'नियंत्रण जोखीम' : 'Control Risk' }}</th>
+                                  <th>{{ isMarathi() ? 'जोखीम प्रकार' : 'Risk Type' }}</th>
+                                  <th *ngIf="isReAudit(detail)">{{ isMarathi() ? 'तपासनीस अभिप्राय' : 'Reviewer Feedback' }}</th>
                                   <th>
-                                    Evidence
+                                    {{ isMarathi() ? 'पुरावा' : 'Evidence' }}
                                     <small
                                       *ngIf="isEvidenceRequired(subsetQuestion)"
                                       class="evidence-required"
                                     >
-                                      Required
+                                      {{ isMarathi() ? 'आवश्यक' : 'Required' }}
                                     </small>
                                   </th>
-                                  <th>Action</th>
+                                  <th>{{ isMarathi() ? 'कृती' : 'Action' }}</th>
                                 </tr>
                               </thead>
 
