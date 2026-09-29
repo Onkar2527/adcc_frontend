@@ -33,41 +33,56 @@ SET
     matrix_columns = '[
         {
             "key": "limit",
-            "label": "मंजूर मर्यादा (Limit)",
+            "label": "Sanctioned Limit",
+            "mr_label": "मंजूर मर्यादा",
             "type": "number"
         },
         {
             "key": "dp",
-            "label": "ड्रॉईंग पॉवर (DP)",
+            "label": "Drawing Power (DP)",
+            "mr_label": "ड्रॉईंग पॉवर",
             "type": "number"
         },
         {
             "key": "balance",
-            "label": "चालू बाकी (Balance)",
+            "label": "Current Balance",
+            "mr_label": "चालू बाकी",
             "type": "number"
         },
         {
             "key": "overdue",
-            "label": "थकबाकी (Overdue)",
+            "label": "Overdue Amount",
+            "mr_label": "थकबाकी",
             "type": "number"
         },
         {
             "key": "npa",
-            "label": "NPA वर्गवारी",
+            "label": "NPA Classification",
+            "mr_label": "NPA वर्गवारी",
             "type": "select",
             "options": [
-                "Standard (नियमित)",
+                "Standard",
                 "SMA-0",
                 "SMA-1",
                 "SMA-2",
-                "Substandard (अनुत्पादक)",
-                "Doubtful (संशयास्पद)",
-                "Loss (बुडीत)"
+                "Substandard",
+                "Doubtful",
+                "Loss"
+            ],
+            "mr_options": [
+                "नियमित",
+                "SMA-0",
+                "SMA-1",
+                "SMA-2",
+                "अनुत्पादक",
+                "संशयास्पद",
+                "बुडीत"
             ]
         },
         {
             "key": "remark",
-            "label": "शेरा (Remarks)",
+            "label": "Remarks",
+            "mr_label": "शेरा",
             "type": "text"
         }
     ]'::jsonb
