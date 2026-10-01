@@ -1057,6 +1057,7 @@ export class AuditDashboardService {
     filterType = 0,
     primaryValue = '',
     secondaryValue = '',
+    schemeCode = '',
   ) {
 
     return this.http.get<any>(
@@ -1073,6 +1074,8 @@ export class AuditDashboardService {
             primaryValue,
           secondary_value:
             secondaryValue,
+          scheme_code:
+            schemeCode,
         },
       },
     );

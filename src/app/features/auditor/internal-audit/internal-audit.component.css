@@ -1764,6 +1764,33 @@ textarea.answer-control1 {
     font-weight: 600;
 }
 
+.sampling-field-focus {
+    flex: 1 1 18rem;
+    max-width: 28rem;
+}
+
+.sampling-field-focus span {
+    font-weight: 700;
+    color: #1e3a8a;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+}
+
+.sampling-field-focus .answer-control {
+    border: 2px solid #2563eb !important;
+    background-color: #f0f7ff !important;
+    font-weight: 600 !important;
+    color: #0f172a !important;
+    box-shadow: 0 1px 3px rgba(37, 99, 235, 0.15);
+}
+
+.sampling-field-focus .answer-control:focus {
+    border-color: #1d4ed8 !important;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.25) !important;
+}
+
 .sampling-result {
     border-top: 1px solid var(--surface-200);
     padding-top: .9rem;

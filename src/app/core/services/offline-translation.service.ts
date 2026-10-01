@@ -16,6 +16,7 @@ export class OfflineTranslationService {
   private originalTexts = new Map<Node, string>();
   private originalPlaceholders = new Map<HTMLInputElement | HTMLTextAreaElement, string>();
   private translationCache = new Map<string, string>();
+  private lowerTranslationCache = new Map<string, string>();
   
   private observer: MutationObserver | null = null;
   private isTranslating = false;
@@ -127,8 +128,12 @@ export class OfflineTranslationService {
       );
 
       this.translationCache.clear();
+      this.lowerTranslationCache.clear();
       for (const [english, translated] of Object.entries(response)) {
-        this.translationCache.set(english.trim(), translated.trim());
+        const engTrim = english.trim();
+        const trTrim = translated.trim();
+        this.translationCache.set(engTrim, trTrim);
+        this.lowerTranslationCache.set(engTrim.toLowerCase(), trTrim);
       }
       console.log(`[OfflineTranslationService] Loaded ${this.translationCache.size} translations for ${lang}`);
     } catch (error) {
@@ -240,8 +245,26 @@ export class OfflineTranslationService {
   private translateText(text: string): string {
     const trimmed = text.trim();
     if (!trimmed) return text;
-    // Perform instant, local synchronous lookup from the loaded dictionary map
-    return this.translationCache.get(trimmed) || text;
+
+    // 1. Exact match
+    if (this.translationCache.has(trimmed)) {
+      return this.translationCache.get(trimmed)!;
+    }
+
+    // 2. Case-insensitive match
+    const lower = trimmed.toLowerCase();
+    if (this.lowerTranslationCache.has(lower)) {
+      return this.lowerTranslationCache.get(lower)!;
+    }
+
+    // 3. Dynamic Prefix match for counts (e.g. "Unsampled accounts: 10")
+    const prefixMatch = trimmed.match(/^(Unsampled accounts:\s*)(\d+)$/i);
+    if (prefixMatch) {
+      const prefixTr = this.lowerTranslationCache.get('unsampled accounts:') || 'नमुना न घेतलेली खाती:';
+      return `${prefixTr} ${prefixMatch[2]}`;
+    }
+
+    return text;
   }
 
   private isExcluded(node: Node): boolean {
@@ -250,10 +273,7 @@ export class OfflineTranslationService {
 
     const excludedSelectors = [
       '.question-card',
-      '.workspace-question-panel',
-      '.account-question-group',
       '.question-wise-scoring-table td',
-      '.question-set',
       '.question-set-title',
       '.question-header-title',
       '.official-report-table td',

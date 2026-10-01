@@ -212,6 +212,8 @@ export class CategoryAssessmentComponent
 
     samplingFilterType = 0;
 
+    samplingSchemeCode = '';
+
     samplingPrimaryValue = '';
 
     samplingSecondaryValue = '';
@@ -3682,6 +3684,7 @@ export class CategoryAssessmentComponent
                 Number(this.samplingFilterType || 0),
                 this.samplingPrimaryValue.trim(),
                 this.samplingSecondaryValue.trim(),
+                this.samplingSchemeCode.trim(),
             )
             .subscribe({
                 next: (res: any) => {

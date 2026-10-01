@@ -1,11 +1,6 @@
-<div
-  class="internal-audit min-h-screen bg-gray-100 p-4 md:p-5"
-  [class.category-workspace-mode]="workspaceMode"
->
-  <div
-    *ngIf="!drawerMode() && !workspaceMode"
-    class="flex flex-column md:flex-row md:align-items-center md:justify-content-between gap-3 mb-4"
-  >
+<div class="internal-audit min-h-screen bg-gray-100 p-4 md:p-5" [class.category-workspace-mode]="workspaceMode">
+  <div *ngIf="!drawerMode() && !workspaceMode"
+    class="flex flex-column md:flex-row md:align-items-center md:justify-content-between gap-3 mb-4">
     <div>
       <h2 class="text-2xl font-bold text-900 m-0">
         {{ categoryDetail()?.overview?.audit_type_name || 'Internal Audit' }}
@@ -14,14 +9,8 @@
       <p class="text-600 mt-2 mb-0">Category assessment</p>
     </div>
 
-    <button
-      pButton
-      type="button"
-      icon="pi pi-arrow-left"
-      label="Dashboard"
-      severity="secondary"
-      (click)="backToDashboard()"
-    ></button>
+    <button pButton type="button" icon="pi pi-arrow-left" label="Dashboard" severity="secondary"
+      (click)="backToDashboard()"></button>
   </div>
 
   <div *ngIf="loading()" class="grid">
@@ -45,13 +34,8 @@
   </div>
 
   <ng-container *ngIf="!loading() && !error() && categoryDetail() as detail">
-    <div
-      class="surface-card border-round-xl shadow-1 p-4 mb-4"
-      [class.workspace-category-header]="workspaceMode"
-    >
-      <div
-        class="flex flex-column md:flex-row md:align-items-start md:justify-content-between gap-3"
-      >
+    <div class="surface-card border-round-xl shadow-1 p-4 mb-4" [class.workspace-category-header]="workspaceMode">
+      <div class="flex flex-column md:flex-row md:align-items-start md:justify-content-between gap-3">
         <div>
           <div class="text-sm text-600 mb-2">
             {{ getCategoryMenuName(detail) }}
@@ -61,10 +45,7 @@
             {{ getCategoryName(detail) }}
           </h3>
 
-          <p
-            *ngIf="isReAudit(detail); else pendingLabel"
-            class="text-red-700 font-medium mt-2 mb-0"
-          >
+          <p *ngIf="isReAudit(detail); else pendingLabel" class="text-red-700 font-medium mt-2 mb-0">
             Re-Audit: Reviewer rejected points only
           </p>
 
@@ -81,48 +62,45 @@
           </p>
         </div>
 
-        <button
-          *ngIf="!workspaceMode"
-          pButton
-          type="button"
-          icon="pi pi-arrow-left"
-          [label]="drawerMode() ? 'Close' : 'Back'"
-          severity="secondary"
-          (click)="backToWorkspace()"
-        ></button>
+        <button *ngIf="!workspaceMode" pButton type="button" icon="pi pi-arrow-left"
+          [label]="drawerMode() ? 'Close' : 'Back'" severity="secondary" (click)="backToWorkspace()"></button>
       </div>
     </div>
 
-    <div
-      *ngIf="isAccountCategory(detail)"
-      class="account-assessment surface-card border-round-xl shadow-1 p-4 mb-4"
-    >
+    <div *ngIf="isAccountCategory(detail)" class="account-assessment surface-card border-round-xl shadow-1 p-4 mb-4">
       <div *ngIf="canManageSampling(detail)" class="flex align-items-center justify-content-end gap-3 mb-3">
         <span *ngIf="!samplingOpen()" class="text-sm text-600 font-medium">
           Unsampled accounts: {{ detail.unsampled_account_count || 0 }}
         </span>
-        <button
-          pButton
-          type="button"
-          icon="pi pi-sliders-h"
-          [label]="samplingOpen() ? 'Close Sampling' : 'Manage Sampling'"
-          severity="secondary"
-          (click)="toggleSampling()"
-        ></button>
+        <button pButton type="button" icon="pi pi-sliders-h"
+          [label]="samplingOpen() ? 'Close Sampling' : 'Manage Sampling'" severity="secondary"
+          (click)="toggleSampling()"></button>
       </div>
 
       <section *ngIf="samplingOpen()" class="sampling-panel mb-4">
         <div class="font-bold text-900 mb-3">Select Accounts For Sampling</div>
 
         <div class="sampling-filters">
+          <!-- Standalone Mandatory Scheme Code Filter Dropdown (Focused / Primary) -->
+          <label class="sampling-field sampling-field-focus">
+            <span>
+              <i class="pi pi-tags text-primary"></i>
+              Scheme Code
+            </span>
+            <select class="answer-control" [(ngModel)]="samplingSchemeCode" (ngModelChange)="loadSampling()">
+              <option value="">All Schemes</option>
+              <option *ngFor="let opt of samplingData()?.scheme_options || []" [value]="opt.scheme_code">
+                {{ opt.scheme_code }} - {{ opt.name }}
+              </option>
+            </select>
+          </label>
+
+          <!-- Filter Type Dropdown -->
           <label class="sampling-field">
             <span>Filter Type</span>
             <select class="answer-control" [(ngModel)]="samplingFilterType" (ngModelChange)="onFilterTypeChange()">
               <option [ngValue]="0">All Available Accounts</option>
-              <option
-                *ngFor="let filter of samplingData()?.filter_types || []"
-                [ngValue]="filter.id"
-              >
+              <option *ngFor="let filter of samplingData()?.filter_types || []" [ngValue]="filter.id">
                 {{ filter.name }}
               </option>
             </select>
@@ -151,7 +129,8 @@
           </label>
 
           <!-- Standard inputs for other filter types -->
-          <label *ngIf="samplingFilterType && samplingFilterType !== 6 && samplingFilterType !== 7" class="sampling-field">
+          <label *ngIf="samplingFilterType && samplingFilterType !== 6 && samplingFilterType !== 7"
+            class="sampling-field">
             <span>
               {{ samplingFilterType === 1 ? 'From Account' : 'Percentage' }}
             </span>
@@ -163,15 +142,8 @@
             <input type="text" class="answer-control" [(ngModel)]="samplingSecondaryValue" />
           </label>
 
-          <button
-            pButton
-            type="button"
-            icon="pi pi-search"
-            label="Search"
-            severity="secondary"
-            [loading]="samplingLoading()"
-            (click)="loadSampling()"
-          ></button>
+          <button pButton type="button" icon="pi pi-search" label="Search" severity="secondary"
+            [loading]="samplingLoading()" (click)="loadSampling()"></button>
         </div>
 
         <div *ngIf="!samplingLoading() && samplingData() as sampling" class="sampling-result">
@@ -193,11 +165,8 @@
               <thead>
                 <tr>
                   <th>
-                    <input
-                      type="checkbox"
-                      aria-label="Select all accounts"
-                      (change)="toggleAllSamplingAccounts($any($event.target).checked)"
-                    />
+                    <input type="checkbox" aria-label="Select all accounts"
+                      (change)="toggleAllSamplingAccounts($any($event.target).checked)" />
                   </th>
                   <th>Scheme</th>
                   <th>Account No.</th>
@@ -209,28 +178,24 @@
                 </tr>
               </thead>
               <tbody>
-                <tr
-                  *ngFor="let account of sampling.candidates"
+                <tr *ngFor="let account of sampling.candidates"
                   [style.cursor]="(account.is_completed || account.has_answers) ? 'default' : 'pointer'"
-                  (click)="!(account.is_completed || account.has_answers) && toggleSamplingAccount(account.id, !samplingAccountSelected(account.id))"
-                >
+                  (click)="!(account.is_completed || account.has_answers) && toggleSamplingAccount(account.id, !samplingAccountSelected(account.id))">
                   <td>
-                    <input
-                      type="checkbox"
-                      [checked]="samplingAccountSelected(account.id)"
-                      [disabled]="account.is_completed || account.has_answers"
-                      (click)="$event.stopPropagation()"
-                      (change)="toggleSamplingAccount(account.id, $any($event.target).checked)"
-                    />
+                    <input type="checkbox" [checked]="samplingAccountSelected(account.id)"
+                      [disabled]="account.is_completed || account.has_answers" (click)="$event.stopPropagation()"
+                      (change)="toggleSamplingAccount(account.id, $any($event.target).checked)" />
                   </td>
                   <td>
-                    {{ account.scheme_name ? account.scheme_name + ' (' + account.scheme_code + ')' : (account.scheme_code || '-') }}
+                    {{ account.scheme_name ? account.scheme_name + ' (' + account.scheme_code + ')' :
+                    (account.scheme_code || '-') }}
                   </td>
                   <td>
                     <strong>{{ account.account_no }}</strong>
                     <div class="mt-1" *ngIf="account.is_completed || account.has_answers">
                       <span *ngIf="account.is_completed" class="account-status">Completed</span>
-                      <span *ngIf="!account.is_completed && account.has_answers" class="account-open-status">Has Answers</span>
+                      <span *ngIf="!account.is_completed && account.has_answers" class="account-open-status">Has
+                        Answers</span>
                     </div>
                   </td>
                   <td>
@@ -255,17 +220,9 @@
             </table>
           </div>
 
-          <button
-            *ngIf="sampling.candidates?.length"
-            pButton
-            type="button"
-            icon="pi pi-check"
-            [label]="'Apply Selected Samples (' + samplingSelection.length + ')'"
-            class="mt-3"
-            [loading]="samplingSaving()"
-            [disabled]="!samplingSelection.length"
-            (click)="applySampling()"
-          ></button>
+          <button *ngIf="sampling.candidates?.length" pButton type="button" icon="pi pi-check"
+            [label]="'Apply Selected Samples (' + samplingSelection.length + ')'" class="mt-3"
+            [loading]="samplingSaving()" [disabled]="!samplingSelection.length" (click)="applySampling()"></button>
         </div>
       </section>
 
@@ -276,12 +233,8 @@
             <small>{{ detail.accounts?.length || 0 }} sampled account(s)</small>
           </div>
 
-          <input
-            type="text"
-            class="answer-control"
-            [(ngModel)]="accountSearch"
-            placeholder="Search account number or holder"
-          />
+          <input type="text" class="answer-control" [(ngModel)]="accountSearch"
+            placeholder="Search account number or scheme code or holder" />
         </div>
 
         <div *ngIf="!detail.accounts?.length" class="account-detail account-prompt">
@@ -341,14 +294,8 @@
                   </ng-template>
                 </td>
                 <td>
-                  <button
-                    pButton
-                    type="button"
-                    icon="pi pi-arrow-right"
-                    label="Open"
-                    class="p-button-sm"
-                    (click)="selectAccount(account)"
-                  ></button>
+                  <button pButton type="button" icon="pi pi-arrow-right" label="Open" class="p-button-sm"
+                    (click)="selectAccount(account)"></button>
                 </td>
               </tr>
             </tbody>
@@ -365,26 +312,16 @@
             </span>
           </div>
 
-          <input
-            type="text"
-            class="answer-control mb-3"
-            [(ngModel)]="accountSearch"
-            placeholder="Search account"
-          />
+          <input type="text" class="answer-control mb-3" [(ngModel)]="accountSearch" placeholder="Search account" />
 
           <div *ngIf="!detail.accounts?.length" class="text-600 text-sm">
             No sampled account is available for this category.
           </div>
 
           <div class="account-items">
-            <button
-              type="button"
-              class="account-item"
-              *ngFor="let account of filteredAccounts()"
-              [class.active]="selectedDumpId() === account.id"
-              [class.completed]="account.is_completed"
-              (click)="selectAccount(account)"
-            >
+            <button type="button" class="account-item" *ngFor="let account of filteredAccounts()"
+              [class.active]="selectedDumpId() === account.id" [class.completed]="account.is_completed"
+              (click)="selectAccount(account)">
               <strong>{{ account.account_no }}</strong>
               <small>
                 {{ account.scheme_code || '-' }}
@@ -397,10 +334,7 @@
           </div>
         </aside>
 
-        <div
-          class="account-detail selected-account-detail"
-          *ngIf="detail.selected_account as account"
-        >
+        <div class="account-detail selected-account-detail" *ngIf="detail.selected_account as account">
           <div class="selected-account-head">
             <div class="selected-account-title">
               <div class="text-sm text-600 mb-1 selected-account-eyebrow">Selected Account</div>
@@ -416,32 +350,14 @@
             </div>
 
             <div class="selected-account-actions">
-              <button
-                pButton
-                type="button"
-                icon="pi pi-arrow-left"
-                label="Back to Account List"
-                severity="secondary"
-                (click)="backToAccountList(detail)"
-              ></button>
-              <button
-                pButton
-                type="button"
-                icon="pi pi-check-square"
-                label="Apply Defaults to Account"
-                severity="secondary"
-                (click)="selectDefaultAnswersForAccount()"
-              ></button>
+              <button pButton type="button" icon="pi pi-arrow-left" label="Back to Account List" severity="secondary"
+                (click)="backToAccountList(detail)"></button>
+              <button pButton type="button" icon="pi pi-check-square" label="Apply Defaults to Account"
+                severity="secondary" (click)="selectDefaultAnswersForAccount()"></button>
 
-              <button
-                *ngIf="canManageSampling(detail) && !account.is_completed"
-                pButton
-                type="button"
-                icon="pi pi-times"
-                label="Remove Sample"
-                severity="secondary"
-                (click)="removeSampling(account)"
-              ></button>
+              <button *ngIf="canManageSampling(detail) && !account.is_completed" pButton type="button"
+                icon="pi pi-times" label="Remove Sample" severity="secondary"
+                (click)="removeSampling(account)"></button>
             </div>
           </div>
 
@@ -487,117 +403,77 @@
           </table>
 
           <div class="selected-account-completion-actions">
-            <button
-              pButton
-              type="button"
-              icon="pi pi-check-circle"
-              label="Mark Account Complete"
-              [disabled]="
+            <button pButton type="button" icon="pi pi-check-circle" label="Mark Account Complete" [disabled]="
                 account.is_completed || completingAccount() || completingRemainingAccounts()
-              "
-              [loading]="completingAccount()"
-              (click)="completeAccount()"
-            ></button>
+              " [loading]="completingAccount()" (click)="completeAccount()"></button>
 
-            <button
-              pButton
-              type="button"
-              icon="pi pi-check-circle"
-              label="Complete Remaining Accounts"
-              severity="danger"
-              [disabled]="completingAccount() || completingRemainingAccounts()"
-              [loading]="completingRemainingAccounts()"
-              (click)="completeRemainingAccounts()"
-            ></button>
+            <button pButton type="button" icon="pi pi-check-circle" label="Complete Remaining Accounts"
+              severity="danger" [disabled]="completingAccount() || completingRemainingAccounts()"
+              [loading]="completingRemainingAccounts()" (click)="completeRemainingAccounts()"></button>
           </div>
         </div>
       </div>
     </div>
 
-    <div
-      *ngIf="!detail.sets?.length && !isAccountCategory(detail)"
-      class="surface-card border-round-xl shadow-1 p-4 text-600"
-    >
+    <div *ngIf="!detail.sets?.length && !isAccountCategory(detail)"
+      class="surface-card border-round-xl shadow-1 p-4 text-600">
       No question is configured for this audit category.
     </div>
 
     <div *ngIf="visibleQuestionSets(detail).length" class="category-question-actions">
       <div>
         <strong>{{ isMarathi() ? 'श्रेणी प्रश्न' : 'Category Questions' }}</strong>
-        <small>{{ isMarathi() ? 'या श्रेणीतील सर्व शीर्षकांवर डीफॉल्ट लागू करा किंवा जतन करा.' : 'Apply defaults or save all headers in this category.' }}</small>
+        <small>{{ isMarathi() ? 'या श्रेणीतील सर्व शीर्षकांवर डीफॉल्ट लागू करा किंवा जतन करा.' : 'Apply defaults or save
+          all headers in this category.' }}</small>
       </div>
 
       <div class="category-question-action-buttons">
-        <button
-          *ngIf="canApplyDefaults()"
-          pButton
-          type="button"
-          icon="pi pi-check-square"
-          [label]="isMarathi() ? 'सर्व हेडरवर डीफॉल्ट लागू करा' : 'Apply Defaults to All Headers'"
-          severity="secondary"
-          [disabled]="savingAllHeaders()"
-          (click)="selectDefaultAnswersForCategory()"
-        ></button>
+        <button *ngIf="canApplyDefaults()" pButton type="button" icon="pi pi-check-square"
+          [label]="isMarathi() ? 'सर्व हेडरवर डीफॉल्ट लागू करा' : 'Apply Defaults to All Headers'" severity="secondary"
+          [disabled]="savingAllHeaders()" (click)="selectDefaultAnswersForCategory()"></button>
 
-        <button
-          pButton
-          type="button"
-          icon="pi pi-save"
-          [label]="isMarathi() ? 'सर्व हेडर जतन करा' : 'Save All Headers'"
-          [loading]="savingAllHeaders()"
-          (click)="saveAllHeaders()"
-        ></button>
+        <button pButton type="button" icon="pi pi-save" [label]="isMarathi() ? 'सर्व हेडर जतन करा' : 'Save All Headers'"
+          [loading]="savingAllHeaders()" (click)="saveAllHeaders()"></button>
       </div>
     </div>
 
-    <div class="question-set" *ngFor="let set of visibleQuestionSets(detail); let setIndex = index; trackBy: trackBySet">
+    <div class="question-set"
+      *ngFor="let set of visibleQuestionSets(detail); let setIndex = index; trackBy: trackBySet">
       <div class="question-set-title">
         {{ getSetDisplayName(set) }}
       </div>
 
-      <p-accordion
-        [multiple]="true"
-        [value]="openedHeaderValues(set, setIndex)"
-        (valueChange)="setOpenedHeaderValues(set, setIndex, $event)"
-      >
-        <p-accordion-panel *ngFor="let header of set.headers; let i = index; trackBy: trackByHeader" [value]="i.toString()">
+      <p-accordion [multiple]="true" [value]="openedHeaderValues(set, setIndex)"
+        (valueChange)="setOpenedHeaderValues(set, setIndex, $event)">
+        <p-accordion-panel *ngFor="let header of set.headers; let i = index; trackBy: trackByHeader"
+          [value]="i.toString()">
           <p-accordion-header>
-            <div
-              class="flex flex-column md:flex-row md:align-items-center md:justify-content-between gap-3 w-full pr-3"
-              (click)="$event.stopPropagation()"
-            >
+            <div class="flex flex-column md:flex-row md:align-items-center md:justify-content-between gap-3 w-full pr-3"
+              (click)="$event.stopPropagation()">
               <div class="question-header-title m-0">
                 {{ getHeaderDisplayName(header) }}
               </div>
               <div class="header-answer-actions flex align-items-center gap-2">
                 <span class="badge-answered">
-                  {{ isMarathi() ? 'उत्तरे दिली: ' : 'Answered: ' }}{{ getAnsweredCount(header) }} / {{ getHeaderQuestionCount(header) }}
+                  {{ isMarathi() ? 'उत्तरे दिली: ' : 'Answered: ' }}{{ getAnsweredCount(header) }} / {{
+                  getHeaderQuestionCount(header) }}
                 </span>
                 <span class="badge-remaining">
-                  {{ isMarathi() ? 'शिल्लक: ' : 'Remaining: ' }}{{ getHeaderQuestionCount(header) - getAnsweredCount(header) }}
+                  {{ isMarathi() ? 'शिल्लक: ' : 'Remaining: ' }}{{ getHeaderQuestionCount(header) -
+                  getAnsweredCount(header) }}
                 </span>
                 @if (canApplyDefaults()) {
-                  <button
-                    pButton
-                    type="button"
-                    icon="pi pi-check-square"
-                    [label]="isMarathi() ? 'डीफॉल्ट लागू करा' : 'Apply Defaults'"
-                    severity="secondary"
-                    class="p-button-sm"
-                    [disabled]="savingHeader() === header.id"
-                    (click)="selectDefaultAnswers(header)"
-                  ></button>
+                <button pButton type="button" icon="pi pi-check-square"
+                  [label]="isMarathi() ? 'डीफॉल्ट लागू करा' : 'Apply Defaults'" severity="secondary" class="p-button-sm"
+                  [disabled]="savingHeader() === header.id" (click)="selectDefaultAnswers(header)"></button>
                 }
               </div>
             </div>
           </p-accordion-header>
           <p-accordion-content>
             <ng-container *ngFor="let question of header.questions; let i = index; trackBy: trackByQuestion">
-              <div
-                class="question-card"
-                [class.re-audit-question]="isReAudit(detail)"
-                [class.annexure-question]="buildIsAnnexureSelected(question)"
-              >
+              <div class="question-card" [class.re-audit-question]="isReAudit(detail)"
+                [class.annexure-question]="buildIsAnnexureSelected(question)">
                 <div class="question-main">
                   <div class="question-number">
                     {{ i + 1 }}
@@ -607,9 +483,7 @@
                     <div class="font-medium text-900">
                       {{ question.question }}
 
-                      <span
-                        *ngIf="question.assigned_emp_code && question.is_editable"
-                        style="
+                      <span *ngIf="question.assigned_emp_code && question.is_editable" style="
                           margin-left: 4px;
                           font-size: 0.75rem;
                           vertical-align: middle;
@@ -620,14 +494,11 @@
                           font-weight: bold;
                           border: 1px solid #a5d6a7;
                           display: inline-block;
-                        "
-                      >
+                        ">
                         Your Assignment
                       </span>
 
-                      <span
-                        *ngIf="question.assigned_emp_code && !question.is_editable"
-                        style="
+                      <span *ngIf="question.assigned_emp_code && !question.is_editable" style="
                           margin-left: 4px;
                           font-size: 0.75rem;
                           vertical-align: middle;
@@ -638,16 +509,12 @@
                           font-weight: bold;
                           border: 1px solid #90caf9;
                           display: inline-block;
-                        "
-                      >
+                        ">
                         Assigned to: {{ question.assigned_emp_name }} ({{ question.assigned_emp_code }})
                       </span>
                     </div>
 
-                    <div
-                      *ngIf="isReAudit(detail) && reviewerComment(question)"
-                      class="reviewer-feedback"
-                    >
+                    <div *ngIf="isReAudit(detail) && reviewerComment(question)" class="reviewer-feedback">
                       <span>Reviewer Comment</span>
                       {{ reviewerComment(question) }}
                     </div>
@@ -656,29 +523,21 @@
                   </div>
                 </div>
 
-                <div
-                  class="answer-form"
-                  [class.annexure-answer-form]="buildIsAnnexureSelected(question)"
-                >
-                  <div
-                    class="answer-form-grid"
-                    [class.annexure-answer-grid]="buildIsAnnexureSelected(question)"
-                  >
+                <div class="answer-form" [class.annexure-answer-form]="buildIsAnnexureSelected(question)">
+                  <div class="answer-form-grid" [class.annexure-answer-grid]="buildIsAnnexureSelected(question)">
                     <div class="answer-field">
                       <label *ngIf="buildIsAnnexureSelected(question)" class="answer-label">
                         Answer
                       </label>
 
                       <ng-container *ngIf="!isTextAnswer(question)">
-                        <select
-                          class="answer-control"
-                          [(ngModel)]="question.answer_value"
+                        <select class="answer-control" [(ngModel)]="question.answer_value"
                           (ngModelChange)="onQuestionAnswerChange(question)"
-                          [disabled]="question.is_editable === false"
-                        >
+                          [disabled]="question.is_editable === false">
                           <option value="">{{ isMarathi() ? 'कृपया निवडा' : 'Please select' }}</option>
 
-                          <option *ngFor="let option of question.options; trackBy: trackByOption" [value]="option.value">
+                          <option *ngFor="let option of question.options; trackBy: trackByOption"
+                            [value]="option.value">
                             {{ option.label }}
                           </option>
                         </select>
@@ -686,84 +545,49 @@
 
                       <div class="answer-checks">
                         <label class="compliance-check">
-                          <input
-                            type="checkbox"
-                            [(ngModel)]="question.is_compliance"
+                          <input type="checkbox" [(ngModel)]="question.is_compliance"
                             (change)="onComplianceCheckboxChange(question)"
-                            [disabled]="question.is_editable === false"
-                          />
+                            [disabled]="question.is_editable === false" />
                           <span>{{ isMarathi() ? 'अनुपालन आवश्यक' : 'Compliance required' }}</span>
                         </label>
 
                         <div class="inline-evidence">
                           <label class="compliance-check">
-                            <input
-                              type="checkbox"
-                              [(ngModel)]="question.audit_compulsary_ev_upload"
-                              [disabled]="question.is_editable === false"
-                            />
+                            <input type="checkbox" [(ngModel)]="question.audit_compulsary_ev_upload"
+                              [disabled]="question.is_editable === false" />
                             <span>{{ isMarathi() ? 'पुरावा अपलोड करणे आवश्यक' : 'Evidence to be uploaded' }}</span>
                           </label>
 
-                          <ng-container
-                            *ngIf="
+                          <ng-container *ngIf="
                               !buildIsAnnexureSelected(question) ||
                               evidenceList(question.answer).length
-                            "
-                          >
-                            <span
-                              class="evidence-chip-list"
-                              *ngIf="evidenceList(question.answer).length"
-                            >
-                              <span
-                                class="evidence-chip"
-                                *ngFor="
+                            ">
+                            <span class="evidence-chip-list" *ngIf="evidenceList(question.answer).length">
+                              <span class="evidence-chip" *ngFor="
                                   let evidence of evidenceList(question.answer);
                                   let ei = index;
                                   trackBy: trackByEvidence
-                                "
-                              >
-                                <button
-                                  pButton
-                                  type="button"
-                                  icon="pi pi-eye"
-                                  severity="secondary"
-                                  [title]="'View evidence ' + (ei + 1)"
-                                  (click)="viewEvidence(evidence)"
-                                ></button>
+                                ">
+                                <button pButton type="button" icon="pi pi-eye" severity="secondary"
+                                  [title]="'View evidence ' + (ei + 1)" (click)="viewEvidence(evidence)"></button>
 
-                                <button
-                                  pButton
-                                  type="button"
-                                  icon="pi pi-trash"
-                                  severity="danger"
+                                <button pButton type="button" icon="pi pi-trash" severity="danger"
                                   [title]="'Remove supporting document ' + (ei + 1)"
                                   [loading]="deletingEvidenceKey() === evidenceDeleteKey(evidence)"
                                   [disabled]="question.is_editable === false || deletingEvidenceKey() === evidenceDeleteKey(evidence)"
-                                  (click)="deleteEvidence(evidence)"
-                                ></button>
+                                  (click)="deleteEvidence(evidence)"></button>
                               </span>
                             </span>
 
-                            <input
-                              #questionEvidenceInput
-                              type="file"
-                              multiple
-                              accept=".jpg,.jpeg,.png,.pdf,image/jpeg,image/png,application/pdf"
-                              style="display: none"
-                              (change)="uploadEvidence(question, $event)"
-                            />
+                            <input #questionEvidenceInput type="file" multiple
+                              accept=".jpg,.jpeg,.png,.pdf,image/jpeg,image/png,application/pdf" style="display: none"
+                              (change)="uploadEvidence(question, $event)" />
 
-                            <button
-                              pButton
-                              type="button"
-                              icon="pi pi-upload"
-                              severity="secondary"
+                            <button pButton type="button" icon="pi pi-upload" severity="secondary"
                               title="Supporting document"
                               [disabled]="!question.answer?.id || question.is_editable === false"
                               [loading]="uploadingEvidenceKey() === evidenceKey(question)"
-                              (click)="questionEvidenceInput.click()"
-                            ></button>
+                              (click)="questionEvidenceInput.click()"></button>
                           </ng-container>
                         </div>
                       </div>
@@ -775,30 +599,18 @@
                       </label>
 
                       <div class="audit-comment-wrapper">
-                        <textarea
-                          class="answer-control"
-                          rows="4"
+                        <textarea class="answer-control" rows="4"
                           [placeholder]="isMarathi() ? 'ऑडिट टिप्पणी' : 'Audit Comment'"
-                          [(ngModel)]="question.audit_comment"
-                          [disabled]="question.is_editable === false"
-                          (focus)="onCommentFocus(question)"
-                          (blur)="onCommentBlur(question)"
-                          (input)="onCommentInput(question)"
-                        ></textarea>
-                        <div
-                          *ngIf="
+                          [(ngModel)]="question.audit_comment" [disabled]="question.is_editable === false"
+                          (focus)="onCommentFocus(question)" (blur)="onCommentBlur(question)"
+                          (input)="onCommentInput(question)"></textarea>
+                        <div *ngIf="
                             question.showSuggestions && getFilteredSuggestions(question).length > 0
-                          "
-                          class="audit-comment-suggestions"
-                          role="listbox"
-                        >
-                          <button
-                            type="button"
+                          " class="audit-comment-suggestions" role="listbox">
+                          <button type="button"
                             *ngFor="let sug of getFilteredSuggestions(question); trackBy: trackByIndex"
-                            class="audit-comment-suggestion-item"
-                            role="option"
-                            (mousedown)="selectSuggestion(question, sug, $event)"
-                          >
+                            class="audit-comment-suggestion-item" role="option"
+                            (mousedown)="selectSuggestion(question, sug, $event)">
                             {{ sug }}
                           </button>
                         </div>
@@ -806,14 +618,11 @@
                     </div>
                   </div>
 
-                  <div
-                    *ngIf="
+                  <div *ngIf="
                       managerComplianceComment(question) ||
                       complianceReviewerComment(question) ||
                       evidenceList(question.answer, 'compliance_evidence').length
-                    "
-                    class="live-compliance-feedback"
-                  >
+                    " class="live-compliance-feedback">
                     <div *ngIf="managerComplianceComment(question)" class="live-feedback-box">
                       <span>Manager Response</span>
                       {{ managerComplianceComment(question) }}
@@ -824,86 +633,52 @@
                       {{ complianceReviewerComment(question) }}
                     </div>
 
-                    <div
-                      *ngIf="evidenceList(question.answer, 'compliance_evidence').length"
-                      class="live-feedback-box"
-                    >
+                    <div *ngIf="evidenceList(question.answer, 'compliance_evidence').length" class="live-feedback-box">
                       <span>Manager Evidence</span>
                       <span class="evidence-chip-list">
-                        <span
-                          class="evidence-chip"
-                          *ngFor="
+                        <span class="evidence-chip" *ngFor="
                             let evidence of evidenceList(question.answer, 'compliance_evidence');
                             let ei = index;
                             trackBy: trackByEvidence
-                          "
-                        >
-                          <button
-                            pButton
-                            type="button"
-                            icon="pi pi-eye"
-                            severity="secondary"
+                          ">
+                          <button pButton type="button" icon="pi pi-eye" severity="secondary"
                             [title]="'View manager supporting document ' + (ei + 1)"
-                            (click)="viewComplianceEvidence(evidence)"
-                          ></button>
+                            (click)="viewComplianceEvidence(evidence)"></button>
                         </span>
                       </span>
                     </div>
                   </div>
 
-                  <div
-                    *ngIf="
+                  <div *ngIf="
                       isLiveManagerComplianceFlow() &&
                       question.answer?.is_compliance == 1 &&
                       liveComplianceStatusLabel(question)
-                    "
-                    class="live-compliance-feedback"
-                  >
+                    " class="live-compliance-feedback">
                     <div class="live-feedback-box">
                       <span>Live Compliance Status</span>
                       {{ liveComplianceStatusLabel(question) }}
                     </div>
 
-                    <div
-                      *ngIf="canShowLiveComplianceAuditorActions(question)"
-                      class="live-feedback-box live-feedback-actions"
-                    >
+                    <div *ngIf="canShowLiveComplianceAuditorActions(question)"
+                      class="live-feedback-box live-feedback-actions">
                       <span>Auditor Action</span>
                       <div class="flex gap-2 flex-wrap">
-                        <button
-                          pButton
-                          type="button"
-                          label="Accept"
-                          icon="pi pi-check"
-                          severity="success"
-                          [loading]="
+                        <button pButton type="button" label="Accept" icon="pi pi-check" severity="success" [loading]="
                             liveComplianceActionSaving()[
                               liveComplianceActionKey('answer', question.answer.id)
                             ]
-                          "
-                          (click)="saveLiveComplianceAction(question, 2)"
-                        ></button>
-                        <button
-                          pButton
-                          type="button"
-                          label="Send To Reviewer"
-                          icon="pi pi-arrow-right"
-                          severity="danger"
-                          [loading]="
+                          " (click)="saveLiveComplianceAction(question, 2)"></button>
+                        <button pButton type="button" label="Send To Reviewer" icon="pi pi-arrow-right"
+                          severity="danger" [loading]="
                             liveComplianceActionSaving()[
                               liveComplianceActionKey('answer', question.answer.id)
                             ]
-                          "
-                          (click)="saveLiveComplianceAction(question, 3)"
-                        ></button>
+                          " (click)="saveLiveComplianceAction(question, 3)"></button>
                       </div>
                     </div>
                   </div>
 
-                  <div
-                    *ngIf="isReAudit(detail) && question.re_audit_annexure_only"
-                    class="reviewer-feedback"
-                  >
+                  <div *ngIf="isReAudit(detail) && question.re_audit_annexure_only" class="reviewer-feedback">
                     Update only the rejected annexure row below.
                   </div>
 
@@ -913,32 +688,24 @@
                     <div *ngIf="isOtherDiscrepanciesSelected(question)">
                       <div class="annexure-entry-panel">
                         <div class="annexure-scroll-frame">
-                          <div
-                            class="annexure-grid annexure-entry-grid"
-                            style="grid-template-columns: minmax(280px, 2fr) minmax(140px, 1fr) minmax(140px, 1fr) minmax(160px, 1fr);"
-                          >
+                          <div class="annexure-grid annexure-entry-grid"
+                            style="grid-template-columns: minmax(280px, 2fr) minmax(140px, 1fr) minmax(140px, 1fr) minmax(160px, 1fr);">
                             <!-- DISCREPANCIES -->
                             <div class="annexure-field">
                               <label class="answer-label">Discrepancies</label>
-                              <textarea
-                                class="answer-control"
-                                rows="1"
-                                [(ngModel)]="question.annexure_draft.values[0]"
+                              <textarea class="answer-control" rows="1" [(ngModel)]="question.annexure_draft.values[0]"
                                 [disabled]="question.is_editable === false"
-                                placeholder="Enter Discrepancy details"
-                              ></textarea>
+                                placeholder="Enter Discrepancy details"></textarea>
                             </div>
 
                             <!-- BUSINESS RISK -->
                             <div class="annexure-field">
                               <label class="answer-label">Business Risk</label>
-                              <select
-                                class="answer-control"
-                                [(ngModel)]="question.annexure_draft.business_risk"
-                                [disabled]="question.is_editable === false"
-                              >
+                              <select class="answer-control" [(ngModel)]="question.annexure_draft.business_risk"
+                                [disabled]="question.is_editable === false">
                                 <option value="">Please select</option>
-                                <option *ngFor="let risk of annexureRiskOptions().business_risks; trackBy: trackBySet" [value]="risk.id">
+                                <option *ngFor="let risk of annexureRiskOptions().business_risks; trackBy: trackBySet"
+                                  [value]="risk.id">
                                   {{ risk.label }}
                                 </option>
                               </select>
@@ -947,13 +714,11 @@
                             <!-- CONTROL RISK -->
                             <div class="annexure-field">
                               <label class="answer-label">Control Risk</label>
-                              <select
-                                class="answer-control"
-                                [(ngModel)]="question.annexure_draft.control_risk"
-                                [disabled]="question.is_editable === false"
-                              >
+                              <select class="answer-control" [(ngModel)]="question.annexure_draft.control_risk"
+                                [disabled]="question.is_editable === false">
                                 <option value="">Please select</option>
-                                <option *ngFor="let risk of annexureRiskOptions().control_risks; trackBy: trackBySet" [value]="risk.id">
+                                <option *ngFor="let risk of annexureRiskOptions().control_risks; trackBy: trackBySet"
+                                  [value]="risk.id">
                                   {{ risk.label }}
                                 </option>
                               </select>
@@ -962,13 +727,11 @@
                             <!-- RISK TYPE -->
                             <div class="annexure-field">
                               <label class="answer-label">Risk Type</label>
-                              <select
-                                class="answer-control"
-                                [(ngModel)]="question.annexure_draft.risk_cat_id"
-                                [disabled]="question.is_editable === false"
-                              >
+                              <select class="answer-control" [(ngModel)]="question.annexure_draft.risk_cat_id"
+                                [disabled]="question.is_editable === false">
                                 <option value="">Please select</option>
-                                <option *ngFor="let risk of annexureRiskOptions().risk_categories; trackBy: trackBySet" [value]="risk.id">
+                                <option *ngFor="let risk of annexureRiskOptions().risk_categories; trackBy: trackBySet"
+                                  [value]="risk.id">
                                   {{ risk.risk_category }}
                                 </option>
                               </select>
@@ -978,66 +741,39 @@
 
                         <!-- ACTIONS FOR OTHER DISCREPANCIES -->
                         <div class="annexure-actions-row">
-                          <input
-                            type="file"
-                            #otherAnnexCsvInput
-                            class="hidden"
-                            accept=".csv,text/csv"
-                            (change)="uploadAnnexureCsv(question, $event)"
-                          />
-                          <button
-                            pButton
-                            type="button"
-                            icon="pi pi-download"
-                            label="Sample CSV"
-                            severity="secondary"
-                            [outlined]="true"
-                            [disabled]="question.is_editable === false"
-                            (click)="downloadAnnexureSample(question)"
-                          ></button>
+                          <input type="file" #otherAnnexCsvInput class="hidden" accept=".csv,text/csv"
+                            (change)="uploadAnnexureCsv(question, $event)" />
+                          <button pButton type="button" icon="pi pi-download" label="Sample CSV" severity="secondary"
+                            [outlined]="true" [disabled]="question.is_editable === false"
+                            (click)="downloadAnnexureSample(question)"></button>
 
-                          <button
-                            pButton
-                            type="button"
-                            icon="pi pi-upload"
-                            label="Upload CSV"
-                            severity="secondary"
-                            [outlined]="true"
-                            [disabled]="question.is_editable === false"
-                            (click)="otherAnnexCsvInput.click()"
-                          ></button>
+                          <button pButton type="button" icon="pi pi-upload" label="Upload CSV" severity="secondary"
+                            [outlined]="true" [disabled]="question.is_editable === false"
+                            (click)="otherAnnexCsvInput.click()"></button>
 
-                          <button
-                            pButton
-                            type="button"
-                            icon="pi pi-times"
-                            label="Clear"
-                            severity="secondary"
+                          <button pButton type="button" icon="pi pi-times" label="Clear" severity="secondary"
                             [disabled]="isSavingAnnexureQuestion(question) || question.is_editable === false"
-                            (click)="clearAnnexureDraft(question)"
-                          ></button>
+                            (click)="clearAnnexureDraft(question)"></button>
 
-                          <button
-                            pButton
-                            type="button"
-                            icon="pi pi-plus"
+                          <button pButton type="button" icon="pi pi-plus"
                             [label]="question.annexure_draft.id ? 'Update Row' : 'Add Row'"
                             [loading]="isSavingAnnexureQuestion(question)"
                             [disabled]="isSavingAnnexureQuestion(question) || question.is_editable === false"
-                            (click)="saveAnnexureRow(question)"
-                          ></button>
+                            (click)="saveAnnexureRow(question)"></button>
                         </div>
                       </div>
                     </div>
 
                     <!-- 2. VERTICAL FORM LAYOUT (तपशिल & शेरा) -->
-                    <div *ngIf="!isOtherDiscrepanciesSelected(question) && isVerticalFormAnnexure(question)" class="annexure-vertical-form-container">
+                    <div *ngIf="!isOtherDiscrepanciesSelected(question) && isVerticalFormAnnexure(question)"
+                      class="annexure-vertical-form-container">
                       <div class="flex justify-content-between align-items-center mb-2 pb-2 border-bottom-1 border-200">
                         <div class="font-semibold text-primary text-sm flex align-items-center gap-2">
                           <i class="pi pi-list"></i>
                           <span>{{ getAnnexureDisplayName(question.annexure) }}</span>
                         </div>
-                        <span class="text-xs text-500 font-medium">{{ isMarathi() ? 'माहिती पत्रक' : 'Vertical Form Format' }}</span>
+                        <span class="text-xs text-500 font-medium">{{ isMarathi() ? 'माहिती पत्रक' : 'Vertical Form
+                          Format' }}</span>
                       </div>
 
                       <div class="annexure-table-frame">
@@ -1045,35 +781,41 @@
                           <thead>
                             <tr>
                               <th style="width: 50px; text-align: center;">{{ isMarathi() ? 'अ.क्र.' : 'Sr. No.' }}</th>
-                              <th [style.width]="getFormColumns(question).length > 2 ? '28%' : '35%'">{{ isMarathi() ? 'तपशील' : 'Particulars' }}</th>
+                              <th [style.width]="getFormColumns(question).length > 2 ? '28%' : '35%'">{{ isMarathi() ?
+                                'तपशील' : 'Particulars' }}</th>
                               <th *ngFor="let col of getFormColumns(question); trackBy: trackByFormCol">
                                 {{ (isMarathi() && col.mr_label) ? col.mr_label : (col.label || col.name) }}
                               </th>
                             </tr>
                           </thead>
                           <tbody>
-                            <tr *ngFor="let column of question.annexure.columns; let ci = index; trackBy: trackByColumn">
-                              <td style="text-align: center; font-weight: 700; color: #64748b; font-size: 0.85rem;">{{ ci + 1 }}</td>
+                            <tr
+                              *ngFor="let column of question.annexure.columns; let ci = index; trackBy: trackByColumn">
+                              <td style="text-align: center; font-weight: 700; color: #64748b; font-size: 0.85rem;">{{
+                                ci + 1 }}</td>
                               <td class="particular-cell">
                                 {{ getAnnexureColumnDisplayName(column) }}
                               </td>
-                              <td *ngFor="let col of getFormColumns(question); let colIdx = index; trackBy: trackByFormCol" class="value-cell">
+                              <td
+                                *ngFor="let col of getFormColumns(question); let colIdx = index; trackBy: trackByFormCol"
+                                class="value-cell">
                                 <!-- SELECT DROPDOWN -->
                                 <select
                                   *ngIf="col.type === 'select' || (getFormColumns(question).length === 1 && column.column_type_id == 3); else notSelect"
                                   class="answer-control form-table-control"
                                   [ngModel]="getFormCellValue(question, ci, col.key || colIdx, colIdx)"
                                   (ngModelChange)="setFormCellValue(question, ci, col.key || colIdx, colIdx, $event)"
-                                  [disabled]="question.is_editable === false"
-                                >
+                                  [disabled]="question.is_editable === false">
                                   <option value="">{{ isMarathi() ? 'कृपया निवडा' : 'Please select' }}</option>
                                   <ng-container *ngIf="col.options; else defaultColumnOptions">
-                                    <option *ngFor="let opt of col.options" [value]="opt.value !== undefined ? opt.value : opt">
+                                    <option *ngFor="let opt of col.options"
+                                      [value]="opt.value !== undefined ? opt.value : opt">
                                       {{ opt.label !== undefined ? opt.label : opt }}
                                     </option>
                                   </ng-container>
                                   <ng-template #defaultColumnOptions>
-                                    <option *ngFor="let option of annexureColumnOptions(column); trackBy: trackByOption" [value]="option.option_label">
+                                    <option *ngFor="let option of annexureColumnOptions(column); trackBy: trackByOption"
+                                      [value]="option.option_label">
                                       {{ option.option_label }}
                                     </option>
                                   </ng-template>
@@ -1083,24 +825,19 @@
                                   <!-- TEXTAREA -->
                                   <textarea
                                     *ngIf="col.type === 'textarea' || (getFormColumns(question).length === 1 && column.column_type_id == 2); else notTextArea"
-                                    class="answer-control form-table-control"
-                                    rows="2"
+                                    class="answer-control form-table-control" rows="2"
                                     [ngModel]="getFormCellValue(question, ci, col.key || colIdx, colIdx)"
                                     (ngModelChange)="setFormCellValue(question, ci, col.key || colIdx, colIdx, $event)"
                                     [disabled]="question.is_editable === false"
-                                    [placeholder]="isMarathi() ? 'नोंदवा ' + ((isMarathi() && col.mr_label) ? col.mr_label : (col.label || column.mr_name || column.name)) : 'Enter ' + (col.label || column.name)"
-                                  ></textarea>
+                                    [placeholder]="isMarathi() ? 'नोंदवा ' + ((isMarathi() && col.mr_label) ? col.mr_label : (col.label || column.mr_name || column.name)) : 'Enter ' + (col.label || column.name)"></textarea>
 
                                   <ng-template #notTextArea>
                                     <!-- INPUT (TEXT / NUMBER / DATE) -->
-                                    <input
-                                      [type]="col.type || 'text'"
-                                      class="answer-control form-table-control"
+                                    <input [type]="col.type || 'text'" class="answer-control form-table-control"
                                       [ngModel]="getFormCellValue(question, ci, col.key || colIdx, colIdx)"
                                       (ngModelChange)="setFormCellValue(question, ci, col.key || colIdx, colIdx, $event)"
                                       [disabled]="question.is_editable === false"
-                                      [placeholder]="isMarathi() ? 'नोंदवा ' + ((isMarathi() && col.mr_label) ? col.mr_label : (col.label || column.mr_name || column.name)) : 'Enter ' + (col.label || column.name)"
-                                    />
+                                      [placeholder]="isMarathi() ? 'नोंदवा ' + ((isMarathi() && col.mr_label) ? col.mr_label : (col.label || column.mr_name || column.name)) : 'Enter ' + (col.label || column.name)" />
                                   </ng-template>
                                 </ng-template>
                               </td>
@@ -1110,51 +847,52 @@
                       </div>
 
                       <!-- RISK & ACTIONS FOR VERTICAL FORM -->
-                      <div class="flex flex-wrap justify-content-between align-items-center gap-2 mt-3 pt-2 border-top-1 border-200">
+                      <div
+                        class="flex flex-wrap justify-content-between align-items-center gap-2 mt-3 pt-2 border-top-1 border-200">
                         <div class="flex gap-2 align-items-center" *ngIf="question.is_compliance">
                           <div>
-                            <label class="text-xs font-semibold text-600 block mb-1">{{ isMarathi() ? 'व्यवसाय जोखीम' : 'Business Risk' }}</label>
-                            <select class="answer-control text-xs" [(ngModel)]="question.annexure_draft.business_risk" [disabled]="question.is_editable === false">
+                            <label class="text-xs font-semibold text-600 block mb-1">{{ isMarathi() ? 'व्यवसाय जोखीम' :
+                              'Business Risk' }}</label>
+                            <select class="answer-control text-xs" [(ngModel)]="question.annexure_draft.business_risk"
+                              [disabled]="question.is_editable === false">
                               <option value="">{{ isMarathi() ? 'निवडा' : 'Select' }}</option>
-                              <option *ngFor="let r of annexureRiskOptions().business_risks" [value]="r.id">{{ r.label }}</option>
+                              <option *ngFor="let r of annexureRiskOptions().business_risks" [value]="r.id">{{ r.label
+                                }}</option>
                             </select>
                           </div>
                           <div>
-                            <label class="text-xs font-semibold text-600 block mb-1">{{ isMarathi() ? 'नियंत्रण जोखीम' : 'Control Risk' }}</label>
-                            <select class="answer-control text-xs" [(ngModel)]="question.annexure_draft.control_risk" [disabled]="question.is_editable === false">
+                            <label class="text-xs font-semibold text-600 block mb-1">{{ isMarathi() ? 'नियंत्रण जोखीम' :
+                              'Control Risk' }}</label>
+                            <select class="answer-control text-xs" [(ngModel)]="question.annexure_draft.control_risk"
+                              [disabled]="question.is_editable === false">
                               <option value="">{{ isMarathi() ? 'निवडा' : 'Select' }}</option>
-                              <option *ngFor="let r of annexureRiskOptions().control_risks" [value]="r.id">{{ r.label }}</option>
+                              <option *ngFor="let r of annexureRiskOptions().control_risks" [value]="r.id">{{ r.label }}
+                              </option>
                             </select>
                           </div>
                           <div>
-                            <label class="text-xs font-semibold text-600 block mb-1">{{ isMarathi() ? 'जोखीम प्रकार' : 'Risk Type' }}</label>
-                            <select class="answer-control text-xs" [(ngModel)]="question.annexure_draft.risk_cat_id" [disabled]="question.is_editable === false">
+                            <label class="text-xs font-semibold text-600 block mb-1">{{ isMarathi() ? 'जोखीम प्रकार' :
+                              'Risk Type' }}</label>
+                            <select class="answer-control text-xs" [(ngModel)]="question.annexure_draft.risk_cat_id"
+                              [disabled]="question.is_editable === false">
                               <option value="">{{ isMarathi() ? 'निवडा' : 'Select' }}</option>
-                              <option *ngFor="let r of annexureRiskOptions().risk_categories" [value]="r.id">{{ r.risk_category }}</option>
+                              <option *ngFor="let r of annexureRiskOptions().risk_categories" [value]="r.id">{{
+                                r.risk_category }}</option>
                             </select>
                           </div>
                         </div>
 
                         <div class="flex gap-2 ml-auto">
-                          <button
-                            pButton
-                            type="button"
-                            icon="pi pi-times"
-                            [label]="isMarathi() ? 'साफ करा' : 'Clear'"
+                          <button pButton type="button" icon="pi pi-times" [label]="isMarathi() ? 'साफ करा' : 'Clear'"
                             severity="secondary"
                             [disabled]="isSavingAnnexureQuestion(question) || question.is_editable === false"
-                            (click)="clearAnnexureDraft(question)"
-                          ></button>
+                            (click)="clearAnnexureDraft(question)"></button>
 
-                          <button
-                            pButton
-                            type="button"
-                            icon="pi pi-save"
+                          <button pButton type="button" icon="pi pi-save"
                             [label]="isMarathi() ? (question.annexure_draft.id || question.annexure_rows?.length ? 'माहिती पत्रक अद्यतनित करा' : 'माहिती पत्रक जतन करा') : (question.annexure_draft.id || question.annexure_rows?.length ? 'Update Form' : 'Save Form')"
                             [loading]="isSavingAnnexureQuestion(question)"
                             [disabled]="isSavingAnnexureQuestion(question) || question.is_editable === false"
-                            (click)="saveAnnexureRow(question)"
-                          ></button>
+                            (click)="saveAnnexureRow(question)"></button>
                         </div>
                       </div>
                     </div>
@@ -1163,60 +901,45 @@
                     <div *ngIf="!isOtherDiscrepanciesSelected(question) && !isVerticalFormAnnexure(question)">
                       <div class="annexure-entry-panel">
                         <div class="annexure-scroll-frame">
-                          <div
-                            class="annexure-grid annexure-entry-grid"
+                          <div class="annexure-grid annexure-entry-grid"
                             [style.grid-template-columns]="annexureEntryGridTemplate(question)"
-                            [style.min-width]="annexureEntryMinWidth(question)"
-                          >
+                            [style.min-width]="annexureEntryMinWidth(question)">
                             <!-- DYNAMIC COLUMNS -->
 
-                            <div
-                              class="annexure-field"
-                              *ngFor="let column of question.annexure.columns; let ci = index; trackBy: trackByColumn"
-                            >
+                            <div class="annexure-field"
+                              *ngFor="let column of question.annexure.columns; let ci = index; trackBy: trackByColumn">
                               <label class="answer-label">
                                 {{ getAnnexureColumnDisplayName(column) }}
                               </label>
 
                               <!-- TEXTAREA -->
 
-                              <textarea
-                                *ngIf="column.column_type_id == 2; else annexureInput"
-                                class="answer-control"
-                                rows="1"
-                                [(ngModel)]="question.annexure_draft.values[ci]"
-                                [disabled]="question.is_editable === false"
-                              ></textarea>
+                              <textarea *ngIf="column.column_type_id == 2; else annexureInput" class="answer-control"
+                                rows="1" [(ngModel)]="question.annexure_draft.values[ci]"
+                                [disabled]="question.is_editable === false"></textarea>
 
                               <ng-template #annexureInput>
                                 <!-- SELECT -->
 
-                                <select
-                                  *ngIf="column.column_type_id == 3; else annexureText"
-                                  class="answer-control"
+                                <select *ngIf="column.column_type_id == 3; else annexureText" class="answer-control"
                                   [(ngModel)]="question.annexure_draft.values[ci]"
-                                  [disabled]="question.is_editable === false"
-                                >
+                                  [disabled]="question.is_editable === false">
                                   <option value="">{{ isMarathi() ? 'कृपया निवडा' : 'Please select' }}</option>
 
-                                  <option
-                                    *ngFor="let option of annexureColumnOptions(column); trackBy: trackByOption"
-                                    [value]="option.option_label"
-                                  >
-                                    {{ (isMarathi() && option.mr_option_label) ? option.mr_option_label : option.option_label }}
+                                  <option *ngFor="let option of annexureColumnOptions(column); trackBy: trackByOption"
+                                    [value]="option.option_label">
+                                    {{ (isMarathi() && option.mr_option_label) ? option.mr_option_label :
+                                    option.option_label }}
                                   </option>
                                 </select>
 
                                 <!-- INPUT -->
 
                                 <ng-template #annexureText>
-                                  <input
-                                    type="text"
-                                    class="answer-control"
+                                  <input type="text" class="answer-control"
                                     [(ngModel)]="question.annexure_draft.values[ci]"
                                     [disabled]="question.is_editable === false"
-                                    [placeholder]="isMarathi() ? 'नोंदवा ' + getAnnexureColumnDisplayName(column) : 'Enter ' + column.name"
-                                  />
+                                    [placeholder]="isMarathi() ? 'नोंदवा ' + getAnnexureColumnDisplayName(column) : 'Enter ' + column.name" />
                                 </ng-template>
                               </ng-template>
                             </div>
@@ -1224,21 +947,17 @@
                             <!-- BUSINESS RISK -->
 
                             <div class="annexure-field">
-                              <label class="answer-label"> {{ isMarathi() ? 'व्यवसाय जोखीम' : 'Business Risk' }} </label>
+                              <label class="answer-label"> {{ isMarathi() ? 'व्यवसाय जोखीम' : 'Business Risk' }}
+                              </label>
 
-                              <select
-                                class="answer-control"
-                                [(ngModel)]="question.annexure_draft.business_risk"
+                              <select class="answer-control" [(ngModel)]="question.annexure_draft.business_risk"
                                 [disabled]="
                                   !isCustomAnnexureRisk(question) || question.is_editable === false
-                                "
-                              >
+                                ">
                                 <option value="">{{ isMarathi() ? 'कृपया निवडा' : 'Please select' }}</option>
 
-                                <option
-                                  *ngFor="let risk of annexureRiskOptions().business_risks; trackBy: trackBySet"
-                                  [value]="risk.id"
-                                >
+                                <option *ngFor="let risk of annexureRiskOptions().business_risks; trackBy: trackBySet"
+                                  [value]="risk.id">
                                   {{ risk.label }}
                                 </option>
                               </select>
@@ -1247,21 +966,17 @@
                             <!-- CONTROL RISK -->
 
                             <div class="annexure-field">
-                              <label class="answer-label"> {{ isMarathi() ? 'नियंत्रण जोखीम' : 'Control Risk' }} </label>
+                              <label class="answer-label"> {{ isMarathi() ? 'नियंत्रण जोखीम' : 'Control Risk' }}
+                              </label>
 
-                              <select
-                                class="answer-control"
-                                [(ngModel)]="question.annexure_draft.control_risk"
+                              <select class="answer-control" [(ngModel)]="question.annexure_draft.control_risk"
                                 [disabled]="
                                   !isCustomAnnexureRisk(question) || question.is_editable === false
-                                "
-                              >
+                                ">
                                 <option value="">{{ isMarathi() ? 'कृपया निवडा' : 'Please select' }}</option>
 
-                                <option
-                                  *ngFor="let risk of annexureRiskOptions().control_risks; trackBy: trackBySet"
-                                  [value]="risk.id"
-                                >
+                                <option *ngFor="let risk of annexureRiskOptions().control_risks; trackBy: trackBySet"
+                                  [value]="risk.id">
                                   {{ risk.label }}
                                 </option>
                               </select>
@@ -1272,19 +987,14 @@
                             <div class="annexure-field">
                               <label class="answer-label"> {{ isMarathi() ? 'जोखीम प्रकार' : 'Risk Type' }} </label>
 
-                              <select
-                                class="answer-control"
-                                [(ngModel)]="question.annexure_draft.risk_cat_id"
+                              <select class="answer-control" [(ngModel)]="question.annexure_draft.risk_cat_id"
                                 [disabled]="
                                   !isCustomAnnexureRisk(question) || question.is_editable === false
-                                "
-                              >
+                                ">
                                 <option value="">{{ isMarathi() ? 'कृपया निवडा' : 'Please select' }}</option>
 
-                                <option
-                                  *ngFor="let risk of annexureRiskOptions().risk_categories; trackBy: trackBySet"
-                                  [value]="risk.id"
-                                >
+                                <option *ngFor="let risk of annexureRiskOptions().risk_categories; trackBy: trackBySet"
+                                  [value]="risk.id">
                                   {{ risk.risk_category }}
                                 </option>
                               </select>
@@ -1294,78 +1004,46 @@
                       </div>
 
                       <div class="annexure-actions">
-                        <input
-                          #annexCsvInput
-                          type="file"
-                          accept=".csv,text/csv"
-                          style="display: none"
-                          (change)="uploadAnnexureCsv(question, $event)"
-                        />
+                        <input #annexCsvInput type="file" accept=".csv,text/csv" style="display: none"
+                          (change)="uploadAnnexureCsv(question, $event)" />
 
-                        <button
-                          pButton
-                          type="button"
-                          icon="pi pi-download"
-                          [label]="isMarathi() ? 'नमुना CSV' : 'Sample CSV'"
-                          severity="secondary"
+                        <button pButton type="button" icon="pi pi-download"
+                          [label]="isMarathi() ? 'नमुना CSV' : 'Sample CSV'" severity="secondary"
                           [disabled]="question.is_editable === false"
-                          (click)="downloadAnnexureSample(question)"
-                        ></button>
+                          (click)="downloadAnnexureSample(question)"></button>
 
-                        <button
-                          pButton
-                          type="button"
-                          icon="pi pi-upload"
-                          [label]="isMarathi() ? 'CSV अपलोड करा' : 'Upload CSV'"
-                          severity="secondary"
-                          [loading]="isUploadingAnnexureQuestion(question)"
-                          [disabled]="
+                        <button pButton type="button" icon="pi pi-upload"
+                          [label]="isMarathi() ? 'CSV अपलोड करा' : 'Upload CSV'" severity="secondary"
+                          [loading]="isUploadingAnnexureQuestion(question)" [disabled]="
                             isSavingAnnexureQuestion(question) || question.is_editable === false
-                          "
-                          (click)="annexCsvInput.click()"
-                        ></button>
+                          " (click)="annexCsvInput.click()"></button>
 
-                        <button
-                          pButton
-                          type="button"
-                          icon="pi pi-times"
-                          [label]="isMarathi() ? 'साफ करा' : 'Clear'"
-                          severity="secondary"
-                          [disabled]="
+                        <button pButton type="button" icon="pi pi-times" [label]="isMarathi() ? 'साफ करा' : 'Clear'"
+                          severity="secondary" [disabled]="
                             isSavingAnnexureQuestion(question) || question.is_editable === false
-                          "
-                          (click)="clearAnnexureDraft(question)"
-                        ></button>
+                          " (click)="clearAnnexureDraft(question)"></button>
 
-                        <button
-                          pButton
-                          type="button"
-                          icon="pi pi-save"
+                        <button pButton type="button" icon="pi pi-save"
                           [label]="question.annexure_draft.id ? 'Update Row' : 'Add Row'"
-                          [loading]="isSavingAnnexureQuestion(question)"
-                          [disabled]="
+                          [loading]="isSavingAnnexureQuestion(question)" [disabled]="
                             isSavingAnnexureQuestion(question) ||
                             isUploadingAnnexureQuestion(question) ||
                             question.is_editable === false
-                          "
-                          (click)="saveAnnexureRow(question)"
-                        ></button>
+                          " (click)="saveAnnexureRow(question)"></button>
                       </div>
                     </div>
 
-                    <div *ngIf="question.annexure_rows?.length && (!isVerticalFormAnnexure(question) || isOtherDiscrepanciesSelected(question))" class="annexure-saved-panel">
+                    <div
+                      *ngIf="question.annexure_rows?.length && (!isVerticalFormAnnexure(question) || isOtherDiscrepanciesSelected(question))"
+                      class="annexure-saved-panel">
                       <div class="annexure-saved-title">
                         <span>{{ isMarathi() ? 'जतन केलेल्या ओळी' : 'Saved Annexure Rows' }}</span>
-                        <small>{{ isMarathi() ? ((question.annexure_rows?.length || 0) + ' नोंदी') : ((question.annexure_rows?.length || 0) + ' record(s)') }}</small>
+                        <small>{{ isMarathi() ? ((question.annexure_rows?.length || 0) + ' नोंदी') :
+                          ((question.annexure_rows?.length || 0) + ' record(s)') }}</small>
                       </div>
 
-                      <div
-                        class="annexure-scroll-frame annexure-table-frame compact-annexure-table"
-                      >
-                        <table
-                          class="annexure-data-table"
-                          [style.min-width]="annexureTableMinWidth(question)"
-                        >
+                      <div class="annexure-scroll-frame annexure-table-frame compact-annexure-table">
+                        <table class="annexure-data-table" [style.min-width]="annexureTableMinWidth(question)">
                           <thead>
                             <tr>
                               <th *ngFor="let column of getAnnexureDisplayColumns(question); trackBy: trackByColumn">
@@ -1374,13 +1052,11 @@
                               <th>{{ isMarathi() ? 'व्यवसाय जोखीम' : 'Business Risk' }}</th>
                               <th>{{ isMarathi() ? 'नियंत्रण जोखीम' : 'Control Risk' }}</th>
                               <th>{{ isMarathi() ? 'जोखीम प्रकार' : 'Risk Type' }}</th>
-                              <th *ngIf="isReAudit(detail)">{{ isMarathi() ? 'तपासनीस अभिप्राय' : 'Reviewer Feedback' }}</th>
+                              <th *ngIf="isReAudit(detail)">{{ isMarathi() ? 'तपासनीस अभिप्राय' : 'Reviewer Feedback' }}
+                              </th>
                               <th>
                                 {{ isMarathi() ? 'पुरावा' : 'Evidence' }}
-                                <small
-                                  *ngIf="isEvidenceRequired(question)"
-                                  class="evidence-required"
-                                >
+                                <small *ngIf="isEvidenceRequired(question)" class="evidence-required">
                                   {{ isMarathi() ? 'आवश्यक' : 'Required' }}
                                 </small>
                               </th>
@@ -1390,7 +1066,8 @@
 
                           <tbody>
                             <tr *ngFor="let row of question.annexure_rows; trackBy: trackByRow">
-                              <td *ngFor="let column of getAnnexureDisplayColumns(question); let ci = index; trackBy: trackByColumn">
+                              <td
+                                *ngFor="let column of getAnnexureDisplayColumns(question); let ci = index; trackBy: trackByColumn">
                                 {{ row.values?.[ci] || '-' }}
                               </td>
 
@@ -1411,81 +1088,59 @@
 
                                 <!-- Inline tiny timeline for annexure row -->
                                 <div *ngIf="getTimeline(row).length > 2" class="row-timeline-inline">
-                                  <div
-                                    *ngFor="let item of getTimeline(row); let index = index; trackBy: trackByIndex"
-                                    class="row-timeline-item"
-                                  >
+                                  <div *ngFor="let item of getTimeline(row); let index = index; trackBy: trackByIndex"
+                                    class="row-timeline-item">
                                     <div class="row-timeline-header">
                                       <span class="round-badge">R{{ index + 1 }}</span>
                                       <span class="date" *ngIf="item.created_at">{{
                                         item.created_at | date: 'dd/MM/yy'
-                                      }}</span>
+                                        }}</span>
                                     </div>
                                     <div class="row-timeline-body">
-                                      <div
-                                        *ngIf="formatTimelineAuditText(item)"
-                                        class="row-comment text-purple"
-                                      >
+                                      <div *ngIf="formatTimelineAuditText(item)" class="row-comment text-purple">
                                         <strong>Aud:</strong>
                                         {{ formatTimelineAuditText(item) }}
                                       </div>
-                                      <div
-                                        *ngIf="
+                                      <div *ngIf="
                                           item.compliance_reviewer_comment ||
                                           item.audit_reviewer_comment ||
                                           item.comment ||
                                           item.reviewer_comment
-                                        "
-                                        class="row-comment text-red"
-                                      >
+                                        " class="row-comment text-red">
                                         <strong>Rev:</strong>
                                         {{
-                                          item.compliance_reviewer_comment ||
-                                            item.audit_reviewer_comment ||
-                                            item.comment ||
-                                            item.reviewer_comment
+                                        item.compliance_reviewer_comment ||
+                                        item.audit_reviewer_comment ||
+                                        item.comment ||
+                                        item.reviewer_comment
                                         }}
                                       </div>
-                                      <div
-                                        *ngIf="
+                                      <div *ngIf="
                                           item.compliance_response ||
                                           item.response
-                                        "
-                                        class="row-comment text-blue"
-                                      >
+                                        " class="row-comment text-blue">
                                         <strong>Mgr:</strong>
                                         {{
-                                          item.compliance_response ||
-                                            item.response
+                                        item.compliance_response ||
+                                        item.response
                                         }}
                                       </div>
-                                      <span
-                                        class="inline-evidences"
-                                        *ngIf="
+                                      <span class="inline-evidences" *ngIf="
                                           evidenceList(item).length ||
                                           evidenceList(item, 'compliance_evidence').length
-                                        "
-                                      >
+                                        ">
                                         <button
                                           *ngFor="let e of evidenceList(item); let ei = index; trackBy: trackByEvidence"
-                                          type="button"
-                                          class="btn-link"
-                                          (click)="viewEvidence(e)"
-                                          title="View auditor supporting document"
-                                        >
+                                          type="button" class="btn-link" (click)="viewEvidence(e)"
+                                          title="View auditor supporting document">
                                           <i class="pi pi-paperclip"></i>
                                         </button>
-                                        <button
-                                          *ngFor="
+                                        <button *ngFor="
                                             let e of evidenceList(item, 'compliance_evidence');
                                             let ei = index;
                                             trackBy: trackByEvidence
-                                          "
-                                          type="button"
-                                          class="btn-link"
-                                          (click)="viewComplianceEvidence(e)"
-                                          title="View manager supporting document"
-                                        >
+                                          " type="button" class="btn-link" (click)="viewComplianceEvidence(e)"
+                                          title="View manager supporting document">
                                           <i class="pi pi-eye"></i>
                                         </button>
                                       </span>
@@ -1497,103 +1152,55 @@
                               <td>
                                 <span class="evidence-cell">
                                   <span class="evidence-chip-list" *ngIf="evidenceList(row).length">
-                                    <span
-                                      class="evidence-chip"
-                                      *ngFor="let evidence of evidenceList(row); let ei = index; trackBy: trackByEvidence"
-                                    >
-                                      <button
-                                        pButton
-                                        type="button"
-                                        icon="pi pi-eye"
-                                        severity="secondary"
-                                        [title]="'View evidence ' + (ei + 1)"
-                                        (click)="viewEvidence(evidence)"
-                                      ></button>
+                                    <span class="evidence-chip"
+                                      *ngFor="let evidence of evidenceList(row); let ei = index; trackBy: trackByEvidence">
+                                      <button pButton type="button" icon="pi pi-eye" severity="secondary"
+                                        [title]="'View evidence ' + (ei + 1)" (click)="viewEvidence(evidence)"></button>
 
-                                      <button
-                                        pButton
-                                        type="button"
-                                        icon="pi pi-trash"
-                                        severity="danger"
+                                      <button pButton type="button" icon="pi pi-trash" severity="danger"
                                         [title]="'Remove supporting document ' + (ei + 1)"
                                         [loading]="deletingEvidenceKey() === evidenceDeleteKey(evidence)"
                                         [disabled]="deletingEvidenceKey() === evidenceDeleteKey(evidence)"
-                                        (click)="deleteEvidence(evidence)"
-                                      ></button>
+                                        (click)="deleteEvidence(evidence)"></button>
                                     </span>
                                   </span>
 
-                                  <span
-                                    class="evidence-chip-list"
-                                    *ngIf="evidenceList(row, 'compliance_evidence').length"
-                                  >
-                                    <span
-                                      class="evidence-chip"
-                                      *ngFor="
+                                  <span class="evidence-chip-list"
+                                    *ngIf="evidenceList(row, 'compliance_evidence').length">
+                                    <span class="evidence-chip" *ngFor="
                                         let evidence of evidenceList(row, 'compliance_evidence');
                                         let ei = index;
                                         trackBy: trackByEvidence
-                                      "
-                                    >
-                                      <button
-                                        pButton
-                                        type="button"
-                                        icon="pi pi-eye"
-                                        severity="secondary"
+                                      ">
+                                      <button pButton type="button" icon="pi pi-eye" severity="secondary"
                                         [title]="'View manager supporting document ' + (ei + 1)"
-                                        (click)="viewComplianceEvidence(evidence)"
-                                      ></button>
+                                        (click)="viewComplianceEvidence(evidence)"></button>
                                     </span>
                                   </span>
 
-                                  <input
-                                    #rowEvidenceInput
-                                    type="file"
-                                    multiple
+                                  <input #rowEvidenceInput type="file" multiple
                                     accept=".jpg,.jpeg,.png,.pdf,image/jpeg,image/png,application/pdf"
-                                    style="display: none"
-                                    (change)="uploadEvidence(question, $event, row)"
-                                  />
+                                    style="display: none" (change)="uploadEvidence(question, $event, row)" />
 
-                                  <button
-                                    pButton
-                                    type="button"
-                                    icon="pi pi-upload"
-                                    severity="secondary"
-                                    [loading]="
+                                  <button pButton type="button" icon="pi pi-upload" severity="secondary" [loading]="
                                       uploadingEvidenceKey() === evidenceKey(question, row)
-                                    "
-                                    (click)="rowEvidenceInput.click()"
-                                  ></button>
+                                    " (click)="rowEvidenceInput.click()"></button>
                                 </span>
                               </td>
 
                               <td>
                                 <span class="annexure-row-actions">
-                                  <button
-                                    pButton
-                                    type="button"
-                                    icon="pi pi-pencil"
-                                    severity="secondary"
+                                  <button pButton type="button" icon="pi pi-pencil" severity="secondary"
                                     [disabled]="question.is_editable === false"
-                                    (click)="editAnnexureRow(question, row)"
-                                  ></button>
+                                    (click)="editAnnexureRow(question, row)"></button>
 
-                                  <button
-                                    pButton
-                                    type="button"
-                                    icon="pi pi-trash"
-                                    severity="danger"
-                                    [loading]="
+                                  <button pButton type="button" icon="pi pi-trash" severity="danger" [loading]="
                                       deletingAnnexureRowKey() ===
                                       annexureRowKey(question.id, row.id)
-                                    "
-                                    [disabled]="
+                                    " [disabled]="
                                       isSavingAnnexureQuestion(question) ||
                                       question.is_editable === false
-                                    "
-                                    (click)="deleteAnnexureRow(question, row)"
-                                  ></button>
+                                    " (click)="deleteAnnexureRow(question, row)"></button>
                                 </span>
                               </td>
                             </tr>
@@ -1603,24 +1210,20 @@
                     </div>
                   </div>
 
-                  <div
-                    *ngIf="answerErrors()[question.id]"
-                    class="text-red-600 text-sm font-medium mt-2"
-                  >
+                  <div *ngIf="answerErrors()[question.id]" class="text-red-600 text-sm font-medium mt-2">
                     {{ answerErrors()[question.id] }}
                   </div>
                 </div>
               </div>
 
-              <div *ngFor="let subsetSet of question.selectedSubsetSets || []; trackBy: trackBySet" class="subset-panel">
+              <div *ngFor="let subsetSet of question.selectedSubsetSets || []; trackBy: trackBySet"
+                class="subset-panel">
                 <div class="question-set-title">
                   {{ subsetSet.name }}
                 </div>
 
                 <section class="question-header" *ngFor="let subsetHeader of subsetSet.headers; trackBy: trackByHeader">
-                  <div
-                    class="flex flex-column md:flex-row md:align-items-center md:justify-content-between gap-3 mb-3"
-                  >
+                  <div class="flex flex-column md:flex-row md:align-items-center md:justify-content-between gap-3 mb-3">
                     <div class="question-header-title m-0">
                       {{ subsetHeader.name }}
                     </div>
@@ -1635,26 +1238,16 @@
                         {{ getHeaderQuestionCount(subsetHeader) - getAnsweredCount(subsetHeader) }}
                       </span>
                       @if (canApplyDefaults()) {
-                        <button
-                          pButton
-                          type="button"
-                          icon="pi pi-check-square"
-                          label="Apply Defaults"
-                          severity="secondary"
-                          class="p-button-sm"
-                          [disabled]="savingHeader() === subsetHeader.id"
-                          (click)="selectDefaultAnswers(subsetHeader)"
-                        ></button>
+                      <button pButton type="button" icon="pi pi-check-square" label="Apply Defaults"
+                        severity="secondary" class="p-button-sm" [disabled]="savingHeader() === subsetHeader.id"
+                        (click)="selectDefaultAnswers(subsetHeader)"></button>
                       }
                     </div>
                   </div>
 
-                  <div
-                    class="question-card"
-                    [class.re-audit-question]="isReAudit(detail)"
+                  <div class="question-card" [class.re-audit-question]="isReAudit(detail)"
                     [class.annexure-question]="buildIsAnnexureSelected(subsetQuestion)"
-                    *ngFor="let subsetQuestion of subsetHeader.questions; let si = index; trackBy: trackByQuestion"
-                  >
+                    *ngFor="let subsetQuestion of subsetHeader.questions; let si = index; trackBy: trackByQuestion">
                     <div class="question-main">
                       <div class="question-number">
                         {{ si + 1 }}
@@ -1664,9 +1257,7 @@
                         <div class="font-medium text-900">
                           {{ subsetQuestion.question }}
 
-                          <span
-                            *ngIf="subsetQuestion.assigned_emp_code && subsetQuestion.is_editable"
-                            style="
+                          <span *ngIf="subsetQuestion.assigned_emp_code && subsetQuestion.is_editable" style="
                               margin-left: 4px;
                               font-size: 0.75rem;
                               vertical-align: middle;
@@ -1677,14 +1268,11 @@
                               font-weight: bold;
                               border: 1px solid #a5d6a7;
                               display: inline-block;
-                            "
-                          >
+                            ">
                             Your Assignment
                           </span>
 
-                          <span
-                            *ngIf="subsetQuestion.assigned_emp_code && !subsetQuestion.is_editable"
-                            style="
+                          <span *ngIf="subsetQuestion.assigned_emp_code && !subsetQuestion.is_editable" style="
                               margin-left: 4px;
                               font-size: 0.75rem;
                               vertical-align: middle;
@@ -1695,8 +1283,7 @@
                               font-weight: bold;
                               border: 1px solid #90caf9;
                               display: inline-block;
-                            "
-                          >
+                            ">
                             Assigned to: {{ subsetQuestion.assigned_emp_name }} ({{ subsetQuestion.assigned_emp_code }})
                           </span>
                         </div>
@@ -1712,10 +1299,7 @@
                           </span>
                         </div>
 
-                        <div
-                          *ngIf="isReAudit(detail) && reviewerComment(subsetQuestion)"
-                          class="reviewer-feedback"
-                        >
+                        <div *ngIf="isReAudit(detail) && reviewerComment(subsetQuestion)" class="reviewer-feedback">
                           <span>Reviewer Comment</span>
                           {{ reviewerComment(subsetQuestion) }}
                         </div>
@@ -1724,34 +1308,21 @@
                       </div>
                     </div>
 
-                    <div
-                      class="answer-form"
-                      [class.annexure-answer-form]="buildIsAnnexureSelected(subsetQuestion)"
-                    >
-                      <div
-                        class="answer-form-grid"
-                        [class.annexure-answer-grid]="buildIsAnnexureSelected(subsetQuestion)"
-                      >
+                    <div class="answer-form" [class.annexure-answer-form]="buildIsAnnexureSelected(subsetQuestion)">
+                      <div class="answer-form-grid"
+                        [class.annexure-answer-grid]="buildIsAnnexureSelected(subsetQuestion)">
                         <div class="answer-field">
-                          <label
-                            *ngIf="buildIsAnnexureSelected(subsetQuestion)"
-                            class="answer-label"
-                          >
+                          <label *ngIf="buildIsAnnexureSelected(subsetQuestion)" class="answer-label">
                             Answer
                           </label>
 
                           <ng-container *ngIf="!isTextAnswer(subsetQuestion)">
-                            <select
-                              class="answer-control"
-                              [(ngModel)]="subsetQuestion.answer_value"
-                              [disabled]="subsetQuestion.is_editable === false"
-                            >
+                            <select class="answer-control" [(ngModel)]="subsetQuestion.answer_value"
+                              [disabled]="subsetQuestion.is_editable === false">
                               <option value="">Please select</option>
 
-                              <option
-                                *ngFor="let option of subsetQuestion.options; trackBy: trackByOption"
-                                [value]="option.value"
-                              >
+                              <option *ngFor="let option of subsetQuestion.options; trackBy: trackByOption"
+                                [value]="option.value">
                                 {{ option.label }}
                               </option>
                             </select>
@@ -1759,125 +1330,73 @@
 
                           <div class="answer-checks">
                             <label class="compliance-check">
-                              <input
-                                type="checkbox"
-                                [(ngModel)]="subsetQuestion.is_compliance"
-                                [disabled]="subsetQuestion.is_editable === false"
-                              />
+                              <input type="checkbox" [(ngModel)]="subsetQuestion.is_compliance"
+                                [disabled]="subsetQuestion.is_editable === false" />
                               <span>Compliance required</span>
                             </label>
 
                             <div class="inline-evidence">
                               <label class="compliance-check">
-                                <input
-                                  type="checkbox"
-                                  [(ngModel)]="subsetQuestion.audit_compulsary_ev_upload"
-                                  [disabled]="subsetQuestion.is_editable === false"
-                                />
+                                <input type="checkbox" [(ngModel)]="subsetQuestion.audit_compulsary_ev_upload"
+                                  [disabled]="subsetQuestion.is_editable === false" />
                                 <span>Evidence to be uploaded</span>
                               </label>
 
-                              <ng-container
-                                *ngIf="
+                              <ng-container *ngIf="
                                   !buildIsAnnexureSelected(subsetQuestion) ||
                                   evidenceList(subsetQuestion.answer).length
-                                "
-                              >
-                                <span
-                                  class="evidence-chip-list"
-                                  *ngIf="evidenceList(subsetQuestion.answer).length"
-                                >
-                                  <span
-                                    class="evidence-chip"
-                                    *ngFor="
+                                ">
+                                <span class="evidence-chip-list" *ngIf="evidenceList(subsetQuestion.answer).length">
+                                  <span class="evidence-chip" *ngFor="
                                       let evidence of evidenceList(subsetQuestion.answer);
                                       let ei = index;
                                       trackBy: trackByEvidence
-                                    "
-                                  >
-                                    <button
-                                      pButton
-                                      type="button"
-                                      icon="pi pi-eye"
-                                      severity="secondary"
-                                      [title]="'View evidence ' + (ei + 1)"
-                                      (click)="viewEvidence(evidence)"
-                                    ></button>
+                                    ">
+                                    <button pButton type="button" icon="pi pi-eye" severity="secondary"
+                                      [title]="'View evidence ' + (ei + 1)" (click)="viewEvidence(evidence)"></button>
 
-                                    <button
-                                      pButton
-                                      type="button"
-                                      icon="pi pi-trash"
-                                      severity="danger"
+                                    <button pButton type="button" icon="pi pi-trash" severity="danger"
                                       [title]="'Remove supporting document ' + (ei + 1)"
                                       [loading]="deletingEvidenceKey() === evidenceDeleteKey(evidence)"
                                       [disabled]="subsetQuestion.is_editable === false || deletingEvidenceKey() === evidenceDeleteKey(evidence)"
-                                      (click)="deleteEvidence(evidence)"
-                                    ></button>
+                                      (click)="deleteEvidence(evidence)"></button>
                                   </span>
                                 </span>
 
-                                <input
-                                  #subsetEvidenceInput
-                                  type="file"
-                                  multiple
+                                <input #subsetEvidenceInput type="file" multiple
                                   accept=".jpg,.jpeg,.png,.pdf,image/jpeg,image/png,application/pdf"
-                                  style="display: none"
-                                  (change)="uploadEvidence(subsetQuestion, $event)"
-                                />
+                                  style="display: none" (change)="uploadEvidence(subsetQuestion, $event)" />
 
-                                <button
-                                  pButton
-                                  type="button"
-                                  icon="pi pi-upload"
-                                  severity="secondary"
-                                  title="Supporting document"
-                                  [disabled]="
+                                <button pButton type="button" icon="pi pi-upload" severity="secondary"
+                                  title="Supporting document" [disabled]="
                                     !subsetQuestion.answer?.id ||
                                     subsetQuestion.is_editable === false
-                                  "
-                                  [loading]="uploadingEvidenceKey() === evidenceKey(subsetQuestion)"
-                                  (click)="subsetEvidenceInput.click()"
-                                ></button>
+                                  " [loading]="uploadingEvidenceKey() === evidenceKey(subsetQuestion)"
+                                  (click)="subsetEvidenceInput.click()"></button>
                               </ng-container>
                             </div>
                           </div>
                         </div>
 
                         <div class="answer-field">
-                          <label
-                            *ngIf="buildIsAnnexureSelected(subsetQuestion)"
-                            class="answer-label"
-                          >
+                          <label *ngIf="buildIsAnnexureSelected(subsetQuestion)" class="answer-label">
                             Audit Comment
                           </label>
 
                           <div class="audit-comment-wrapper">
-                            <textarea
-                              class="answer-control"
-                              rows="4"
-                              placeholder="Audit Comment"
+                            <textarea class="answer-control" rows="4" placeholder="Audit Comment"
                               [(ngModel)]="subsetQuestion.audit_comment"
-                              [disabled]="subsetQuestion.is_editable === false"
-                              (focus)="onCommentFocus(subsetQuestion)"
+                              [disabled]="subsetQuestion.is_editable === false" (focus)="onCommentFocus(subsetQuestion)"
                               (blur)="onCommentBlur(subsetQuestion)"
-                              (input)="onCommentInput(subsetQuestion)"
-                            ></textarea>
-                            <div
-                              *ngIf="
+                              (input)="onCommentInput(subsetQuestion)"></textarea>
+                            <div *ngIf="
                                 subsetQuestion.showSuggestions &&
                                 getFilteredSuggestions(subsetQuestion).length > 0
-                              "
-                              class="audit-comment-suggestions"
-                              role="listbox"
-                            >
-                              <button
-                                type="button"
+                              " class="audit-comment-suggestions" role="listbox">
+                              <button type="button"
                                 *ngFor="let sug of getFilteredSuggestions(subsetQuestion); trackBy: trackByIndex"
-                                class="audit-comment-suggestion-item"
-                                role="option"
-                                (mousedown)="selectSuggestion(subsetQuestion, sug, $event)"
-                              >
+                                class="audit-comment-suggestion-item" role="option"
+                                (mousedown)="selectSuggestion(subsetQuestion, sug, $event)">
                                 {{ sug }}
                               </button>
                             </div>
@@ -1885,134 +1404,87 @@
                         </div>
                       </div>
 
-                      <div
-                        *ngIf="
+                      <div *ngIf="
                           managerComplianceComment(subsetQuestion) ||
                           complianceReviewerComment(subsetQuestion) ||
                           evidenceList(subsetQuestion.answer, 'compliance_evidence').length
-                        "
-                        class="live-compliance-feedback"
-                      >
-                        <div
-                          *ngIf="managerComplianceComment(subsetQuestion)"
-                          class="live-feedback-box"
-                        >
+                        " class="live-compliance-feedback">
+                        <div *ngIf="managerComplianceComment(subsetQuestion)" class="live-feedback-box">
                           <span>Manager Response</span>
                           {{ managerComplianceComment(subsetQuestion) }}
                         </div>
 
-                        <div
-                          *ngIf="complianceReviewerComment(subsetQuestion)"
-                          class="live-feedback-box"
-                        >
+                        <div *ngIf="complianceReviewerComment(subsetQuestion)" class="live-feedback-box">
                           <span>Reviewer Comment</span>
                           {{ complianceReviewerComment(subsetQuestion) }}
                         </div>
 
-                        <div
-                          *ngIf="evidenceList(subsetQuestion.answer, 'compliance_evidence').length"
-                          class="live-feedback-box"
-                        >
+                        <div *ngIf="evidenceList(subsetQuestion.answer, 'compliance_evidence').length"
+                          class="live-feedback-box">
                           <span>Manager Evidence</span>
                           <span class="evidence-chip-list">
-                            <span
-                              class="evidence-chip"
-                              *ngFor="
+                            <span class="evidence-chip" *ngFor="
                                 let evidence of evidenceList(
                                   subsetQuestion.answer,
                                   'compliance_evidence'
                                 );
                                 let ei = index;
                                 trackBy: trackByEvidence
-                              "
-                            >
-                              <button
-                                pButton
-                                type="button"
-                                icon="pi pi-eye"
-                                severity="secondary"
+                              ">
+                              <button pButton type="button" icon="pi pi-eye" severity="secondary"
                                 [title]="'View manager supporting document ' + (ei + 1)"
-                                (click)="viewComplianceEvidence(evidence)"
-                              ></button>
+                                (click)="viewComplianceEvidence(evidence)"></button>
                             </span>
                           </span>
                         </div>
                       </div>
 
-                      <div
-                        *ngIf="
+                      <div *ngIf="
                           isLiveManagerComplianceFlow() &&
                           subsetQuestion.answer?.is_compliance == 1 &&
                           liveComplianceStatusLabel(subsetQuestion)
-                        "
-                        class="live-compliance-feedback"
-                      >
+                        " class="live-compliance-feedback">
                         <div class="live-feedback-box">
                           <span>Live Compliance Status</span>
                           {{ liveComplianceStatusLabel(subsetQuestion) }}
                         </div>
 
-                        <div
-                          *ngIf="canShowLiveComplianceAuditorActions(subsetQuestion)"
-                          class="live-feedback-box live-feedback-actions"
-                        >
+                        <div *ngIf="canShowLiveComplianceAuditorActions(subsetQuestion)"
+                          class="live-feedback-box live-feedback-actions">
                           <span>Auditor Action</span>
                           <div class="flex gap-2 flex-wrap">
-                            <button
-                              pButton
-                              type="button"
-                              label="Accept"
-                              icon="pi pi-check"
-                              severity="success"
+                            <button pButton type="button" label="Accept" icon="pi pi-check" severity="success"
                               [loading]="
                                 liveComplianceActionSaving()[
                                   liveComplianceActionKey('answer', subsetQuestion.answer.id)
                                 ]
-                              "
-                              (click)="saveLiveComplianceAction(subsetQuestion, 2)"
-                            ></button>
-                            <button
-                              pButton
-                              type="button"
-                              label="Send To Reviewer"
-                              icon="pi pi-arrow-right"
-                              severity="danger"
-                              [loading]="
+                              " (click)="saveLiveComplianceAction(subsetQuestion, 2)"></button>
+                            <button pButton type="button" label="Send To Reviewer" icon="pi pi-arrow-right"
+                              severity="danger" [loading]="
                                 liveComplianceActionSaving()[
                                   liveComplianceActionKey('answer', subsetQuestion.answer.id)
                                 ]
-                              "
-                              (click)="saveLiveComplianceAction(subsetQuestion, 3)"
-                            ></button>
+                              " (click)="saveLiveComplianceAction(subsetQuestion, 3)"></button>
                           </div>
                         </div>
                       </div>
 
-                      <div
-                        *ngIf="isReAudit(detail) && subsetQuestion.re_audit_annexure_only"
-                        class="reviewer-feedback"
-                      >
+                      <div *ngIf="isReAudit(detail) && subsetQuestion.re_audit_annexure_only" class="reviewer-feedback">
                         Update only the rejected annexure row below.
                       </div>
 
-                      <div
-                        *ngIf="
+                      <div *ngIf="
                           !subsetQuestion.answer?.id &&
                           (!buildIsAnnexureSelected(subsetQuestion) ||
                             subsetQuestion.answer?.evidence)
-                        "
-                        class="evidence-hint"
-                      >
+                        " class="evidence-hint">
                         Save the answer first to Supporting document.
                       </div>
 
-                      <div
-                        *ngIf="
+                      <div *ngIf="
                           buildIsAnnexureSelected(subsetQuestion) &&
                           !subsetQuestion.answer?.evidence
-                        "
-                        class="evidence-panel evidence-hint"
-                      >
+                        " class="evidence-panel evidence-hint">
                         Supporting document from the annexure row after adding the row.
                       </div>
 
@@ -2021,14 +1493,12 @@
                           {{ subsetQuestion.annexure?.name || 'Annexure' }}
                         </div>
 
-                        <div
-                          *ngIf="
+                        <div *ngIf="
                             subsetQuestion.annexure?.columns?.length;
                             else noSubsetAnnexureColumns
-                          "
-                          class="annexure-column-list"
-                        >
-                          <span *ngFor="let column of getAnnexureDisplayColumns(subsetQuestion); trackBy: trackByColumn">
+                          " class="annexure-column-list">
+                          <span
+                            *ngFor="let column of getAnnexureDisplayColumns(subsetQuestion); trackBy: trackByColumn">
                             {{ column.name }}
                           </span>
                         </div>
@@ -2037,38 +1507,30 @@
                           <div class="text-600 text-sm">No annexure columns configured.</div>
                         </ng-template>
 
-                        <div
-                          *ngIf="subsetQuestion.annexure?.columns?.length"
-                          class="annexure-editor"
-                        >
+                        <div *ngIf="subsetQuestion.annexure?.columns?.length" class="annexure-editor">
                           <!-- 1. SUBSET OTHER DISCREPANCIES LAYOUT -->
                           <div *ngIf="isOtherDiscrepanciesSelected(subsetQuestion)">
                             <div class="annexure-entry-panel">
                               <div class="annexure-scroll-frame">
-                                <div
-                                  class="annexure-grid annexure-entry-grid"
-                                  style="grid-template-columns: minmax(280px, 2fr) minmax(140px, 1fr) minmax(140px, 1fr) minmax(160px, 1fr);"
-                                >
+                                <div class="annexure-grid annexure-entry-grid"
+                                  style="grid-template-columns: minmax(280px, 2fr) minmax(140px, 1fr) minmax(140px, 1fr) minmax(160px, 1fr);">
                                   <div class="annexure-field">
                                     <label class="answer-label">Discrepancies</label>
-                                    <textarea
-                                      class="answer-control"
-                                      rows="1"
+                                    <textarea class="answer-control" rows="1"
                                       [(ngModel)]="subsetQuestion.annexure_draft.values[0]"
                                       [disabled]="subsetQuestion.is_editable === false"
-                                      placeholder="Enter Discrepancy details"
-                                    ></textarea>
+                                      placeholder="Enter Discrepancy details"></textarea>
                                   </div>
 
                                   <div class="annexure-field">
                                     <label class="answer-label">Business Risk</label>
-                                    <select
-                                      class="answer-control"
+                                    <select class="answer-control"
                                       [(ngModel)]="subsetQuestion.annexure_draft.business_risk"
-                                      [disabled]="subsetQuestion.is_editable === false"
-                                    >
+                                      [disabled]="subsetQuestion.is_editable === false">
                                       <option value="">Please select</option>
-                                      <option *ngFor="let risk of annexureRiskOptions().business_risks; trackBy: trackBySet" [value]="risk.id">
+                                      <option
+                                        *ngFor="let risk of annexureRiskOptions().business_risks; trackBy: trackBySet"
+                                        [value]="risk.id">
                                         {{ risk.label }}
                                       </option>
                                     </select>
@@ -2076,13 +1538,13 @@
 
                                   <div class="annexure-field">
                                     <label class="answer-label">Control Risk</label>
-                                    <select
-                                      class="answer-control"
+                                    <select class="answer-control"
                                       [(ngModel)]="subsetQuestion.annexure_draft.control_risk"
-                                      [disabled]="subsetQuestion.is_editable === false"
-                                    >
+                                      [disabled]="subsetQuestion.is_editable === false">
                                       <option value="">Please select</option>
-                                      <option *ngFor="let risk of annexureRiskOptions().control_risks; trackBy: trackBySet" [value]="risk.id">
+                                      <option
+                                        *ngFor="let risk of annexureRiskOptions().control_risks; trackBy: trackBySet"
+                                        [value]="risk.id">
                                         {{ risk.label }}
                                       </option>
                                     </select>
@@ -2090,13 +1552,13 @@
 
                                   <div class="annexure-field">
                                     <label class="answer-label">Risk Type</label>
-                                    <select
-                                      class="answer-control"
+                                    <select class="answer-control"
                                       [(ngModel)]="subsetQuestion.annexure_draft.risk_cat_id"
-                                      [disabled]="subsetQuestion.is_editable === false"
-                                    >
+                                      [disabled]="subsetQuestion.is_editable === false">
                                       <option value="">Please select</option>
-                                      <option *ngFor="let risk of annexureRiskOptions().risk_categories; trackBy: trackBySet" [value]="risk.id">
+                                      <option
+                                        *ngFor="let risk of annexureRiskOptions().risk_categories; trackBy: trackBySet"
+                                        [value]="risk.id">
                                         {{ risk.risk_category }}
                                       </option>
                                     </select>
@@ -2105,66 +1567,87 @@
                               </div>
 
                               <div class="annexure-actions-row">
-                                <input
-                                  type="file"
-                                  #subsetOtherAnnexCsvInput
-                                  class="hidden"
-                                  accept=".csv,text/csv"
-                                  (change)="uploadAnnexureCsv(subsetQuestion, $event)"
-                                />
-                                <button pButton type="button" icon="pi pi-download" label="Sample CSV" severity="secondary" [outlined]="true" [disabled]="subsetQuestion.is_editable === false" (click)="downloadAnnexureSample(subsetQuestion)"></button>
-                                <button pButton type="button" icon="pi pi-upload" label="Upload CSV" severity="secondary" [outlined]="true" [disabled]="subsetQuestion.is_editable === false" (click)="subsetOtherAnnexCsvInput.click()"></button>
-                                <button pButton type="button" icon="pi pi-times" label="Clear" severity="secondary" [disabled]="isSavingAnnexureQuestion(subsetQuestion) || subsetQuestion.is_editable === false" (click)="clearAnnexureDraft(subsetQuestion)"></button>
-                                <button pButton type="button" icon="pi pi-plus" [label]="subsetQuestion.annexure_draft.id ? 'Update Row' : 'Add Row'" [loading]="isSavingAnnexureQuestion(subsetQuestion)" [disabled]="isSavingAnnexureQuestion(subsetQuestion) || subsetQuestion.is_editable === false" (click)="saveAnnexureRow(subsetQuestion)"></button>
+                                <input type="file" #subsetOtherAnnexCsvInput class="hidden" accept=".csv,text/csv"
+                                  (change)="uploadAnnexureCsv(subsetQuestion, $event)" />
+                                <button pButton type="button" icon="pi pi-download" label="Sample CSV"
+                                  severity="secondary" [outlined]="true"
+                                  [disabled]="subsetQuestion.is_editable === false"
+                                  (click)="downloadAnnexureSample(subsetQuestion)"></button>
+                                <button pButton type="button" icon="pi pi-upload" label="Upload CSV"
+                                  severity="secondary" [outlined]="true"
+                                  [disabled]="subsetQuestion.is_editable === false"
+                                  (click)="subsetOtherAnnexCsvInput.click()"></button>
+                                <button pButton type="button" icon="pi pi-times" label="Clear" severity="secondary"
+                                  [disabled]="isSavingAnnexureQuestion(subsetQuestion) || subsetQuestion.is_editable === false"
+                                  (click)="clearAnnexureDraft(subsetQuestion)"></button>
+                                <button pButton type="button" icon="pi pi-plus"
+                                  [label]="subsetQuestion.annexure_draft.id ? 'Update Row' : 'Add Row'"
+                                  [loading]="isSavingAnnexureQuestion(subsetQuestion)"
+                                  [disabled]="isSavingAnnexureQuestion(subsetQuestion) || subsetQuestion.is_editable === false"
+                                  (click)="saveAnnexureRow(subsetQuestion)"></button>
                               </div>
                             </div>
                           </div>
 
                           <!-- 2. SUBSET VERTICAL FORM LAYOUT -->
-                          <div *ngIf="!isOtherDiscrepanciesSelected(subsetQuestion) && isVerticalFormAnnexure(subsetQuestion)" class="annexure-vertical-form-container">
-                            <div class="flex justify-content-between align-items-center mb-2 pb-2 border-bottom-1 border-200">
+                          <div
+                            *ngIf="!isOtherDiscrepanciesSelected(subsetQuestion) && isVerticalFormAnnexure(subsetQuestion)"
+                            class="annexure-vertical-form-container">
+                            <div
+                              class="flex justify-content-between align-items-center mb-2 pb-2 border-bottom-1 border-200">
                               <div class="font-semibold text-primary text-sm flex align-items-center gap-2">
                                 <i class="pi pi-list"></i>
                                 <span>{{ getAnnexureDisplayName(subsetQuestion.annexure) }}</span>
                               </div>
-                              <span class="text-xs text-500 font-medium">{{ isMarathi() ? 'माहिती पत्रक' : 'Vertical Form Format' }}</span>
+                              <span class="text-xs text-500 font-medium">{{ isMarathi() ? 'माहिती पत्रक' : 'Vertical
+                                Form Format' }}</span>
                             </div>
 
                             <div class="annexure-table-frame">
                               <table class="annexure-vertical-table">
                                 <thead>
                                   <tr>
-                                    <th style="width: 50px; text-align: center;">{{ isMarathi() ? 'अ.क्र.' : 'Sr. No.' }}</th>
-                                    <th [style.width]="getFormColumns(subsetQuestion).length > 2 ? '28%' : '35%'">{{ isMarathi() ? 'तपशील' : 'Particulars' }}</th>
+                                    <th style="width: 50px; text-align: center;">{{ isMarathi() ? 'अ.क्र.' : 'Sr. No.'
+                                      }}</th>
+                                    <th [style.width]="getFormColumns(subsetQuestion).length > 2 ? '28%' : '35%'">{{
+                                      isMarathi() ? 'तपशील' : 'Particulars' }}</th>
                                     <th *ngFor="let col of getFormColumns(subsetQuestion); trackBy: trackByFormCol">
                                       {{ (isMarathi() && col.mr_label) ? col.mr_label : (col.label || col.name) }}
                                     </th>
                                   </tr>
                                 </thead>
                                 <tbody>
-                                  <tr *ngFor="let column of subsetQuestion.annexure.columns; let ci = index; trackBy: trackByColumn">
-                                    <td style="text-align: center; font-weight: 700; color: #64748b; font-size: 0.85rem;">{{ ci + 1 }}</td>
+                                  <tr
+                                    *ngFor="let column of subsetQuestion.annexure.columns; let ci = index; trackBy: trackByColumn">
+                                    <td
+                                      style="text-align: center; font-weight: 700; color: #64748b; font-size: 0.85rem;">
+                                      {{ ci + 1 }}</td>
                                     <td class="particular-cell">
                                       {{ getAnnexureColumnDisplayName(column) }}
                                     </td>
-                                    <td *ngFor="let col of getFormColumns(subsetQuestion); let colIdx = index; trackBy: trackByFormCol" class="value-cell">
+                                    <td
+                                      *ngFor="let col of getFormColumns(subsetQuestion); let colIdx = index; trackBy: trackByFormCol"
+                                      class="value-cell">
                                       <!-- SELECT DROPDOWN -->
                                       <select
                                         *ngIf="col.type === 'select' || (getFormColumns(subsetQuestion).length === 1 && column.column_type_id == 3); else notSubsetSelect"
                                         class="answer-control form-table-control"
                                         [ngModel]="getFormCellValue(subsetQuestion, ci, col.key || colIdx, colIdx)"
                                         (ngModelChange)="setFormCellValue(subsetQuestion, ci, col.key || colIdx, colIdx, $event)"
-                                        [disabled]="subsetQuestion.is_editable === false"
-                                      >
+                                        [disabled]="subsetQuestion.is_editable === false">
                                         <option value="">{{ isMarathi() ? 'कृपया निवडा' : 'Please select' }}</option>
                                         <ng-container *ngIf="col.options; else defaultSubsetColumnOptions">
-                                          <option *ngFor="let opt of col.options" [value]="opt.value !== undefined ? opt.value : opt">
+                                          <option *ngFor="let opt of col.options"
+                                            [value]="opt.value !== undefined ? opt.value : opt">
                                             {{ opt.label !== undefined ? opt.label : opt }}
                                           </option>
                                         </ng-container>
                                         <ng-template #defaultSubsetColumnOptions>
-                                          <option *ngFor="let option of annexureColumnOptions(column); trackBy: trackByOption" [value]="option.option_label">
-                                            {{ (isMarathi() && option.mr_option_label) ? option.mr_option_label : option.option_label }}
+                                          <option
+                                            *ngFor="let option of annexureColumnOptions(column); trackBy: trackByOption"
+                                            [value]="option.option_label">
+                                            {{ (isMarathi() && option.mr_option_label) ? option.mr_option_label :
+                                            option.option_label }}
                                           </option>
                                         </ng-template>
                                       </select>
@@ -2173,24 +1656,19 @@
                                         <!-- TEXTAREA -->
                                         <textarea
                                           *ngIf="col.type === 'textarea' || (getFormColumns(subsetQuestion).length === 1 && column.column_type_id == 2); else notSubsetTextArea"
-                                          class="answer-control form-table-control"
-                                          rows="2"
+                                          class="answer-control form-table-control" rows="2"
                                           [ngModel]="getFormCellValue(subsetQuestion, ci, col.key || colIdx, colIdx)"
                                           (ngModelChange)="setFormCellValue(subsetQuestion, ci, col.key || colIdx, colIdx, $event)"
                                           [disabled]="subsetQuestion.is_editable === false"
-                                          [placeholder]="isMarathi() ? 'नोंदवा ' + ((isMarathi() && col.mr_label) ? col.mr_label : (col.label || col.name)) : 'Enter ' + (col.label || column.name)"
-                                        ></textarea>
+                                          [placeholder]="isMarathi() ? 'नोंदवा ' + ((isMarathi() && col.mr_label) ? col.mr_label : (col.label || col.name)) : 'Enter ' + (col.label || column.name)"></textarea>
 
                                         <ng-template #notSubsetTextArea>
                                           <!-- INPUT (TEXT / NUMBER / DATE) -->
-                                          <input
-                                            [type]="col.type || 'text'"
-                                            class="answer-control form-table-control"
+                                          <input [type]="col.type || 'text'" class="answer-control form-table-control"
                                             [ngModel]="getFormCellValue(subsetQuestion, ci, col.key || colIdx, colIdx)"
                                             (ngModelChange)="setFormCellValue(subsetQuestion, ci, col.key || colIdx, colIdx, $event)"
                                             [disabled]="subsetQuestion.is_editable === false"
-                                            [placeholder]="isMarathi() ? 'नोंदवा ' + ((isMarathi() && col.mr_label) ? col.mr_label : (col.label || col.name)) : 'Enter ' + (col.label || column.name)"
-                                          />
+                                            [placeholder]="isMarathi() ? 'नोंदवा ' + ((isMarathi() && col.mr_label) ? col.mr_label : (col.label || col.name)) : 'Enter ' + (col.label || column.name)" />
                                         </ng-template>
                                       </ng-template>
                                     </td>
@@ -2199,142 +1677,126 @@
                               </table>
                             </div>
 
-                            <div class="flex flex-wrap justify-content-between align-items-center gap-2 mt-3 pt-2 border-top-1 border-200">
+                            <div
+                              class="flex flex-wrap justify-content-between align-items-center gap-2 mt-3 pt-2 border-top-1 border-200">
                               <div class="flex gap-2 align-items-center" *ngIf="subsetQuestion.is_compliance">
                                 <div>
-                                  <label class="text-xs font-semibold text-600 block mb-1">{{ isMarathi() ? 'व्यवसाय जोखीम' : 'Business Risk' }}</label>
-                                  <select class="answer-control text-xs" [(ngModel)]="subsetQuestion.annexure_draft.business_risk" [disabled]="subsetQuestion.is_editable === false">
+                                  <label class="text-xs font-semibold text-600 block mb-1">{{ isMarathi() ? 'व्यवसाय
+                                    जोखीम' : 'Business Risk' }}</label>
+                                  <select class="answer-control text-xs"
+                                    [(ngModel)]="subsetQuestion.annexure_draft.business_risk"
+                                    [disabled]="subsetQuestion.is_editable === false">
                                     <option value="">{{ isMarathi() ? 'निवडा' : 'Select' }}</option>
-                                    <option *ngFor="let r of annexureRiskOptions().business_risks" [value]="r.id">{{ r.label }}</option>
+                                    <option *ngFor="let r of annexureRiskOptions().business_risks" [value]="r.id">{{
+                                      r.label }}</option>
                                   </select>
                                 </div>
                                 <div>
-                                  <label class="text-xs font-semibold text-600 block mb-1">{{ isMarathi() ? 'नियंत्रण जोखीम' : 'Control Risk' }}</label>
-                                  <select class="answer-control text-xs" [(ngModel)]="subsetQuestion.annexure_draft.control_risk" [disabled]="subsetQuestion.is_editable === false">
+                                  <label class="text-xs font-semibold text-600 block mb-1">{{ isMarathi() ? 'नियंत्रण
+                                    जोखीम' : 'Control Risk' }}</label>
+                                  <select class="answer-control text-xs"
+                                    [(ngModel)]="subsetQuestion.annexure_draft.control_risk"
+                                    [disabled]="subsetQuestion.is_editable === false">
                                     <option value="">{{ isMarathi() ? 'निवडा' : 'Select' }}</option>
-                                    <option *ngFor="let r of annexureRiskOptions().control_risks" [value]="r.id">{{ r.label }}</option>
+                                    <option *ngFor="let r of annexureRiskOptions().control_risks" [value]="r.id">{{
+                                      r.label }}</option>
                                   </select>
                                 </div>
                                 <div>
-                                  <label class="text-xs font-semibold text-600 block mb-1">{{ isMarathi() ? 'जोखीम प्रकार' : 'Risk Type' }}</label>
-                                  <select class="answer-control text-xs" [(ngModel)]="subsetQuestion.annexure_draft.risk_cat_id" [disabled]="subsetQuestion.is_editable === false">
+                                  <label class="text-xs font-semibold text-600 block mb-1">{{ isMarathi() ? 'जोखीम
+                                    प्रकार' : 'Risk Type' }}</label>
+                                  <select class="answer-control text-xs"
+                                    [(ngModel)]="subsetQuestion.annexure_draft.risk_cat_id"
+                                    [disabled]="subsetQuestion.is_editable === false">
                                     <option value="">{{ isMarathi() ? 'निवडा' : 'Select' }}</option>
-                                    <option *ngFor="let r of annexureRiskOptions().risk_categories" [value]="r.id">{{ r.risk_category }}</option>
+                                    <option *ngFor="let r of annexureRiskOptions().risk_categories" [value]="r.id">{{
+                                      r.risk_category }}</option>
                                   </select>
                                 </div>
                               </div>
 
                               <div class="flex gap-2 ml-auto">
-                                <button
-                                  pButton
-                                  type="button"
-                                  icon="pi pi-times"
-                                  [label]="isMarathi() ? 'रद्द करा' : 'Clear'"
-                                  severity="secondary"
+                                <button pButton type="button" icon="pi pi-times"
+                                  [label]="isMarathi() ? 'रद्द करा' : 'Clear'" severity="secondary"
                                   [disabled]="isSavingAnnexureQuestion(subsetQuestion) || subsetQuestion.is_editable === false"
-                                  (click)="clearAnnexureDraft(subsetQuestion)"
-                                ></button>
+                                  (click)="clearAnnexureDraft(subsetQuestion)"></button>
 
-                                <button
-                                  pButton
-                                  type="button"
-                                  icon="pi pi-save"
+                                <button pButton type="button" icon="pi pi-save"
                                   [label]="subsetQuestion.annexure_draft.id || subsetQuestion.annexure_rows?.length ? (isMarathi() ? 'फॉर्म अपडेट करा' : 'Update Form') : (isMarathi() ? 'फॉर्म जतन करा' : 'Save Form')"
                                   [loading]="isSavingAnnexureQuestion(subsetQuestion)"
                                   [disabled]="isSavingAnnexureQuestion(subsetQuestion) || subsetQuestion.is_editable === false"
-                                  (click)="saveAnnexureRow(subsetQuestion)"
-                                ></button>
+                                  (click)="saveAnnexureRow(subsetQuestion)"></button>
                               </div>
                             </div>
                           </div>
 
                           <!-- 3. SUBSET STANDARD HORIZONTAL GRID LAYOUT -->
-                          <div *ngIf="!isOtherDiscrepanciesSelected(subsetQuestion) && !isVerticalFormAnnexure(subsetQuestion)">
+                          <div
+                            *ngIf="!isOtherDiscrepanciesSelected(subsetQuestion) && !isVerticalFormAnnexure(subsetQuestion)">
                             <div class="annexure-grid">
-                              <div
-                                class="annexure-field"
-                                *ngFor="let column of subsetQuestion.annexure.columns; let ci = index; trackBy: trackByColumn"
-                              >
+                              <div class="annexure-field"
+                                *ngFor="let column of subsetQuestion.annexure.columns; let ci = index; trackBy: trackByColumn">
                                 <label class="answer-label">
                                   {{ getAnnexureColumnDisplayName(column) }}
                                 </label>
 
-                                <textarea
-                                  *ngIf="column.column_type_id == 2; else subsetAnnexureInput"
-                                  class="answer-control"
-                                  rows="1"
-                                  [(ngModel)]="subsetQuestion.annexure_draft.values[ci]"
-                                  [disabled]="subsetQuestion.is_editable === false"
-                                ></textarea>
+                                <textarea *ngIf="column.column_type_id == 2; else subsetAnnexureInput"
+                                  class="answer-control" rows="1" [(ngModel)]="subsetQuestion.annexure_draft.values[ci]"
+                                  [disabled]="subsetQuestion.is_editable === false"></textarea>
 
                                 <ng-template #subsetAnnexureInput>
-                                  <select
-                                    *ngIf="column.column_type_id == 3; else subsetAnnexureText"
-                                    class="answer-control"
-                                    [(ngModel)]="subsetQuestion.annexure_draft.values[ci]"
-                                    [disabled]="subsetQuestion.is_editable === false"
-                                  >
+                                  <select *ngIf="column.column_type_id == 3; else subsetAnnexureText"
+                                    class="answer-control" [(ngModel)]="subsetQuestion.annexure_draft.values[ci]"
+                                    [disabled]="subsetQuestion.is_editable === false">
                                     <option value="">{{ isMarathi() ? 'कृपया निवडा' : 'Please select' }}</option>
 
-                                    <option
-                                      *ngFor="let option of annexureColumnOptions(column); trackBy: trackByOption"
-                                      [value]="option.option_label"
-                                    >
-                                      {{ (isMarathi() && option.mr_option_label) ? option.mr_option_label : option.option_label }}
+                                    <option *ngFor="let option of annexureColumnOptions(column); trackBy: trackByOption"
+                                      [value]="option.option_label">
+                                      {{ (isMarathi() && option.mr_option_label) ? option.mr_option_label :
+                                      option.option_label }}
                                     </option>
                                   </select>
 
                                   <ng-template #subsetAnnexureText>
-                                    <input
-                                      type="text"
-                                      class="answer-control"
+                                    <input type="text" class="answer-control"
                                       [(ngModel)]="subsetQuestion.annexure_draft.values[ci]"
                                       [disabled]="subsetQuestion.is_editable === false"
-                                      [placeholder]="isMarathi() ? 'नोंदवा ' + getAnnexureColumnDisplayName(column) : 'Enter ' + column.name"
-                                    />
+                                      [placeholder]="isMarathi() ? 'नोंदवा ' + getAnnexureColumnDisplayName(column) : 'Enter ' + column.name" />
                                   </ng-template>
                                 </ng-template>
                               </div>
 
                               <div class="annexure-field">
-                                <label class="answer-label"> {{ isMarathi() ? 'व्यवसाय जोखीम' : 'Business Risk' }} </label>
+                                <label class="answer-label"> {{ isMarathi() ? 'व्यवसाय जोखीम' : 'Business Risk' }}
+                                </label>
 
-                                <select
-                                  class="answer-control"
-                                  [(ngModel)]="subsetQuestion.annexure_draft.business_risk"
+                                <select class="answer-control" [(ngModel)]="subsetQuestion.annexure_draft.business_risk"
                                   [disabled]="
                                     !isCustomAnnexureRisk(subsetQuestion) ||
                                     subsetQuestion.is_editable === false
-                                  "
-                                >
+                                  ">
                                   <option value="">{{ isMarathi() ? 'कृपया निवडा' : 'Please select' }}</option>
 
-                                  <option
-                                    *ngFor="let risk of annexureRiskOptions().business_risks; trackBy: trackBySet"
-                                    [value]="risk.id"
-                                  >
+                                  <option *ngFor="let risk of annexureRiskOptions().business_risks; trackBy: trackBySet"
+                                    [value]="risk.id">
                                     {{ risk.label }}
                                   </option>
                                 </select>
                               </div>
 
                               <div class="annexure-field">
-                                <label class="answer-label"> {{ isMarathi() ? 'नियंत्रण जोखीम' : 'Control Risk' }} </label>
+                                <label class="answer-label"> {{ isMarathi() ? 'नियंत्रण जोखीम' : 'Control Risk' }}
+                                </label>
 
-                                <select
-                                  class="answer-control"
-                                  [(ngModel)]="subsetQuestion.annexure_draft.control_risk"
+                                <select class="answer-control" [(ngModel)]="subsetQuestion.annexure_draft.control_risk"
                                   [disabled]="
                                     !isCustomAnnexureRisk(subsetQuestion) ||
                                     subsetQuestion.is_editable === false
-                                  "
-                                >
+                                  ">
                                   <option value="">{{ isMarathi() ? 'कृपया निवडा' : 'Please select' }}</option>
 
-                                  <option
-                                    *ngFor="let risk of annexureRiskOptions().control_risks; trackBy: trackBySet"
-                                    [value]="risk.id"
-                                  >
+                                  <option *ngFor="let risk of annexureRiskOptions().control_risks; trackBy: trackBySet"
+                                    [value]="risk.id">
                                     {{ risk.label }}
                                   </option>
                                 </select>
@@ -2343,20 +1805,16 @@
                               <div class="annexure-field">
                                 <label class="answer-label"> {{ isMarathi() ? 'जोखीम प्रकार' : 'Risk Type' }} </label>
 
-                                <select
-                                  class="answer-control"
-                                  [(ngModel)]="subsetQuestion.annexure_draft.risk_cat_id"
+                                <select class="answer-control" [(ngModel)]="subsetQuestion.annexure_draft.risk_cat_id"
                                   [disabled]="
                                     !isCustomAnnexureRisk(subsetQuestion) ||
                                     subsetQuestion.is_editable === false
-                                  "
-                                >
+                                  ">
                                   <option value="">{{ isMarathi() ? 'कृपया निवडा' : 'Please select' }}</option>
 
                                   <option
                                     *ngFor="let risk of annexureRiskOptions().risk_categories; trackBy: trackBySet"
-                                    [value]="risk.id"
-                                  >
+                                    [value]="risk.id">
                                     {{ risk.risk_category }}
                                   </option>
                                 </select>
@@ -2364,90 +1822,56 @@
                             </div>
 
                             <div class="flex flex-wrap justify-content-end gap-2 mt-3">
-                              <input
-                                #subsetAnnexCsvInput
-                                type="file"
-                                accept=".csv,text/csv"
-                                style="display: none"
-                                (change)="uploadAnnexureCsv(subsetQuestion, $event)"
-                              />
+                              <input #subsetAnnexCsvInput type="file" accept=".csv,text/csv" style="display: none"
+                                (change)="uploadAnnexureCsv(subsetQuestion, $event)" />
 
-                              <button
-                                pButton
-                                type="button"
-                                icon="pi pi-download"
-                                [label]="isMarathi() ? 'नमुना CSV' : 'Sample CSV'"
-                                severity="secondary"
+                              <button pButton type="button" icon="pi pi-download"
+                                [label]="isMarathi() ? 'नमुना CSV' : 'Sample CSV'" severity="secondary"
                                 [disabled]="subsetQuestion.is_editable === false"
-                                (click)="downloadAnnexureSample(subsetQuestion)"
-                              ></button>
+                                (click)="downloadAnnexureSample(subsetQuestion)"></button>
 
-                              <button
-                                pButton
-                                type="button"
-                                icon="pi pi-upload"
-                                [label]="isMarathi() ? 'CSV अपलोड करा' : 'Upload CSV'"
-                                severity="secondary"
-                                [loading]="isUploadingAnnexureQuestion(subsetQuestion)"
-                                [disabled]="
+                              <button pButton type="button" icon="pi pi-upload"
+                                [label]="isMarathi() ? 'CSV अपलोड करा' : 'Upload CSV'" severity="secondary"
+                                [loading]="isUploadingAnnexureQuestion(subsetQuestion)" [disabled]="
                                   isSavingAnnexureQuestion(subsetQuestion) ||
                                   subsetQuestion.is_editable === false
-                                "
-                                (click)="subsetAnnexCsvInput.click()"
-                              ></button>
+                                " (click)="subsetAnnexCsvInput.click()"></button>
 
-                              <button
-                                pButton
-                                type="button"
-                                icon="pi pi-times"
-                                [label]="isMarathi() ? 'रद्द करा' : 'Clear'"
-                                severity="secondary"
-                                [disabled]="
+                              <button pButton type="button" icon="pi pi-times"
+                                [label]="isMarathi() ? 'रद्द करा' : 'Clear'" severity="secondary" [disabled]="
                                   isSavingAnnexureQuestion(subsetQuestion) ||
                                   subsetQuestion.is_editable === false
-                                "
-                                (click)="clearAnnexureDraft(subsetQuestion)"
-                              ></button>
+                                " (click)="clearAnnexureDraft(subsetQuestion)"></button>
 
-                              <button
-                                pButton
-                                type="button"
-                                icon="pi pi-save"
+                              <button pButton type="button" icon="pi pi-save"
                                 [label]="subsetQuestion.annexure_draft.id ? (isMarathi() ? 'ओळ अपडेट करा' : 'Update Row') : (isMarathi() ? 'ओळ जोडा' : 'Add Row')"
-                                [loading]="isSavingAnnexureQuestion(subsetQuestion)"
-                                [disabled]="
+                                [loading]="isSavingAnnexureQuestion(subsetQuestion)" [disabled]="
                                   isSavingAnnexureQuestion(subsetQuestion) ||
                                   isUploadingAnnexureQuestion(subsetQuestion) ||
                                   subsetQuestion.is_editable === false
-                                "
-                                (click)="saveAnnexureRow(subsetQuestion)"
-                              ></button>
+                                " (click)="saveAnnexureRow(subsetQuestion)"></button>
                             </div>
                           </div>
 
                           <div
                             *ngIf="subsetQuestion.annexure_rows?.length && (!isVerticalFormAnnexure(subsetQuestion) || isOtherDiscrepanciesSelected(subsetQuestion))"
-                            class="annexure-scroll-frame annexure-table-frame compact-annexure-table"
-                          >
-                            <table
-                              class="annexure-data-table"
-                              [style.min-width]="annexureTableMinWidth(subsetQuestion)"
-                            >
+                            class="annexure-scroll-frame annexure-table-frame compact-annexure-table">
+                            <table class="annexure-data-table"
+                              [style.min-width]="annexureTableMinWidth(subsetQuestion)">
                               <thead>
                                 <tr>
-                                  <th *ngFor="let column of getAnnexureDisplayColumns(subsetQuestion); trackBy: trackByColumn">
+                                  <th
+                                    *ngFor="let column of getAnnexureDisplayColumns(subsetQuestion); trackBy: trackByColumn">
                                     {{ getAnnexureColumnDisplayName(column) }}
                                   </th>
                                   <th>{{ isMarathi() ? 'व्यवसाय जोखीम' : 'Business Risk' }}</th>
                                   <th>{{ isMarathi() ? 'नियंत्रण जोखीम' : 'Control Risk' }}</th>
                                   <th>{{ isMarathi() ? 'जोखीम प्रकार' : 'Risk Type' }}</th>
-                                  <th *ngIf="isReAudit(detail)">{{ isMarathi() ? 'तपासनीस अभिप्राय' : 'Reviewer Feedback' }}</th>
+                                  <th *ngIf="isReAudit(detail)">{{ isMarathi() ? 'तपासनीस अभिप्राय' : 'Reviewer
+                                    Feedback' }}</th>
                                   <th>
                                     {{ isMarathi() ? 'पुरावा' : 'Evidence' }}
-                                    <small
-                                      *ngIf="isEvidenceRequired(subsetQuestion)"
-                                      class="evidence-required"
-                                    >
+                                    <small *ngIf="isEvidenceRequired(subsetQuestion)" class="evidence-required">
                                       {{ isMarathi() ? 'आवश्यक' : 'Required' }}
                                     </small>
                                   </th>
@@ -2457,13 +1881,11 @@
 
                               <tbody>
                                 <tr *ngFor="let row of subsetQuestion.annexure_rows; trackBy: trackByRow">
-                                  <td
-                                    *ngFor="
+                                  <td *ngFor="
                                       let column of getAnnexureDisplayColumns(subsetQuestion);
                                       let ci = index;
                                       trackBy: trackByColumn
-                                    "
-                                  >
+                                    ">
                                     {{ row.values?.[ci] || '-' }}
                                   </td>
                                   <td>{{ riskLabel(row.business_risk, 'business_risks') }}</td>
@@ -2474,88 +1896,64 @@
                                     <div>{{ row.compliance_reviewer_comment || '-' }}</div>
 
                                     <!-- Inline tiny timeline for annexure row -->
-                                    <div
-                                      *ngIf="getTimeline(row).length > 2"
-                                      class="row-timeline-inline"
-                                    >
+                                    <div *ngIf="getTimeline(row).length > 2" class="row-timeline-inline">
                                       <div
                                         *ngFor="let item of getTimeline(row); let index = index; trackBy: trackByIndex"
-                                        class="row-timeline-item"
-                                      >
+                                        class="row-timeline-item">
                                         <div class="row-timeline-header">
                                           <span class="round-badge">R{{ index + 1 }}</span>
                                           <span class="date" *ngIf="item.created_at">{{
                                             item.created_at | date: 'dd/MM/yy'
-                                          }}</span>
+                                            }}</span>
                                         </div>
                                         <div class="row-timeline-body">
-                                          <div
-                                            *ngIf="formatTimelineAuditText(item)"
-                                            class="row-comment text-purple"
-                                          >
+                                          <div *ngIf="formatTimelineAuditText(item)" class="row-comment text-purple">
                                             <strong>Aud:</strong>
                                             {{ formatTimelineAuditText(item) }}
                                           </div>
-                                          <div
-                                            *ngIf="
+                                          <div *ngIf="
                                               item.compliance_reviewer_comment ||
                                               item.audit_reviewer_comment ||
                                               item.comment ||
                                               item.reviewer_comment
-                                            "
-                                            class="row-comment text-red"
-                                          >
+                                            " class="row-comment text-red">
                                             <strong>Rev:</strong>
                                             {{
-                                              item.compliance_reviewer_comment ||
-                                                item.audit_reviewer_comment ||
-                                                item.comment ||
-                                                item.reviewer_comment
+                                            item.compliance_reviewer_comment ||
+                                            item.audit_reviewer_comment ||
+                                            item.comment ||
+                                            item.reviewer_comment
                                             }}
                                           </div>
-                                          <div
-                                            *ngIf="
+                                          <div *ngIf="
                                               item.compliance_response ||
                                               item.response
-                                            "
-                                            class="row-comment text-blue"
-                                          >
+                                            " class="row-comment text-blue">
                                             <strong>Mgr:</strong>
                                             {{
-                                              item.compliance_response ||
-                                                item.response
+                                            item.compliance_response ||
+                                            item.response
                                             }}
                                           </div>
-                                          <span
-                                            class="inline-evidences"
-                                            *ngIf="
+                                          <span class="inline-evidences" *ngIf="
                                               evidenceList(item).length ||
                                               evidenceList(item, 'compliance_evidence').length
-                                            "
-                                          >
+                                            ">
                                             <button
                                               *ngFor="let e of evidenceList(item); let ei = index; trackBy: trackByEvidence"
-                                              type="button"
-                                              class="btn-link"
-                                              (click)="viewEvidence(e)"
-                                              title="View auditor supporting document"
-                                            >
+                                              type="button" class="btn-link" (click)="viewEvidence(e)"
+                                              title="View auditor supporting document">
                                               <i class="pi pi-paperclip"></i>
                                             </button>
-                                            <button
-                                              *ngFor="
+                                            <button *ngFor="
                                                 let e of evidenceList(
                                                   item,
                                                   'compliance_evidence'
                                                 );
                                                 let ei = index;
                                                 trackBy: trackByEvidence
-                                              "
-                                              type="button"
-                                              class="btn-link"
-                                              (click)="viewComplianceEvidence(e)"
-                                              title="View manager supporting document"
-                                            >
+                                              " type="button" class="btn-link" (click)="viewComplianceEvidence(e)"
+                                              title="View manager supporting document">
                                               <i class="pi pi-eye"></i>
                                             </button>
                                           </span>
@@ -2566,112 +1964,62 @@
 
                                   <td>
                                     <span class="evidence-cell">
-                                      <span
-                                        class="evidence-chip-list"
-                                        *ngIf="evidenceList(row).length"
-                                      >
-                                        <span
-                                          class="evidence-chip"
-                                          *ngFor="let evidence of evidenceList(row); let ei = index; trackBy: trackByEvidence"
-                                        >
-                                          <button
-                                            pButton
-                                            type="button"
-                                            icon="pi pi-eye"
-                                            severity="secondary"
+                                      <span class="evidence-chip-list" *ngIf="evidenceList(row).length">
+                                        <span class="evidence-chip"
+                                          *ngFor="let evidence of evidenceList(row); let ei = index; trackBy: trackByEvidence">
+                                          <button pButton type="button" icon="pi pi-eye" severity="secondary"
                                             [title]="'View evidence ' + (ei + 1)"
-                                            (click)="viewEvidence(evidence)"
-                                          ></button>
+                                            (click)="viewEvidence(evidence)"></button>
 
-                                          <button
-                                            pButton
-                                            type="button"
-                                            icon="pi pi-trash"
-                                            severity="danger"
+                                          <button pButton type="button" icon="pi pi-trash" severity="danger"
                                             [title]="'Remove supporting document ' + (ei + 1)"
                                             [loading]="deletingEvidenceKey() === evidenceDeleteKey(evidence)"
                                             [disabled]="deletingEvidenceKey() === evidenceDeleteKey(evidence)"
-                                            (click)="deleteEvidence(evidence)"
-                                          ></button>
+                                            (click)="deleteEvidence(evidence)"></button>
                                         </span>
                                       </span>
 
-                                      <span
-                                        class="evidence-chip-list"
-                                        *ngIf="evidenceList(row, 'compliance_evidence').length"
-                                      >
-                                        <span
-                                          class="evidence-chip"
-                                          *ngFor="
+                                      <span class="evidence-chip-list"
+                                        *ngIf="evidenceList(row, 'compliance_evidence').length">
+                                        <span class="evidence-chip" *ngFor="
                                             let evidence of evidenceList(
                                               row,
                                               'compliance_evidence'
                                             );
                                             let ei = index;
                                             trackBy: trackByEvidence
-                                          "
-                                        >
-                                          <button
-                                            pButton
-                                            type="button"
-                                            icon="pi pi-eye"
-                                            severity="secondary"
+                                          ">
+                                          <button pButton type="button" icon="pi pi-eye" severity="secondary"
                                             [title]="'View manager supporting document ' + (ei + 1)"
-                                            (click)="viewComplianceEvidence(evidence)"
-                                          ></button>
+                                            (click)="viewComplianceEvidence(evidence)"></button>
                                         </span>
                                       </span>
 
-                                      <input
-                                        #subsetRowEvidenceInput
-                                        type="file"
-                                        multiple
+                                      <input #subsetRowEvidenceInput type="file" multiple
                                         accept=".jpg,.jpeg,.png,.pdf,image/jpeg,image/png,application/pdf"
-                                        style="display: none"
-                                        (change)="uploadEvidence(subsetQuestion, $event, row)"
-                                      />
+                                        style="display: none" (change)="uploadEvidence(subsetQuestion, $event, row)" />
 
-                                      <button
-                                        pButton
-                                        type="button"
-                                        icon="pi pi-upload"
-                                        severity="secondary"
-                                        title="Supporting document"
-                                        [loading]="
+                                      <button pButton type="button" icon="pi pi-upload" severity="secondary"
+                                        title="Supporting document" [loading]="
                                           uploadingEvidenceKey() ===
                                           evidenceKey(subsetQuestion, row)
-                                        "
-                                        (click)="subsetRowEvidenceInput.click()"
-                                      ></button>
+                                        " (click)="subsetRowEvidenceInput.click()"></button>
                                     </span>
                                   </td>
 
                                   <td>
                                     <span class="annexure-row-actions">
-                                      <button
-                                        pButton
-                                        type="button"
-                                        icon="pi pi-pencil"
-                                        severity="secondary"
+                                      <button pButton type="button" icon="pi pi-pencil" severity="secondary"
                                         [disabled]="subsetQuestion.is_editable === false"
-                                        (click)="editAnnexureRow(subsetQuestion, row)"
-                                      ></button>
+                                        (click)="editAnnexureRow(subsetQuestion, row)"></button>
 
-                                      <button
-                                        pButton
-                                        type="button"
-                                        icon="pi pi-trash"
-                                        severity="danger"
-                                        [loading]="
+                                      <button pButton type="button" icon="pi pi-trash" severity="danger" [loading]="
                                           deletingAnnexureRowKey() ===
                                           annexureRowKey(subsetQuestion.id, row.id)
-                                        "
-                                        [disabled]="
+                                        " [disabled]="
                                           isSavingAnnexureQuestion(subsetQuestion) ||
                                           subsetQuestion.is_editable === false
-                                        "
-                                        (click)="deleteAnnexureRow(subsetQuestion, row)"
-                                      ></button>
+                                        " (click)="deleteAnnexureRow(subsetQuestion, row)"></button>
                                     </span>
                                   </td>
                                 </tr>
@@ -2681,10 +2029,7 @@
                         </div>
                       </div>
 
-                      <div
-                        *ngIf="answerErrors()[subsetQuestion.id]"
-                        class="text-red-600 text-sm font-medium mt-2"
-                      >
+                      <div *ngIf="answerErrors()[subsetQuestion.id]" class="text-red-600 text-sm font-medium mt-2">
                         {{ answerErrors()[subsetQuestion.id] }}
                       </div>
                     </div>
@@ -2701,15 +2046,8 @@
             </ng-container>
 
             <div class="header-save-row">
-              <button
-                pButton
-                type="button"
-                icon="pi pi-save"
-                label="Save Header Answers"
-                class="p-button-sm"
-                [loading]="savingHeader() === header.id"
-                (click)="saveHeader(header)"
-              ></button>
+              <button pButton type="button" icon="pi pi-save" label="Save Header Answers" class="p-button-sm"
+                [loading]="savingHeader() === header.id" (click)="saveHeader(header)"></button>
             </div>
           </p-accordion-content>
         </p-accordion-panel>
