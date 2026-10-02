@@ -629,23 +629,6 @@ export class CategoryAssessmentComponent
         return detail;
     }
 
-    private isReferenceSet(set: any): boolean {
-        if (!set) return false;
-        const setId = Number(set.id || 0);
-        // 1. Filter by Reference Set IDs (993 to 1002)
-        if (setId >= 993 && setId <= 1002) return true;
-
-        // 2. Filter by Reference Header IDs (9940 to 9949) or Question IDs (17266 to 17275)
-        return (set.headers || []).some((h: any) => {
-            const hId = Number(h.id || 0);
-            if (hId >= 9940 && hId <= 9949) return true;
-            return (h.questions || []).some((q: any) => {
-                const qId = Number(q.id || 0);
-                return (qId >= 17266 && qId <= 17275);
-            });
-        });
-    }
-
     private sortSetsByAssessmentSequence(detail: any): void {
         if (!detail?.sets || !Array.isArray(detail.sets)) return;
 
@@ -659,14 +642,9 @@ export class CategoryAssessmentComponent
             .map((s: string) => Number(s.trim()))
             .filter((n: number) => !isNaN(n) && n > 0);
 
-        // 1. Sort Sets: Statically place Reference / Matrix Sets at the START, followed by natural / assessment order
-        detail.sets.sort((a: any, b: any) => {
-            const aRef = this.isReferenceSet(a);
-            const bRef = this.isReferenceSet(b);
-            if (aRef && !bRef) return -1;
-            if (!aRef && bRef) return 1;
-
-            if (headerOrder.length > 0) {
+        // 1. Sort Sets purely according to the assigned multi_level header sequence
+        if (headerOrder.length > 0) {
+            detail.sets.sort((a: any, b: any) => {
                 const aHeaders = a.headers || [];
                 const bHeaders = b.headers || [];
                 const aMinIdx = aHeaders.length > 0
@@ -682,11 +660,11 @@ export class CategoryAssessmentComponent
                     }))
                     : 999999;
                 if (aMinIdx !== bMinIdx) return aMinIdx - bMinIdx;
-            }
-            return (a.id || 0) - (b.id || 0);
-        });
+                return (a.id || 0) - (b.id || 0);
+            });
+        }
 
-        // 2. Sort Headers within each set by headerOrder
+        // 2. Sort Headers within each set purely according to assigned headerOrder
         for (const set of detail.sets) {
             if (Array.isArray(set.headers)) {
                 if (headerOrder.length > 0) {
@@ -695,11 +673,12 @@ export class CategoryAssessmentComponent
                         const bIdx = headerOrder.indexOf(Number(b.id));
                         const aPos = aIdx !== -1 ? aIdx : 999999;
                         const bPos = bIdx !== -1 ? bIdx : 999999;
-                        return aPos - bPos;
+                        if (aPos !== bPos) return aPos - bPos;
+                        return (a.id || 0) - (b.id || 0);
                     });
                 }
 
-                // 3. Sort Questions within each header by questionOrder
+                // 3. Sort Questions within each header purely according to assigned questionOrder
                 if (questionOrder.length > 0) {
                     for (const header of set.headers) {
                         if (Array.isArray(header.questions)) {
@@ -708,7 +687,8 @@ export class CategoryAssessmentComponent
                                 const bIdx = questionOrder.indexOf(Number(b.id));
                                 const aPos = aIdx !== -1 ? aIdx : 999999;
                                 const bPos = bIdx !== -1 ? bIdx : 999999;
-                                return aPos - bPos;
+                                if (aPos !== bPos) return aPos - bPos;
+                                return (a.id || 0) - (b.id || 0);
                             });
                         }
                     }
@@ -905,119 +885,22 @@ export class CategoryAssessmentComponent
         return header.name || '';
     }
 
-    private annexureMarathiMap: Record<string, string> = {
-        'Deposits Position Matrix': 'ठेवींची स्थिती माहिती पत्रक',
-        'Inoperative & Unclaimed Accounts': 'इनऑपरेटिव्ह व अनक्लेम्ड खाते',
-        'TDS Accounts Balance': 'टी.डी.एस. खाती शिल्लक',
-        'BC / IB / IBP Pending Position': 'बी.सी. / आय.बी. / आय.बी.पी. प्रलंबित स्थिती',
-        'R.C. Reconciliation Sent Dates': 'आर.सी. पाठविल्याचे दिनांक',
-        'Branch Inspection Register': 'शाखा तपासणी रजिस्टर',
-        'Lockers Status': 'लॉकरस् स्थिती',
-        'KYC Status': 'के.वाय.सी. स्थिती',
-        'Branch Staff Strength': 'शाखेतील सेवक संख्या',
-        'Gold Loan Physical Verification': 'सोने तारण कर्ज प्रत्यक्ष तपासणी',
-    };
-
-    private annexureColumnMarathiMap: Record<string, string> = {
-        // Deposits (Cat3_Deposits)
-        'Current Deposits': 'करंट ठेवी',
-        'Savings': 'सेव्हिंग्ज',
-        'Term Deposits': 'मुदत ठेवी',
-        'Cash Certificate': 'कॅश सर्टिफिकेट',
-        'Recurring': 'रिकरिंग',
-        'Total': 'एकूण',
-
-        // Inoperative (Cat3_Inoperative)
-        'Inoperative Accounts': 'इनऑपरेटिव्ह खाते',
-        'Unclaimed Accounts': 'अनक्लेम्ड खाते',
-        'Deposit Amount (₹)': 'जमा रक्कम रु.',
-        'No. of Accounts': 'खाते संख्या',
-
-        // TDS (Cat10_TDS)
-        'TDS Payable (422)': 'टी.डी.एस. पेएबल (४२२)',
-        'TDS Recovery (421)': 'टी.डी.एस. रिकव्हरी (४२१)',
-        'Balance (₹)': 'बाकी रु.',
-
-        // BC / IB / IBP (CTS_LC_OBC)
-        'BC': 'बी.सी.',
-        'IB': 'आय.बी.',
-        'IBP': 'आय.बी.पी.',
-        'Pending Count': 'प्रलंबित संख्या',
-        'Amount (₹)': 'रक्कम रु.',
-
-        // Reconciliation (Cat19_Reconciliation)
-        'Head Office': 'हेड ऑफिस',
-        'M.S.C. Bank': 'एम.एस.सी. बँक',
-        'State Bank': 'स्टेट बँक',
-        'Date R.C. Sent to Head Office': 'दिनांक – आर.सी. मुख्यालयास पाठविला',
-
-        // Inspection Register (Cat16_Inspection)
-        'C.A. Statutory Audit': 'सी.ए. वैधानिक तपासणी',
-        'Continuous & Concurrent Audit': 'सतत व समवर्ती लेखापरीक्षण',
-        'Serious Defects in Continuous & Concurrent Audit': 'समवर्ती गंभीर दोष',
-        'State Bank Inspection': 'राज्य बँक तपासणी',
-        'Managerial Inspection': 'व्यवस्थापकीय तपासणी',
-        'T.V.A. Inspection': 'ता.वि.अ. तपासणी',
-        'Balance Sheet Inspection': 'ताळेबंद तपासणी',
-        'Surprise Visit': 'अचानक भेट',
-        'Other Inspection': 'इतर तपासणी',
-        'Inspection Period': 'तपासणी कालावधी',
-        'Date Report Received by Branch': 'शाखेस अहवाल प्राप्त दिनांक',
-        'Date Branch Sent Rectification Report': 'शाखेने दोष दुरुस्ती अहवाल पाठविल्याचा दिनांक',
-
-        // Lockers (Cat13_Lockers)
-        'Total Lockers': 'एकूण लॉकरस्',
-        'Lockers Rented Out': 'भाड्याने दिलेले',
-        'Vacant Lockers': 'शिल्लक लॉकरस्',
-        'Defective Lockers': 'नादुरुस्त लॉकरस्',
-        'Outstanding Rent (₹)': 'थकित भाडे रु.',
-        'Locker Holders with Outstanding Rent': 'थकितभाडे लॉकर धारक संख्या',
-
-        // KYC (Cat6_KYC)
-        'Total Account Holders': 'एकूण खातेदार',
-        'Operative Accounts': 'ऑपरेटिव्ह खाते',
-        'KYC Completed Accounts': 'के.वाय.सी. पूर्ण खाते',
-        'KYC Incomplete Accounts': 'के.वाय.सी. अपूर्ण खाते',
-
-        // Staff Strength (Cat16_Staff)
-        'Branch Manager / Officer': 'शाखाधिकारी',
-        'Accountant': 'अकाउंटंट',
-        'Inspector': 'इन्स्पेक्टर',
-        'Cashier': 'कॅशिअर',
-        'Clerk': 'क्लार्क',
-        'Permanent Peon': 'कायम शिपाई',
-        'Non-Permanent Peon': 'कायम नसलेला शिपाई',
-
-        // Gold Loan (Cat12_GoldLoan)
-        'Bag No.': 'पिशवी नं.',
-        'Found Correct as per Register (Yes/No)': 'रजिस्टरप्रमाणे बरोबर आढळल्या आहेत/नाहीत',
-        'Amount Receivable (₹)': 'येणे बाकी रु.',
-        'Outstanding Amount as on Date (₹)': 'थकबाकी रु. दि. अखेर',
-    };
-
     getAnnexureDisplayName(annexure: any): string {
         if (!annexure) return this.isMarathi() ? 'तपशील माहिती पत्रक' : 'Statement / Annexure';
         if (this.isMarathi()) {
-            if (annexure.mr_name) return annexure.mr_name;
-            if (annexure.name && this.annexureMarathiMap[annexure.name]) {
-                return this.annexureMarathiMap[annexure.name];
-            }
-            return annexure.name || 'तपशील माहिती पत्रक';
+            return annexure.mr_name || annexure.name || 'तपशील माहिती पत्रक';
         }
         return annexure.name || 'Statement / Annexure';
     }
 
     getAnnexureColumnDisplayName(column: any): string {
         if (!column) return '';
-        const name = typeof column === 'string' ? column : column.name;
         if (this.isMarathi()) {
-            if (column && typeof column === 'object' && column.mr_name) return column.mr_name;
-            if (name && this.annexureColumnMarathiMap[name]) {
-                return this.annexureColumnMarathiMap[name];
-            }
-            return name || '';
+            if (typeof column === 'object' && column.mr_name) return column.mr_name;
+            if (typeof column === 'object' && column.name) return column.name;
+            return typeof column === 'string' ? column : '';
         }
-        return name || '';
+        return (typeof column === 'object' ? (column.name || column.mr_name) : column) || '';
     }
 
     buildAnswerOptions(
