@@ -67,7 +67,127 @@
       </div>
     </div>
 
-    <div *ngIf="isAccountCategory(detail)" class="account-assessment surface-card border-round-xl shadow-1 p-4 mb-4">
+    <!-- 1. When an account is selected: Show Selected Account Card on Top, then Account Questions -->
+    <div *ngIf="detail.selected_account" class="account-assessment surface-card border-round-xl shadow-1 p-4 mb-4">
+      <div class="selected-account-layout">
+        <aside class="account-list-panel">
+          <div class="flex align-items-center justify-content-between gap-2 mb-3">
+            <div class="font-bold text-900">Sampled Accounts</div>
+            <span class="account-total">
+              {{ detail.accounts?.length || 0 }}
+            </span>
+          </div>
+
+          <input type="text" class="answer-control mb-3" [(ngModel)]="accountSearch" placeholder="Search account" />
+
+          <div *ngIf="!detail.accounts?.length" class="text-600 text-sm">
+            No sampled account is available for this category.
+          </div>
+
+          <div class="account-items">
+            <button type="button" class="account-item" *ngFor="let account of filteredAccounts()"
+              [class.active]="selectedDumpId() === account.id" [class.completed]="account.is_completed"
+              (click)="selectAccount(account)">
+              <strong>{{ account.account_no }}</strong>
+              <small>
+                {{ account.scheme_code || '-' }}
+                <span *ngIf="account.account_holder_name">
+                  | {{ account.account_holder_name }}
+                </span>
+              </small>
+              <span *ngIf="account.is_completed" class="account-status"> Completed </span>
+            </button>
+          </div>
+        </aside>
+
+        <div class="account-detail selected-account-detail" *ngIf="detail.selected_account as account">
+          <div class="selected-account-head">
+            <div class="selected-account-title">
+              <div class="text-sm text-600 mb-1 selected-account-eyebrow">Selected Account</div>
+              <div class="selected-account-number">
+                {{ account.account_no }}
+              </div>
+              <div class="selected-account-subtitle">
+                {{ account.scheme_name || account.scheme_code || '-' }}
+                <span *ngIf="account.account_holder_name">
+                  | {{ account.account_holder_name }}
+                </span>
+              </div>
+            </div>
+
+            <div class="selected-account-actions">
+              <button pButton type="button" icon="pi pi-arrow-left" label="Back to Account List" severity="secondary"
+                (click)="backToAccountList(detail)"></button>
+              <button pButton type="button" icon="pi pi-check-square" label="Apply Defaults to Account"
+                severity="secondary" (click)="selectDefaultAnswersForAccount()"></button>
+
+              <button *ngIf="canManageSampling(detail) && !account.is_completed" pButton type="button"
+                icon="pi pi-times" label="Remove Sample" severity="secondary"
+                (click)="removeSampling(account)"></button>
+            </div>
+          </div>
+
+          <table class="account-detail-table">
+            <tbody>
+              <tr>
+                <th>Branch</th>
+                <td>{{ detail.overview?.audit_unit_name || '-' }}</td>
+                <th>Scheme</th>
+                <td>{{ account.scheme_name || account.scheme_code || '-' }}</td>
+              </tr>
+              <tr>
+                <th>A/C Number</th>
+                <td>{{ account.account_no || '-' }}</td>
+                <th>A/C Open Date</th>
+                <td>{{ account.account_opening_date | date: 'dd/MM/yyyy' }}</td>
+              </tr>
+              <tr>
+                <th>A/C Holder Name</th>
+                <td>{{ account.account_holder_name || '-' }}</td>
+                <th>UCIC</th>
+                <td>{{ account.ucic || '-' }}</td>
+              </tr>
+              <tr>
+                <th>Renewal Date</th>
+                <td>
+                  {{ account.renewal_date ? (account.renewal_date | date: 'dd/MM/yyyy') : '-' }}
+                </td>
+                <th>Amount</th>
+                <td>
+                  {{ account.principal_amount || account.sanction_amount || 0 | number: '1.2-2' }}
+                </td>
+              </tr>
+              <tr>
+                <th>KYC Status</th>
+                <td>{{ account.kyc || '-' }}</td>
+                <th *ngIf="detail.category?.linked_table_id === 2">NPA Classification</th>
+                <td *ngIf="detail.category?.linked_table_id === 2">{{ account.npa_classification || '-' }}</td>
+                <th *ngIf="detail.category?.linked_table_id !== 2"></th>
+                <td *ngIf="detail.category?.linked_table_id !== 2"></td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div class="selected-account-completion-actions">
+            <button pButton type="button" icon="pi pi-check-circle" label="Mark Account Complete" [disabled]="
+                account.is_completed || completingAccount() || completingRemainingAccounts()
+              " [loading]="completingAccount()" (click)="completeAccount()"></button>
+
+            <button pButton type="button" icon="pi pi-check-circle" label="Complete Remaining Accounts"
+              severity="danger" [disabled]="completingAccount() || completingRemainingAccounts()"
+              [loading]="completingRemainingAccounts()" (click)="completeRemainingAccounts()"></button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. When viewing Category (No Account selected): Show Category Questions FIRST -->
+    <ng-container *ngIf="!detail.selected_account">
+      <ng-container [ngTemplateOutlet]="questionsBlock"></ng-container>
+    </ng-container>
+
+    <!-- 3. Account Sampling & Selection Panel (Shown below Category Questions) -->
+    <div *ngIf="isAccountCategory(detail) && !detail.selected_account" class="account-assessment surface-card border-round-xl shadow-1 p-4 mb-4">
       <div *ngIf="canManageSampling(detail)" class="flex align-items-center justify-content-end gap-3 mb-3">
         <span *ngIf="!samplingOpen()" class="text-sm text-600 font-medium">
           Unsampled accounts: {{ detail.unsampled_account_count || 0 }}
@@ -302,125 +422,21 @@
           </table>
         </div>
       </div>
+    </div>
 
-      <div *ngIf="detail.selected_account" class="selected-account-layout">
-        <aside class="account-list-panel">
-          <div class="flex align-items-center justify-content-between gap-2 mb-3">
-            <div class="font-bold text-900">Sampled Accounts</div>
-            <span class="account-total">
-              {{ detail.accounts?.length || 0 }}
-            </span>
-          </div>
+    <!-- If an account is selected OR if it's a general category, render questions -->
+    <ng-container *ngIf="detail.selected_account || !isAccountCategory(detail)">
+      <ng-container [ngTemplateOutlet]="questionsBlock"></ng-container>
+    </ng-container>
 
-          <input type="text" class="answer-control mb-3" [(ngModel)]="accountSearch" placeholder="Search account" />
-
-          <div *ngIf="!detail.accounts?.length" class="text-600 text-sm">
-            No sampled account is available for this category.
-          </div>
-
-          <div class="account-items">
-            <button type="button" class="account-item" *ngFor="let account of filteredAccounts()"
-              [class.active]="selectedDumpId() === account.id" [class.completed]="account.is_completed"
-              (click)="selectAccount(account)">
-              <strong>{{ account.account_no }}</strong>
-              <small>
-                {{ account.scheme_code || '-' }}
-                <span *ngIf="account.account_holder_name">
-                  | {{ account.account_holder_name }}
-                </span>
-              </small>
-              <span *ngIf="account.is_completed" class="account-status"> Completed </span>
-            </button>
-          </div>
-        </aside>
-
-        <div class="account-detail selected-account-detail" *ngIf="detail.selected_account as account">
-          <div class="selected-account-head">
-            <div class="selected-account-title">
-              <div class="text-sm text-600 mb-1 selected-account-eyebrow">Selected Account</div>
-              <div class="selected-account-number">
-                {{ account.account_no }}
-              </div>
-              <div class="selected-account-subtitle">
-                {{ account.scheme_name || account.scheme_code || '-' }}
-                <span *ngIf="account.account_holder_name">
-                  | {{ account.account_holder_name }}
-                </span>
-              </div>
-            </div>
-
-            <div class="selected-account-actions">
-              <button pButton type="button" icon="pi pi-arrow-left" label="Back to Account List" severity="secondary"
-                (click)="backToAccountList(detail)"></button>
-              <button pButton type="button" icon="pi pi-check-square" label="Apply Defaults to Account"
-                severity="secondary" (click)="selectDefaultAnswersForAccount()"></button>
-
-              <button *ngIf="canManageSampling(detail) && !account.is_completed" pButton type="button"
-                icon="pi pi-times" label="Remove Sample" severity="secondary"
-                (click)="removeSampling(account)"></button>
-            </div>
-          </div>
-
-          <table class="account-detail-table">
-            <tbody>
-              <tr>
-                <th>Branch</th>
-                <td>{{ detail.overview?.audit_unit_name || '-' }}</td>
-                <th>Scheme</th>
-                <td>{{ account.scheme_name || account.scheme_code || '-' }}</td>
-              </tr>
-              <tr>
-                <th>A/C Number</th>
-                <td>{{ account.account_no || '-' }}</td>
-                <th>A/C Open Date</th>
-                <td>{{ account.account_opening_date | date: 'dd/MM/yyyy' }}</td>
-              </tr>
-              <tr>
-                <th>A/C Holder Name</th>
-                <td>{{ account.account_holder_name || '-' }}</td>
-                <th>UCIC</th>
-                <td>{{ account.ucic || '-' }}</td>
-              </tr>
-              <tr>
-                <th>Renewal Date</th>
-                <td>
-                  {{ account.renewal_date ? (account.renewal_date | date: 'dd/MM/yyyy') : '-' }}
-                </td>
-                <th>Amount</th>
-                <td>
-                  {{ account.principal_amount || account.sanction_amount || 0 | number: '1.2-2' }}
-                </td>
-              </tr>
-              <tr>
-                <th>KYC Status</th>
-                <td>{{ account.kyc || '-' }}</td>
-                <th *ngIf="detail.category?.linked_table_id === 2">NPA Classification</th>
-                <td *ngIf="detail.category?.linked_table_id === 2">{{ account.npa_classification || '-' }}</td>
-                <th *ngIf="detail.category?.linked_table_id !== 2"></th>
-                <td *ngIf="detail.category?.linked_table_id !== 2"></td>
-              </tr>
-            </tbody>
-          </table>
-
-          <div class="selected-account-completion-actions">
-            <button pButton type="button" icon="pi pi-check-circle" label="Mark Account Complete" [disabled]="
-                account.is_completed || completingAccount() || completingRemainingAccounts()
-              " [loading]="completingAccount()" (click)="completeAccount()"></button>
-
-            <button pButton type="button" icon="pi pi-check-circle" label="Complete Remaining Accounts"
-              severity="danger" [disabled]="completingAccount() || completingRemainingAccounts()"
-              [loading]="completingRemainingAccounts()" (click)="completeRemainingAccounts()"></button>
-          </div>
-        </div>
+    <!-- Questions Block Template (Used for both Category-Level and Account-Level questions) -->
+    <ng-template #questionsBlock>
+      <div *ngIf="!detail.sets?.length && !isAccountCategory(detail)"
+        class="surface-card border-round-xl shadow-1 p-4 text-600">
+        No question is configured for this audit category.
       </div>
-    </div>
 
-    <div *ngIf="!detail.sets?.length && !isAccountCategory(detail)"
-      class="surface-card border-round-xl shadow-1 p-4 text-600">
-      No question is configured for this audit category.
-    </div>
-
-    <div *ngIf="visibleQuestionSets(detail).length" class="category-question-actions">
+      <div *ngIf="visibleQuestionSets(detail).length" class="category-question-actions">
       <div>
         <strong>{{ isMarathi() ? 'श्रेणी प्रश्न' : 'Category Questions' }}</strong>
         <small>{{ isMarathi() ? 'या श्रेणीतील सर्व शीर्षकांवर डीफॉल्ट लागू करा किंवा जतन करा.' : 'Apply defaults or save
@@ -1024,7 +1040,7 @@
                           " (click)="clearAnnexureDraft(question)"></button>
 
                         <button pButton type="button" icon="pi pi-save"
-                          [label]="question.annexure_draft.id ? 'Update Row' : 'Add Row'"
+                          [label]="isMarathi() ? (question.annexure_draft.id ? 'नोंद अद्यतनित करा' : 'नोंद जोडा') : (question.annexure_draft.id ? 'Update Row' : 'Add Row')"
                           [loading]="isSavingAnnexureQuestion(question)" [disabled]="
                             isSavingAnnexureQuestion(question) ||
                             isUploadingAnnexureQuestion(question) ||
@@ -2053,5 +2069,6 @@
         </p-accordion-panel>
       </p-accordion>
     </div>
+    </ng-template>
   </ng-container>
 </div>

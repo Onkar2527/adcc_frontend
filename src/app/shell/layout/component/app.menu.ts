@@ -463,12 +463,6 @@ export class AppMenu implements OnInit, OnDestroy {
         icon: 'pi pi-fw pi-file-edit',
         routerLink: ['/auditor/internal-audit/executive-summary', assessmentId],
       });
-
-      dynamicItems.push({
-        label: isMr ? 'बिगर शेती सहकारी संस्था माहिती पत्रक' : 'बिगर शेती सहकारी संस्था माहिती पत्रक (ADCC Non-Agri Statement)',
-        icon: 'pi pi-fw pi-file-excel',
-        routerLink: ['/auditor/internal-audit/non-agri-statement', assessmentId],
-      });
     }
 
     if (!isComplianceActive) {
@@ -496,7 +490,6 @@ export class AppMenu implements OnInit, OnDestroy {
             menuTotal += total;
             menuAnswered += answered;
 
-            const isMr = (localStorage.getItem('selected_lang') || 'en') === 'mr';
             const catLabel = (isMr && (category?.mr_name || category?.mr_category_name))
               ? (category.mr_name || category.mr_category_name)
               : category.name;
@@ -532,6 +525,21 @@ export class AppMenu implements OnInit, OnDestroy {
             };
           });
 
+        const isNonAgriMenu = normalized(menu?.name).includes('non-agri') || normalized(menu?.name).includes('non agri') || normalized(menu?.name).includes('बिगरशेती') || Number(menu?.id) === 54;
+        if (isNonAgriMenu) {
+          categoryItems.unshift({
+            label: isMr ? 'बिगर शेती सहकारी संस्था माहिती पत्रक' : 'Non-Agriculture Society Information Statement',
+            icon: 'pi pi-fw pi-file-excel',
+            routerLink: ['/auditor/internal-audit/non-agri-statement', assessmentId],
+            routerLinkActiveOptions: {
+              paths: 'exact',
+              queryParams: 'exact',
+              matrixParams: 'ignored',
+              fragment: 'ignored',
+            },
+          } as any);
+        }
+
         if (
           !categoryItems.length ||
           ['executive summary', 'assessment info', 'बिगर शेती सहकारी संस्था माहिती पत्रक', 'non-agri statement'].includes(normalized(menu?.name))
@@ -545,7 +553,6 @@ export class AppMenu implements OnInit, OnDestroy {
           0
         );
 
-        const isMr = (localStorage.getItem('selected_lang') || 'en') === 'mr';
         const menuLabel = (isMr && (menu?.mr_name || menu?.mr_menu_name))
           ? (menu.mr_name || menu.mr_menu_name)
           : (isMr && (menu?.name === 'Banking' || menu?.name === 'BANKING') ? 'बँकिंग' : menu.name);

@@ -1,5 +1,5 @@
 {
   "company_uuid4": "from_config",
-  "apiUrl": "http://localhost:3581",
-  "bank_name": "Kredpool Bank"
+  "apiUrl": "https://assureproadccbackend.kredpool.ai",
+  "bank_name": "Ahilyanagar District Central Co-operative Bank."
 }
