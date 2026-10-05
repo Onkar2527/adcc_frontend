@@ -771,8 +771,15 @@ export class CategoryAssessmentComponent
                     of header.questions || []
                 ) {
 
-                    question.answer_value =
-                        question.answer?.answer_given || '';
+                    const savedAns = question.answer?.answer_given;
+                    const annexId = question.annexure_id || question.annexure?.id;
+                    if (savedAns !== undefined && savedAns !== null && String(savedAns).trim() !== '') {
+                        question.answer_value = String(savedAns);
+                    } else if (Number(question?.option_id) === 4 && annexId) {
+                        question.answer_value = String(annexId);
+                    } else {
+                        question.answer_value = '';
+                    }
 
                     question.audit_comment =
                         question.answer?.audit_comment || '';
@@ -936,14 +943,15 @@ export class CategoryAssessmentComponent
                 },
             );
 
+        const annexId = question?.annexure_id || question?.annexure?.id;
         if (
             Number(question?.option_id) === 4
             &&
-            question?.annexure_id
+            annexId
         ) {
             options.push({
                 value:
-                    String(question.annexure_id),
+                    String(annexId),
                 label:
                     isMr ? 'परिशिष्टानुसार' : 'As per annexure',
             });
@@ -1278,9 +1286,10 @@ export class CategoryAssessmentComponent
         question: any,
     ) {
         const val = String(question?.answer_value || '');
+        const annexId = String(question?.annexure_id || question?.annexure?.id || '');
         return Number(question?.option_id) === 4
             && (
-                (question?.annexure_id && val === String(question.annexure_id))
+                (annexId && val === annexId)
                 ||
                 val === '72'
                 ||
@@ -2087,6 +2096,14 @@ export class CategoryAssessmentComponent
             )
         ) {
             return null;
+        }
+
+        const annexId = question?.annexure_id || question?.annexure?.id;
+        if (
+            Number(question?.option_id) === 4
+            && annexId
+        ) {
+            return String(annexId);
         }
 
         const parameters =
@@ -3333,6 +3350,9 @@ export class CategoryAssessmentComponent
             return;
         }
 
+        const isMr = this.isMarathi();
+        const lang = isMr ? 'mr' : 'en';
+
         this.service
             .getInternalAuditAnnexureSample(
                 Number(detail.overview.id),
@@ -3340,6 +3360,7 @@ export class CategoryAssessmentComponent
                 Number(question.id),
                 this.employeeId,
                 this.selectedDumpId(),
+                lang,
             )
             .subscribe({
                 next: (res: any) => {
@@ -3349,14 +3370,32 @@ export class CategoryAssessmentComponent
                         !res?.csv
                     ) {
                         this.notification.error(
-                            res?.message || 'Unable to download annexure sample.',
+                            res?.message || (isMr ? 'परिशिष्ट नमुना डाउनलोड करण्यात त्रुटी आली.' : 'Unable to download annexure sample.'),
                         );
                         return;
                     }
 
+                    let csvContent = String(res.csv || '');
+                    const columns = question?.annexure?.columns || [];
+                    if (columns.length > 0) {
+                        const headerRow = [
+                            ...columns.map((col: any) => this.getAnnexureColumnDisplayName(col)),
+                            isMr ? 'व्यवसाय जोखीम' : 'BUSINESS RISK',
+                            isMr ? 'नियंत्रण जोखीम' : 'CONTROL RISK',
+                            isMr ? 'जोखीम प्रकार' : 'RISK TYPE',
+                        ];
+
+                        const csvLines = csvContent.split(/\r?\n/).filter((line: string) => line.trim().length > 0);
+                        if (csvLines.length > 0) {
+                            const formattedHeader = headerRow.map((h: string) => `"${String(h ?? '').replace(/"/g, '""')}"`).join(',');
+                            csvLines[0] = formattedHeader;
+                            csvContent = csvLines.join('\r\n');
+                        }
+                    }
+
                     const blob =
                         new Blob(
-                            [res.csv],
+                            ['\uFEFF' + csvContent],
                             {
                                 type:
                                     'text/csv;charset=utf-8;',
@@ -3372,18 +3411,18 @@ export class CategoryAssessmentComponent
                     link.href =
                         url;
                     link.download =
-                        res.filename || 'sample-annexure.csv';
+                        res.filename || (isMr ? 'sample-annexure-mr.csv' : 'sample-annexure.csv');
                     link.click();
 
                     URL.revokeObjectURL(url);
                     this.notification.success(
-                        'Annexure sample downloaded successfully.',
+                        isMr ? 'परिशिष्ट नमुना CSV यशस्वीरित्या डाउनलोड झाला.' : 'Annexure sample downloaded successfully.',
                     );
                 },
                 error: (err) => {
                     this.notification.error(
                         err?.error?.message
-                        || 'Unable to download annexure sample.',
+                        || (isMr ? 'परिशिष्ट नमुना डाउनलोड करण्यात त्रुटी आली.' : 'Unable to download annexure sample.'),
                     );
                 },
             });

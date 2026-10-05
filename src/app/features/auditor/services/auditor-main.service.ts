@@ -842,6 +842,7 @@ export class AuditDashboardService {
     questionId: number,
     employeeId: number,
     dumpId = 0,
+    lang = 'en',
   ) {
 
     return this.http.get<any>(
@@ -854,6 +855,8 @@ export class AuditDashboardService {
             employeeId,
           dump_id:
             dumpId,
+          lang:
+            lang,
         },
       },
     );
